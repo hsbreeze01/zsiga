@@ -1,13 +1,15 @@
 import os
+import re
 
 from ..transport import Transport, LocalTransport
 from .utils import read_file, file_exists
 
 
-MAX_CONTEXT_CHARS = 30000
+MAX_CONTEXT_CHARS = 25000
 
 
-def build_project_context(target_path: str, transport: Transport = None) -> str:
+def build_project_context(target_path: str, transport: Transport = None,
+                          proposal: str = "") -> str:
     transport = transport or LocalTransport()
     sections = []
 
@@ -19,14 +21,27 @@ def build_project_context(target_path: str, transport: Transport = None) -> str:
         if content:
             sections.append(f"### {label} ({fpath})\n```\n{content}\n```")
 
-    sections.append(_scan_routes(target_path, transport))
-    sections.append(_scan_services(target_path, transport))
-    sections.append(_scan_models(target_path, transport))
+    keywords = _extract_keywords(proposal)
+
+    sections.append(_scan_routes(target_path, transport, keywords))
+    sections.append(_scan_services(target_path, transport, keywords))
+    sections.append(_scan_models(target_path, transport, keywords))
 
     combined = "\n\n".join(s for s in sections if s)
     if len(combined) > MAX_CONTEXT_CHARS:
         combined = combined[:MAX_CONTEXT_CHARS] + "\n\n... (truncated)"
     return combined
+
+
+def _extract_keywords(text: str) -> list[str]:
+    if not text:
+        return []
+    stop = {"add", "the", "a", "an", "to", "for", "in", "on", "of", "and", "with",
+            "from", "by", "is", "are", "was", "were", "be", "been", "being",
+            "this", "that", "it", "its", "or", "not", "no", "but", "at", "as",
+            "api", "new", "create", "update", "delete", "get", "set", "list", "all"}
+    words = re.findall(r'[a-zA-Z_]{3,}', text.lower())
+    return list(set(w for w in words if w not in stop))[:10]
 
 
 def _scan_tree(target_path: str, transport: Transport) -> str:
@@ -70,7 +85,8 @@ def _find_key_files(target_path: str, transport: Transport) -> list[tuple[str, s
     return found[:5]
 
 
-def _scan_routes(target_path: str, transport: Transport) -> str:
+def _scan_routes(target_path: str, transport: Transport,
+                 keywords: list[str] = None) -> str:
     r = transport.run_shell(
         f"find '{target_path}' -path '*/routes/*.py' -o -path '*/views/*.py' -o -path '*/api/*.py' "
         f"| grep -v __pycache__ | grep -v venv | sort | head -20",
@@ -79,6 +95,10 @@ def _scan_routes(target_path: str, transport: Transport) -> str:
     if r["exit_code"] != 0 or not r["stdout"].strip():
         return ""
     route_files = r["stdout"].strip().split("\n")
+    if keywords:
+        route_files = _prioritize(route_files, keywords, top=5)
+    else:
+        route_files = route_files[:5]
     parts = ["## API Routes"]
     for rf in route_files:
         rel = rf.replace(f"{target_path}/", "") if rf.startswith(target_path) else rf
@@ -90,7 +110,8 @@ def _scan_routes(target_path: str, transport: Transport) -> str:
     return "\n\n".join(parts)
 
 
-def _scan_services(target_path: str, transport: Transport) -> str:
+def _scan_services(target_path: str, transport: Transport,
+                   keywords: list[str] = None) -> str:
     r = transport.run_shell(
         f"find '{target_path}' -path '*/services/*.py' -not -path '*/venv/*' -not -path '*/__pycache__/*' "
         f"| sort | head -20",
@@ -99,6 +120,10 @@ def _scan_services(target_path: str, transport: Transport) -> str:
     if r["exit_code"] != 0 or not r["stdout"].strip():
         return ""
     svc_files = r["stdout"].strip().split("\n")
+    if keywords:
+        svc_files = _prioritize(svc_files, keywords, top=5)
+    else:
+        svc_files = svc_files[:5]
     parts = ["## Services"]
     for sf in svc_files:
         rel = sf.replace(f"{target_path}/", "") if sf.startswith(target_path) else sf
@@ -110,7 +135,8 @@ def _scan_services(target_path: str, transport: Transport) -> str:
     return "\n\n".join(parts)
 
 
-def _scan_models(target_path: str, transport: Transport) -> str:
+def _scan_models(target_path: str, transport: Transport,
+                 keywords: list[str] = None) -> str:
     r = transport.run_shell(
         f"find '{target_path}' -path '*/models/*.py' -not -path '*/venv/*' -not -path '*/__pycache__/*' "
         f"| sort | head -20",
@@ -119,6 +145,10 @@ def _scan_models(target_path: str, transport: Transport) -> str:
     if r["exit_code"] != 0 or not r["stdout"].strip():
         return ""
     model_files = r["stdout"].strip().split("\n")
+    if keywords:
+        model_files = _prioritize(model_files, keywords, top=5)
+    else:
+        model_files = model_files[:5]
     parts = ["## Models"]
     for mf in model_files:
         rel = mf.replace(f"{target_path}/", "") if mf.startswith(target_path) else mf
@@ -128,6 +158,19 @@ def _scan_models(target_path: str, transport: Transport) -> str:
                 content = content[:3000] + "\n... (truncated)"
             parts.append(f"### {rel}\n```\n{content}\n```")
     return "\n\n".join(parts)
+
+
+def _prioritize(files: list[str], keywords: list[str], top: int = 5) -> list[str]:
+    scored = []
+    for f in files:
+        score = 0
+        fname = f.lower()
+        for kw in keywords:
+            if kw in fname:
+                score += 2
+        scored.append((score, f))
+    scored.sort(key=lambda x: -x[0])
+    return [f for _, f in scored[:top]]
 
 
 def prefetch_mechanical(target_path: str, test_cmd: str, lint_cmd: str,

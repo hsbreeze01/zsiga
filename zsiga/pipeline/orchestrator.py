@@ -15,7 +15,7 @@ from ..transport import Transport, LocalTransport, create_transport
 from .enricher import enrich
 from .implementer import implement
 from .verifier import verify, read_verdict
-from .utils import verify_mechanical, archive_change
+from .utils import verify_mechanical, archive_change, _get_changed_files, read_file
 from .project_context import build_project_context, prefetch_mechanical
 
 
@@ -104,7 +104,9 @@ class ZsigaOrchestrator:
         # Prefetch project context once (shared by enrich + implement)
         print(f"  Prefetching project context...")
         t_pf = time.monotonic()
-        project_context = build_project_context(target_path, transport)
+        proposal_text = read_file(f"{change_dir}/proposal.md", transport) or ""
+        project_context = build_project_context(target_path, transport,
+                                                 proposal=proposal_text)
         print(f"  Project context ready ({len(project_context)} chars, {time.monotonic() - t_pf:.1f}s)")
 
         # Phase 1: ENRICH
@@ -272,15 +274,30 @@ class ZsigaOrchestrator:
                         pre_sha: str, transport: Transport,
                         max_attempts: int) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
+
+        changed = _get_changed_files(target_path, pre_sha, transport)
+        changed_info = f"\n本次变更的文件（只修这些）: {', '.join(changed) if changed else '无'}"
+
         for attempt in range(1, max_attempts + 1):
             print(f"    Fix attempt {attempt}/{max_attempts}...")
             self.agent.set_phase(f"fix-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
-            await self.agent.run(
-                "你是 zsiga 的修复引擎。修复以下错误。不要添加新功能。",
-                f"错误:\n{errors}\n\n修复后运行 {project_config.test_cmd} 和 {project_config.lint_cmd}",
-                max_turns=fix_turns,
-            )
+
+            if attempt == 1:
+                await self.agent.run(
+                    "你是 zsiga 的修复引擎。只修复本次变更引入的错误，不要触碰其他文件。",
+                    f"错误:\n{errors}{changed_info}\n\n"
+                    f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
+                    max_turns=fix_turns,
+                )
+            else:
+                await self.agent.run(
+                    "你是 zsiga 的修复引擎。上一次修复没有解决问题。只修改本次变更的文件。",
+                    f"仍然存在的错误:\n{errors}{changed_info}\n\n"
+                    f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
+                    max_turns=fix_turns,
+                )
+
             passed, errors = verify_mechanical(
                 target_path, project_config.test_cmd, project_config.lint_cmd,
                 since_sha=pre_sha, transport=transport,
@@ -293,6 +310,10 @@ class ZsigaOrchestrator:
                              pre_sha, transport: Transport,
                              max_attempts: int) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
+
+        changed = _get_changed_files(target_path, pre_sha, transport)
+        changed_info = f"\n本次变更的文件（只修这些）: {', '.join(changed) if changed else '无'}"
+
         for attempt in range(1, max_attempts + 1):
             print(f"    Eval fix attempt {attempt}/{max_attempts}...")
             verify_file = f"{change_dir}/verify.md"
@@ -302,8 +323,9 @@ class ZsigaOrchestrator:
             self.agent.set_phase(f"eval-fix-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
             await self.agent.run(
-                "你是 zsiga 的修复引擎。修复验证发现的问题。不要添加新功能。",
-                f"验证反馈:\n{feedback}\n\n修复后运行 {project_config.test_cmd}",
+                "你是 zsiga 的修复引擎。只修改本次变更涉及的文件。",
+                f"验证反馈:\n{feedback}{changed_info}\n\n"
+                f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                 max_turns=fix_turns,
             )
 
