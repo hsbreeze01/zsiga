@@ -29,7 +29,8 @@ IMPLEMENTER_SYSTEM = """你是 zsiga 的实现引擎。
 - 只改 task 要求的文件，不做额外重构"""
 
 
-async def implement(agent: AgentLoop, change_dir: str, target_path: str):
+async def implement(agent: AgentLoop, change_dir: str, target_path: str,
+                    max_turns: int = 30, timeout_seconds: int = 900):
     proposal = Path(change_dir, "proposal.md").read_text()
     specs = _read_all_specs(change_dir)
     design_path = Path(change_dir, "design.md")
@@ -53,7 +54,8 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str):
 
 从第一个 - [ ] 开始实现。完成所有 task 后停止。"""
 
-    return await agent.run(IMPLEMENTER_SYSTEM, user_prompt)
+    return await agent.run(IMPLEMENTER_SYSTEM, user_prompt,
+                          max_turns=max_turns, timeout_seconds=timeout_seconds)
 
 
 def _read_all_specs(change_dir: str) -> str:

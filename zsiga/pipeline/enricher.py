@@ -33,7 +33,8 @@ ENRICHER_SYSTEM = """你是 zsiga，一个基于 OpenSpec 的自动开发智能�
 - tasks 每个 - [ ] 最多改 3 个文件"""
 
 
-async def enrich(agent: AgentLoop, change_dir: str, target_path: str):
+async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
+                 max_turns: int = 25, timeout_seconds: int = 600):
     proposal = Path(change_dir, "proposal.md").read_text()
 
     user_prompt = f"""## Change 目录: {change_dir}
@@ -50,4 +51,5 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str):
 
 先读代码再写 artifacts。"""
 
-    return await agent.run(ENRICHER_SYSTEM, user_prompt)
+    return await agent.run(ENRICHER_SYSTEM, user_prompt,
+                          max_turns=max_turns, timeout_seconds=timeout_seconds)

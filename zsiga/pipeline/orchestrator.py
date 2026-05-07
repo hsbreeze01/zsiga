@@ -16,7 +16,12 @@ class ZsigaOrchestrator:
 
     def __init__(self, config: ZsigaConfig):
         self.config = config
-        self.agent = AgentLoop(config.llm.api_key, config.llm.model)
+        self.agent = AgentLoop(
+            config.llm.api_key,
+            config.llm.model,
+            base_url=config.llm.base_url,
+            proxy=config.llm.proxy,
+        )
 
     async def run_cycle(self):
         scanner = DirectoryScanner(self.config.targets)
@@ -51,7 +56,9 @@ class ZsigaOrchestrator:
         if not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
             print(f"  Phase 1: Enriching {change_name}...")
             register_tools(self.agent, target_path)
-            await enrich(self.agent, change_dir, target_path)
+            await enrich(self.agent, change_dir, target_path,
+                        max_turns=self.config.pipeline.enrich_max_turns,
+                        timeout_seconds=self.config.pipeline.enrich_timeout)
             print(f"  Enriched.")
 
         # Approval gate
@@ -65,17 +72,21 @@ class ZsigaOrchestrator:
         print(f"  Phase 2: Implementing {change_name}...")
         pre_sha = git_ops.rev_parse(target_path)
         register_tools(self.agent, target_path)
-        await implement(self.agent, change_dir, target_path)
+        await implement(self.agent, change_dir, target_path,
+                       max_turns=self.config.pipeline.impl_max_turns,
+                       timeout_seconds=self.config.pipeline.impl_timeout)
 
-        # Mechanical verification
+        # Mechanical verification (only check changed files)
         passed, errors = verify_mechanical(
-            target_path, project_config.test_cmd, project_config.lint_cmd
+            target_path, project_config.test_cmd, project_config.lint_cmd,
+            since_sha=pre_sha,
         )
         if not passed:
             print(f"  Mechanical verification FAILED, attempting fixes...")
             fixed = await self._fix_loop(
                 target_path, project_config,
-                errors, max_attempts=self.config.pipeline.fix_attempts,
+                errors, pre_sha=pre_sha,
+                max_attempts=self.config.pipeline.fix_attempts,
             )
             if not fixed:
                 git_ops.reset_hard(target_path, pre_sha)
@@ -85,7 +96,9 @@ class ZsigaOrchestrator:
         # Phase 3: VERIFY
         print(f"  Phase 3: Verifying {change_name}...")
         register_tools(self.agent, target_path)
-        await verify(self.agent, change_dir, target_path, pre_sha)
+        await verify(self.agent, change_dir, target_path, pre_sha,
+                    max_turns=self.config.pipeline.verify_max_turns,
+                    timeout_seconds=self.config.pipeline.verify_timeout)
 
         verdict = read_verdict(change_dir)
         if verdict == "FAIL":
@@ -105,23 +118,26 @@ class ZsigaOrchestrator:
             git_ops.add_all(target_path)
             git_ops.commit(target_path, f"feat({project_name}): {change_name}")
         git_ops.tag(target_path, f"zsiga-{change_name}")
-        git_ops.push(target_path)
+        git_ops.push(target_path, dry_run=self.config.safety.dry_run)
 
         archive_change(target_path, change_name)
         print(f"  ✓ Done: {change_name}")
         return True
 
     async def _fix_loop(self, target_path, project_config, errors,
-                        max_attempts: int) -> bool:
+                        pre_sha: str, max_attempts: int) -> bool:
+        fix_turns = self.config.pipeline.fix_max_turns
         for attempt in range(1, max_attempts + 1):
             print(f"    Fix attempt {attempt}/{max_attempts}...")
             register_tools(self.agent, target_path)
             await self.agent.run(
                 "你是 zsiga 的修复引擎。修复以下错误。不要添加新功能。",
                 f"错误:\n{errors}\n\n修复后运行 {project_config.test_cmd} 和 {project_config.lint_cmd}",
+                max_turns=fix_turns,
             )
             passed, errors = verify_mechanical(
-                target_path, project_config.test_cmd, project_config.lint_cmd
+                target_path, project_config.test_cmd, project_config.lint_cmd,
+                since_sha=pre_sha,
             )
             if passed:
                 return True
@@ -129,6 +145,7 @@ class ZsigaOrchestrator:
 
     async def _eval_fix_loop(self, change_dir, target_path, project_config,
                              pre_sha, max_attempts: int) -> bool:
+        fix_turns = self.config.pipeline.fix_max_turns
         for attempt in range(1, max_attempts + 1):
             print(f"    Eval fix attempt {attempt}/{max_attempts}...")
             verify_file = Path(change_dir) / "verify.md"
@@ -138,16 +155,20 @@ class ZsigaOrchestrator:
             await self.agent.run(
                 "你是 zsiga 的修复引擎。修复验证发现的问题。不要添加新功能。",
                 f"验证反馈:\n{feedback}\n\n修复后运行 {project_config.test_cmd}",
+                max_turns=fix_turns,
             )
 
             passed, _ = verify_mechanical(
-                target_path, project_config.test_cmd, project_config.lint_cmd
+                target_path, project_config.test_cmd, project_config.lint_cmd,
+                since_sha=pre_sha,
             )
             if not passed:
                 return False
 
             register_tools(self.agent, target_path)
-            await verify(self.agent, change_dir, target_path, pre_sha)
+            await verify(self.agent, change_dir, target_path, pre_sha,
+                        max_turns=self.config.pipeline.verify_max_turns,
+                        timeout_seconds=self.config.pipeline.verify_timeout)
             if read_verdict(change_dir) == "PASS":
                 return True
         return False
