@@ -1,12 +1,11 @@
-import subprocess
-from pathlib import Path
-
 from ..agent.loop import AgentLoop
 from ..agent.tools import register_tools
+from ..transport import Transport, LocalTransport
+from .utils import read_file
 
 ENRICHER_SYSTEM = """你是 zsiga，一个基于 OpenSpec 的自动开发智能体。
 
-你的任务：根据 proposal.md 补全 OpenSpec change 的其余 artifacts。
+你的任务：根据 proposal.md 和已提供的项目上下文，直接编写 OpenSpec artifacts。
 
 必须遵循 OpenSpec 的 artifact 格式：
 
@@ -27,29 +26,34 @@ ENRICHER_SYSTEM = """你是 zsiga，一个基于 OpenSpec 的自动开发智能�
    - 用 - [ ] 格式
 
 规则：
-- 先读目标项目代码，理解现有架构和模式
+- 项目代码已经提供在下方，不需要再用工具读文件
 - specs 描述行为，不描述实现细节
-- design 基于项目现有技术栈
-- tasks 每个 - [ ] 最多改 3 个文件"""
+- design 基于项目现有技术栈，遵循现有模式
+- tasks 每个 - [ ] 最多改 3 个文件
+- 直接开始写 artifacts，不要先做探索"""
 
 
 async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
-                 max_turns: int = 25, timeout_seconds: int = 600):
-    proposal = Path(change_dir, "proposal.md").read_text()
+                 transport: Transport = None, project_context: str = "", **kwargs):
+    transport = transport or LocalTransport()
+    proposal = read_file(f"{change_dir}/proposal.md", transport) or ""
+
+    ctx_section = ""
+    if project_context:
+        ctx_section = f"\n## 项目代码上下文（已预读，不需要再用工具读取）\n{project_context}\n"
 
     user_prompt = f"""## Change 目录: {change_dir}
 ## 目标项目: {target_path}
-
+{ctx_section}
 ## 已有 proposal.md:
 {proposal}
 
-## 你的任务:
-1. 读取目标项目代码，理解现有架构（list_files, read_file, search）
-2. 在 {change_dir}/specs/ 下创建 delta spec
-3. 创建 {change_dir}/design.md
-4. 创建 {change_dir}/tasks.md
+直接开始写 artifacts：
+1. 用 write_file 在 {change_dir}/specs/ 下创建 delta spec 文件（注意：必须在 specs/ 子目录里，不是 specs.md）
+2. 用 write_file 创建 {change_dir}/design.md
+3. 用 write_file 创建 {change_dir}/tasks.md
 
-先读代码再写 artifacts。"""
+项目架构已在上方提供，直接开始写，不要用工具探索项目。"""
 
     return await agent.run(ENRICHER_SYSTEM, user_prompt,
-                          max_turns=max_turns, timeout_seconds=timeout_seconds)
+                          **kwargs)

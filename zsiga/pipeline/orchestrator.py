@@ -1,7 +1,6 @@
 import asyncio
 import time
 from datetime import datetime
-from pathlib import Path
 
 from ..agent.loop import AgentLoop
 from ..agent.tools import register_tools
@@ -17,6 +16,7 @@ from .enricher import enrich
 from .implementer import implement
 from .verifier import verify, read_verdict
 from .utils import verify_mechanical, archive_change
+from .project_context import build_project_context, prefetch_mechanical
 
 
 class ZsigaOrchestrator:
@@ -99,19 +99,32 @@ class ZsigaOrchestrator:
     async def _run_phases(self, prop, rec, change_dir, target_path,
                           project_name, project_config, change_name,
                           transport: Transport) -> bool:
+        cycle_start = time.monotonic()
+
+        # Prefetch project context once (shared by enrich + implement)
+        print(f"  Prefetching project context...")
+        t_pf = time.monotonic()
+        project_context = build_project_context(target_path, transport)
+        print(f"  Project context ready ({len(project_context)} chars, {time.monotonic() - t_pf:.1f}s)")
+
         # Phase 1: ENRICH
         if not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
-            print(f"  Phase 1: Enriching {change_name}...")
+            print(f"\n  {'='*50}")
+            print(f"  Phase 1/4: ENRICH {change_name}")
+            print(f"  {'='*50}")
+            self.agent.set_phase("enrich")
             register_tools(self.agent, target_path, transport=transport)
             t0 = time.monotonic()
             await enrich(self.agent, change_dir, target_path,
+                        transport=transport,
+                        project_context=project_context,
                         max_turns=self.config.pipeline.enrich_max_turns,
                         timeout_seconds=self.config.pipeline.enrich_timeout)
             rec.phases.append(PhaseRecord(
                 phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
                 seconds_used=time.monotonic() - t0,
             ))
-            print(f"  Enriched.")
+            print(f"  Phase 1 done in {time.monotonic() - t0:.1f}s")
 
         # Approval gate
         if self.config.safety.require_approval:
@@ -122,23 +135,37 @@ class ZsigaOrchestrator:
                 return False
 
         # Phase 2: IMPLEMENT
-        print(f"  Phase 2: Implementing {change_name}...")
+        print(f"\n  {'='*50}")
+        print(f"  Phase 2/4: IMPLEMENT {change_name}")
+        print(f"  {'='*50}")
+        self.agent.set_phase("impl")
         pre_sha = git_ops.rev_parse(target_path, transport=transport)
+        print(f"  Pre-impl SHA: {pre_sha}")
         register_tools(self.agent, target_path, transport=transport)
         t0 = time.monotonic()
         await implement(self.agent, change_dir, target_path,
+                       transport=transport,
+                       project_context=project_context,
                        max_turns=self.config.pipeline.impl_max_turns,
                        timeout_seconds=self.config.pipeline.impl_timeout)
         impl_seconds = time.monotonic() - t0
+        print(f"  Phase 2 done in {impl_seconds:.1f}s")
 
         # Mechanical verification (only check changed files)
+        print(f"\n  Mechanical verification...")
         fix_attempts = 0
+        t_mv = time.monotonic()
         passed, errors = verify_mechanical(
             target_path, project_config.test_cmd, project_config.lint_cmd,
             since_sha=pre_sha, transport=transport,
         )
-        if not passed:
-            print(f"  Mechanical verification FAILED, attempting fixes...")
+        mv_seconds = time.monotonic() - t_mv
+        if passed:
+            print(f"  Mechanical verification PASSED ({mv_seconds:.1f}s)")
+        else:
+            print(f"  Mechanical verification FAILED ({mv_seconds:.1f}s)")
+            print(f"  Errors: {errors[:300]}")
+            print(f"  Attempting fixes...")
             fixed, fix_attempts = await self._fix_loop(
                 target_path, project_config,
                 errors, pre_sha=pre_sha, transport=transport,
@@ -161,20 +188,37 @@ class ZsigaOrchestrator:
         ))
 
         # Phase 3: VERIFY
-        print(f"  Phase 3: Verifying {change_name}...")
+        print(f"\n  {'='*50}")
+        print(f"  Phase 3/4: VERIFY {change_name}")
+        print(f"  {'='*50}")
+        self.agent.set_phase("verify")
         register_tools(self.agent, target_path, transport=transport)
+
+        print(f"  Prefetching test/lint results...")
+        t_mech = time.monotonic()
+        mech_results = prefetch_mechanical(
+            target_path, project_config.test_cmd, project_config.lint_cmd,
+            transport=transport,
+        )
+        print(f"  Test: {'✅' if mech_results['test']['passed'] else '❌'}, "
+              f"Lint: {'✅' if mech_results['lint']['passed'] else '❌'} "
+              f"({time.monotonic() - t_mech:.1f}s)")
+
         t0 = time.monotonic()
         await verify(self.agent, change_dir, target_path, pre_sha,
+                    transport=transport,
+                    mech_results=mech_results,
                     max_turns=self.config.pipeline.verify_max_turns,
                     timeout_seconds=self.config.pipeline.verify_timeout)
         verify_seconds = time.monotonic() - t0
 
-        verdict = read_verdict(change_dir)
+        verdict = read_verdict(change_dir, transport)
+        print(f"  Verdict: {verdict} ({verify_seconds:.1f}s)")
         verify_outcome = Outcome.SUCCESS if verdict == "PASS" else Outcome.FAIL
         eval_fix_attempts = 0
 
         if verdict == "FAIL":
-            print(f"  Verifier: FAIL, attempting fixes...")
+            print(f"  Verifier: FAIL, attempting eval fixes...")
             fixed, eval_fix_attempts = await self._eval_fix_loop(
                 change_dir, target_path, project_config,
                 pre_sha, transport=transport,
@@ -197,7 +241,9 @@ class ZsigaOrchestrator:
         ))
 
         # Phase 4: DELIVER
-        print(f"  Phase 4: Delivering {change_name}...")
+        print(f"\n  {'='*50}")
+        print(f"  Phase 4/4: DELIVER {change_name}")
+        print(f"  {'='*50}")
         t0 = time.monotonic()
         if git_ops.has_uncommitted_changes(target_path, transport=transport):
             git_ops.add_all(target_path, transport=transport)
@@ -208,11 +254,17 @@ class ZsigaOrchestrator:
                     transport=transport)
 
         archive_change(target_path, change_name, transport=transport)
+        deliver_seconds = time.monotonic() - t0
         rec.phases.append(PhaseRecord(
             phase=Phase.DELIVER, outcome=Outcome.SUCCESS,
-            seconds_used=time.monotonic() - t0,
+            seconds_used=deliver_seconds,
         ))
-        print(f"  ✓ Done: {change_name}")
+
+        total = time.monotonic() - cycle_start
+        print(f"\n  {'='*50}")
+        print(f"  ✅ DONE: {change_name}")
+        print(f"  Total: {total:.1f}s | impl={impl_seconds:.1f}s verify={verify_seconds:.1f}s deliver={deliver_seconds:.1f}s")
+        print(f"  {'='*50}")
         record_outcome(change_name, project_name, True, "deliver")
         return True
 
@@ -222,6 +274,7 @@ class ZsigaOrchestrator:
         fix_turns = self.config.pipeline.fix_max_turns
         for attempt in range(1, max_attempts + 1):
             print(f"    Fix attempt {attempt}/{max_attempts}...")
+            self.agent.set_phase(f"fix-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
             await self.agent.run(
                 "你是 zsiga 的修复引擎。修复以下错误。不要添加新功能。",
@@ -246,6 +299,7 @@ class ZsigaOrchestrator:
             r = transport.run_shell(f"cat '{verify_file}'", timeout=10)
             feedback = r["stdout"] if r["exit_code"] == 0 else "unknown"
 
+            self.agent.set_phase(f"eval-fix-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
             await self.agent.run(
                 "你是 zsiga 的修复引擎。修复验证发现的问题。不要添加新功能。",
@@ -260,11 +314,13 @@ class ZsigaOrchestrator:
             if not passed:
                 return False, attempt
 
+            self.agent.set_phase(f"re-verify-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
             await verify(self.agent, change_dir, target_path, pre_sha,
+                        transport=transport,
                         max_turns=self.config.pipeline.verify_max_turns,
                         timeout_seconds=self.config.pipeline.verify_timeout)
-            if read_verdict(change_dir) == "PASS":
+            if read_verdict(change_dir, transport) == "PASS":
                 return True, attempt
         return False, max_attempts
 

@@ -25,6 +25,10 @@ class AgentLoop:
         self.tool_funcs = {}
         self.max_turns = 40
         self.context = ""
+        self._phase_label = ""
+
+    def set_phase(self, label: str):
+        self._phase_label = label
 
     def register_tool(self, name, description, parameters, func):
         self.tools.append({
@@ -47,29 +51,47 @@ class AgentLoop:
             {"role": "user", "content": user_prompt},
         ]
 
+        phase = self._phase_label or "agent"
         start = time.monotonic()
+        tool_calls_total = 0
+        llm_calls_total = 0
+
+        print(f"  [{phase}] starting (max={max_turns} turns, timeout={timeout_seconds or '∞'}s)")
+
         for turn in range(max_turns):
-            if timeout_seconds and (time.monotonic() - start) > timeout_seconds:
-                print(f"  ⏱️ agent.run timeout after {turn} turns")
+            elapsed = time.monotonic() - start
+            if timeout_seconds and elapsed > timeout_seconds:
+                print(f"  [{phase}] ⏱️ TIMEOUT after {turn} turns, {elapsed:.1f}s, {llm_calls_total} LLM calls, {tool_calls_total} tool calls")
                 return "TIMEOUT"
 
+            t_llm = time.monotonic()
             resp = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 tools=self.tools or None,
                 tool_choice="auto",
             )
+            llm_calls_total += 1
+            llm_ms = (time.monotonic() - t_llm) * 1000
             msg = resp.choices[0].message
             messages.append(msg.model_dump())
 
             if not msg.tool_calls:
+                elapsed = time.monotonic() - start
+                content_preview = (msg.content or "")[:80].replace("\n", " ")
+                print(f"  [{phase}] ✅ done in {elapsed:.1f}s | {llm_calls_total} LLM calls, {tool_calls_total} tool calls | response: {content_preview}...")
                 return msg.content
+
+            turn_tools = len(msg.tool_calls)
+            tool_calls_total += turn_tools
 
             for tc in msg.tool_calls:
                 name = tc.function.name
                 args = json.loads(tc.function.arguments)
-                print(f"  🔧 {name}({json.dumps(args, ensure_ascii=False)[:200]})")
+                args_preview = json.dumps(args, ensure_ascii=False)[:120]
+                print(f"  [{phase}] turn {turn+1}: 🔧 {name}({args_preview})")
 
+                t_tool = time.monotonic()
                 try:
                     result = self.tool_funcs[name](**args)
                     if inspect.isawaitable(result):
@@ -77,6 +99,11 @@ class AgentLoop:
                     result_str = json.dumps(result, ensure_ascii=False, default=str)
                 except Exception as e:
                     result_str = json.dumps({"error": str(e)})
+                tool_ms = (time.monotonic() - t_tool) * 1000
+
+                result_lines = result_str.count("\n") + 1
+                result_len = len(result_str)
+                print(f"  [{phase}]     → {tool_ms:.0f}ms, {result_len} chars")
 
                 messages.append({
                     "role": "tool",
@@ -84,5 +111,6 @@ class AgentLoop:
                     "tool_call_id": tc.id,
                 })
 
-        print(f"  ⚠️ MAX_TURNS ({max_turns}) reached")
+        elapsed = time.monotonic() - start
+        print(f"  [{phase}] ⚠️ MAX_TURNS ({max_turns}) reached after {elapsed:.1f}s, {tool_calls_total} tool calls")
         return "MAX_TURNS_REACHED"

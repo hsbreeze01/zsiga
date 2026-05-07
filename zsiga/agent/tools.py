@@ -109,19 +109,24 @@ def _list_files(transport: Transport, target_path, path=""):
         return {"entries": entries}
     else:
         r = transport.run_shell(
-            f"ls -1 --group-directories-first '{full}' 2>/dev/null || echo '__NOTDIR__'"
+            f"ls -la --time-style=+ '{full}' 2>/dev/null | tail -n +2 || echo '__NOTDIR__'",
+            timeout=15,
         )
         output = r.get("stdout", "").strip()
         if "__NOTDIR__" in output or r["exit_code"] != 0:
             return {"error": f"Not a directory: {path}"}
         entries = []
-        for name in output.split("\n")[:200]:
-            name = name.strip()
-            if not name:
+        for line in output.split("\n")[:200]:
+            line = line.strip()
+            if not line:
                 continue
-            full_entry = f"{full}/{name}"
-            check = transport.run_shell(f"test -d '{full_entry}' && echo DIR || echo FILE", timeout=5)
-            is_dir = check.get("stdout", "").strip() == "DIR"
+            parts = line.split()
+            if len(parts) < 7:
+                continue
+            name = parts[-1]
+            if name in (".", ".."):
+                continue
+            is_dir = parts[0].startswith("d")
             rel = f"{path}/{name}".lstrip("/") if path else name
             entries.append({"name": rel, "is_dir": is_dir})
         return {"entries": entries}
