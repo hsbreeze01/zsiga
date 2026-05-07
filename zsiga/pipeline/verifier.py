@@ -34,7 +34,7 @@ async def verify(agent: AgentLoop, change_dir: str, target_path: str,
     specs = _read_all_specs(change_dir, transport)
     design = read_file(f"{change_dir}/design.md", transport) or ""
     tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
-    diff = git_ops.diff(target_path, pre_impl_sha)
+    diff = git_ops.diff(target_path, pre_impl_sha, transport=transport)
 
     mech_section = ""
     if mech_results:

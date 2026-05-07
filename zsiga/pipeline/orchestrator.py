@@ -202,6 +202,7 @@ class ZsigaOrchestrator:
         t_mech = time.monotonic()
         mech_results = prefetch_mechanical(
             target_path, project_config.test_cmd, project_config.lint_cmd,
+            since_sha=pre_sha,
             transport=transport,
         )
         print(f"  Test: {'✅' if mech_results['test']['passed'] else '❌'}, "
