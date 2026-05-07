@@ -20,15 +20,38 @@ def _slugify(text: str) -> str:
 
 
 def cmd_propose(args: list[str]):
-    if len(args) < 2:
-        print("Usage: python3.11 -m zsiga propose <project> <description>")
-        print("       python3.11 -m zsiga propose <project> <description> --plan-only")
+    project_name = None
+    description = None
+    change_name_override = None
+    plan_only = "--plan-only" in args
+    run_pipeline = "--run" in args
+
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a == "--name" and i + 1 < len(args):
+            change_name_override = args[i + 1]
+            i += 2
+        elif a == "--description" and i + 1 < len(args):
+            description = args[i + 1]
+            i += 2
+        elif a in ("--plan-only", "--run"):
+            i += 1
+        elif project_name is None:
+            project_name = a
+            i += 1
+        elif description is None:
+            description = a
+            i += 1
+        else:
+            i += 1
+
+    if not project_name or not description:
+        print("Usage: python3.11 -m zsiga propose <project> --description <desc>")
+        print("                                [--name <change-name>] [--run] [--plan-only]")
+        print("  or:  python3.11 -m zsiga propose <project> <description>")
         print(f"\nProjects: {', '.join(load_config().targets.keys())}")
         sys.exit(1)
-
-    project_name = args[0]
-    description = args[1]
-    plan_only = "--plan-only" in args
 
     config = load_config()
     if project_name not in config.targets:
@@ -38,7 +61,10 @@ def cmd_propose(args: list[str]):
 
     target = config.targets[project_name]
     transport = create_transport(target)
-    change_name = _slugify(description)
+    if change_name_override:
+        change_name = _slugify(change_name_override)
+    else:
+        change_name = _slugify(description)
     if not change_name:
         change_name = "unnamed-change"
 
@@ -72,8 +98,11 @@ def cmd_propose(args: list[str]):
     print(f"  Project: {project_name}")
     print(f"  Path:    {change_dir}")
 
-    if plan_only:
-        print(f"\n  --plan-only: stopping before pipeline")
+    if plan_only or not run_pipeline:
+        if plan_only:
+            print(f"\n  --plan-only: stopping before pipeline")
+        else:
+            print(f"\n  Tip: add --run to start the pipeline")
         return
 
     print(f"\n  Starting pipeline...")
