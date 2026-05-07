@@ -1,0 +1,51 @@
+agent:
+  name: zsiga
+  llm:
+    provider: zhipuai
+    model: glm-4.7
+    api_key: ${ZHIPUAI_API_KEY}
+    max_tokens: 4096
+    temperature: 0.3
+
+# 目标项目 — zsiga 操作的对象，不是 zsiga 自己
+# path 指向 d8q 各子工程的本地路径或服务器路径
+targets:
+  factory:
+    path: /Users/lancer.zhang/ProjectNIO/d8q-intelligentengine-datafactory
+    test_cmd: "pytest -x --tb=short"
+    lint_cmd: "ruff check ."
+
+  compass:
+    path: /Users/lancer.zhang/ProjectNIO/d8q-intelligentengine-stockcompass
+    test_cmd: "pytest -x --tb=short"
+    lint_cmd: "ruff check ."
+
+  dataagent:
+    path: /Users/lancer.zhang/ProjectNIO/d8q-intelligentengine-dataagent
+    test_cmd: "pytest -x --tb=short"
+    lint_cmd: "ruff check ."
+
+  stockshark:
+    path: /Users/lancer.zhang/ProjectNIO/d8q-intelligentengine-stockshark
+    test_cmd: "pytest -x --tb=short"
+    lint_cmd: "ruff check ."
+
+intake:
+  mode: dir_scan
+  dir_scan:
+    scan_interval_seconds: 60
+
+pipeline:
+  max_changes_per_cycle: 3
+  impl_timeout_minutes: 20
+  fix_attempts: 10
+  eval_fix_attempts: 9
+  cycle_interval_hours: 8
+
+safety:
+  require_approval: true
+  protected_paths:
+    - "*/migrations/*"
+    - "*/settings/prod*"
+    - "*/.env"
+  max_files_per_task: 3
