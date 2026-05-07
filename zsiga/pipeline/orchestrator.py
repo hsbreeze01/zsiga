@@ -45,6 +45,8 @@ class ZsigaOrchestrator:
             print(f"  📝 Loaded memory context ({len(ctx)} chars)")
 
     async def run_cycle(self):
+        for name in self.config.targets:
+            self._get_transport(name)
         scanner = DirectoryScanner(self.config.targets)
         proposals = scanner.scan(transports=self._transports)
 
