@@ -30,8 +30,15 @@ def tag(target_path: str, tag_name: str):
     )
 
 
-def push(target_path: str):
-    subprocess.run(["git", "push", "origin", "main"], cwd=target_path, check=True)
+def push(target_path: str, remote: str = "origin", branch: str = "main",
+         dry_run: bool = False):
+    if dry_run:
+        print(f"  [DRY RUN] git push {remote} {branch} --tags")
+        return
+    subprocess.run(
+        ["git", "push", remote, branch],
+        cwd=target_path, check=True,
+    )
     subprocess.run(["git", "push", "--tags"], cwd=target_path, check=True)
 
 
