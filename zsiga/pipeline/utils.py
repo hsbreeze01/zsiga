@@ -92,13 +92,12 @@ def verify_mechanical(target_path: str, test_cmd: str, lint_cmd: str,
                 " ".join(ruff + ["check"] + changed),
                 cwd=target_path, timeout=120,
             )
-        else:
-            lint_r = transport.run_shell(lint_cmd, cwd=target_path, timeout=120)
+            if lint_r["exit_code"] != 0:
+                errors.append(f"lint:\n{lint_r['stdout'][:2000]}")
     else:
         lint_r = transport.run_shell(lint_cmd, cwd=target_path, timeout=120)
-
-    if lint_r["exit_code"] != 0:
-        errors.append(f"lint:\n{lint_r['stdout'][:2000]}")
+        if lint_r["exit_code"] != 0:
+            errors.append(f"lint:\n{lint_r['stdout'][:2000]}")
 
     test_r = transport.run_shell(test_cmd, cwd=target_path, timeout=300)
     if test_r["exit_code"] != 0:
