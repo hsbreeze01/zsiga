@@ -24,6 +24,7 @@ class AgentLoop:
         self.tools = []
         self.tool_funcs = {}
         self.max_turns = 40
+        self.context = ""
 
     def register_tool(self, name, description, parameters, func):
         self.tools.append({
@@ -39,6 +40,8 @@ class AgentLoop:
     async def run(self, system_prompt: str, user_prompt: str,
                   max_turns: int = None, timeout_seconds: int = None) -> str:
         max_turns = max_turns or self.max_turns
+        if self.context:
+            system_prompt = f"{self.context}\n\n---\n\n{system_prompt}"
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},

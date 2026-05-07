@@ -6,6 +6,8 @@ from ..agent.tools import register_tools
 from ..config import ZsigaConfig
 from ..intake.scanner import DirectoryScanner
 from .. import git_ops
+from ..memory.context import load_active_context, update_active_context, load_recent_lessons
+from ..memory.learn import record_outcome
 from .enricher import enrich
 from .implementer import implement
 from .verifier import verify, read_verdict
@@ -22,6 +24,13 @@ class ZsigaOrchestrator:
             base_url=config.llm.base_url,
             proxy=config.llm.proxy,
         )
+        self._load_context()
+
+    def _load_context(self):
+        ctx = load_active_context()
+        if ctx:
+            self.agent.context = ctx
+            print(f"  📝 Loaded memory context ({len(ctx)} chars)")
 
     async def run_cycle(self):
         scanner = DirectoryScanner(self.config.targets)
@@ -41,9 +50,17 @@ class ZsigaOrchestrator:
             if await self._process_change(prop):
                 processed += 1
 
+        self._update_memory()
+
         print(f"\n{'='*60}")
         print(f"Cycle complete: {processed} changes processed")
         print(f"{'='*60}")
+
+    def _update_memory(self):
+        lessons = load_recent_lessons(n=20)
+        if lessons:
+            update_active_context(new_lessons=lessons)
+            print(f"  📝 Memory updated with {len(lessons)} recent lessons")
 
     async def _process_change(self, prop: dict) -> bool:
         change_dir = prop["change_dir"]
@@ -51,10 +68,12 @@ class ZsigaOrchestrator:
         project_name = prop["project"]
         project_config = self.config.targets[project_name]
         change_name = prop["id"]
+        current_phase = "enrich"
 
         # Phase 1: ENRICH
         if not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
             print(f"  Phase 1: Enriching {change_name}...")
+            current_phase = "enrich"
             register_tools(self.agent, target_path)
             await enrich(self.agent, change_dir, target_path,
                         max_turns=self.config.pipeline.enrich_max_turns,
@@ -70,6 +89,7 @@ class ZsigaOrchestrator:
 
         # Phase 2: IMPLEMENT
         print(f"  Phase 2: Implementing {change_name}...")
+        current_phase = "implement"
         pre_sha = git_ops.rev_parse(target_path)
         register_tools(self.agent, target_path)
         await implement(self.agent, change_dir, target_path,
@@ -91,10 +111,12 @@ class ZsigaOrchestrator:
             if not fixed:
                 git_ops.reset_hard(target_path, pre_sha)
                 print(f"  REVERTED: {change_name}")
+                record_outcome(change_name, project_name, False, current_phase, errors)
                 return False
 
         # Phase 3: VERIFY
         print(f"  Phase 3: Verifying {change_name}...")
+        current_phase = "verify"
         register_tools(self.agent, target_path)
         await verify(self.agent, change_dir, target_path, pre_sha,
                     max_turns=self.config.pipeline.verify_max_turns,
@@ -110,6 +132,7 @@ class ZsigaOrchestrator:
             if not fixed:
                 git_ops.reset_hard(target_path, pre_sha)
                 print(f"  REVERTED: {change_name} (verify failed)")
+                record_outcome(change_name, project_name, False, current_phase)
                 return False
 
         # Phase 4: DELIVER
@@ -122,6 +145,7 @@ class ZsigaOrchestrator:
 
         archive_change(target_path, change_name)
         print(f"  ✓ Done: {change_name}")
+        record_outcome(change_name, project_name, True, "deliver")
         return True
 
     async def _fix_loop(self, target_path, project_config, errors,

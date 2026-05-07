@@ -206,6 +206,61 @@ git push origin main --tags     # dry_run=true 时仅打印
 
 完成后将 change 目录移动到 `openspec/changes/archive/<date>-<name>/`。
 
+## 记忆系统
+
+zsiga 具有自我学习能力——从每次运行中积累经验，避免重复犯错。
+
+### 工作方式
+
+```
+每次 change 处理完成（成功或失败）
+        ↓
+record_outcome() → memory/learnings.jsonl    ← 追加一条经验
+        ↓
+cycle 结束 → update_active_context()         ← 从 lessons 重新合成 active_context.md
+        ↓
+下次启动 → load_active_context()             ← 注入到 agent 的每个 system prompt
+```
+
+### 经验格式
+
+每条经验记录在 `memory/learnings.jsonl`，包含 `pattern_key`（分类标签）：
+
+```json
+{
+  "type": "lesson",
+  "ts": "2026-05-07T14:30:00",
+  "source": "orchestrator",
+  "title": "FAIL: add-health-check at verify",
+  "context": "project=stockshark, phase=verify",
+  "takeaway": "Failed at verify: verifier wastes turns",
+  "pattern_key": "pipeline.fail.verify"
+}
+```
+
+### 自动注入
+
+`memory/active_context.md` 的内容会在每次 pipeline 运行时自动注入到 agent 的 system prompt 前面。这意味着：
+- 之前的教训会被 agent 看到，避免重复犯错
+- 积累越多经验，agent 越聪明
+- 不需要手动修改 prompt
+
+### 手动添加经验
+
+也可以手动记录经验（不需要跑 pipeline）：
+
+```python
+from zsiga.memory.learn import record_lesson
+
+record_lesson(
+    title="target project uses venv/",
+    context="stockshark has venv/bin/python",
+    takeaway="detect venv/ first, use venv/bin/python -m pytest",
+    pattern_key="tools.venv_detection",
+    source="manual",
+)
+```
+
 ## 安全机制
 
 | 机制 | 说明 |
@@ -229,9 +284,9 @@ zsiga/
 │   ├── implement.md            #   实现规则
 │   ├── verify.md               #   验证规则
 │   └── safety.md               #   安全红线
-├── memory/                     # Agent 记忆
-│   ├── active_context.md       #   当前上下文
-│   └── learnings.jsonl         #   经验归档
+├── memory/                     # Agent 记忆（自我学习）
+│   ├── active_context.md       #   注入到每次 agent 运行的上下文
+│   └── learnings.jsonl         #   经验归档（追加写入）
 ├── templates/                  # 模板（预留）
 └── zsiga/                      # 源码
     ├── __init__.py
@@ -243,6 +298,9 @@ zsiga/
     │   └── tools.py             #   6 个工具（bash, read/write/edit, search, list）
     ├── intake/
     │   └── scanner.py           #   目录扫描，发现 proposal
+    ├── memory/
+    │   ├── learn.py             #   经验记录
+    │   └── context.py           #   上下文加载与合成
     └── pipeline/
         ├── orchestrator.py      #   四阶段编排器
         ├── enricher.py          #   Phase 1: 补全
