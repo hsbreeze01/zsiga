@@ -1,4 +1,6 @@
 import asyncio
+import time
+from datetime import datetime
 from pathlib import Path
 
 from ..agent.loop import AgentLoop
@@ -8,6 +10,8 @@ from ..intake.scanner import DirectoryScanner
 from .. import git_ops
 from ..memory.context import load_active_context, update_active_context, load_recent_lessons
 from ..memory.learn import record_outcome
+from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
+from ..metrics.collector import record_change
 from .enricher import enrich
 from .implementer import implement
 from .verifier import verify, read_verdict
@@ -68,16 +72,34 @@ class ZsigaOrchestrator:
         project_name = prop["project"]
         project_config = self.config.targets[project_name]
         change_name = prop["id"]
-        current_phase = "enrich"
 
+        rec = ChangeRecord(
+            change_name=change_name,
+            project=project_name,
+            outcome=Outcome.SUCCESS,
+            started_at=datetime.now().isoformat(),
+        )
+
+        try:
+            return await self._run_phases(prop, rec, change_dir, target_path,
+                                          project_name, project_config, change_name)
+        finally:
+            record_change(rec)
+
+    async def _run_phases(self, prop, rec, change_dir, target_path,
+                          project_name, project_config, change_name) -> bool:
         # Phase 1: ENRICH
         if not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
             print(f"  Phase 1: Enriching {change_name}...")
-            current_phase = "enrich"
             register_tools(self.agent, target_path)
+            t0 = time.monotonic()
             await enrich(self.agent, change_dir, target_path,
                         max_turns=self.config.pipeline.enrich_max_turns,
                         timeout_seconds=self.config.pipeline.enrich_timeout)
+            rec.phases.append(PhaseRecord(
+                phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
+                seconds_used=time.monotonic() - t0,
+            ))
             print(f"  Enriched.")
 
         # Approval gate
@@ -85,25 +107,28 @@ class ZsigaOrchestrator:
             approved = self._ask_approval(change_name)
             if not approved:
                 print(f"  Skipped: not approved")
+                rec.outcome = Outcome.SKIPPED
                 return False
 
         # Phase 2: IMPLEMENT
         print(f"  Phase 2: Implementing {change_name}...")
-        current_phase = "implement"
         pre_sha = git_ops.rev_parse(target_path)
         register_tools(self.agent, target_path)
+        t0 = time.monotonic()
         await implement(self.agent, change_dir, target_path,
                        max_turns=self.config.pipeline.impl_max_turns,
                        timeout_seconds=self.config.pipeline.impl_timeout)
+        impl_seconds = time.monotonic() - t0
 
         # Mechanical verification (only check changed files)
+        fix_attempts = 0
         passed, errors = verify_mechanical(
             target_path, project_config.test_cmd, project_config.lint_cmd,
             since_sha=pre_sha,
         )
         if not passed:
             print(f"  Mechanical verification FAILED, attempting fixes...")
-            fixed = await self._fix_loop(
+            fixed, fix_attempts = await self._fix_loop(
                 target_path, project_config,
                 errors, pre_sha=pre_sha,
                 max_attempts=self.config.pipeline.fix_attempts,
@@ -111,32 +136,57 @@ class ZsigaOrchestrator:
             if not fixed:
                 git_ops.reset_hard(target_path, pre_sha)
                 print(f"  REVERTED: {change_name}")
-                record_outcome(change_name, project_name, False, current_phase, errors)
+                rec.outcome = Outcome.REVERTED
+                rec.phases.append(PhaseRecord(
+                    phase=Phase.IMPLEMENT, outcome=Outcome.FAIL,
+                    seconds_used=impl_seconds, fix_attempts=fix_attempts, detail=errors[:200],
+                ))
+                record_outcome(change_name, project_name, False, "implement", errors)
                 return False
+
+        rec.phases.append(PhaseRecord(
+            phase=Phase.IMPLEMENT, outcome=Outcome.SUCCESS,
+            seconds_used=impl_seconds, fix_attempts=fix_attempts,
+        ))
 
         # Phase 3: VERIFY
         print(f"  Phase 3: Verifying {change_name}...")
-        current_phase = "verify"
         register_tools(self.agent, target_path)
+        t0 = time.monotonic()
         await verify(self.agent, change_dir, target_path, pre_sha,
                     max_turns=self.config.pipeline.verify_max_turns,
                     timeout_seconds=self.config.pipeline.verify_timeout)
+        verify_seconds = time.monotonic() - t0
 
         verdict = read_verdict(change_dir)
+        verify_outcome = Outcome.SUCCESS if verdict == "PASS" else Outcome.FAIL
+        eval_fix_attempts = 0
+
         if verdict == "FAIL":
             print(f"  Verifier: FAIL, attempting fixes...")
-            fixed = await self._eval_fix_loop(
+            fixed, eval_fix_attempts = await self._eval_fix_loop(
                 change_dir, target_path, project_config,
                 pre_sha, max_attempts=self.config.pipeline.eval_fix_attempts,
             )
             if not fixed:
                 git_ops.reset_hard(target_path, pre_sha)
                 print(f"  REVERTED: {change_name} (verify failed)")
-                record_outcome(change_name, project_name, False, current_phase)
+                rec.outcome = Outcome.REVERTED
+                rec.phases.append(PhaseRecord(
+                    phase=Phase.VERIFY, outcome=Outcome.FAIL,
+                    seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
+                ))
+                record_outcome(change_name, project_name, False, "verify")
                 return False
+
+        rec.phases.append(PhaseRecord(
+            phase=Phase.VERIFY, outcome=verify_outcome,
+            seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
+        ))
 
         # Phase 4: DELIVER
         print(f"  Phase 4: Delivering {change_name}...")
+        t0 = time.monotonic()
         if git_ops.has_uncommitted_changes(target_path):
             git_ops.add_all(target_path)
             git_ops.commit(target_path, f"feat({project_name}): {change_name}")
@@ -144,12 +194,16 @@ class ZsigaOrchestrator:
         git_ops.push(target_path, dry_run=self.config.safety.dry_run)
 
         archive_change(target_path, change_name)
+        rec.phases.append(PhaseRecord(
+            phase=Phase.DELIVER, outcome=Outcome.SUCCESS,
+            seconds_used=time.monotonic() - t0,
+        ))
         print(f"  ✓ Done: {change_name}")
         record_outcome(change_name, project_name, True, "deliver")
         return True
 
     async def _fix_loop(self, target_path, project_config, errors,
-                        pre_sha: str, max_attempts: int) -> bool:
+                        pre_sha: str, max_attempts: int) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
         for attempt in range(1, max_attempts + 1):
             print(f"    Fix attempt {attempt}/{max_attempts}...")
@@ -164,11 +218,11 @@ class ZsigaOrchestrator:
                 since_sha=pre_sha,
             )
             if passed:
-                return True
-        return False
+                return True, attempt
+        return False, max_attempts
 
     async def _eval_fix_loop(self, change_dir, target_path, project_config,
-                             pre_sha, max_attempts: int) -> bool:
+                             pre_sha, max_attempts: int) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
         for attempt in range(1, max_attempts + 1):
             print(f"    Eval fix attempt {attempt}/{max_attempts}...")
@@ -187,15 +241,15 @@ class ZsigaOrchestrator:
                 since_sha=pre_sha,
             )
             if not passed:
-                return False
+                return False, attempt
 
             register_tools(self.agent, target_path)
             await verify(self.agent, change_dir, target_path, pre_sha,
                         max_turns=self.config.pipeline.verify_max_turns,
                         timeout_seconds=self.config.pipeline.verify_timeout)
             if read_verdict(change_dir) == "PASS":
-                return True
-        return False
+                return True, attempt
+        return False, max_attempts
 
     def _ask_approval(self, change_name: str) -> bool:
         try:

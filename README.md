@@ -261,6 +261,49 @@ record_lesson(
 )
 ```
 
+## 指标与里程碑
+
+### 查看仪表盘
+
+```bash
+python3 -m zsiga dashboard
+# 生成 site/dashboard.html，浏览器打开即可
+```
+
+### 指标体系
+
+| 指标 | 说明 |
+|------|------|
+| Total Changes | 处理过的 change 总数 |
+| Success Rate | 完成全部 4 阶段的比例 |
+| First-Pass Test Rate | 实现阶段首次 pytest+ruff 通过率（无需修复循环） |
+| Verify Pass Rate | AI 验证通过率 |
+| Lessons Learned | 记忆系统积累的经验条数 |
+| Phase Performance | 每阶段的平均轮次、耗时、修复次数 |
+
+### 里程碑
+
+**L2: Better Tools（引入 LSP、AST grep、sub-agent）**
+
+| 条件 | 目标 | 当前 |
+|------|------|------|
+| 累计成功 change | ≥ 10 | 需积累 |
+| 总成功率 | ≥ 70% | 需积累 |
+| 覆盖项目数 | ≥ 3 | 需积累 |
+| 经验教训数 | ≥ 20 | 需积累 |
+
+**L3: Self-Evolution（zsiga 修改自身代码）**
+
+| 条件 | 目标 | 当前 |
+|------|------|------|
+| 累计成功 change | ≥ 30 | 需积累 |
+| 总成功率 | ≥ 85% | 需积累 |
+| 验证通过率 | ≥ 80% | 需积累 |
+| 经验教训数 | ≥ 50 | 需积累 |
+| 首次测试通过率 | ≥ 60% | 需积累 |
+
+仪表盘会实时显示每项指标的进度条，全部达标时显示 ✅ READY。
+
 ## 安全机制
 
 | 机制 | 说明 |
@@ -301,6 +344,10 @@ zsiga/
     ├── memory/
     │   ├── learn.py             #   经验记录
     │   └── context.py           #   上下文加载与合成
+    ├── metrics/
+    │   ├── types.py             #   数据模型 + 里程碑定义
+    │   ├── collector.py         #   指标采集与统计
+    │   └── dashboard.py         #   HTML 仪表盘生成
     └── pipeline/
         ├── orchestrator.py      #   四阶段编排器
         ├── enricher.py          #   Phase 1: 补全
