@@ -11,6 +11,12 @@ agent:
 
 # 目标项目 — zsiga 操作的对象，不是 zsiga 自己
 # path 指向 d8q 各子工程的本地路径或服务器路径
+# SSH 远程模式: 添加 transport: ssh + ssh: 子段
+#   ssh:
+#     host: 47.99.57.152
+#     user: deploy
+#     key_path: ~/.ssh/id_rsa
+#     port: 22  (默认 22，可省略)
 targets:
   factory:
     path: /Users/lancer.zhang/ProjectNIO/d8q-intelligentengine-datafactory

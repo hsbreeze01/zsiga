@@ -26,13 +26,25 @@ def _resolve_env_vars(value):
     return value
 
 
+class SSHConfig:
+    def __init__(self, host: str, user: str = None, port: int = 22,
+                 key_path: str = None):
+        self.host = host
+        self.user = user
+        self.port = port
+        self.key_path = key_path
+
+
 class TargetConfig:
     def __init__(self, name: str, path: str, test_cmd: str = "pytest -x --tb=short",
-                 lint_cmd: str = "ruff check ."):
+                 lint_cmd: str = "ruff check .", transport: str = "local",
+                 ssh: SSHConfig = None):
         self.name = name
         self.path = path
         self.test_cmd = test_cmd
         self.lint_cmd = lint_cmd
+        self.transport = transport
+        self.ssh = ssh
 
 
 class LLMConfig:
@@ -119,11 +131,22 @@ def load_config(path: str = None) -> ZsigaConfig:
 
     targets = {}
     for name, tc in raw.get("targets", {}).items():
+        ssh_raw = tc.get("ssh")
+        ssh = None
+        if ssh_raw:
+            ssh = SSHConfig(
+                host=ssh_raw["host"],
+                user=ssh_raw.get("user"),
+                port=ssh_raw.get("port", 22),
+                key_path=ssh_raw.get("key_path"),
+            )
         targets[name] = TargetConfig(
             name=name,
             path=tc["path"],
             test_cmd=tc.get("test_cmd", "pytest -x --tb=short"),
             lint_cmd=tc.get("lint_cmd", "ruff check ."),
+            transport=tc.get("transport", "ssh" if ssh else "local"),
+            ssh=ssh,
         )
 
     pipeline_raw = raw.get("pipeline", {})

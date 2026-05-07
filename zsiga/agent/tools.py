@@ -1,59 +1,92 @@
 import json
+import os
 import subprocess
-import re
 from pathlib import Path
 
+from ..transport import Transport, LocalTransport
 
-def _bash(target_path, command, timeout=120):
-    r = subprocess.run(
-        command, shell=True,
-        cwd=target_path,
-        capture_output=True, text=True,
-        timeout=timeout,
-    )
+
+def _bash(transport: Transport, target_path, command, timeout=120):
+    r = transport.run_shell(command, cwd=target_path, timeout=timeout)
     return {
-        "exit_code": r.returncode,
-        "stdout": r.stdout[-10000:],
-        "stderr": r.stderr[-3000:],
+        "exit_code": r["exit_code"],
+        "stdout": r["stdout"][-10000:],
+        "stderr": r["stderr"][-3000:],
     }
 
 
-def _read_file(target_path, path):
-    full = Path(target_path) / path
-    if not full.exists():
-        return {"error": f"File not found: {path}"}
-    content = full.read_text(errors="replace")
+def _read_file(transport: Transport, target_path, path):
+    full = f"{target_path}/{path}"
+    if isinstance(transport, LocalTransport):
+        full_path = Path(full)
+        if not full_path.exists():
+            return {"error": f"File not found: {path}"}
+        content = full_path.read_text(errors="replace")
+    else:
+        r = transport.run_shell(f"cat '{full}'")
+        if r["exit_code"] != 0:
+            return {"error": f"File not found: {path}"}
+        content = r["stdout"]
     return {"path": path, "content": content, "lines": content.count("\n") + 1}
 
 
-def _write_file(target_path, path, content):
-    full = Path(target_path) / path
-    full.parent.mkdir(parents=True, exist_ok=True)
-    full.write_text(content)
+def _write_file(transport: Transport, target_path, path, content):
+    full = f"{target_path}/{path}"
+    if isinstance(transport, LocalTransport):
+        full_path = Path(full)
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        full_path.write_text(content)
+    else:
+        transport.run_shell(f"mkdir -p $(dirname '{full}')")
+        r = transport.run_shell(f"cat > '{full}'", stdin_data=content)
+        if r["exit_code"] != 0:
+            return {"error": f"Write failed: {r['stderr']}"}
     return {"ok": True, "path": path, "bytes": len(content)}
 
 
-def _edit_file(target_path, path, old_text, new_text):
-    full = Path(target_path) / path
-    if not full.exists():
-        return {"error": f"File not found: {path}"}
-    content = full.read_text()
+def _edit_file(transport: Transport, target_path, path, old_text, new_text):
+    full = f"{target_path}/{path}"
+    if isinstance(transport, LocalTransport):
+        full_path = Path(full)
+        if not full_path.exists():
+            return {"error": f"File not found: {path}"}
+        content = full_path.read_text()
+    else:
+        r = transport.run_shell(f"cat '{full}'")
+        if r["exit_code"] != 0:
+            return {"error": f"File not found: {path}"}
+        content = r["stdout"]
+
     if old_text not in content:
         return {"error": f"old_text not found in {path}"}
     if content.count(old_text) > 1:
         return {"error": f"old_text found {content.count(old_text)} times in {path}, must be unique"}
     content = content.replace(old_text, new_text)
-    full.write_text(content)
+
+    if isinstance(transport, LocalTransport):
+        Path(full).write_text(content)
+    else:
+        transport.run_shell(f"cat > '{full}'", stdin_data=content)
     return {"ok": True, "path": path}
 
 
-def _search(target_path, pattern, include=None):
-    cmd = ["grep", "-rn", "-E", pattern]
-    if include:
-        cmd.extend(["--include", include])
-    cmd.append(target_path)
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-    lines = r.stdout.strip().split("\n")[:100]
+def _search(transport: Transport, target_path, pattern, include=None):
+    if isinstance(transport, LocalTransport):
+        cmd = ["grep", "-rn", "-E", pattern]
+        if include:
+            cmd.extend(["--include", include])
+        cmd.append(target_path)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        output = r.stdout
+    else:
+        grep_cmd = f"grep -rn -E '{pattern}'"
+        if include:
+            grep_cmd += f" --include='{include}'"
+        grep_cmd += f" '{target_path}'"
+        r = transport.run_shell(grep_cmd, timeout=30)
+        output = r.get("stdout", "")
+
+    lines = output.strip().split("\n")[:100]
     results = []
     for line in lines:
         if ":" in line:
@@ -63,18 +96,39 @@ def _search(target_path, pattern, include=None):
     return {"matches": len(results), "results": results[:50]}
 
 
-def _list_files(target_path, path=""):
-    full = Path(target_path) / path
-    if not full.is_dir():
-        return {"error": f"Not a directory: {path}"}
-    entries = []
-    for p in sorted(full.iterdir())[:200]:
-        rel = p.relative_to(target_path)
-        entries.append({"name": rel.as_posix(), "is_dir": p.is_dir()})
-    return {"entries": entries}
+def _list_files(transport: Transport, target_path, path=""):
+    full = f"{target_path}/{path}".rstrip("/")
+    if isinstance(transport, LocalTransport):
+        full_path = Path(full)
+        if not full_path.is_dir():
+            return {"error": f"Not a directory: {path}"}
+        entries = []
+        for p in sorted(full_path.iterdir())[:200]:
+            rel = p.relative_to(target_path)
+            entries.append({"name": rel.as_posix(), "is_dir": p.is_dir()})
+        return {"entries": entries}
+    else:
+        r = transport.run_shell(
+            f"ls -1 --group-directories-first '{full}' 2>/dev/null || echo '__NOTDIR__'"
+        )
+        output = r.get("stdout", "").strip()
+        if "__NOTDIR__" in output or r["exit_code"] != 0:
+            return {"error": f"Not a directory: {path}"}
+        entries = []
+        for name in output.split("\n")[:200]:
+            name = name.strip()
+            if not name:
+                continue
+            full_entry = f"{full}/{name}"
+            check = transport.run_shell(f"test -d '{full_entry}' && echo DIR || echo FILE", timeout=5)
+            is_dir = check.get("stdout", "").strip() == "DIR"
+            rel = f"{path}/{name}".lstrip("/") if path else name
+            entries.append({"name": rel, "is_dir": is_dir})
+        return {"entries": entries}
 
 
-def register_tools(agent, target_path: str):
+def register_tools(agent, target_path: str, transport: Transport = None):
+    transport = transport or LocalTransport()
     agent.tools = []
     agent.tool_funcs = {}
 
@@ -89,7 +143,7 @@ def register_tools(agent, target_path: str):
             },
             "required": ["command"],
         },
-        func=lambda command, timeout=120: _bash(target_path, command, timeout),
+        func=lambda command, timeout=120: _bash(transport, target_path, command, timeout),
     )
 
     agent.register_tool(
@@ -102,7 +156,7 @@ def register_tools(agent, target_path: str):
             },
             "required": ["path"],
         },
-        func=lambda path: _read_file(target_path, path),
+        func=lambda path: _read_file(transport, target_path, path),
     )
 
     agent.register_tool(
@@ -116,7 +170,7 @@ def register_tools(agent, target_path: str):
             },
             "required": ["path", "content"],
         },
-        func=lambda path, content: _write_file(target_path, path, content),
+        func=lambda path, content: _write_file(transport, target_path, path, content),
     )
 
     agent.register_tool(
@@ -131,7 +185,7 @@ def register_tools(agent, target_path: str):
             },
             "required": ["path", "old_text", "new_text"],
         },
-        func=lambda path, old_text, new_text: _edit_file(target_path, path, old_text, new_text),
+        func=lambda path, old_text, new_text: _edit_file(transport, target_path, path, old_text, new_text),
     )
 
     agent.register_tool(
@@ -145,7 +199,7 @@ def register_tools(agent, target_path: str):
             },
             "required": ["pattern"],
         },
-        func=lambda pattern, include=None: _search(target_path, pattern, include),
+        func=lambda pattern, include=None: _search(transport, target_path, pattern, include),
     )
 
     agent.register_tool(
@@ -158,5 +212,5 @@ def register_tools(agent, target_path: str):
             },
             "required": [],
         },
-        func=lambda path="": _list_files(target_path, path),
+        func=lambda path="": _list_files(transport, target_path, path),
     )
