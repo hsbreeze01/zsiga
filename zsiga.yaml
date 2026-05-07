@@ -2,8 +2,10 @@ agent:
   name: zsiga
   llm:
     provider: zhipuai
-    model: glm-4.7
+    model: glm-5.1
     api_key: ${ZHIPUAI_API_KEY}
+    base_url: https://open.bigmodel.cn/api/coding/paas/v4
+    proxy: http://proxy-chj.nioint.com:8080
     max_tokens: 4096
     temperature: 0.3
 
@@ -39,11 +41,12 @@ pipeline:
   max_changes_per_cycle: 3
   impl_timeout_minutes: 20
   fix_attempts: 10
-  eval_fix_attempts: 9
+  eval_fix_attempts: 3
   cycle_interval_hours: 8
 
 safety:
-  require_approval: true
+  require_approval: false
+  dry_run: true
   protected_paths:
     - "*/migrations/*"
     - "*/settings/prod*"
