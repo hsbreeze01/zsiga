@@ -4,6 +4,9 @@ import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import threading
 
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
 from .config import load_config
 from .pipeline.orchestrator import ZsigaOrchestrator
 from .metrics.dashboard import generate_dashboard
