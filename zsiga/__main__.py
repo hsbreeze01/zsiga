@@ -1,9 +1,13 @@
 import asyncio
 import re
 import sys
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import threading
+
 from .config import load_config
 from .pipeline.orchestrator import ZsigaOrchestrator
 from .metrics.dashboard import generate_dashboard
+from .metrics.collector import load_all_changes
 from .transport import LocalTransport, create_transport
 
 
@@ -105,6 +109,137 @@ def cmd_run():
         orchestrator.close()
 
 
+def cmd_projects():
+    config = load_config()
+    print(f"{'Project':<15} {'Transport':<10} {'Target':<50} {'Status'}")
+    print(f"{'-'*15} {'-'*10} {'-'*50} {'-'*10}")
+    for name, tc in config.targets.items():
+        transport = create_transport(tc)
+        r = transport.run_shell("echo OK", timeout=5)
+        status = "✅ connected" if r["exit_code"] == 0 else "❌ failed"
+        transport_type = tc.transport or "local"
+        target_display = tc.path if len(tc.path) <= 48 else "..." + tc.path[-45:]
+        print(f"{name:<15} {transport_type:<10} {target_display:<50} {status}")
+        if tc.transport == "ssh" and tc.ssh:
+            print(f"{'':<15} {'':<10} ssh://{tc.ssh.user}@{tc.ssh.host}:{tc.ssh.port}")
+
+
+def cmd_status():
+    config = load_config()
+    changes = load_all_changes()
+
+    for name, tc in config.targets.items():
+        transport = create_transport(tc)
+        changes_dir = f"{tc.path}/openspec/changes"
+        r = transport.run_shell(f"ls -1 '{changes_dir}' 2>/dev/null", timeout=5)
+        pending = [d for d in r.get("stdout", "").strip().split("\n") if d and d != "archive"]
+        archive_r = transport.run_shell(f"ls -1 '{changes_dir}/archive' 2>/dev/null", timeout=5)
+        archived = [d for d in archive_r.get("stdout", "").strip().split("\n") if d]
+
+        print(f"\n📦 {name} ({tc.transport})")
+        if pending:
+            for p in pending:
+                print(f"  ⏳ {p}")
+        else:
+            print(f"  (no pending changes)")
+        if archived:
+            print(f"  📁 archive: {len(archived)} completed")
+
+    if changes:
+        print(f"\n{'='*60}")
+        print(f"Recent outcomes:")
+        recent = changes[-10:]
+        for c in reversed(recent):
+            icon = {"success": "✅", "reverted": "❌", "fail": "❌", "skipped": "⏭️"}.get(c.get("outcome", ""), "❓")
+            duration = ""
+            if c.get("started_at") and c.get("finished_at"):
+                try:
+                    from datetime import datetime
+                    s = datetime.fromisoformat(c["started_at"])
+                    e = datetime.fromisoformat(c["finished_at"])
+                    duration = f" ({(e-s).total_seconds():.0f}s)"
+                except Exception:
+                    pass
+            print(f"  {icon} {c['change_name']:<40} {c['project']:<12} {c.get('outcome', '?')}{duration}")
+
+
+def cmd_log(args: list[str]):
+    changes = load_all_changes()
+    if not changes:
+        print("No change history yet.")
+        return
+
+    limit = 20
+    for a in args:
+        if a.startswith("--limit="):
+            limit = int(a.split("=")[1])
+        elif a.startswith("-n"):
+            limit = int(a[2:])
+
+    project_filter = None
+    for a in args:
+        if not a.startswith("-"):
+            project_filter = a
+            break
+
+    filtered = changes
+    if project_filter:
+        filtered = [c for c in changes if c.get("project") == project_filter]
+
+    print(f"{'Change':<40} {'Project':<12} {'Outcome':<10} {'Duration':<10} {'Started'}")
+    print(f"{'-'*40} {'-'*12} {'-'*10} {'-'*10} {'-'*20}")
+
+    for c in reversed(filtered[-limit:]):
+        outcome = c.get("outcome", "?")
+        icon = {"success": "✅", "reverted": "❌", "fail": "❌"}.get(outcome, "❓")
+        duration = ""
+        if c.get("started_at") and c.get("finished_at"):
+            try:
+                from datetime import datetime
+                s = datetime.fromisoformat(c["started_at"])
+                e = datetime.fromisoformat(c["finished_at"])
+                duration = f"{(e-s).total_seconds():.0f}s"
+            except Exception:
+                pass
+        started = c.get("started_at", "")[:19].replace("T", " ")
+        print(f"{icon} {c['change_name']:<38} {c.get('project', '?'):<12} {outcome:<10} {duration:<10} {started}")
+
+        for p in c.get("phases", []):
+            psec = f"{p.get('seconds_used', 0):.0f}s" if p.get("seconds_used") else ""
+            fix = f" fixes={p['fix_attempts']}" if p.get("fix_attempts") else ""
+            print(f"    {p['phase']:<12} {p['outcome']:<10} {psec}{fix}")
+
+
+def cmd_dashboard(args: list[str]):
+    serve = "--serve" in args
+    port = 58175
+    for a in args:
+        if a.startswith("--port="):
+            port = int(a.split("=")[1])
+
+    path = generate_dashboard()
+    print(f"Dashboard generated: {path}")
+
+    if serve:
+        import os
+        serve_dir = os.path.dirname(path)
+
+        class Handler(SimpleHTTPRequestHandler):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, directory=serve_dir, **kwargs)
+
+            def log_message(self, format, *args):
+                pass
+
+        server = HTTPServer(("0.0.0.0", port), Handler)
+        print(f"Serving at http://localhost:{port}")
+        print(f"Press Ctrl+C to stop")
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            print(f"\nStopped.")
+
+
 def main():
     if len(sys.argv) < 2:
         cmd_run()
@@ -117,17 +252,24 @@ def main():
         cmd_propose(rest)
     elif subcmd == "run":
         cmd_run()
+    elif subcmd == "projects":
+        cmd_projects()
+    elif subcmd == "status":
+        cmd_status()
+    elif subcmd == "log":
+        cmd_log(rest)
     elif subcmd == "dashboard":
-        path = generate_dashboard()
-        print(f"Dashboard generated: {path}")
+        cmd_dashboard(rest)
     else:
         print(f"Unknown command: {subcmd}")
         print("Usage:")
-        print("  python3.11 -m zsiga                          # run pipeline")
-        print("  python3.11 -m zsiga run                      # run pipeline")
-        print("  python3.11 -m zsiga propose <project> <desc> # create + run")
+        print("  python3.11 -m zsiga propose <project> <desc>       # create + run")
         print("  python3.11 -m zsiga propose <project> <desc> --plan-only")
-        print("  python3.11 -m zsiga dashboard                # generate dashboard")
+        print("  python3.11 -m zsiga run                            # scan + run pending")
+        print("  python3.11 -m zsiga projects                       # list projects + status")
+        print("  python3.11 -m zsiga status                         # pending changes + history")
+        print("  python3.11 -m zsiga log [project] [-n20]           # change history")
+        print("  python3.11 -m zsiga dashboard [--serve] [--port=N] # metrics dashboard")
         sys.exit(1)
 
 
