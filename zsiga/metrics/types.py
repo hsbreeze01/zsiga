@@ -28,6 +28,8 @@ class PhaseRecord:
     llm_calls: int = 0
     tool_calls: int = 0
     detail: str = ""
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
 
 @dataclass
@@ -58,6 +60,8 @@ class ChangeRecord:
                     "llm_calls": p.llm_calls,
                     "tool_calls": p.tool_calls,
                     "detail": p.detail,
+                    "prompt_tokens": p.prompt_tokens,
+                    "completion_tokens": p.completion_tokens,
                 }
                 for p in self.phases
             ],

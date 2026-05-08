@@ -69,6 +69,8 @@ def compute_stats(changes: list[dict] = None) -> dict:
             "total_fixes": total_fixes,
             "total_llm_calls": total_llm_calls,
             "total_tool_calls": total_tool_calls,
+            "total_prompt_tokens": sum(p.get("prompt_tokens", 0) for p in phase_records),
+            "total_completion_tokens": sum(p.get("completion_tokens", 0) for p in phase_records),
         }
 
     verify_passes = sum(
@@ -102,6 +104,12 @@ def compute_stats(changes: list[dict] = None) -> dict:
     total_seconds_all = sum(
         p.get("seconds_used", 0) for c in changes for p in c.get("phases", [])
     )
+    total_prompt_tokens = sum(
+        p.get("prompt_tokens", 0) for c in changes for p in c.get("phases", [])
+    )
+    total_completion_tokens = sum(
+        p.get("completion_tokens", 0) for c in changes for p in c.get("phases", [])
+    )
 
     return {
         "total_changes": total,
@@ -117,6 +125,8 @@ def compute_stats(changes: list[dict] = None) -> dict:
         "total_llm_calls": total_llm_calls,
         "total_tool_calls": total_tool_calls,
         "total_runtime_seconds": round(total_seconds_all, 1),
+        "total_prompt_tokens": total_prompt_tokens,
+        "total_completion_tokens": total_completion_tokens,
         "recent_changes": [c["change_name"] for c in changes[-5:]],
         "last_updated": datetime.now().isoformat(),
     }
@@ -160,6 +170,8 @@ def _empty_stats(lessons_count: int = 0) -> dict:
         "total_llm_calls": 0,
         "total_tool_calls": 0,
         "total_runtime_seconds": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
         "recent_changes": [],
         "last_updated": datetime.now().isoformat(),
     }

@@ -124,12 +124,14 @@ class ZsigaOrchestrator:
                         project_context=project_context,
                         max_turns=self.config.pipeline.enrich_max_turns,
                         timeout_seconds=self.config.pipeline.enrich_timeout)
-            enrich_calls = _extract_calls(enrich_result)
-            rec.phases.append(PhaseRecord(
-                phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
-                seconds_used=time.monotonic() - t0,
-                llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
-            ))
+             enrich_calls = _extract_calls(enrich_result)
+             enrich_tokens = _extract_tokens(enrich_result)
+             rec.phases.append(PhaseRecord(
+                 phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
+                 seconds_used=time.monotonic() - t0,
+                 llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
+                 prompt_tokens=enrich_tokens[0], completion_tokens=enrich_tokens[1],
+             ))
             print(f"  Phase 1 done in {time.monotonic() - t0:.1f}s")
 
         # Approval gate
@@ -155,7 +157,8 @@ class ZsigaOrchestrator:
                        max_turns=self.config.pipeline.impl_max_turns,
                        timeout_seconds=self.config.pipeline.impl_timeout)
         impl_seconds = time.monotonic() - t0
-        impl_calls = _extract_calls(impl_result)
+         impl_calls = _extract_calls(impl_result)
+         impl_tokens = _extract_tokens(impl_result)
         print(f"  Phase 2 done in {impl_seconds:.1f}s")
 
         # Mechanical verification (only check changed files)
@@ -186,6 +189,7 @@ class ZsigaOrchestrator:
                     phase=Phase.IMPLEMENT, outcome=Outcome.FAIL,
                     seconds_used=impl_seconds, fix_attempts=fix_attempts, detail=errors[:200],
                     llm_calls=impl_calls[0], tool_calls=impl_calls[1],
+                    prompt_tokens=impl_tokens[0], completion_tokens=impl_tokens[1],
                 ))
                 record_outcome(change_name, project_name, False, "implement", errors)
                 return False
@@ -194,6 +198,7 @@ class ZsigaOrchestrator:
             phase=Phase.IMPLEMENT, outcome=Outcome.SUCCESS,
             seconds_used=impl_seconds, fix_attempts=fix_attempts,
             llm_calls=impl_calls[0], tool_calls=impl_calls[1],
+            prompt_tokens=impl_tokens[0], completion_tokens=impl_tokens[1],
         ))
 
         # Phase 3: VERIFY
@@ -222,6 +227,7 @@ class ZsigaOrchestrator:
                     timeout_seconds=self.config.pipeline.verify_timeout)
         verify_seconds = time.monotonic() - t0
         verify_calls = _extract_calls(verify_result)
+        verify_tokens = _extract_tokens(verify_result)
 
         verdict = read_verdict(change_dir, transport)
         print(f"  Verdict: {verdict} ({verify_seconds:.1f}s)")
@@ -243,6 +249,7 @@ class ZsigaOrchestrator:
                     phase=Phase.VERIFY, outcome=Outcome.FAIL,
                     seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
                     llm_calls=verify_calls[0], tool_calls=verify_calls[1],
+                    prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
                 ))
                 record_outcome(change_name, project_name, False, "verify")
                 return False
@@ -251,6 +258,7 @@ class ZsigaOrchestrator:
             phase=Phase.VERIFY, outcome=verify_outcome,
             seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
             llm_calls=verify_calls[0], tool_calls=verify_calls[1],
+            prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
         ))
 
         # Phase 4: DELIVER
@@ -373,4 +381,10 @@ class ZsigaOrchestrator:
 def _extract_calls(result) -> tuple[int, int]:
     if isinstance(result, RunResult):
         return (result.llm_calls, result.tool_calls)
+    return (0, 0)
+
+
+def _extract_tokens(result) -> tuple[int, int]:
+    if isinstance(result, RunResult):
+        return (result.prompt_tokens, result.completion_tokens)
     return (0, 0)

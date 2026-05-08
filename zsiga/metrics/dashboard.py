@@ -301,6 +301,8 @@ def _phase_table(phase_stats: dict) -> str:
         if s.get("count", 0) == 0:
             continue
         pr = s.get("pass_rate", 0)
+        pt = s.get("total_prompt_tokens", 0)
+        ct = s.get("total_completion_tokens", 0)
         rows += f"""<tr>
   <td>{phase}</td>
   <td>{s['count']}</td>
@@ -310,9 +312,10 @@ def _phase_table(phase_stats: dict) -> str:
   <td>{s.get('total_fixes', 0)}</td>
   <td>{s.get('total_llm_calls', 0)}</td>
   <td>{s.get('total_tool_calls', 0)}</td>
+  <td>{_fmt_tokens(pt + ct)}</td>
 </tr>"""
     return f"""<table>
-<thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th></tr></thead>
+<thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody>{rows}</tbody></table>"""
 
 
@@ -349,6 +352,14 @@ def _fmt_seconds(s: float) -> str:
     return f"{h:.1f}h"
 
 
+def _fmt_tokens(n: int) -> str:
+    if n < 1000:
+        return str(n)
+    if n < 1_000_000:
+        return f"{n/1000:.1f}K"
+    return f"{n/1_000_000:.2f}M"
+
+
 def _usage_section(stats: dict) -> str:
     llm = stats.get("total_llm_calls", 0)
     tool = stats.get("total_tool_calls", 0)
@@ -356,10 +367,23 @@ def _usage_section(stats: dict) -> str:
     changes = stats.get("total_changes", 0)
     avg_llm = round(llm / changes, 1) if changes else 0
     avg_tool = round(tool / changes, 1) if changes else 0
+    prompt_tokens = stats.get("total_prompt_tokens", 0)
+    completion_tokens = stats.get("total_completion_tokens", 0)
+    total_tokens = prompt_tokens + completion_tokens
+    avg_tokens = round(total_tokens / changes) if changes else 0
 
     return f"""<div class="section">
   <h2>Resource Usage</h2>
   <div class="grid">
+    <div class="card">
+      <div class="label">Total Tokens</div>
+      <div class="value">{_fmt_tokens(total_tokens)}</div>
+      <div class="meta">{_fmt_tokens(prompt_tokens)} prompt + {_fmt_tokens(completion_tokens)} completion</div>
+    </div>
+    <div class="card">
+      <div class="label">Avg Tokens / Change</div>
+      <div class="value">{_fmt_tokens(avg_tokens)}</div>
+    </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
       <div class="value">{llm:,}</div>

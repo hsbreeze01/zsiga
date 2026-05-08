@@ -8,13 +8,18 @@ from zai import ZaiClient
 
 
 class RunResult:
-    __slots__ = ("content", "llm_calls", "tool_calls", "elapsed_seconds")
+    __slots__ = ("content", "llm_calls", "tool_calls", "elapsed_seconds",
+                 "prompt_tokens", "completion_tokens")
 
-    def __init__(self, content: str, llm_calls: int, tool_calls: int, elapsed_seconds: float):
+    def __init__(self, content: str, llm_calls: int, tool_calls: int,
+                 elapsed_seconds: float, prompt_tokens: int = 0,
+                 completion_tokens: int = 0):
         self.content = content
         self.llm_calls = llm_calls
         self.tool_calls = tool_calls
         self.elapsed_seconds = elapsed_seconds
+        self.prompt_tokens = prompt_tokens
+        self.completion_tokens = completion_tokens
 
     def __str__(self):
         return self.content
@@ -68,6 +73,8 @@ class AgentLoop:
         start = time.monotonic()
         tool_calls_total = 0
         llm_calls_total = 0
+        prompt_tokens_total = 0
+        completion_tokens_total = 0
 
         print(f"  [{phase}] starting (max={max_turns} turns, timeout={timeout_seconds or '∞'}s)")
 
@@ -75,7 +82,8 @@ class AgentLoop:
             elapsed = time.monotonic() - start
             if timeout_seconds and elapsed > timeout_seconds:
                 print(f"  [{phase}] ⏱️ TIMEOUT after {turn} turns, {elapsed:.1f}s, {llm_calls_total} LLM calls, {tool_calls_total} tool calls")
-                return RunResult("TIMEOUT", llm_calls_total, tool_calls_total, elapsed)
+                return RunResult("TIMEOUT", llm_calls_total, tool_calls_total, elapsed,
+                                 prompt_tokens_total, completion_tokens_total)
 
             t_llm = time.monotonic()
             resp = self.client.chat.completions.create(
@@ -85,6 +93,9 @@ class AgentLoop:
                 tool_choice="auto",
             )
             llm_calls_total += 1
+            if resp.usage:
+                prompt_tokens_total += getattr(resp.usage, "prompt_tokens", 0) or 0
+                completion_tokens_total += getattr(resp.usage, "completion_tokens", 0) or 0
             llm_ms = (time.monotonic() - t_llm) * 1000
             msg = resp.choices[0].message
             messages.append(msg.model_dump())
@@ -93,7 +104,8 @@ class AgentLoop:
                 elapsed = time.monotonic() - start
                 content_preview = (msg.content or "")[:80].replace("\n", " ")
                 print(f"  [{phase}] ✅ done in {elapsed:.1f}s | {llm_calls_total} LLM calls, {tool_calls_total} tool calls | response: {content_preview}...")
-                return RunResult(msg.content, llm_calls_total, tool_calls_total, elapsed)
+                return RunResult(msg.content, llm_calls_total, tool_calls_total, elapsed,
+                                 prompt_tokens_total, completion_tokens_total)
 
             turn_tools = len(msg.tool_calls)
             tool_calls_total += turn_tools
@@ -126,4 +138,5 @@ class AgentLoop:
 
         elapsed = time.monotonic() - start
         print(f"  [{phase}] ⚠️ MAX_TURNS ({max_turns}) reached after {elapsed:.1f}s, {tool_calls_total} tool calls")
-        return RunResult("MAX_TURNS_REACHED", llm_calls_total, tool_calls_total, elapsed)
+        return RunResult("MAX_TURNS_REACHED", llm_calls_total, tool_calls_total, elapsed,
+                         prompt_tokens_total, completion_tokens_total)
