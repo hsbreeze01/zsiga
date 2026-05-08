@@ -58,6 +58,8 @@ def compute_stats(changes: list[dict] = None) -> dict:
         total_turns = sum(p.get("turns_used", 0) for p in phase_records)
         total_seconds = sum(p.get("seconds_used", 0) for p in phase_records)
         total_fixes = sum(p.get("fix_attempts", 0) for p in phase_records)
+        total_llm_calls = sum(p.get("llm_calls", 0) for p in phase_records)
+        total_tool_calls = sum(p.get("tool_calls", 0) for p in phase_records)
 
         phase_stats[phase] = {
             "count": len(phase_records),
@@ -65,6 +67,8 @@ def compute_stats(changes: list[dict] = None) -> dict:
             "avg_turns": round(total_turns / len(phase_records), 1),
             "avg_seconds": round(total_seconds / len(phase_records), 1),
             "total_fixes": total_fixes,
+            "total_llm_calls": total_llm_calls,
+            "total_tool_calls": total_tool_calls,
         }
 
     verify_passes = sum(
@@ -89,6 +93,16 @@ def compute_stats(changes: list[dict] = None) -> dict:
     verify_total = sum(1 for c in changes for p in c.get("phases", []) if p["phase"] == "verify")
     verify_pass_rate = round(verify_pass_count / verify_total * 100, 1) if verify_total else 0
 
+    total_llm_calls = sum(
+        p.get("llm_calls", 0) for c in changes for p in c.get("phases", [])
+    )
+    total_tool_calls = sum(
+        p.get("tool_calls", 0) for c in changes for p in c.get("phases", [])
+    )
+    total_seconds_all = sum(
+        p.get("seconds_used", 0) for c in changes for p in c.get("phases", [])
+    )
+
     return {
         "total_changes": total,
         "successful_changes": len(successes),
@@ -100,6 +114,9 @@ def compute_stats(changes: list[dict] = None) -> dict:
         "first_pass_test_rate_pct": first_pass_rate,
         "verify_pass_rate_pct": verify_pass_rate,
         "phase_stats": phase_stats,
+        "total_llm_calls": total_llm_calls,
+        "total_tool_calls": total_tool_calls,
+        "total_runtime_seconds": round(total_seconds_all, 1),
         "recent_changes": [c["change_name"] for c in changes[-5:]],
         "last_updated": datetime.now().isoformat(),
     }
@@ -140,6 +157,9 @@ def _empty_stats(lessons_count: int = 0) -> dict:
         "first_pass_test_rate_pct": 0,
         "verify_pass_rate_pct": 0,
         "phase_stats": {},
+        "total_llm_calls": 0,
+        "total_tool_calls": 0,
+        "total_runtime_seconds": 0,
         "recent_changes": [],
         "last_updated": datetime.now().isoformat(),
     }

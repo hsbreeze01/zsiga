@@ -25,6 +25,8 @@ class PhaseRecord:
     turns_used: int = 0
     seconds_used: float = 0.0
     fix_attempts: int = 0
+    llm_calls: int = 0
+    tool_calls: int = 0
     detail: str = ""
 
 
@@ -53,6 +55,8 @@ class ChangeRecord:
                     "turns_used": p.turns_used,
                     "seconds_used": round(p.seconds_used, 1),
                     "fix_attempts": p.fix_attempts,
+                    "llm_calls": p.llm_calls,
+                    "tool_calls": p.tool_calls,
                     "detail": p.detail,
                 }
                 for p in self.phases

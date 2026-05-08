@@ -7,6 +7,19 @@ from pathlib import Path
 from zai import ZaiClient
 
 
+class RunResult:
+    __slots__ = ("content", "llm_calls", "tool_calls", "elapsed_seconds")
+
+    def __init__(self, content: str, llm_calls: int, tool_calls: int, elapsed_seconds: float):
+        self.content = content
+        self.llm_calls = llm_calls
+        self.tool_calls = tool_calls
+        self.elapsed_seconds = elapsed_seconds
+
+    def __str__(self):
+        return self.content
+
+
 class AgentLoop:
 
     def __init__(self, api_key: str, model: str = "glm-5.1",
@@ -42,7 +55,7 @@ class AgentLoop:
         self.tool_funcs[name] = func
 
     async def run(self, system_prompt: str, user_prompt: str,
-                  max_turns: int = None, timeout_seconds: int = None) -> str:
+                   max_turns: int = None, timeout_seconds: int = None) -> RunResult:
         max_turns = max_turns or self.max_turns
         if self.context:
             system_prompt = f"{self.context}\n\n---\n\n{system_prompt}"
@@ -62,7 +75,7 @@ class AgentLoop:
             elapsed = time.monotonic() - start
             if timeout_seconds and elapsed > timeout_seconds:
                 print(f"  [{phase}] ⏱️ TIMEOUT after {turn} turns, {elapsed:.1f}s, {llm_calls_total} LLM calls, {tool_calls_total} tool calls")
-                return "TIMEOUT"
+                return RunResult("TIMEOUT", llm_calls_total, tool_calls_total, elapsed)
 
             t_llm = time.monotonic()
             resp = self.client.chat.completions.create(
@@ -80,7 +93,7 @@ class AgentLoop:
                 elapsed = time.monotonic() - start
                 content_preview = (msg.content or "")[:80].replace("\n", " ")
                 print(f"  [{phase}] ✅ done in {elapsed:.1f}s | {llm_calls_total} LLM calls, {tool_calls_total} tool calls | response: {content_preview}...")
-                return msg.content
+                return RunResult(msg.content, llm_calls_total, tool_calls_total, elapsed)
 
             turn_tools = len(msg.tool_calls)
             tool_calls_total += turn_tools
@@ -113,4 +126,4 @@ class AgentLoop:
 
         elapsed = time.monotonic() - start
         print(f"  [{phase}] ⚠️ MAX_TURNS ({max_turns}) reached after {elapsed:.1f}s, {tool_calls_total} tool calls")
-        return "MAX_TURNS_REACHED"
+        return RunResult("MAX_TURNS_REACHED", llm_calls_total, tool_calls_total, elapsed)

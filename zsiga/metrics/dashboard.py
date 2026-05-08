@@ -22,6 +22,7 @@ def _render(stats: dict, l2: dict, l3: dict) -> str:
     l2_card = _milestone_card(l2, "#f59e0b")
     l3_card = _milestone_card(l3, "#8b5cf6")
     recent = _recent_list(stats.get("recent_changes", []))
+    usage_section = _usage_section(stats)
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -103,6 +104,8 @@ td {{ border-top: 1px solid #334155; }}
   {phase_rows}
 </div>
 
+{usage_section}
+
 <div class="section">
   <h2>Milestones</h2>
   {l2_card}
@@ -144,9 +147,11 @@ def _phase_table(phase_stats: dict) -> str:
   <td>{s.get('avg_turns', '—')}</td>
   <td>{s.get('avg_seconds', '—')}s</td>
   <td>{s.get('total_fixes', 0)}</td>
+  <td>{s.get('total_llm_calls', 0)}</td>
+  <td>{s.get('total_tool_calls', 0)}</td>
 </tr>"""
     return f"""<table>
-<thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th></tr></thead>
+<thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th></tr></thead>
 <tbody>{rows}</tbody></table>"""
 
 
@@ -172,3 +177,42 @@ def _recent_list(names: list[str]) -> str:
     if not names:
         return '<li class="meta">No changes yet</li>'
     return "\n".join(f"<li>{n}</li>" for n in names)
+
+
+def _fmt_seconds(s: float) -> str:
+    if s < 60:
+        return f"{s:.0f}s"
+    if s < 3600:
+        return f"{s/60:.1f}min"
+    h = s / 3600
+    return f"{h:.1f}h"
+
+
+def _usage_section(stats: dict) -> str:
+    llm = stats.get("total_llm_calls", 0)
+    tool = stats.get("total_tool_calls", 0)
+    runtime = stats.get("total_runtime_seconds", 0)
+    changes = stats.get("total_changes", 0)
+    avg_llm = round(llm / changes, 1) if changes else 0
+    avg_tool = round(tool / changes, 1) if changes else 0
+
+    return f"""<div class="section">
+  <h2>Resource Usage</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="label">Total LLM Calls</div>
+      <div class="value">{llm:,}</div>
+      <div class="meta">avg {avg_llm} per change</div>
+    </div>
+    <div class="card">
+      <div class="label">Total Tool Calls</div>
+      <div class="value">{tool:,}</div>
+      <div class="meta">avg {avg_tool} per change</div>
+    </div>
+    <div class="card">
+      <div class="label">Total Runtime</div>
+      <div class="value">{_fmt_seconds(runtime)}</div>
+      <div class="meta">{runtime:,.0f}s total</div>
+    </div>
+  </div>
+</div>"""
