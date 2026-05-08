@@ -26,6 +26,7 @@ def build_project_context(target_path: str, transport: Transport = None,
     sections.append(_scan_routes(target_path, transport, keywords))
     sections.append(_scan_services(target_path, transport, keywords))
     sections.append(_scan_models(target_path, transport, keywords))
+    sections.append(_scan_templates(target_path, transport, keywords))
 
     combined = "\n\n".join(s for s in sections if s)
     if len(combined) > MAX_CONTEXT_CHARS:
@@ -46,10 +47,10 @@ def _extract_keywords(text: str) -> list[str]:
 
 def _scan_tree(target_path: str, transport: Transport) -> str:
     r = transport.run_shell(
-        f"find '{target_path}' -type f -name '*.py' "
+        f"find '{target_path}' -type f \\( -name '*.py' -o -name '*.html' -o -name '*.js' -o -name '*.css' \\) "
         f"-not -path '*/venv/*' -not -path '*/__pycache__/*' "
         f"-not -path '*/.git/*' -not -path '*/node_modules/*' "
-        f"-not -path '*/migrations/*' "
+        f"-not -path '*/migrations/*' -not -path '*/static/*' "
         f"| sort | head -100",
         timeout=15,
     )
@@ -171,6 +172,33 @@ def _prioritize(files: list[str], keywords: list[str], top: int = 5) -> list[str
         scored.append((score, f))
     scored.sort(key=lambda x: -x[0])
     return [f for _, f in scored[:top]]
+
+
+def _scan_templates(target_path: str, transport: Transport,
+                    keywords: list[str] = None) -> str:
+    r = transport.run_shell(
+        f"find '{target_path}' -type f \\( -name '*.html' -o -name '*.js' \\) "
+        f"-not -path '*/venv/*' -not -path '*/__pycache__/*' -not -path '*/.git/*' "
+        f"-not -path '*/node_modules/*' -not -path '*/static/*' "
+        f"| sort | head -20",
+        timeout=10,
+    )
+    if r["exit_code"] != 0 or not r["stdout"].strip():
+        return ""
+    template_files = r["stdout"].strip().split("\n")
+    if keywords:
+        template_files = _prioritize(template_files, keywords, top=3)
+    else:
+        template_files = template_files[:3]
+    parts = ["## Frontend Templates"]
+    for tf in template_files:
+        rel = tf.replace(f"{target_path}/", "") if tf.startswith(target_path) else tf
+        content = read_file(tf, transport)
+        if content:
+            if len(content) > 4000:
+                content = content[:4000] + "\n... (truncated)"
+            parts.append(f"### {rel}\n```\n{content}\n```")
+    return "\n\n".join(parts)
 
 
 def prefetch_mechanical(target_path: str, test_cmd: str, lint_cmd: str,

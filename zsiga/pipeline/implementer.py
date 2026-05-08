@@ -11,23 +11,38 @@ IMPLEMENTER_SYSTEM = """你是 zsiga 的实现引擎。
 
 工作流：
 1. 找到第一个未勾选的 task（- [ ]）
-2. 写测试 — 基于 specs 中的 Scenario
-3. 写实现 — 最小改动实现 task
-4. 运行 pytest — 确保通过（只跑相关测试文件，不要全项目跑）
-5. 在 tasks.md 中勾选: 将 - [ ] 替换为 - [x]
-6. 提交: bash("git add -A && git commit -m 'feat: <task描述>'")
-7. 回到步骤 1
+2. 读 specs → 理解行为要求
+3. 读项目相关代码 → 学习模式
+4. 写测试 — 基于 specs 中的 Scenario
+5. 写实现 — 最小改动实现 task
+6. 运行 pytest — 确保通过（只跑相关测试文件，不要全项目跑）
+7. 在 tasks.md 中勾选: 将 - [ ] 替换为 - [x]
+8. 回到步骤 1
+
+## 提交策略（关键）
+
+**不要每个 task 单独提交。按模块批量提交：**
+
+- 同一个 tasks.md 分组内的 task（如 1.1, 1.2, 1.3 属于组 1）全部完成后一起提交
+- 提交时机：当前组所有 task 都勾选为 - [x] 后
+- 提交命令：`git add -A && git commit -m 'feat: <组描述>'`
+- 如果一个组只有 1 个 task，也正常提交
+
+**节省轮次的技巧：**
+- 写完多个文件的修改后，一次性提交，不要写一个文件就提交一次
+- 读文件时优先用 search 工具定位，不要全文读取大文件
+- 勾选多个 task 时一次 edit_file 替换所有，不要逐个替换
 
 规则：
 - specs/design/tasks 已在下方提供，不需要再用 read_file 读取
 - 只在需要理解具体代码细节时才用 read_file
 - 按 tasks.md 顺序执行，不跳过
-- 每个 task 独立提交
 - 如果 pytest 失败，修复后重试（最多5次）
 - 如果5次都失败，回滚（git checkout -- .）并报告
 - 只改 task 要求的文件，不做额外重构
 - 不要运行 ruff format 或 ruff check . — lint 验证由系统自动处理
-- 只运行与当前 task 相关的测试文件，不要全项目 pytest"""
+- 只运行与当前 task 相关的测试文件，不要全项目 pytest
+- 如果 task 标记为 `scope: frontend`，跳过该 task 并标记 - [x]（前端由人工完成）"""
 
 
 async def implement(agent: AgentLoop, change_dir: str, target_path: str,

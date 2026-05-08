@@ -20,13 +20,25 @@ description: 按照OpenSpec artifacts实现代码
 3. 读现有代码 → 学习模式
 4. 写测试
 5. 写实现
-6. pytest + ruff
-7. 勾选 task → git commit
-8. 下一个
+6. pytest（只跑相关测试文件）
+7. 勾选 task → - [x]
+8. 同组所有 task 完成后，一次性 git commit
+9. 下一个组
+
+## 提交策略
+- **按模块批量提交**：同组 task 全部完成后一起 commit
+- 不要每个 task 单独 commit（浪费轮次）
+- 提交命令：`git add -A && git commit -m 'feat: <组描述>'`
+
+## 节省轮次
+- 多个文件修改后一次提交
+- 用 search 定位代码，不要全文读取大文件
+- 勾选多个 task 时一次 edit_file 替换
 
 ## 禁止
 - 不要改 proposal.md、specs/、design.md
 - 不要删除已有测试
 - 不要引入项目没用过的新框架
-- 每个 task 最多改 3 个文件
+- 不要运行 ruff format — lint 由系统自动处理
 - 不要修改 openspec/ 目录以外的无关文件
+- 如果 task 标记为 `scope: frontend`，跳过并标记 - [x]

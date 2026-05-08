@@ -65,7 +65,7 @@ class PipelineConfig:
                  fix_attempts: int = 10, eval_fix_attempts: int = 3,
                  cycle_interval_hours: int = 8,
                  enrich_max_turns: int = 25, enrich_timeout: int = 600,
-                 impl_max_turns: int = 30, impl_timeout: int = 900,
+                 impl_max_turns: int = 50, impl_timeout: int = 1200,
                  verify_max_turns: int = 12, verify_timeout: int = 300,
                  fix_max_turns: int = 8):
         self.max_changes_per_cycle = max_changes_per_cycle
@@ -158,8 +158,8 @@ def load_config(path: str = None) -> ZsigaConfig:
         cycle_interval_hours=pipeline_raw.get("cycle_interval_hours", 8),
         enrich_max_turns=pipeline_raw.get("enrich_max_turns", 25),
         enrich_timeout=pipeline_raw.get("enrich_timeout", 600),
-        impl_max_turns=pipeline_raw.get("impl_max_turns", 30),
-        impl_timeout=pipeline_raw.get("impl_timeout", 900),
+        impl_max_turns=pipeline_raw.get("impl_max_turns", 50),
+        impl_timeout=pipeline_raw.get("impl_timeout", 1200),
         verify_max_turns=pipeline_raw.get("verify_max_turns", 12),
         verify_timeout=pipeline_raw.get("verify_timeout", 300),
         fix_max_turns=pipeline_raw.get("fix_max_turns", 8),
