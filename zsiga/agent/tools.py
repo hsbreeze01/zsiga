@@ -16,6 +16,8 @@ def _bash(transport: Transport, target_path, command, timeout=120):
 
 
 def _read_file(transport: Transport, target_path, path):
+    if path.startswith(target_path):
+        path = path[len(target_path):].lstrip("/")
     full = f"{target_path}/{path}"
     if isinstance(transport, LocalTransport):
         full_path = Path(full)
@@ -31,6 +33,9 @@ def _read_file(transport: Transport, target_path, path):
 
 
 def _write_file(transport: Transport, target_path, path, content):
+    # Handle LLM passing absolute paths — strip target_path prefix if present
+    if path.startswith(target_path):
+        path = path[len(target_path):].lstrip("/")
     full = f"{target_path}/{path}"
     if isinstance(transport, LocalTransport):
         full_path = Path(full)
@@ -45,6 +50,8 @@ def _write_file(transport: Transport, target_path, path, content):
 
 
 def _edit_file(transport: Transport, target_path, path, old_text, new_text):
+    if path.startswith(target_path):
+        path = path[len(target_path):].lstrip("/")
     full = f"{target_path}/{path}"
     if isinstance(transport, LocalTransport):
         full_path = Path(full)
