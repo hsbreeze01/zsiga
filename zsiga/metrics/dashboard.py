@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 import shutil
 from .collector import load_all_changes, compute_stats, check_milestone
-from .types import MILESTONE_L2, MILESTONE_L3
+from .types import MILESTONE_L2, MILESTONE_L3, MILESTONE_L4, MILESTONE_L5, ALL_MILESTONES
 from ..memory.journal import load_journal
 
 _DASHBOARD_PATH = Path(__file__).resolve().parent.parent.parent / "site" / "dashboard.html"
@@ -22,10 +22,11 @@ def _detect_state(stats: dict) -> str:
 
 def generate_dashboard(output_path: str = None) -> str:
     stats = compute_stats()
-    l2 = check_milestone(stats, MILESTONE_L2)
-    l3 = check_milestone(stats, MILESTONE_L3)
+    milestones = []
+    for m_def in ALL_MILESTONES:
+        milestones.append(check_milestone(stats, m_def))
     state = _detect_state(stats)
-    html = _render(stats, l2, l3, state)
+    html = _render(stats, milestones, state)
 
     out = Path(output_path) if output_path else _DASHBOARD_PATH
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -33,16 +34,19 @@ def generate_dashboard(output_path: str = None) -> str:
     return str(out)
 
 
-def _render(stats: dict, l2: dict, l3: dict, state: str = "resting") -> str:
+def _render(stats: dict, milestones: list[dict], state: str = "resting") -> str:
     phase_rows = _phase_table(stats.get("phase_stats", {}))
-    l2_card = _milestone_card(l2, "#f59e0b")
-    l3_card = _milestone_card(l3, "#8b5cf6")
+    milestone_cards = ""
+    for m in milestones:
+        milestone_cards += _milestone_card(m) + "\n"
     recent = _recent_list(stats.get("recent_changes", []))
     usage_section = _usage_section(stats)
     journal = _journal_section()
     mascot = _mascot_img(state)
 
     state_label = "⚡ Working" if state == "working" else "💤 Resting"
+
+    current_level = _current_level(milestones)
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -119,7 +123,7 @@ td {{ border-top: 1px solid #334155; }}
     {mascot}
   </div>
   <div class="hero-info">
-    <h1>zsiga <span>⚡ Level 2 · Code Architect · 超电磁开发智能体</span></h1>
+    <h1>zsiga <span>{current_level}</span></h1>
     <span class="state-badge {state}">{state_label}</span>
   </div>
 </div>
@@ -171,9 +175,8 @@ td {{ border-top: 1px solid #334155; }}
 {usage_section}
 
 <div class="section">
-    <h2>🪙 Milestones</h2>
-  {l2_card}
-  {l3_card}
+    <h2>🪙 Evolution Roadmap</h2>
+  {milestone_cards}
 </div>
 
 {journal}
@@ -565,22 +568,58 @@ def _phase_table(phase_stats: dict) -> str:
 <tbody>{rows}</tbody></table>"""
 
 
-def _milestone_card(m: dict, color: str) -> str:
-    status = "⚡ ACHIEVED" if m["all_met"] else "🚧 Leveling Up"
-    criteria = ""
+def _milestone_card(m: dict) -> str:
+    color = m.get("color", "#8b5cf6")
+    icon = m.get("icon", "⚡")
+    status = f"{icon} ACHIEVED" if m["all_met"] else "🚧 Leveling Up"
+    desc = m.get("description", "")
+    desc_html = f'<div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">{desc}</div>' if desc else ''
+
+    criteria_html = ""
     for c in m["criteria"]:
-        icon = "✓" if c["met"] else "○"
+        c_icon = "✓" if c["met"] else "○"
         fill_color = color if c["met"] else "#475569"
-        criteria += f"""<div class="criterion">
-  <span class="icon">{icon}</span>
+        criteria_html += f"""<div class="criterion">
+  <span class="icon">{c_icon}</span>
   <span>{c['description']}</span>
   <div class="progress"><div class="fill" style="width:{c['progress_pct']}%;background:{fill_color}"></div></div>
   <span style="color:#94a3b8;font-size:0.8rem">{c['current']}/{c['threshold']}</span>
 </div>"""
-    return f"""<div class="milestone" style="border-color:{color}">
-  <h3>{m['label']} — {status}</h3>
-  {criteria}
+
+    tasks_html = ""
+    tasks = m.get("tasks", [])
+    if tasks:
+        tasks_completed = m.get("tasks_completed", 0)
+        tasks_total = m.get("tasks_total", len(tasks))
+        tasks_html = f'<div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks ({tasks_completed}/{tasks_total})</div>'
+        for t in tasks:
+            t_icon = "✅" if t["done"] else "⬜"
+            t_style = "color:#94a3b8;" if t["done"] else "color:#64748b;"
+            bar_color = color if t["done"] else "#334155"
+            tasks_html += f"""<div class="criterion">
+  <span class="icon">{t_icon}</span>
+  <span style="{t_style}" title="{t.get('acceptance', '')}">{t['title']}</span>
+  <div class="progress"><div class="fill" style="width:{t['progress_pct']}%;background:{bar_color}"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">{t['found']}/{t['total']}</span>
 </div>"""
+
+    return f"""<div class="milestone" style="border-color:{color}">
+  <h3 style="color:{color}">{icon} {m['label']} — {status}</h3>
+  {desc_html}
+  {criteria_html}
+  {tasks_html}
+</div>"""
+
+
+def _current_level(milestones: list[dict]) -> str:
+    achieved = []
+    for m in milestones:
+        if m["all_met"]:
+            achieved.append(m)
+    if not achieved:
+        return "⚡ Pre-L2 · 超电磁开发智能体"
+    top = achieved[-1]
+    return f"{top['icon']} {top['label']} · 超电磁开发智能体"
 
 
 def _recent_list(names: list[str]) -> str:

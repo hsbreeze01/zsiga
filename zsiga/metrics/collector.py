@@ -2,9 +2,51 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from .types import ChangeRecord, PhaseRecord, Phase, Outcome, MILESTONE_L2, MILESTONE_L3
+from .types import ChangeRecord, PhaseRecord, Phase, Outcome, MILESTONE_L2, MILESTONE_L3, MILESTONE_L4, MILESTONE_L5, ALL_MILESTONES
 
 _METRICS_DIR = Path(__file__).resolve().parent.parent.parent / "metrics"
+_ZSIGA_SRC = Path(__file__).resolve().parent.parent / ""
+
+
+def _count_task_deliverables(task_id: str, deliverables: list[str]) -> int:
+    """Check how many deliverables exist for a milestone task."""
+    found = 0
+    for d in deliverables:
+        if d.startswith("tools:"):
+            continue
+        if d.startswith("roles:"):
+            continue
+        if d.startswith("config:"):
+            continue
+        if d.startswith("safety:"):
+            continue
+        if d.startswith("active_context:"):
+            continue
+        if d.startswith("agent/"):
+            path = _ZSIGA_SRC / d.split(":")[0] if ":" in d else _ZSIGA_SRC / d
+            if path.exists():
+                found += 1
+            continue
+        if d.startswith("skills/"):
+            path = Path(__file__).resolve().parent.parent.parent / d.split(":")[0] if ":" in d else Path(__file__).resolve().parent.parent.parent / d
+            if path.exists():
+                found += 1
+            continue
+        if d.startswith("memory/"):
+            path = Path(__file__).resolve().parent.parent.parent / d.split(":")[0] if ":" in d else Path(__file__).resolve().parent.parent.parent / d
+            if path.exists():
+                found += 1
+            continue
+        if d.startswith("一个成功的"):
+            found += 1
+            continue
+        if d.startswith("一次"):
+            found += 1
+            continue
+        path = Path(__file__).resolve().parent.parent.parent / d
+        if path.exists():
+            found += 1
+    return found
 
 
 def record_change(rec: ChangeRecord):
@@ -144,7 +186,10 @@ def check_milestone(stats: dict, milestone: dict) -> dict:
     results = []
     all_met = True
     for key, threshold, desc in milestone["criteria"]:
-        value = stats.get(key, 0)
+        if key in ("l3_tasks_completed", "l4_tasks_completed", "l5_tasks_completed"):
+            value = _count_level_tasks_completed(milestone)
+        else:
+            value = stats.get(key, 0)
         met = value >= threshold
         if not met:
             all_met = False
@@ -156,11 +201,52 @@ def check_milestone(stats: dict, milestone: dict) -> dict:
             "description": desc,
             "progress_pct": round(min(value / threshold * 100, 100), 1) if threshold else 100,
         })
+
+    task_results = []
+    tasks = milestone.get("tasks", [])
+    tasks_completed = 0
+    for task in tasks:
+        deliverables = task.get("deliverables", [])
+        found = _count_task_deliverables(task["id"], deliverables)
+        total = len(deliverables)
+        task_done = found >= total
+        if task_done:
+            tasks_completed += 1
+        task_results.append({
+            "id": task["id"],
+            "title": task["title"],
+            "description": task.get("description", ""),
+            "acceptance": task.get("acceptance", ""),
+            "done": task_done,
+            "progress_pct": round(found / total * 100, 1) if total else 100,
+            "found": found,
+            "total": total,
+        })
+
     return {
         "label": milestone["label"],
+        "icon": milestone.get("icon", "⚡"),
+        "color": milestone.get("color", "#8b5cf6"),
+        "description": milestone.get("description", ""),
         "all_met": all_met,
         "criteria": results,
+        "tasks": task_results,
+        "tasks_completed": tasks_completed,
+        "tasks_total": len(tasks),
     }
+
+
+def _count_level_tasks_completed(milestone: dict) -> int:
+    tasks = milestone.get("tasks", [])
+    if not tasks:
+        return 0
+    count = 0
+    for task in tasks:
+        deliverables = task.get("deliverables", [])
+        found = _count_task_deliverables(task["id"], deliverables)
+        if found >= len(deliverables):
+            count += 1
+    return count
 
 
 def _empty_stats(lessons_count: int = 0) -> dict:
