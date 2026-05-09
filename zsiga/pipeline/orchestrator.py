@@ -28,6 +28,9 @@ class ZsigaOrchestrator:
             config.llm.model,
             base_url=config.llm.base_url,
             proxy=config.llm.proxy,
+            compaction_enabled=config.pipeline.compaction.enabled,
+            compaction_threshold=config.pipeline.compaction.threshold_chars,
+            compaction_keep_recent=config.pipeline.compaction.keep_recent,
         )
         self._transports: dict[str, Transport] = {}
         self._load_context()

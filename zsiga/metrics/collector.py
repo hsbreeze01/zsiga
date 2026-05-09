@@ -110,6 +110,12 @@ def compute_stats(changes: list[dict] = None) -> dict:
     total_completion_tokens = sum(
         p.get("completion_tokens", 0) for c in changes for p in c.get("phases", [])
     )
+    total_compaction_count = sum(
+        p.get("compaction_count", 0) for c in changes for p in c.get("phases", [])
+    )
+    total_sub_agent_count = sum(
+        p.get("sub_agent_count", 0) for c in changes for p in c.get("phases", [])
+    )
 
     return {
         "total_changes": total,
@@ -127,6 +133,8 @@ def compute_stats(changes: list[dict] = None) -> dict:
         "total_runtime_seconds": round(total_seconds_all, 1),
         "total_prompt_tokens": total_prompt_tokens,
         "total_completion_tokens": total_completion_tokens,
+        "total_compaction_count": total_compaction_count,
+        "total_sub_agent_count": total_sub_agent_count,
         "recent_changes": [c["change_name"] for c in changes[-5:]],
         "last_updated": datetime.now().isoformat(),
     }
@@ -172,6 +180,8 @@ def _empty_stats(lessons_count: int = 0) -> dict:
         "total_runtime_seconds": 0,
         "total_prompt_tokens": 0,
         "total_completion_tokens": 0,
+        "total_compaction_count": 0,
+        "total_sub_agent_count": 0,
         "recent_changes": [],
         "last_updated": datetime.now().isoformat(),
     }

@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 
 from ..transport import Transport, LocalTransport
+from ..agent.ast_tools import ast_search, ast_replace
 
 
 def _bash(transport: Transport, target_path, command, timeout=120):
@@ -225,4 +226,35 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             "required": [],
         },
         func=lambda path="": _list_files(transport, target_path, path),
+    )
+
+    agent.register_tool(
+        name="ast_search",
+        description="AST 模式搜索：用 AST pattern 在源码中查找匹配节点，比正则更精确",
+        parameters={
+            "type": "object",
+            "properties": {
+                "pattern": {"type": "string", "description": "AST pattern，如 'def $NAME($ARGS)': $VAR 匹配单个节点，$$$ 匹配多个"},
+                "path": {"type": "string", "description": "要搜索的文件路径"},
+                "lang": {"type": "string", "description": "语言（python/javascript/rust/go 等），不填则自动检测"},
+            },
+            "required": ["pattern", "path"],
+        },
+        func=lambda pattern, path, lang=None: ast_search(transport, target_path, pattern, path, lang),
+    )
+
+    agent.register_tool(
+        name="ast_replace",
+        description="AST 模式替换：用 AST pattern 匹配并替换代码，保证语法正确性",
+        parameters={
+            "type": "object",
+            "properties": {
+                "pattern": {"type": "string", "description": "AST pattern，如 'return $X'"},
+                "replacement": {"type": "string", "description": "替换文本，可用 $VAR 引用捕获的变量"},
+                "path": {"type": "string", "description": "要修改的文件路径"},
+                "lang": {"type": "string", "description": "语言，不填则自动检测"},
+            },
+            "required": ["pattern", "replacement", "path"],
+        },
+        func=lambda pattern, replacement, path, lang=None: ast_replace(transport, target_path, pattern, replacement, path, lang),
     )

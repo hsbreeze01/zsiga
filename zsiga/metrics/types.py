@@ -30,6 +30,8 @@ class PhaseRecord:
     detail: str = ""
     prompt_tokens: int = 0
     completion_tokens: int = 0
+    compaction_count: int = 0
+    sub_agent_count: int = 0
 
 
 @dataclass
@@ -62,6 +64,8 @@ class ChangeRecord:
                     "detail": p.detail,
                     "prompt_tokens": p.prompt_tokens,
                     "completion_tokens": p.completion_tokens,
+                    "compaction_count": p.compaction_count,
+                    "sub_agent_count": p.sub_agent_count,
                 }
                 for p in self.phases
             ],

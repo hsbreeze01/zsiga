@@ -149,6 +149,16 @@ td {{ border-top: 1px solid #334155; }}
     <div class="label">Verify Pass Rate</div>
     <div class="value {_rate_class(stats['verify_pass_rate_pct'])}">{stats['verify_pass_rate_pct']}%</div>
   </div>
+  <div class="card">
+    <div class="label">Compactions</div>
+    <div class="value">{stats.get('total_compaction_count', 0)}</div>
+    <div class="meta">context compressed</div>
+  </div>
+  <div class="card">
+    <div class="label">Sub-Agents</div>
+    <div class="value">{stats.get('total_sub_agent_count', 0)}</div>
+    <div class="meta">parallel dispatches</div>
+  </div>
 </div>
 
 <div class="section">

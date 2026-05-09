@@ -60,6 +60,15 @@ class LLMConfig:
         self.temperature = temperature
 
 
+class CompactionConfig:
+    def __init__(self, enabled: bool = True, threshold_chars: int = 60000,
+                 keep_recent: int = 3, use_llm_summary: bool = True):
+        self.enabled = enabled
+        self.threshold_chars = threshold_chars
+        self.keep_recent = keep_recent
+        self.use_llm_summary = use_llm_summary
+
+
 class PipelineConfig:
     def __init__(self, max_changes_per_cycle: int = 3, impl_timeout_minutes: int = 20,
                  fix_attempts: int = 10, eval_fix_attempts: int = 3,
@@ -67,7 +76,8 @@ class PipelineConfig:
                  enrich_max_turns: int = 25, enrich_timeout: int = 600,
                  impl_max_turns: int = 50, impl_timeout: int = 1200,
                  verify_max_turns: int = 12, verify_timeout: int = 300,
-                 fix_max_turns: int = 8):
+                 fix_max_turns: int = 8,
+                 compaction: CompactionConfig = None):
         self.max_changes_per_cycle = max_changes_per_cycle
         self.impl_timeout_minutes = impl_timeout_minutes
         self.fix_attempts = fix_attempts
@@ -80,6 +90,7 @@ class PipelineConfig:
         self.verify_max_turns = verify_max_turns
         self.verify_timeout = verify_timeout
         self.fix_max_turns = fix_max_turns
+        self.compaction = compaction or CompactionConfig()
 
 
 class IntakeConfig:
@@ -150,6 +161,13 @@ def load_config(path: str = None) -> ZsigaConfig:
         )
 
     pipeline_raw = raw.get("pipeline", {})
+    compaction_raw = pipeline_raw.get("compaction", {})
+    compaction = CompactionConfig(
+        enabled=compaction_raw.get("enabled", True),
+        threshold_chars=compaction_raw.get("threshold_chars", 60000),
+        keep_recent=compaction_raw.get("keep_recent", 3),
+        use_llm_summary=compaction_raw.get("use_llm_summary", True),
+    )
     pipeline = PipelineConfig(
         max_changes_per_cycle=pipeline_raw.get("max_changes_per_cycle", 3),
         impl_timeout_minutes=pipeline_raw.get("impl_timeout_minutes", 20),
@@ -163,6 +181,7 @@ def load_config(path: str = None) -> ZsigaConfig:
         verify_max_turns=pipeline_raw.get("verify_max_turns", 12),
         verify_timeout=pipeline_raw.get("verify_timeout", 300),
         fix_max_turns=pipeline_raw.get("fix_max_turns", 8),
+        compaction=compaction,
     )
 
     intake_raw = raw.get("intake", {})

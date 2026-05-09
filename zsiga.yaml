@@ -71,6 +71,11 @@ pipeline:
   fix_attempts: 10
   eval_fix_attempts: 3
   cycle_interval_hours: 8
+  compaction:
+    enabled: true
+    threshold_chars: 60000
+    keep_recent: 3
+    use_llm_summary: true
 
 safety:
   require_approval: false

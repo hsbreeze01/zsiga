@@ -5,6 +5,7 @@ import time
 import subprocess
 from pathlib import Path
 from zai import ZaiClient
+from zsiga.agent.compaction import compact_messages, estimate_chars
 
 
 class RunResult:
@@ -28,7 +29,10 @@ class RunResult:
 class AgentLoop:
 
     def __init__(self, api_key: str, model: str = "glm-5.1",
-                 base_url: str = None, proxy: str = None):
+                 base_url: str = None, proxy: str = None,
+                 compaction_enabled: bool = True,
+                 compaction_threshold: int = 60000,
+                 compaction_keep_recent: int = 3):
         kwargs = {"api_key": api_key}
         if base_url:
             kwargs["base_url"] = base_url
@@ -44,6 +48,9 @@ class AgentLoop:
         self.max_turns = 40
         self.context = ""
         self._phase_label = ""
+        self.compaction_enabled = compaction_enabled
+        self.compaction_threshold = compaction_threshold
+        self.compaction_keep_recent = compaction_keep_recent
 
     def set_phase(self, label: str):
         self._phase_label = label
@@ -86,6 +93,19 @@ class AgentLoop:
                                  prompt_tokens_total, completion_tokens_total)
 
             t_llm = time.monotonic()
+
+            if self.compaction_enabled and turn > 0 and turn % 3 == 0:
+                messages, compacted = compact_messages(
+                    messages,
+                    threshold=self.compaction_threshold,
+                    keep_recent=self.compaction_keep_recent,
+                    client=self.client,
+                    model=self.model,
+                )
+                if compacted:
+                    new_chars = estimate_chars(messages)
+                    print(f"  [{phase}] 🗜️ compacted → {len(messages)} msgs, {new_chars} chars")
+
             resp = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,

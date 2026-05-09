@@ -35,6 +35,18 @@ description: 按照OpenSpec artifacts实现代码
 - 用 search 定位代码，不要全文读取大文件
 - 勾选多个 task 时一次 edit_file 替换
 
+## AST 工具（优先于正则搜索）
+当你需要查找或替换代码模式时，**优先使用 AST 工具**：
+- `ast_search(pattern, path)` — 用 AST pattern 精确搜索，如 `ast_search("def $NAME($ARGS)", "src/api.py")`
+- `ast_replace(pattern, replacement, path)` — AST 级精确替换，保证语法正确
+- 适用场景：查找所有函数定义、类方法、import 语句、return 语句等
+- Pattern 语法：`$VAR` 匹配单个节点，`$$$` 匹配多个节点
+- 示例：
+  - 查找所有函数：`ast_search("def $NAME($$$)", "app.py")`
+  - 替换返回值：`ast_replace("return $X", "return $X  # tracked", "app.py")`
+  - 查找方法调用：`ast_search("$OBJ.$METHOD($$$)", "service.py")`
+- 对于纯文本搜索（非代码结构），仍用 `search` 工具
+
 ## 禁止
 - 不要改 proposal.md、specs/、design.md
 - 不要删除已有测试
