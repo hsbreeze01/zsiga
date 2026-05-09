@@ -123,15 +123,15 @@ class ZsigaOrchestrator:
                         transport=transport,
                         project_context=project_context,
                         max_turns=self.config.pipeline.enrich_max_turns,
-                        timeout_seconds=self.config.pipeline.enrich_timeout)
-             enrich_calls = _extract_calls(enrich_result)
-             enrich_tokens = _extract_tokens(enrich_result)
-             rec.phases.append(PhaseRecord(
-                 phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
-                 seconds_used=time.monotonic() - t0,
-                 llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
-                 prompt_tokens=enrich_tokens[0], completion_tokens=enrich_tokens[1],
-             ))
+                         timeout_seconds=self.config.pipeline.enrich_timeout)
+            enrich_calls = _extract_calls(enrich_result)
+            enrich_tokens = _extract_tokens(enrich_result)
+            rec.phases.append(PhaseRecord(
+                phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
+                seconds_used=time.monotonic() - t0,
+                llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
+                prompt_tokens=enrich_tokens[0], completion_tokens=enrich_tokens[1],
+            ))
             print(f"  Phase 1 done in {time.monotonic() - t0:.1f}s")
 
         # Approval gate
@@ -155,10 +155,10 @@ class ZsigaOrchestrator:
                        transport=transport,
                        project_context=project_context,
                        max_turns=self.config.pipeline.impl_max_turns,
-                       timeout_seconds=self.config.pipeline.impl_timeout)
+                        timeout_seconds=self.config.pipeline.impl_timeout)
         impl_seconds = time.monotonic() - t0
-         impl_calls = _extract_calls(impl_result)
-         impl_tokens = _extract_tokens(impl_result)
+        impl_calls = _extract_calls(impl_result)
+        impl_tokens = _extract_tokens(impl_result)
         print(f"  Phase 2 done in {impl_seconds:.1f}s")
 
         # Mechanical verification (only check changed files)
