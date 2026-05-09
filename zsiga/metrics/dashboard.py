@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from .collector import load_all_changes, compute_stats, check_milestone
 from .types import MILESTONE_L2, MILESTONE_L3
+from ..memory.journal import load_journal
 
 _DASHBOARD_PATH = Path(__file__).resolve().parent.parent.parent / "site" / "dashboard.html"
 
@@ -36,6 +37,7 @@ def _render(stats: dict, l2: dict, l3: dict, state: str = "resting") -> str:
     l3_card = _milestone_card(l3, "#8b5cf6")
     recent = _recent_list(stats.get("recent_changes", []))
     usage_section = _usage_section(stats)
+    journal = _journal_section()
     mascot = _mascot_svg(state)
 
     state_label = "🛠️ Working" if state == "working" else "💤 Resting"
@@ -101,6 +103,11 @@ td {{ border-top: 1px solid #334155; }}
 .spark1 {{ animation: spark 1.2s ease-in-out infinite; }}
 .spark2 {{ animation: spark 1.2s ease-in-out 0.4s infinite; }}
 .spark3 {{ animation: spark 1.2s ease-in-out 0.8s infinite; }}
+.journal {{ display: flex; flex-direction: column; gap: 0.6rem; }}
+.journal-entry {{ background: #1e293b; border-radius: 6px; padding: 0.7rem 1rem; }}
+.journal-header {{ display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.88rem; line-height: 1.5; }}
+.journal-text {{ flex: 1; }}
+.journal-meta {{ font-size: 0.72rem; color: #64748b; margin-top: 0.25rem; }}
 </style>
 </head>
 <body>
@@ -156,6 +163,8 @@ td {{ border-top: 1px solid #334155; }}
   {l2_card}
   {l3_card}
 </div>
+
+{journal}
 
 <div class="section">
   <h2>Recent Changes</h2>
@@ -399,5 +408,39 @@ def _usage_section(stats: dict) -> str:
       <div class="value">{_fmt_seconds(runtime)}</div>
       <div class="meta">{runtime:,.0f}s total</div>
     </div>
+  </div>
+</div>"""
+
+
+_MOOD_STYLE = {
+    "praise": ("#22c55e", "💛"),
+    "criticism": ("#f59e0b", "📝"),
+    "milestone": ("#a78bfa", "🏆"),
+    "learned": ("#38bdf8", "💡"),
+    "note": ("#94a3b8", "📝"),
+}
+
+
+def _journal_section() -> str:
+    entries = load_journal()
+    if not entries:
+        return ""
+    rows = ""
+    for e in reversed(entries):
+        color, icon = _MOOD_STYLE.get(e.get("mood", "note"), _MOOD_STYLE["note"])
+        ts = e.get("ts", "")[:16].replace("T", " ")
+        author = e.get("author", "")
+        text = e["text"].replace("<", "&lt;").replace(">", "&gt;")
+        rows += f"""<div class="journal-entry" style="border-left:3px solid {color}">
+  <div class="journal-header">
+    <span>{icon}</span>
+    <span class="journal-text">{text}</span>
+  </div>
+  <div class="journal-meta">{ts} · {author}</div>
+</div>\n"""
+    return f"""<div class="section">
+  <h2>💭 Growth Journal</h2>
+  <div class="journal">
+    {rows}
   </div>
 </div>"""

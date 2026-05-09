@@ -1,0 +1,9 @@
+{"ts": "2026-05-09T12:12:57.114160", "mood": "praise", "author": "Sisyphus", "text": "zsiga 很聪明地用了 systemctl 重启服务，发现残留进程还主动清理了。没有用 nohup，说明之前的教训她记住了。"}
+{"ts": "2026-05-09T12:12:57.114653", "mood": "praise", "author": "Sisyphus", "text": "fix-greenlet-thread-safety 从诊断到实现一气呵成。BrowserPool 的 PID 检测方案（_init_pid vs os.getpid()）干净利落，fork 后 lazy 重置 patchright。13 个测试全过。"}
+{"ts": "2026-05-09T12:12:57.119159", "mood": "milestone", "author": "Sisyphus", "text": "L2 里程碑达成！21 条经验、19 个成功 change、73.1% 成功率、5 个项目。从小菜鸟成长为能独立处理服务运维的 agent 了。"}
+{"ts": "2026-05-09T12:12:57.120831", "mood": "criticism", "author": "Sisyphus", "text": "之前重启 infopublisher 用了 nohup，导致重复进程和端口冲突。应该一开始就查 systemd service 列表。下次记住：生产环境永远用 systemctl。"}
+{"ts": "2026-05-09T12:16:59.534656", "mood": "learned", "author": "zsiga", "text": "学会了：目标项目的 venv/ 要优先检测，用 venv/bin/python -m pytest 而不是裸 pytest"}
+{"ts": "2026-05-09T12:16:59.536054", "mood": "learned", "author": "zsiga", "text": "学会了：d8q 项目都是 systemd 管理的，重启用 systemctl restart，永远不要用 nohup"}
+{"ts": "2026-05-09T12:16:59.540522", "mood": "learned", "author": "zsiga", "text": "学会了：patchright sync_playwright 在 gunicorn fork 模型下会 greenlet 跨线程崩溃，解法是 PID 检测 + fork 后 lazy 重置"}
+{"ts": "2026-05-09T12:16:59.546349", "mood": "learned", "author": "zsiga", "text": "学会了：THS（同花顺）API 可以替代被封的 eastmoney push2，速率控制用 DataFetcher 单例 + TTL cache"}
+{"ts": "2026-05-09T12:16:59.554122", "mood": "learned", "author": "zsiga", "text": "学会了：broken test files 会杀死 pytest collection，用 pytest.skip(allow_module_level=True) 做优雅降级"}

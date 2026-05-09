@@ -50,6 +50,16 @@ targets:
       user: root
       key_path: ~/.ssh/id_rsa
 
+  infopublisher:
+    path: /home/ecs-assist-user/d8q-intelligentengine-infopublisher
+    test_cmd: "venv/bin/python -m pytest -x --tb=short"
+    lint_cmd: "venv/bin/python -m ruff check ."
+    transport: ssh
+    ssh:
+      host: 47.99.57.152
+      user: root
+      key_path: ~/.ssh/id_rsa
+
 intake:
   mode: dir_scan
   dir_scan:
