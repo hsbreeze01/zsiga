@@ -1,10 +1,12 @@
 from datetime import datetime
 from pathlib import Path
+import shutil
 from .collector import load_all_changes, compute_stats, check_milestone
 from .types import MILESTONE_L2, MILESTONE_L3
 from ..memory.journal import load_journal
 
 _DASHBOARD_PATH = Path(__file__).resolve().parent.parent.parent / "site" / "dashboard.html"
+_MASCOT_SRC = Path(__file__).resolve().parent.parent.parent / "site" / "mascot.png"
 
 
 def _detect_state(stats: dict) -> str:
@@ -38,7 +40,7 @@ def _render(stats: dict, l2: dict, l3: dict, state: str = "resting") -> str:
     recent = _recent_list(stats.get("recent_changes", []))
     usage_section = _usage_section(stats)
     journal = _journal_section()
-    mascot = _mascot_svg(state)
+    mascot = _mascot_img(state)
 
     state_label = "⚡ Working" if state == "working" else "💤 Resting"
 
@@ -186,6 +188,17 @@ td {{ border-top: 1px solid #334155; }}
 <div class="meta" style="margin-top:2rem">Updated: {stats['last_updated']}</div>
 </body>
 </html>"""
+
+
+def _mascot_img(state: str = "resting") -> str:
+    if _MASCOT_SRC.exists():
+        cls = "mascot-working" if state == "working" else "mascot-resting"
+        badge = "⚡ Working" if state == "working" else "💤 Resting"
+        return f"""<div style="position:relative;display:inline-block;">
+<img src="mascot.png" alt="zsiga" class="{cls}" style="width:180px;height:auto;border-radius:8px;box-shadow:0 4px 24px #7c3aed40;" />
+<div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fbbf24;padding:2px 10px;border-radius:999px;font-size:0.7rem;font-weight:700;white-space:nowrap;">{badge}</div>
+</div>"""
+    return _mascot_svg(state)
 
 
 def _mascot_svg(state: str = "resting") -> str:
