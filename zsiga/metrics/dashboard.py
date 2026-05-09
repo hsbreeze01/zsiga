@@ -40,7 +40,7 @@ def _render(stats: dict, l2: dict, l3: dict, state: str = "resting") -> str:
     journal = _journal_section()
     mascot = _mascot_svg(state)
 
-    state_label = "🛠️ Working" if state == "working" else "💤 Resting"
+    state_label = "⚡ Working" if state == "working" else "💤 Resting"
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -117,59 +117,59 @@ td {{ border-top: 1px solid #334155; }}
     {mascot}
   </div>
   <div class="hero-info">
-    <h1>zsiga <span>autonomous development agent</span></h1>
+    <h1>zsiga <span>⚡ Level 2 · Code Architect · 超电磁开发智能体</span></h1>
     <span class="state-badge {state}">{state_label}</span>
   </div>
 </div>
 
 <div class="grid">
   <div class="card">
-    <div class="label">Total Changes</div>
+    <div class="label">🪙 Total Changes</div>
     <div class="value">{stats['total_changes']}</div>
   </div>
   <div class="card">
-    <div class="label">Success Rate</div>
+    <div class="label">🎯 Hit Rate</div>
     <div class="value {_rate_class(stats['success_rate_pct'])}">{stats['success_rate_pct']}%</div>
-    <div class="meta">{stats['successful_changes']} ok / {stats['failed_changes']} fail</div>
+    <div class="meta">{stats['successful_changes']} hit / {stats['failed_changes']} miss</div>
   </div>
   <div class="card">
-    <div class="label">Projects</div>
+    <div class="label">📐 Targets</div>
     <div class="value">{stats['distinct_projects']}</div>
     <div class="meta">{', '.join(stats['projects']) if stats['projects'] else '—'}</div>
   </div>
   <div class="card">
-    <div class="label">Lessons</div>
+    <div class="label">📝 Lessons</div>
     <div class="value">{stats['lessons_learned']}</div>
   </div>
   <div class="card">
-    <div class="label">First-Pass Test Rate</div>
+    <div class="label">⚡ First-Pass Rate</div>
     <div class="value {_rate_class(stats['first_pass_test_rate_pct'])}">{stats['first_pass_test_rate_pct']}%</div>
   </div>
   <div class="card">
-    <div class="label">Verify Pass Rate</div>
+    <div class="label">✅ Verify Rate</div>
     <div class="value {_rate_class(stats['verify_pass_rate_pct'])}">{stats['verify_pass_rate_pct']}%</div>
   </div>
   <div class="card">
-    <div class="label">Compactions</div>
+    <div class="label">🗜️ Compactions</div>
     <div class="value">{stats.get('total_compaction_count', 0)}</div>
-    <div class="meta">context compressed</div>
+    <div class="meta">electromagnetic compress</div>
   </div>
   <div class="card">
-    <div class="label">Sub-Agents</div>
+    <div class="label">🐾 Sub-Agents</div>
     <div class="value">{stats.get('total_sub_agent_count', 0)}</div>
-    <div class="meta">parallel dispatches</div>
+    <div class="meta">network dispatched</div>
   </div>
 </div>
 
 <div class="section">
-  <h2>Phase Performance</h2>
+    <h2>⚡ Phase Performance</h2>
   {phase_rows}
 </div>
 
 {usage_section}
 
 <div class="section">
-  <h2>Milestones</h2>
+    <h2>🪙 Milestones</h2>
   {l2_card}
   {l3_card}
 </div>
@@ -191,116 +191,169 @@ td {{ border-top: 1px solid #334155; }}
 def _mascot_svg(state: str = "resting") -> str:
     cls = "mascot-working" if state == "working" else "mascot-resting"
     if state == "working":
-        return f"""<svg width="140" height="170" viewBox="0 0 140 170" class="{cls}" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="160" height="180" viewBox="0 0 160 180" class="{cls}" xmlns="http://www.w3.org/2000/svg">
 <defs>
-  <radialGradient id="wBody" cx="40%" cy="35%" r="60%">
-    <stop offset="0%" stop-color="#c4b5fd"/>
+  <radialGradient id="hair" cx="45%" cy="30%" r="65%">
+    <stop offset="0%" stop-color="#a78bfa"/>
+    <stop offset="100%" stop-color="#5b21b6"/>
+  </radialGradient>
+  <radialGradient id="face" cx="50%" cy="40%" r="50%">
+    <stop offset="0%" stop-color="#fef3c7"/>
+    <stop offset="100%" stop-color="#fde68a"/>
+  </radialGradient>
+  <radialGradient id="coin" cx="40%" cy="35%" r="50%">
+    <stop offset="0%" stop-color="#fde68a"/>
+    <stop offset="50%" stop-color="#f59e0b"/>
+    <stop offset="100%" stop-color="#d97706"/>
+  </radialGradient>
+  <radialGradient id="boltGrad" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#fbbf24"/>
     <stop offset="100%" stop-color="#7c3aed"/>
   </radialGradient>
-  <radialGradient id="wCheek" cx="50%" cy="50%" r="50%">
-    <stop offset="0%" stop-color="#fda4af"/>
-    <stop offset="100%" stop-color="#fb7185"/>
-  </radialGradient>
-  <radialGradient id="wScreen" cx="50%" cy="30%" r="70%">
-    <stop offset="0%" stop-color="#1e293b"/>
-    <stop offset="100%" stop-color="#0f172a"/>
-  </radialGradient>
-  <linearGradient id="wHat" x1="0%" y1="0%" x2="0%" y2="100%">
-    <stop offset="0%" stop-color="#fbbf24"/>
-    <stop offset="100%" stop-color="#f59e0b"/>
-  </linearGradient>
+  <filter id="glow">
+    <feGaussianBlur stdDeviation="2" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
 </defs>
 <!-- shadow -->
-<ellipse cx="70" cy="163" rx="30" ry="5" fill="#7c3aed30"/>
-<!-- body -->
-<rect x="48" y="105" width="44" height="38" rx="16" fill="url(#wBody)"/>
-<!-- feet -->
-<ellipse cx="55" cy="146" rx="12" ry="7" fill="#7c3aed"/>
-<ellipse cx="85" cy="146" rx="12" ry="7" fill="#7c3aed"/>
-<!-- laptop base -->
-<rect x="30" y="130" width="50" height="5" rx="2" fill="#475569"/>
-<rect x="35" y="125" width="40" height="8" rx="2" fill="#334155"/>
-<!-- laptop screen -->
-<rect x="35" y="100" width="40" height="28" rx="3" fill="url(#wScreen)"/>
-<!-- code lines on screen -->
-<rect x="40" y="106" width="18" height="2.5" rx="1" fill="#34d399" class="spark1"/>
-<rect x="40" y="111" width="24" height="2.5" rx="1" fill="#38bdf8" class="spark2"/>
-<rect x="40" y="116" width="14" height="2.5" rx="1" fill="#fbbf24" class="spark3"/>
-<rect x="40" y="121" width="20" height="2.5" rx="1" fill="#818cf8" class="spark1"/>
-<!-- head -->
-<circle cx="70" cy="60" r="42" fill="url(#wBody)"/>
-<!-- hard hat -->
-<ellipse cx="70" cy="24" rx="35" ry="10" fill="url(#wHat)"/>
-<rect x="42" y="24" width="56" height="14" rx="4" fill="url(#wHat)"/>
-<rect x="60" y="16" width="20" height="12" rx="4" fill="#fbbf24"/>
-<!-- eyes - wide open, determined -->
-<ellipse cx="55" cy="58" rx="9" ry="10" fill="white"/>
-<ellipse cx="85" cy="58" rx="9" ry="10" fill="white"/>
-<circle cx="57" cy="59" r="5.5" fill="#1e1b4b"/>
-<circle cx="87" cy="59" r="5.5" fill="#1e1b4b"/>
-<!-- eye highlights -->
-<circle cx="59" cy="56" r="2" fill="white"/>
-<circle cx="89" cy="56" r="2" fill="white"/>
-<!-- cheeks -->
-<circle cx="42" cy="70" r="6" fill="url(#wCheek)" opacity="0.5"/>
-<circle cx="98" cy="70" r="6" fill="url(#wCheek)" opacity="0.5"/>
-<!-- mouth - excited "o" -->
-<ellipse cx="70" cy="76" rx="5" ry="4" fill="#4c1d95"/>
-<!-- arms reaching to keyboard -->
-<rect x="30" y="112" width="12" height="6" rx="3" fill="#a78bfa"/>
-<rect x="98" y="112" width="12" height="6" rx="3" fill="#a78bfa"/>
-<!-- sparkles -->
-<text x="18" y="45" font-size="12" class="spark1">✦</text>
-<text x="112" y="40" font-size="10" class="spark2">✦</text>
-<text x="105" y="95" font-size="8" class="spark3">✦</text>
-<text x="22" y="90" font-size="9" class="spark2">✧</text>
+<ellipse cx="80" cy="172" rx="35" ry="5" fill="#7c3aed20"/>
+<!-- hair back -->
+<ellipse cx="80" cy="55" rx="48" ry="50" fill="url(#hair)"/>
+<!-- hair strands flowing right (signature Misaka style) -->
+<path d="M100,25 Q120,18 118,40 Q122,30 130,38 Q125,22 115,15" fill="url(#hair)" opacity="0.9"/>
+<path d="M105,30 Q125,28 128,48 Q130,35 135,45 Q130,25 118,20" fill="url(#hair)" opacity="0.7"/>
+<path d="M95,20 Q110,10 112,28 Q116,16 122,24" fill="url(#hair)" opacity="0.6"/>
+<!-- face -->
+<ellipse cx="80" cy="62" rx="36" ry="38" fill="url(#face)"/>
+<!-- hair bangs -->
+<path d="M44,45 Q50,25 65,35 Q55,20 70,22 Q62,15 78,18 Q75,25 82,30 Q72,22 68,35 Q60,28 50,40Z" fill="url(#hair)"/>
+<!-- hair clip (Gekota frog pin) -->
+<circle cx="55" cy="32" r="4" fill="#22c55e"/>
+<circle cx="55" cy="32" r="2" fill="#16a34a"/>
+<!-- eyes - determined, sharp -->
+<ellipse cx="66" cy="60" rx="10" ry="11" fill="white"/>
+<ellipse cx="94" cy="60" rx="10" ry="11" fill="white"/>
+<circle cx="68" cy="61" r="6.5" fill="#7c3aed"/>
+<circle cx="96" cy="61" r="6.5" fill="#7c3aed"/>
+<circle cx="67" cy="59" r="2.5" fill="white"/>
+<circle cx="95" cy="59" r="2.5" fill="white"/>
+<!-- eyebrows - determined -->
+<path d="M56,48 Q66,43 76,47" stroke="#5b21b6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<path d="M84,47 Q94,43 104,48" stroke="#5b21b6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<!-- cheeks - slight blush -->
+<circle cx="52" cy="72" r="5" fill="#fda4af" opacity="0.4"/>
+<circle cx="108" cy="72" r="5" fill="#fda4af" opacity="0.4"/>
+<!-- mouth - confident smirk -->
+<path d="M74,78 Q80,82 86,78" stroke="#92400e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<!-- body (Tokiwadai-style uniform, purple) -->
+<rect x="58" y="98" width="44" height="35" rx="8" fill="#7c3aed"/>
+<rect x="62" y="98" width="36" height="18" rx="4" fill="white"/>
+<path d="M68,98 L80,112 L92,98" fill="none" stroke="#7c3aed" stroke-width="2"/>
+<!-- skirt -->
+<path d="M55,130 Q58,145 52,155 L108,155 Q102,145 105,130 Q80,135 55,130Z" fill="#5b21b6"/>
+<!-- legs -->
+<rect x="65" y="152" width="8" height="16" rx="4" fill="#fde68a"/>
+<rect x="87" y="152" width="8" height="16" rx="4" fill="#fde68a"/>
+<!-- shoes -->
+<ellipse cx="69" cy="168" rx="8" ry="4" fill="#1e1b4b"/>
+<ellipse cx="91" cy="168" rx="8" ry="4" fill="#1e1b4b"/>
+<!-- right arm flicking coin -->
+<line x1="102" y1="108" x2="130" y2="90" stroke="#7c3aed" stroke-width="8" stroke-linecap="round"/>
+<circle cx="130" cy="86" r="3" fill="#fde68a"/>
+<!-- THE COIN - spinning mid-air -->
+<ellipse cx="138" cy="78" rx="8" ry="4" fill="url(#coin)" filter="url(#glow)" class="spark1">
+  <animateTransform attributeName="transform" type="rotate" from="0 138 78" to="360 138 78" dur="0.6s" repeatCount="indefinite"/>
+</ellipse>
+<!-- coin detail -->
+<text x="136" y="81" font-size="6" fill="#92400e" font-weight="bold" text-anchor="middle">¥</text>
+<!-- left arm at side -->
+<line x1="58" y1="108" x2="42" y2="125" stroke="#7c3aed" stroke-width="8" stroke-linecap="round"/>
+<!-- ELECTRIC ARCS -->
+<polyline points="132,74 136,68 134,62" stroke="#fbbf24" stroke-width="1.5" fill="none" filter="url(#glow)" class="spark1"/>
+<polyline points="140,76 146,70 144,64" stroke="#fbbf24" stroke-width="1.2" fill="none" filter="url(#glow)" class="spark2"/>
+<polyline points="136,82 140,88 138,94" stroke="#fbbf24" stroke-width="1" fill="none" filter="url(#glow)" class="spark3"/>
+<polyline points="128,80 122,76 124,70" stroke="#c4b5fd" stroke-width="1" fill="none" filter="url(#glow)" class="spark2"/>
+<polyline points="144,82 150,86 148,92" stroke="#c4b5fd" stroke-width="0.8" fill="none" filter="url(#glow)" class="spark3"/>
+<!-- small sparks around coin -->
+<text x="150" y="72" font-size="8" fill="#fbbf24" class="spark1">⚡</text>
+<text x="122" y="68" font-size="6" fill="#c4b5fd" class="spark2">⚡</text>
+<!-- Level badge -->
+<rect x="60" y="140" width="40" height="12" rx="6" fill="#fbbf24" opacity="0.9"/>
+<text x="80" y="149" font-size="8" fill="#1e1b4b" text-anchor="middle" font-weight="bold">Lv.2</text>
 </svg>"""
 
-    return f"""<svg width="140" height="170" viewBox="0 0 140 170" class="{cls}" xmlns="http://www.w3.org/2000/svg">
+    return f"""<svg width="160" height="180" viewBox="0 0 160 180" class="{cls}" xmlns="http://www.w3.org/2000/svg">
 <defs>
-  <radialGradient id="rBody" cx="40%" cy="35%" r="60%">
-    <stop offset="0%" stop-color="#c4b5fd"/>
-    <stop offset="100%" stop-color="#7c3aed"/>
+  <radialGradient id="rhair" cx="45%" cy="30%" r="65%">
+    <stop offset="0%" stop-color="#a78bfa"/>
+    <stop offset="100%" stop-color="#5b21b6"/>
   </radialGradient>
-  <radialGradient id="rCheek" cx="50%" cy="50%" r="50%">
-    <stop offset="0%" stop-color="#fda4af"/>
-    <stop offset="100%" stop-color="#fb7185"/>
+  <radialGradient id="rface" cx="50%" cy="40%" r="50%">
+    <stop offset="0%" stop-color="#fef3c7"/>
+    <stop offset="100%" stop-color="#fde68a"/>
   </radialGradient>
-  <radialGradient id="rCushion" cx="50%" cy="60%" r="60%">
-    <stop offset="0%" stop-color="#a5b4fc"/>
-    <stop offset="100%" stop-color="#6366f1"/>
+  <radialGradient id="drink" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#fbbf24"/>
+    <stop offset="100%" stop-color="#f59e0b"/>
   </radialGradient>
+  <filter id="rglow">
+    <feGaussianBlur stdDeviation="1.5" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
 </defs>
 <!-- shadow -->
-<ellipse cx="70" cy="158" rx="35" ry="6" fill="#6366f120"/>
-<!-- cushion -->
-<ellipse cx="70" cy="148" rx="38" ry="14" fill="url(#rCushion)"/>
-<ellipse cx="70" cy="145" rx="32" ry="8" fill="#818cf880"/>
-<!-- body - sitting relaxed -->
-<rect x="45" y="105" width="50" height="40" rx="18" fill="url(#rBody)"/>
-<!-- feet dangled -->
-<ellipse cx="52" cy="142" rx="10" ry="6" fill="#7c3aed"/>
-<ellipse cx="88" cy="142" rx="10" ry="6" fill="#7c3aed"/>
-<!-- head -->
-<circle cx="70" cy="60" r="42" fill="url(#rBody)"/>
-<!-- sleeping cap -->
-<path d="M40,38 Q50,8 70,18 Q90,8 100,38" fill="#818cf8"/>
-<circle cx="70" cy="14" r="6" fill="#c4b5fd"/>
-<!-- eyes - happy closed arcs -->
-<path d="M47,58 Q55,52 63,58" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<path d="M77,58 Q85,52 93,58" stroke="#1e1b4b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<ellipse cx="80" cy="172" rx="40" ry="5" fill="#7c3aed15"/>
+<!-- bench / ground -->
+<rect x="30" y="148" width="100" height="6" rx="3" fill="#334155"/>
+<!-- hair back -->
+<ellipse cx="80" cy="58" rx="48" ry="50" fill="url(#rhair)"/>
+<!-- face -->
+<ellipse cx="80" cy="65" rx="36" ry="38" fill="url(#rface)"/>
+<!-- hair bangs (slightly messy, relaxed) -->
+<path d="M44,48 Q52,28 66,38 Q56,22 72,25 Q64,18 80,22 Q76,28 82,34 Q74,26 70,38 Q62,32 52,44Z" fill="url(#rhair)"/>
+<!-- hair strands right -->
+<path d="M100,30 Q118,25 116,45 Q120,35 126,42" fill="url(#rhair)" opacity="0.6"/>
+<!-- hair clip -->
+<circle cx="55" cy="35" r="3.5" fill="#22c55e"/>
+<circle cx="55" cy="35" r="1.5" fill="#16a34a"/>
+<!-- eyes - happy closed arcs (content) -->
+<path d="M60,63 Q68,56 76,63" stroke="#5b21b6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<path d="M84,63 Q92,56 100,63" stroke="#5b21b6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
 <!-- cheeks -->
-<circle cx="42" cy="70" r="6" fill="url(#rCheek)" opacity="0.5"/>
-<circle cx="98" cy="70" r="6" fill="url(#rCheek)" opacity="0.5"/>
+<circle cx="52" cy="74" r="5" fill="#fda4af" opacity="0.5"/>
+<circle cx="108" cy="74" r="5" fill="#fda4af" opacity="0.5"/>
 <!-- mouth - content smile -->
-<path d="M63,76 Q70,82 77,76" stroke="#4c1d95" stroke-width="2" fill="none" stroke-linecap="round"/>
-<!-- arms resting on belly -->
-<ellipse cx="42" cy="118" rx="10" ry="6" fill="#a78bfa"/>
-<ellipse cx="98" cy="118" rx="10" ry="6" fill="#a78bfa"/>
-<!-- zzz floating -->
-<text x="108" y="38" font-size="14" fill="#a5b4fc" class="float-z" font-weight="700">z</text>
-<text x="118" y="28" font-size="11" fill="#a5b4fc" class="float-z2" font-weight="700">z</text>
-<text x="126" y="20" font-size="9" fill="#a5b4fc" class="float-z3" font-weight="700">z</text>
+<path d="M73,80 Q80,85 87,80" stroke="#92400e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<!-- body sitting -->
+<rect x="58" y="102" width="44" height="32" rx="8" fill="#7c3aed"/>
+<rect x="62" y="102" width="36" height="16" rx="4" fill="white"/>
+<path d="M68,102 L80,114 L92,102" fill="none" stroke="#7c3aed" stroke-width="2"/>
+<!-- skirt sitting -->
+<path d="M55,132 Q50,145 48,148 L112,148 Q110,145 105,132 Q80,137 55,132Z" fill="#5b21b6"/>
+<!-- legs crossed sitting -->
+<ellipse cx="70" cy="155" rx="12" ry="5" fill="#fde68a"/>
+<ellipse cx="90" cy="150" rx="12" ry="5" fill="#fde68a"/>
+<!-- shoes -->
+<ellipse cx="65" cy="158" rx="7" ry="3.5" fill="#1e1b4b"/>
+<ellipse cx="95" cy="153" rx="7" ry="3.5" fill="#1e1b4b"/>
+<!-- right arm holding drink -->
+<line x1="102" y1="112" x2="118" y2="95" stroke="#7c3aed" stroke-width="7" stroke-linecap="round"/>
+<circle cx="118" cy="85" r="3" fill="#fde68a"/>
+<!-- drink can -->
+<rect x="112" y="72" width="14" height="18" rx="4" fill="url(#drink)"/>
+<rect x="114" y="74" width="10" height="3" rx="1" fill="white" opacity="0.3"/>
+<text x="119" y="86" font-size="5" fill="#92400e" text-anchor="middle" font-weight="bold">☕</text>
+<!-- left arm resting -->
+<line x1="58" y1="112" x2="44" y2="128" stroke="#7c3aed" stroke-width="7" stroke-linecap="round"/>
+<!-- Level badge on skirt -->
+<rect x="64" y="138" width="32" height="10" rx="5" fill="#fbbf24" opacity="0.8"/>
+<text x="80" y="146" font-size="7" fill="#1e1b4b" text-anchor="middle" font-weight="bold">Lv.2</text>
+<!-- zzz with tiny sparks -->
+<text x="128" y="50" font-size="14" fill="#a5b4fc" class="float-z" font-weight="700">z</text>
+<text x="138" y="40" font-size="11" fill="#a5b4fc" class="float-z2" font-weight="700">z</text>
+<text x="146" y="32" font-size="9" fill="#a5b4fc" class="float-z3" font-weight="700">z</text>
+<!-- tiny residual spark on fingertip -->
+<circle cx="118" cy="72" r="2" fill="#fbbf24" filter="rglow" class="spark1" opacity="0.5"/>
 </svg>"""
 
 
@@ -339,7 +392,7 @@ def _phase_table(phase_stats: dict) -> str:
 
 
 def _milestone_card(m: dict, color: str) -> str:
-    status = "✅ READY" if m["all_met"] else "🚧 In Progress"
+    status = "⚡ ACHIEVED" if m["all_met"] else "🚧 Leveling Up"
     criteria = ""
     for c in m["criteria"]:
         icon = "✓" if c["met"] else "○"
@@ -392,7 +445,7 @@ def _usage_section(stats: dict) -> str:
     avg_tokens = round(total_tokens / changes) if changes else 0
 
     return f"""<div class="section">
-  <h2>Resource Usage</h2>
+    <h2>⚡ Resource Usage</h2>
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>

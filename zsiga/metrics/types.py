@@ -73,7 +73,7 @@ class ChangeRecord:
 
 
 MILESTONE_L2 = {
-    "label": "L2: Better Tools",
+    "label": "Level 2: Code Architect",
     "criteria": [
         ("successful_changes", 10, "累计成功 change 数 >= 10"),
         ("success_rate_pct", 70, "总成功率 >= 70%"),
@@ -83,7 +83,7 @@ MILESTONE_L2 = {
 }
 
 MILESTONE_L3 = {
-    "label": "L3: Self-Evolution",
+    "label": "Level 3: Self-Evolution",
     "criteria": [
         ("successful_changes", 30, "累计成功 change 数 >= 30"),
         ("success_rate_pct", 85, "总成功率 >= 85%"),
