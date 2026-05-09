@@ -29,13 +29,35 @@ def compact_messages(
         return messages, 0
 
     system_msg = messages[0] if messages[0].get("role") == "system" else None
-    to_compress = messages[1:-keep_recent] if system_msg else messages[:-keep_recent]
     recent = messages[-keep_recent:]
+    to_compress = messages[1:-keep_recent] if system_msg else messages[:-keep_recent]
 
-    if not to_compress:
+    orphan_tool_ids = set()
+    for m in recent:
+        tid = m.get("tool_call_id", "")
+        if tid:
+            orphan_tool_ids.add(tid)
+
+    preserved = []
+    if orphan_tool_ids and to_compress:
+        for i in range(len(to_compress) - 1, -1, -1):
+            m = to_compress[i]
+            if m.get("role") == "assistant" and m.get("tool_calls"):
+                for tc in m["tool_calls"]:
+                    tc_id = tc.get("id", "")
+                    if tc_id in orphan_tool_ids:
+                        preserved.insert(0, m)
+                        orphan_tool_ids.discard(tc_id)
+                        break
+            if not orphan_tool_ids:
+                break
+
+    to_compress_final = [m for m in to_compress if m not in preserved]
+
+    if not to_compress_final:
         return messages, 0
 
-    summary_text = _generate_summary(to_compress, client, model)
+    summary_text = _generate_summary(to_compress_final, client, model)
     summary_msg = {
         "role": "assistant",
         "content": (
@@ -47,6 +69,7 @@ def compact_messages(
     result = []
     if system_msg:
         result.append(system_msg)
+    result.extend(preserved)
     result.append(summary_msg)
     result.extend(recent)
 
