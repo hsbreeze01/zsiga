@@ -94,14 +94,21 @@ def verify_mechanical(target_path: str, test_cmd: str, lint_cmd: str,
             )
             if lint_r["exit_code"] != 0:
                 errors.append(f"lint:\n{lint_r['stdout'][:2000]}")
+
+        test_targets = _get_test_targets(target_path, since_sha, changed, transport)
+        if test_targets:
+            test_cmd_scoped = f"{test_cmd} {' '.join(test_targets)}"
+            test_r = transport.run_shell(test_cmd_scoped, cwd=target_path, timeout=300)
+            if test_r["exit_code"] != 0:
+                errors.append(f"tests:\n{test_r['stdout'][-3000:]}")
     else:
         lint_r = transport.run_shell(lint_cmd, cwd=target_path, timeout=120)
         if lint_r["exit_code"] != 0:
             errors.append(f"lint:\n{lint_r['stdout'][:2000]}")
 
-    test_r = transport.run_shell(test_cmd, cwd=target_path, timeout=300)
-    if test_r["exit_code"] != 0:
-        errors.append(f"tests:\n{test_r['stdout'][-3000:]}")
+        test_r = transport.run_shell(test_cmd, cwd=target_path, timeout=300)
+        if test_r["exit_code"] != 0:
+            errors.append(f"tests:\n{test_r['stdout'][-3000:]}")
 
     passed = len(errors) == 0
     return passed, "\n".join(errors)
@@ -122,6 +129,42 @@ def _get_changed_files(target_path: str, since_sha: str,
         if f and f.endswith(".py"):
             files.add(f)
     return sorted(files)
+
+
+def _get_test_targets(target_path: str, since_sha: str,
+                      changed_files: list[str],
+                      transport: Transport = None) -> list[str]:
+    transport = transport or LocalTransport()
+    test_files = set()
+    for f in changed_files:
+        if f.startswith("tests/") or f.startswith("test_"):
+            test_files.add(f)
+        else:
+            parts = f.rsplit("/", 1)
+            basename = parts[-1].replace(".py", "")
+            r = transport.run_shell(
+                f"find '{target_path}/tests' -name 'test_{basename}.py' -o -name '*_test_{basename}.py' 2>/dev/null | head -5",
+                timeout=10,
+            )
+            for line in r.get("stdout", "").strip().split("\n"):
+                if line.strip():
+                    rel = line.strip()
+                    if rel.startswith(target_path):
+                        rel = rel[len(target_path):].lstrip("/")
+                    test_files.add(rel)
+
+    if not test_files:
+        return []
+
+    r = transport.run_shell(
+        f"git diff --name-only {since_sha} HEAD -- 'tests/' 'test_*.py'",
+        cwd=target_path, timeout=10,
+    )
+    for line in r.get("stdout", "").strip().split("\n"):
+        if line.strip():
+            test_files.add(line.strip())
+
+    return sorted(test_files)
 
 
 def archive_change(target_path: str, change_name: str,

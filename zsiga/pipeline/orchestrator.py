@@ -307,14 +307,22 @@ class ZsigaOrchestrator:
 
             if attempt == 1:
                 await self.agent.run(
-                    "你是 zsiga 的修复引擎。只修复本次变更引入的错误，不要触碰其他文件。",
+                    "你是 zsiga 的修复引擎。严格遵守以下规则：\n"
+                    "1. 只修改本次变更引入的文件（上方列出的）\n"
+                    "2. 绝对不要修改任何未列出的文件\n"
+                    "3. 不要添加新路由、新端点、新功能 — 只修复错误\n"
+                    "4. 不要删除或替换 render_template、redirect 等现有调用",
                     f"错误:\n{errors}{changed_info}\n\n"
                     f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                     max_turns=fix_turns,
                 )
             else:
                 await self.agent.run(
-                    "你是 zsiga 的修复引擎。上一次修复没有解决问题。只修改本次变更的文件。",
+                    "你是 zsiga 的修复引擎。上一次修复没有解决问题。严格遵守以下规则：\n"
+                    "1. 只修改本次变更引入的文件（上方列出的）\n"
+                    "2. 绝对不要修改任何未列出的文件\n"
+                    "3. 不要添加新路由、新端点、新功能\n"
+                    "4. 如果无法在限制内修复，回复 STOP",
                     f"仍然存在的错误:\n{errors}{changed_info}\n\n"
                     f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                     max_turns=fix_turns,
@@ -345,7 +353,11 @@ class ZsigaOrchestrator:
             self.agent.set_phase(f"eval-fix-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
             await self.agent.run(
-                "你是 zsiga 的修复引擎。只修改本次变更涉及的文件。",
+                "你是 zsiga 的修复引擎。严格遵守以下规则：\n"
+                "1. 只修改本次变更涉及的文件（上方列出的）\n"
+                "2. 绝对不要修改任何未列出的文件\n"
+                "3. 不要添加新路由、新端点、新功能 — 只修复验证反馈中的问题\n"
+                "4. 不要删除或替换 render_template、redirect 等现有调用",
                 f"验证反馈:\n{feedback}{changed_info}\n\n"
                 f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                 max_turns=fix_turns,
