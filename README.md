@@ -1,6 +1,108 @@
 # zsiga
 
-基于 [OpenSpec](https://github.com/Fission-AI/OpenSpec) 的自主开发智能体。读取目标项目中的需求提案，自动补全规格、实现代码、验证质量，完成 git 提交。
+**L1: Shell Artisan** — 基于 [OpenSpec](https://github.com/Fission-AI/OpenSpec) 的自主开发智能体。
+
+> "Shell Artisan" — 手艺人。工具是原始的（bash、grep、cat），靠经验积累和 OpenSpec 流程纪律交付高质量代码。没有结构化代码理解，没有并行分解，但能稳定完成 ENRICH→IMPL→VERIFY→DELIVER 全流程。
+
+## 版本信息
+
+| 项目 | 值 |
+|------|-----|
+| Branch | `zsiga-l1-shell-artisan` |
+| 等级 | L1 (Shell Artisan) |
+| LLM | 智谱 AI GLM-5.1 |
+| 源文件数 | 25 个 `.py` |
+| 首次运行 | 2026-05 |
+| License | MIT |
+
+## L1 能力定位
+
+### 擅长什么
+
+| 能力 | 说明 |
+|------|------|
+| OpenSpec 四阶段流水线 | ENRICH→IMPL→VERIFY→DELIVER 全自动 |
+| Shell 级代码操作 | bash、文件读写、grep 搜索、精确文本替换 |
+| SSH 远程开发 | ControlMaster 连接复用，直接操作远程服务器上的项目 |
+| 自我学习 | 每次运行记录经验教训，自动注入下次运行的 system prompt |
+| 成长日记 | 记录表扬、批评、里程碑和"学会了什么" |
+| 机械化验证 | pytest + ruff，只检查本轮改动文件 |
+| 安全机制 | approval gate、dry run、protected paths、auto revert |
+| 指标仪表盘 | HTML dashboard，里程碑进度条，Pop Mart 吉祥物 |
+
+### 6 个工具
+
+zsiga 为 LLM 注册 6 个工具，全部指向**目标项目**（不能操作自身）：
+
+| 工具 | 作用 | 实现方式 |
+|------|------|---------|
+| `bash` | 执行 shell 命令 | SSH/Local subprocess |
+| `read_file` | 读文件 | `cat` via transport |
+| `write_file` | 创建/覆盖文件 | `cat >` via transport |
+| `edit_file` | 精确文本替换（old_text 必须唯一匹配） | Python string replace |
+| `search` | 正则搜索文件内容 | `grep -rn -E` |
+| `list_files` | 列出目录结构 | `ls -la` via transport |
+
+### L1 边界（做不到什么）
+
+| 限制 | 影响 | L2 方向 |
+|------|------|---------|
+| **无 Context Compaction** | 大项目后半程消息超长，模型能力下降 | 消息超阈值时自动摘要压缩 |
+| **无 Sub-agent** | 复杂任务单 agent 扛，无法并行 | 子任务派发 + 并行执行 |
+| **无 AST 代码理解** | 靠 grep/regex 匹配，无法理解代码结构 | tree-sitter / AST-grep |
+| **无并发保护** | cron 重叠可能同时启动两个 pipeline | PID 锁 / 文件锁 |
+| **无智能截断** | 工具输出硬切，可能丢失关键信息 | 按结构截断，保留首尾 |
+
+## L1 成长数据
+
+| 指标 | 值 |
+|------|-----|
+| Pipeline 运行次数 | 25+ |
+| 总 change 数 | 24 |
+| 成功 change 数 | 19 |
+| 成功率 | 75% |
+| 覆盖项目 | 5 (factory, compass, dataagent, stockshark, infopublisher) |
+| 经验教训 | 22 条 |
+| 总 LLM 调用 | 182 次 |
+| 总 Token 消耗 | ~2M prompt + 24K completion |
+| 总运行时间 | ~2 小时 |
+
+### 已学会的技能
+
+- 检测目标项目 venv/，用 `venv/bin/python -m pytest` 而不是裸 pytest
+- d8q 项目都是 systemd 管理的，用 `systemctl restart` 重启服务，不用 nohup
+- patchright `sync_playwright` 在 gunicorn fork 下 greenlet 跨线程崩溃，解法是 PID 检测 + lazy 重置
+- THS（同花顺）API 替代被封的 eastmoney push2，用 DataFetcher 单例 + TTL cache 做速率控制
+- broken test files 用 `pytest.skip(allow_module_level=True)` 做优雅降级
+
+## 里程碑体系
+
+**L1: Shell Artisan（当前）** ✅ 已达成
+
+| 条件 | 目标 | 实际 |
+|------|------|------|
+| 成功 change | ≥ 10 | 19 ✅ |
+| 成功率 | ≥ 70% | 75% ✅ |
+| 项目数 | ≥ 3 | 5 ✅ |
+| 经验教训 | ≥ 20 | 22 ✅ |
+
+**L2: Code Architect（下一阶段）**
+
+| 条件 | 目标 |
+|------|------|
+| Context Compaction | 消息自动摘要 |
+| Sub-agent | 任务并行分解 |
+| AST Tools | 结构化代码理解 |
+
+**L3: Self-Evolver（远期）**
+
+| 条件 | 目标 |
+|------|------|
+| 成功 change | ≥ 30 |
+| 成功率 | ≥ 85% |
+| 验证通过率 | ≥ 80% |
+| 首次测试通过率 | ≥ 60% |
+| 自身代码修改 | zsiga 能改进自己 |
 
 ## 工作原理
 
@@ -153,8 +255,17 @@ cd /path/to/zsiga
 export ZHIPUAI_API_KEY="your-key"
 python3 -m zsiga
 
-# 或安装后直接用
-zsiga
+# 生成仪表盘
+python3 -m zsiga dashboard
+# 输出: site/dashboard.html
+
+# 查看指标
+python3 -c "
+from zsiga.metrics.collector import compute_stats
+s = compute_stats()
+print(f'Changes: {s[\"total_changes\"]}, Success: {s[\"success_rate_pct\"]}%')
+print(f'Projects: {s[\"distinct_projects\"]}, Lessons: {s[\"lessons_learned\"]}')
+"
 ```
 
 ## Pipeline 四阶段详解
@@ -208,8 +319,6 @@ git push origin main --tags     # dry_run=true 时仅打印
 
 ## 记忆系统
 
-zsiga 具有自我学习能力——从每次运行中积累经验，避免重复犯错。
-
 ### 工作方式
 
 ```
@@ -261,49 +370,6 @@ record_lesson(
 )
 ```
 
-## 指标与里程碑
-
-### 查看仪表盘
-
-```bash
-python3 -m zsiga dashboard
-# 生成 site/dashboard.html，浏览器打开即可
-```
-
-### 指标体系
-
-| 指标 | 说明 |
-|------|------|
-| Total Changes | 处理过的 change 总数 |
-| Success Rate | 完成全部 4 阶段的比例 |
-| First-Pass Test Rate | 实现阶段首次 pytest+ruff 通过率（无需修复循环） |
-| Verify Pass Rate | AI 验证通过率 |
-| Lessons Learned | 记忆系统积累的经验条数 |
-| Phase Performance | 每阶段的平均轮次、耗时、修复次数 |
-
-### 里程碑
-
-**L2: Better Tools（引入 LSP、AST grep、sub-agent）**
-
-| 条件 | 目标 | 当前 |
-|------|------|------|
-| 累计成功 change | ≥ 10 | 需积累 |
-| 总成功率 | ≥ 70% | 需积累 |
-| 覆盖项目数 | ≥ 3 | 需积累 |
-| 经验教训数 | ≥ 20 | 需积累 |
-
-**L3: Self-Evolution（zsiga 修改自身代码）**
-
-| 条件 | 目标 | 当前 |
-|------|------|------|
-| 累计成功 change | ≥ 30 | 需积累 |
-| 总成功率 | ≥ 85% | 需积累 |
-| 验证通过率 | ≥ 80% | 需积累 |
-| 经验教训数 | ≥ 50 | 需积累 |
-| 首次测试通过率 | ≥ 60% | 需积累 |
-
-仪表盘会实时显示每项指标的进度条，全部达标时显示 ✅ READY。
-
 ## 安全机制
 
 | 机制 | 说明 |
@@ -322,52 +388,46 @@ zsiga/
 ├── zsiga.yaml                  # 全局配置
 ├── requirements.txt
 ├── pyproject.toml
-├── skills/                     # Agent 行为约束
+├── skills/                     # Agent 行为约束（Markdown prompt 模板）
 │   ├── enrich.md               #   补全规则
 │   ├── implement.md            #   实现规则
 │   ├── verify.md               #   验证规则
 │   └── safety.md               #   安全红线
 ├── memory/                     # Agent 记忆（自我学习）
 │   ├── active_context.md       #   注入到每次 agent 运行的上下文
-│   └── learnings.jsonl         #   经验归档（追加写入）
-├── templates/                  # 模板（预留）
+│   ├── learnings.jsonl         #   经验归档（追加写入）
+│   └── journal.jsonl           #   成长日记（表扬/批评/里程碑/学会）
+├── metrics/                    # 运行时指标数据
+│   └── changes.jsonl           #   每次 change 的完整记录
+├── site/                       # 生成的静态文件
+│   └── dashboard.html          #   指标仪表盘
 └── zsiga/                      # 源码
     ├── __init__.py
-    ├── __main__.py              # 入口：python -m zsiga
-    ├── config.py                # 配置加载
-    ├── git_ops.py               # Git 操作
+    ├── __main__.py              # 入口：python3 -m zsiga
+    ├── config.py                # 配置加载（YAML + env var）
+    ├── git_ops.py               # Git 操作（commit/tag/push/reset）
+    ├── transport.py             # Transport 层（Local + SSH ControlMaster）
     ├── agent/
     │   ├── loop.py              #   LLM Agent Loop（GLM function calling）
-    │   └── tools.py             #   6 个工具（bash, read/write/edit, search, list）
+    │   └── tools.py             #   6 个工具注册
     ├── intake/
     │   └── scanner.py           #   目录扫描，发现 proposal
     ├── memory/
     │   ├── learn.py             #   经验记录
-    │   └── context.py           #   上下文加载与合成
+    │   ├── context.py           #   上下文加载与合成
+    │   └── journal.py           #   成长日记读写
     ├── metrics/
     │   ├── types.py             #   数据模型 + 里程碑定义
     │   ├── collector.py         #   指标采集与统计
-    │   └── dashboard.py         #   HTML 仪表盘生成
+    │   └── dashboard.py         #   HTML 仪表盘 + Pop Mart 吉祥物
     └── pipeline/
-        ├── orchestrator.py      #   四阶段编排器
+        ├── orchestrator.py      #   四阶段编排器 + fix loops
         ├── enricher.py          #   Phase 1: 补全
         ├── implementer.py       #   Phase 2: 实现
         ├── verifier.py          #   Phase 3: 验证
-        └── utils.py             #   机械化验证 + 归档
+        ├── utils.py             #   机械化验证 + 归档
+        └── project_context.py   #   项目上下文预读
 ```
-
-## Agent 工具
-
-zsiga 为 LLM 注册 6 个工具，全部指向**目标项目**：
-
-| 工具 | 作用 |
-|------|------|
-| `bash` | 在目标项目目录执行 shell 命令 |
-| `read_file` | 读取目标项目文件 |
-| `write_file` | 在目标项目创建/覆盖文件 |
-| `edit_file` | 精确替换文件中的文本片段（old_text 必须唯一匹配） |
-| `search` | 正则搜索目标项目文件内容 |
-| `list_files` | 列出目标项目目录结构 |
 
 ## 常见问题
 
