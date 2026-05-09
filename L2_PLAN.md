@@ -77,6 +77,52 @@ rewrite: "logger.info($MSG)"
 - 语言支持：Python、JavaScript、TypeScript、HTML（后续可扩展）
 - LLM 自动选择：简单文本操作用 edit_file，代码结构操作用 ast_replace
 
+## 架构决策
+
+### 为什么不走 spec-driven pipeline
+
+L2 改造是修改 zsiga 自身，但 zsiga 的 pipeline 只能操作目标项目（scoped tools）。三大能力（compaction/AST/sub-agent）都是内部基础设施，不适用于 OpenSpec 的 ENRICH→IMPL→VERIFY→DELIVER 流程。本计划用 OpenSpec 格式写设计文档作为人工实施蓝图，但实现由人直接编码。
+
+### 主/子 agent 能力分层
+
+```
+┌─────────────────────────────────────────┐
+│  L2 主 agent                            │
+│  ┌─────────────────────────────────────┐│
+│  │ 调度层：task 分组、并行/串行决策     ││
+│  │ Context Compaction                  ││
+│  │ AST Tools（分析代码结构）            ││
+│  │ Memory + Skills                     ││
+│  │ L1 基础 6 工具                      ││
+│  └──────────────┬──────────────────────┘│
+│                 │ 派发精确指令            │
+│     ┌───────────┴───────────┐           │
+│     ▼                       ▼           │
+│ ┌──────────┐          ┌──────────┐      │
+│ │ 子 agent A│          │ 子 agent B│      │
+│ │ L1 切片   │          │ L1 切片   │      │
+│ │ 6 工具    │          │ 6 工具    │      │
+│ │ max=15   │          │ max=15   │      │
+│ │ 无 memory │          │ 无 memory │      │
+│ │ 无 AST   │          │ 无 AST   │      │
+│ └──────────┘          └──────────┘      │
+└─────────────────────────────────────────┘
+```
+
+**子 agent = L1 能力的单任务切片**：
+- 只持有 L1 基础 6 工具（bash/read/write/edit/search/list_files）
+- 不需要 compaction（turns 短，不会爆）
+- 不需要 AST（主 agent 做 AST 分析后，把精确的"改这个函数的这几行"指令给子 agent）
+- 不需要 memory/skills（单任务，没有上下文积累的需求）
+- turns 上限 15（单 task 不需要 50 轮）
+
+**主 agent 的角色**：
+- 用 AST 工具分析代码结构，确定改什么
+- 拆解 tasks.md 为可并行执行的原子指令
+- 把精确的指令（含文件路径、函数签名、改动描述）派发给子 agent
+- 子 agent 完成后，主 agent 做全局验证（pytest + ruff）
+- compaction 只在主 agent 上启用
+
 ## 计划（执行顺序）
 
 按收益/风险排序：
@@ -136,30 +182,35 @@ rewrite: "logger.info($MSG)"
   - 单元测试：模式替换（rename function、change signature）
   - 集成测试：zsiga pipeline 中使用 AST 工具完成一个 change
 
-### Phase C: Sub-agent
+### Phase C: Sub-agent（L1 切片并行）
 
 - [ ] C.1 新建 `agent/sub_agent.py`
-  - `create_sub_agent(agent_config, target_path, transport) -> AgentLoop`
-  - `run_sub_agent(agent, task_prompt, max_turns) -> SubAgentResult`
-  - `SubAgentResult`：content, llm_calls, tool_calls, success
+  - `create_sub_agent(api_key, model, base_url, target_path, transport) -> AgentLoop`
+  - 只注册 L1 基础 6 工具，不注册 AST 工具，不注入 memory/skills
+  - `run_sub_agent(agent, task_instruction, max_turns=15) -> SubAgentResult`
+  - `SubAgentResult`：content, llm_calls, tool_calls, success, prompt_tokens, completion_tokens
 - [ ] C.2 修改 `pipeline/orchestrator.py`
   - 新增 `_detect_parallelizable_tasks(tasks_md) -> list[list[task]]`
+  - 分析 tasks.md 分组结构：同一组内串行，不同组可并行
   - 新增 `_run_parallel_impl(task_groups) -> list[SubAgentResult]`
-  - 主 agent 串行执行有依赖的 task，并行执行独立 task
+  - 主 agent 用 AST 工具预分析代码结构，生成精确指令后派发
 - [ ] C.3 并发控制
-  - `asyncio.Semaphore(2)` 限制并发子 agent 数
-  - 共享 transport 连接的线程安全（SSH ControlMaster 是进程级，无需额外锁）
-- [ ] C.4 结果合并
-  - 子 agent 完成后，主 agent 检查所有变更
-  - 运行一次完整 pytest + ruff 验证
-  - 失败的子 agent 结果交给主 agent 修复
+  - `asyncio.Semaphore(2)` 限制最多 2 个子 agent 同时运行
+  - 每个子 agent 用独立的 AgentLoop（独立消息历史）
+  - 共享同一个 transport 连接（SSH ControlMaster 是进程级，天然复用）
+- [ ] C.4 结果合并与验证
+  - 所有子 agent 完成后，主 agent 运行一次完整 pytest + ruff
+  - 失败的子 agent 结果交给主 agent 修复（走现有 fix loop）
+  - 汇总所有子 agent 的 token/call 数据到主 PhaseRecord
 - [ ] C.5 Metrics 扩展
   - PhaseRecord 新增 `sub_agent_count` 字段
-  - Dashboard 显示并行度信息
+  - Dashboard Phase table 新增 "Sub-agents" 列
+  - 子 agent 的 token 消耗计入总消耗
 - [ ] C.6 测试
-  - 单元测试：task 依赖分析和分组
-  - 单元测试：子 agent 创建和执行
-  - 集成测试：包含 2 个独立 task 的 change 并行完成
+  - 单元测试：task 依赖分析和分组（同组串行、跨组并行）
+  - 单元测试：子 agent 创建（只注册 6 工具、无 memory）
+  - 单元测试：子 agent 独立执行并返回结果
+  - 集成测试：包含 2 个独立 task 的 change 并行完成，总时间 < 串行时间
 
 ## 文件变更预估
 
