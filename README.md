@@ -38,13 +38,13 @@
 
 ## 等级体系
 
-| Level | 代号 | 能力 | 状态 |
-|-------|------|------|------|
-| Level 1 | Shell Artisan | shell 工具 + OpenSpec 流程纪律 | ✅ ACHIEVED |
-| **Level 2** | **Code Architect** | **AST 透视 + 消息压缩 + 分身并行** | **✅ CURRENT** |
-| Level 3 | Self-Evolution | 自我修改、自我进化 | 🚧 Leveling Up |
-| Level 4 | ? | 多项目协同 | 🔒 LOCKED |
-| Level 5 | ? | 全栈自主（目标：代码界 Level 5） | 🔒 LOCKED |
+| Level | 代号 | 核心能力 | 关键任务 | 状态 |
+|-------|------|----------|----------|------|
+| Level 1 | Shell Artisan | shell 工具 + OpenSpec 流程纪律 | — | ✅ ACHIEVED |
+| **Level 2** | **Code Architect** | **AST 透视 + 消息压缩 + 分身并行** | — | **✅ CURRENT** |
+| Level 3 | 🔧 Self-Evolution | LSP 集成 + 自我修改 + 专业子代理 + 模式挖掘 | LSP 集成, Self-Modify 门控, 专业子代理分化, 跨会话模式挖掘, L3 验证 | 🚧 Leveling Up |
+| Level 4 | 🌐 Multi-Project Orchestrator | 意图路由 + 跨项目分解 + Todo 编排 + 升级协议 | Intent Router, 跨项目任务分解, Todo 驱动编排, 升级路径, L4 验证 | 🔒 LOCKED |
+| Level 5 | 🚀 Autonomous Engineer | 意图门控 + 并行代理 + Skill 演化 + 自我审查 + 失败恢复 | Phase 0 Intent Gate, 并行后台代理, Skill 演化, 自我审查循环, 失败恢复协议, L5 验证 | 🔒 LOCKED |
 
 ## 工作原理
 
