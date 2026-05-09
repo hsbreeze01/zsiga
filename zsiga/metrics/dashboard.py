@@ -191,14 +191,232 @@ td {{ border-top: 1px solid #334155; }}
 
 
 def _mascot_img(state: str = "resting") -> str:
-    if _MASCOT_SRC.exists():
-        cls = "mascot-working" if state == "working" else "mascot-resting"
-        badge = "⚡ Working" if state == "working" else "💤 Resting"
-        return f"""<div style="position:relative;display:inline-block;">
-<img src="mascot.png" alt="zsiga" class="{cls}" style="width:180px;height:auto;border-radius:8px;box-shadow:0 4px 24px #7c3aed40;" />
-<div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fbbf24;padding:2px 10px;border-radius:999px;font-size:0.7rem;font-weight:700;white-space:nowrap;">{badge}</div>
-</div>"""
-    return _mascot_svg(state)
+    return _pixel_misaka(state)
+
+
+def _pixel_misaka(state: str = "resting") -> str:
+    cls = "mascot-working" if state == "working" else "mascot-resting"
+    s = 4  # pixel scale
+
+    def px(x, y, color, w=1, h=1):
+        return f'<rect x="{x*s}" y="{y*s}" width="{w*s}" height="{h*s}" fill="{color}"/>'
+
+    def pxa(x, y, color, opacity, w=1, h=1):
+        return f'<rect x="{x*s}" y="{y*s}" width="{w*s}" height="{h*s}" fill="{color}" opacity="{opacity}"/>'
+
+    BG = "#0f172a"
+    HAIR_DARK = "#5b21b6"
+    HAIR_MID = "#7c3aed"
+    HAIR_LIGHT = "#a78bfa"
+    SKIN = "#fde68a"
+    SKIN_SHADOW = "#d4a44a"
+    EYE = "#7c3aed"
+    EYE_HI = "#c4b5fd"
+    BLUSH = "#fda4af"
+    MOUTH = "#92400e"
+    WHITE_TOP = "#e2e8f0"
+    UNIFORM = "#7c3aed"
+    UNIFORM_DARK = "#5b21b6"
+    SKIRT = "#4c1d95"
+    SHOE = "#1e1b4b"
+    COIN_GOLD = "#f59e0b"
+    COIN_DARK = "#d97706"
+    COIN_HI = "#fde68a"
+    SPARK_Y = "#fbbf24"
+    SPARK_P = "#c4b5fd"
+    CLIP_G = "#22c55e"
+    CLIP_D = "#16a34a"
+
+    rows = []
+
+    # === HAIR BACK (wide block) ===
+    for x in range(9, 24):
+        rows.append(px(x, 4, HAIR_DARK))
+    for x in range(8, 25):
+        rows.append(px(x, 5, HAIR_DARK))
+    for x in range(8, 25):
+        rows.append(px(x, 6, HAIR_DARK))
+    for x in range(7, 26):
+        rows.append(px(x, 7, HAIR_DARK))
+    # hair strands flowing right
+    for x in range(24, 27):
+        rows.append(px(x, 6, HAIR_MID))
+    for x in range(25, 28):
+        rows.append(px(x, 5, HAIR_MID))
+    for x in range(27, 29):
+        rows.append(px(x, 7, HAIR_LIGHT, 0.7))
+    for x in range(26, 28):
+        rows.append(px(x, 8, HAIR_LIGHT, 0.5))
+
+    # === FACE ===
+    for y in range(8, 16):
+        for x in range(10, 23):
+            rows.append(px(x, y, SKIN))
+    # face shadow right
+    rows.append(px(22, 8, SKIN_SHADOW))
+    rows.append(px(22, 9, SKIN_SHADOW))
+    rows.append(px(22, 13, SKIN_SHADOW))
+    rows.append(px(22, 14, SKIN_SHADOW))
+    rows.append(px(22, 15, SKIN_SHADOW))
+
+    # === HAIR BANGS (over face) ===
+    for x in range(9, 24):
+        rows.append(px(x, 8, HAIR_DARK))
+    for x in range(9, 14):
+        rows.append(px(x, 9, HAIR_DARK))
+    for x in range(16, 18):
+        rows.append(px(x, 9, HAIR_DARK))
+    for x in range(20, 24):
+        rows.append(px(x, 9, HAIR_MID))
+    # side hair left
+    for y in range(9, 15):
+        rows.append(px(8, y, HAIR_DARK))
+        rows.append(px(9, y, HAIR_DARK, 0.5))
+
+    # === HAIR CLIP (Gekota) ===
+    rows.append(px(10, 9, CLIP_G, 1, 2))
+    rows.append(px(11, 9, CLIP_D, 1, 1))
+
+    # === EYES ===
+    # left eye
+    rows.append(px(12, 10, WHITE_TOP))
+    rows.append(px(13, 10, WHITE_TOP))
+    rows.append(px(12, 11, EYE))
+    rows.append(px(13, 11, EYE))
+    rows.append(px(14, 11, EYE_HI))
+    rows.append(px(12, 12, EYE))
+    rows.append(px(13, 12, EYE))
+    # right eye
+    rows.append(px(18, 10, WHITE_TOP))
+    rows.append(px(19, 10, WHITE_TOP))
+    rows.append(px(18, 11, EYE))
+    rows.append(px(19, 11, EYE))
+    rows.append(px(20, 11, EYE_HI))
+    rows.append(px(18, 12, EYE))
+    rows.append(px(19, 12, EYE))
+
+    # === BLUSH ===
+    rows.append(pxa(11, 13, BLUSH, 0.5))
+    rows.append(pxa(20, 13, BLUSH, 0.5))
+
+    # === MOUTH ===
+    if state == "working":
+        rows.append(px(15, 14, MOUTH))
+        rows.append(px(16, 14, MOUTH))
+    else:
+        rows.append(pxa(15, 14, MOUTH, 0.7))
+        rows.append(pxa(16, 14, MOUTH, 0.7))
+
+    # === BODY (uniform top) ===
+    for y in range(16, 21):
+        for x in range(11, 22):
+            rows.append(px(x, y, UNIFORM))
+    # white collar
+    for x in range(14, 19):
+        rows.append(px(x, 16, WHITE_TOP))
+    # collar V
+    rows.append(px(15, 17, WHITE_TOP))
+    rows.append(px(17, 17, WHITE_TOP))
+    rows.append(px(16, 18, WHITE_TOP))
+
+    # === ARMS ===
+    # left arm (down)
+    for y in range(18, 22):
+        rows.append(px(10, y, UNIFORM))
+        rows.append(px(9, y, UNIFORM))
+    # right arm (reaching right — coin flick pose)
+    for y in range(17, 19):
+        rows.append(px(22, y, UNIFORM))
+        rows.append(px(23, y, UNIFORM))
+    for y in range(15, 17):
+        rows.append(px(24, y, UNIFORM))
+        rows.append(px(25, y, UNIFORM))
+    # hand
+    rows.append(px(26, 14, SKIN))
+    rows.append(px(27, 14, SKIN))
+    rows.append(px(26, 15, SKIN))
+
+    # === SKIRT ===
+    for y in range(21, 25):
+        for x in range(10, 23):
+            rows.append(px(x, y, SKIRT))
+
+    # === LEGS ===
+    for y in range(25, 28):
+        rows.append(px(13, y, SKIN))
+        rows.append(px(14, y, SKIN))
+        rows.append(px(19, y, SKIN))
+        rows.append(px(20, y, SKIN))
+
+    # === SHOES ===
+    rows.append(px(12, 28, SHOE))
+    rows.append(px(13, 28, SHOE))
+    rows.append(px(14, 28, SHOE))
+    rows.append(px(18, 28, SHOE))
+    rows.append(px(19, 28, SHOE))
+    rows.append(px(20, 28, SHOE))
+
+    # === COIN ===
+    if state == "working":
+        coin_x, coin_y = 29, 10
+        rows.append(px(coin_x, coin_y, COIN_HI))
+        rows.append(px(coin_x+1, coin_y, COIN_GOLD))
+        rows.append(px(coin_x+2, coin_y, COIN_GOLD))
+        rows.append(px(coin_x, coin_y+1, COIN_GOLD))
+        rows.append(px(coin_x+1, coin_y+1, COIN_DARK))
+        rows.append(px(coin_x+2, coin_y+1, COIN_GOLD))
+        rows.append(px(coin_x, coin_y+2, COIN_GOLD))
+        rows.append(px(coin_x+1, coin_y+2, COIN_GOLD))
+        rows.append(px(coin_x+2, coin_y+2, COIN_HI))
+
+    # === ELECTRIC ARCS ===
+    if state == "working":
+        rows.append(px(28, 9, SPARK_Y))
+        rows.append(px(29, 8, SPARK_Y))
+        rows.append(px(31, 9, SPARK_P))
+        rows.append(px(32, 8, SPARK_Y))
+        rows.append(px(28, 13, SPARK_Y))
+        rows.append(px(30, 14, SPARK_P))
+        rows.append(px(31, 13, SPARK_Y))
+        rows.append(px(25, 12, SPARK_P))
+        rows.append(px(24, 13, SPARK_Y))
+        rows.append(px(33, 11, SPARK_P))
+        rows.append(px(34, 10, SPARK_Y))
+        rows.append(px(33, 14, SPARK_Y))
+        rows.append(px(27, 16, SPARK_P))
+    else:
+        rows.append(pxa(28, 10, SPARK_P, 0.3))
+        rows.append(pxa(25, 13, SPARK_P, 0.2))
+
+    # === LEVEL BADGE on skirt ===
+    rows.append(px(13, 22, COIN_GOLD, 5, 1))
+    rows.append(px(14, 22, COIN_GOLD, 1, 1))
+    rows.append(px(15, 22, COIN_GOLD, 1, 1))
+    rows.append(px(16, 22, COIN_GOLD, 1, 1))
+    rows.append(px(17, 22, COIN_GOLD, 1, 1))
+
+    pixel_art = "\n".join(rows)
+
+    w = 38 * s
+    h = 32 * s
+
+    if state == "working":
+        return f"""<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" class="{cls}" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
+<rect width="{w}" height="{h}" fill="transparent"/>
+{pixel_art}
+</svg>"""
+
+    zzz = ""
+    if state == "resting":
+        zzz = f"""<text x="{30*s}" y="{6*s}" font-size="14" fill="#a5b4fc" class="float-z" font-weight="700">z</text>
+<text x="{33*s}" y="{4*s}" font-size="11" fill="#a5b4fc" class="float-z2" font-weight="700">z</text>
+<text x="{35*s}" y="{3*s}" font-size="9" fill="#a5b4fc" class="float-z3" font-weight="700">z</text>"""
+
+    return f"""<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" class="{cls}" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
+<rect width="{w}" height="{h}" fill="transparent"/>
+{pixel_art}
+{zzz}
+</svg>"""
 
 
 def _mascot_svg(state: str = "resting") -> str:
