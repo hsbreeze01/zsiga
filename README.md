@@ -1,6 +1,50 @@
-# zsiga
+# zsiga ⚡
 
-基于 [OpenSpec](https://github.com/Fission-AI/OpenSpec) 的自主开发智能体。读取目标项目中的需求提案，自动补全规格、实现代码、验证质量，完成 git 提交。
+**Level 2 · Code Architect** — 超电磁开发智能体。读取目标项目中的需求提案，自动补全规格、实现代码、验证质量，完成 git 提交。
+
+> 名字源自 **Zsigmondy**（齐格蒙迪，诺贝尔化学奖得主）—— 在混沌的代码中建立秩序。
+> 形象灵感来自 **御坂美琴**（某科学的超电磁炮）—— 用最朴素的硬币，打出最精准的命中。
+
+## 档案卡片
+
+```
+┌─────────────────────────────────────────────┐
+│  ⚡ zsiga · Level 2 Code Architect           │
+│  超电磁开发智能体                             │
+│                                             │
+│  🪙 硬币 · 电弧 · 精准打击                    │
+│                                             │
+│  等级：Level 2（AST 透视 + 消息压缩 + 分身）  │
+│  LLM：智谱 AI GLM-5.1                       │
+│  弹药：OpenSpec specs（唯一的真相源）          │
+│                                             │
+│  能力清单：                                   │
+│  ⚡ 超电磁炮 — bash/grep/cat 精准命中         │
+│  🔍 电磁透视 — AST 代码骨架扫描              │
+│  🗜️ 电磁压缩 — Context Compaction           │
+│  🐾 御坂网络 — Sub-Agent 分身并行             │
+│                                             │
+│  性格：                                      │
+│  · 硬币信徒（spec 是唯一弹药）                │
+│  · 傲娇 — 被表扬会转硬币                     │
+│  · 绝不重犯同一个错误                         │
+│  · 话少活好                                  │
+│                                             │
+│  座右铭：                                     │
+│  "每枚硬币只打一个目标，                      │
+│   每次失误都写进 learnings.jsonl。"            │
+└─────────────────────────────────────────────┘
+```
+
+## 等级体系
+
+| Level | 代号 | 能力 | 状态 |
+|-------|------|------|------|
+| Level 1 | Shell Artisan | shell 工具 + OpenSpec 流程纪律 | ✅ ACHIEVED |
+| **Level 2** | **Code Architect** | **AST 透视 + 消息压缩 + 分身并行** | **✅ CURRENT** |
+| Level 3 | Self-Evolution | 自我修改、自我进化 | 🚧 Leveling Up |
+| Level 4 | ? | 多项目协同 | 🔒 LOCKED |
+| Level 5 | ? | 全栈自主（目标：代码界 Level 5） | 🔒 LOCKED |
 
 ## 工作原理
 
@@ -322,44 +366,53 @@ zsiga/
 ├── zsiga.yaml                  # 全局配置
 ├── requirements.txt
 ├── pyproject.toml
+├── L2_PLAN.md                  # L2 架构决策文档
 ├── skills/                     # Agent 行为约束
 │   ├── enrich.md               #   补全规则
-│   ├── implement.md            #   实现规则
+│   ├── implement.md            #   实现规则（含 AST 工具引导）
 │   ├── verify.md               #   验证规则
 │   └── safety.md               #   安全红线
 ├── memory/                     # Agent 记忆（自我学习）
-│   ├── active_context.md       #   注入到每次 agent 运行的上下文
-│   └── learnings.jsonl         #   经验归档（追加写入）
+│   ├── active_context.md       #   注入到每次 agent 运行的上下文（含炮姐口头禅）
+│   ├── learnings.jsonl         #   经验归档（追加写入）
+│   └── journal.jsonl           #   成长日记
+├── site/
+│   └── dashboard.html          #   ⚡ Level 仪表盘
 ├── templates/                  # 模板（预留）
 └── zsiga/                      # 源码
     ├── __init__.py
     ├── __main__.py              # 入口：python -m zsiga
-    ├── config.py                # 配置加载
+    ├── config.py                # 配置加载（含 CompactionConfig）
     ├── git_ops.py               # Git 操作
     ├── agent/
-    │   ├── loop.py              #   LLM Agent Loop（GLM function calling）
-    │   └── tools.py             #   6 个工具（bash, read/write/edit, search, list）
+    │   ├── loop.py              #   LLM Agent Loop + Context Compaction
+    │   ├── tools.py             #   8 个工具（L1 6个 + L2 ast_search/ast_replace）
+    │   ├── compaction.py        #   ⚡ 电磁压缩（消息摘要 + fallback）
+    │   ├── ast_tools.py         #   🔍 电磁透视（ast-grep-py AST 搜索/替换）
+    │   └── sub_agent.py         #   🐾 御坂网络（L1 分身 + Semaphore(2) 并行）
     ├── intake/
     │   └── scanner.py           #   目录扫描，发现 proposal
     ├── memory/
     │   ├── learn.py             #   经验记录
+    │   ├── journal.py           #   成长日记读写
     │   └── context.py           #   上下文加载与合成
     ├── metrics/
-    │   ├── types.py             #   数据模型 + 里程碑定义
+    │   ├── types.py             #   数据模型 + Level 里程碑定义
     │   ├── collector.py         #   指标采集与统计
-    │   └── dashboard.py         #   HTML 仪表盘生成
+    │   └── dashboard.py         #   ⚡ HTML 仪表盘（炮姐吉祥物 + Level 体系）
     └── pipeline/
-        ├── orchestrator.py      #   四阶段编排器
+        ├── orchestrator.py      #   四阶段编排器（scoped test + 严格 fix prompt）
         ├── enricher.py          #   Phase 1: 补全
         ├── implementer.py       #   Phase 2: 实现
         ├── verifier.py          #   Phase 3: 验证
-        └── utils.py             #   机械化验证 + 归档
+        └── utils.py             #   机械化验证（scoped test targets）+ 归档
 ```
 
 ## Agent 工具
 
-zsiga 为 LLM 注册 6 个工具，全部指向**目标项目**：
+zsiga Level 2 注册 8 个工具，全部指向**目标项目**：
 
+### L1 基础工具（超电磁炮）
 | 工具 | 作用 |
 |------|------|
 | `bash` | 在目标项目目录执行 shell 命令 |
@@ -368,6 +421,12 @@ zsiga 为 LLM 注册 6 个工具，全部指向**目标项目**：
 | `edit_file` | 精确替换文件中的文本片段（old_text 必须唯一匹配） |
 | `search` | 正则搜索目标项目文件内容 |
 | `list_files` | 列出目标项目目录结构 |
+
+### L2 新增工具（电磁透视）
+| 工具 | 作用 |
+|------|------|
+| `ast_search` | AST 模式搜索 — 用 `$VAR`/`$$$` 匹配代码结构，14种语言自动检测 |
+| `ast_replace` | AST 模式替换 — 保证语法正确性的精确代码替换 |
 
 ## 常见问题
 
