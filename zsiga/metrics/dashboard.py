@@ -191,169 +191,112 @@ td {{ border-top: 1px solid #334155; }}
 def _mascot_svg(state: str = "resting") -> str:
     cls = "mascot-working" if state == "working" else "mascot-resting"
     if state == "working":
-        return f"""<svg width="160" height="180" viewBox="0 0 160 180" class="{cls}" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="160" height="160" viewBox="0 0 160 160" class="{cls}" xmlns="http://www.w3.org/2000/svg">
 <defs>
-  <radialGradient id="hair" cx="45%" cy="30%" r="65%">
-    <stop offset="0%" stop-color="#a78bfa"/>
-    <stop offset="100%" stop-color="#5b21b6"/>
-  </radialGradient>
-  <radialGradient id="face" cx="50%" cy="40%" r="50%">
-    <stop offset="0%" stop-color="#fef3c7"/>
-    <stop offset="100%" stop-color="#fde68a"/>
-  </radialGradient>
-  <radialGradient id="coin" cx="40%" cy="35%" r="50%">
+  <radialGradient id="coinGrad" cx="35%" cy="30%" r="65%">
     <stop offset="0%" stop-color="#fde68a"/>
-    <stop offset="50%" stop-color="#f59e0b"/>
+    <stop offset="40%" stop-color="#f59e0b"/>
     <stop offset="100%" stop-color="#d97706"/>
   </radialGradient>
-  <radialGradient id="boltGrad" cx="50%" cy="50%" r="50%">
+  <radialGradient id="arcGlow" cx="50%" cy="50%" r="50%">
     <stop offset="0%" stop-color="#fbbf24"/>
-    <stop offset="100%" stop-color="#7c3aed"/>
+    <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
   </radialGradient>
-  <filter id="glow">
-    <feGaussianBlur stdDeviation="2" result="blur"/>
-    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  <filter id="elecGlow">
+    <feGaussianBlur stdDeviation="3" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="coinGlow">
+    <feGaussianBlur stdDeviation="1.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
 </defs>
-<!-- shadow -->
-<ellipse cx="80" cy="172" rx="35" ry="5" fill="#7c3aed20"/>
-<!-- hair back -->
-<ellipse cx="80" cy="55" rx="48" ry="50" fill="url(#hair)"/>
-<!-- hair strands flowing right (signature Misaka style) -->
-<path d="M100,25 Q120,18 118,40 Q122,30 130,38 Q125,22 115,15" fill="url(#hair)" opacity="0.9"/>
-<path d="M105,30 Q125,28 128,48 Q130,35 135,45 Q130,25 118,20" fill="url(#hair)" opacity="0.7"/>
-<path d="M95,20 Q110,10 112,28 Q116,16 122,24" fill="url(#hair)" opacity="0.6"/>
-<!-- face -->
-<ellipse cx="80" cy="62" rx="36" ry="38" fill="url(#face)"/>
-<!-- hair bangs -->
-<path d="M44,45 Q50,25 65,35 Q55,20 70,22 Q62,15 78,18 Q75,25 82,30 Q72,22 68,35 Q60,28 50,40Z" fill="url(#hair)"/>
-<!-- hair clip (Gekota frog pin) -->
-<circle cx="55" cy="32" r="4" fill="#22c55e"/>
-<circle cx="55" cy="32" r="2" fill="#16a34a"/>
-<!-- eyes - determined, sharp -->
-<ellipse cx="66" cy="60" rx="10" ry="11" fill="white"/>
-<ellipse cx="94" cy="60" rx="10" ry="11" fill="white"/>
-<circle cx="68" cy="61" r="6.5" fill="#7c3aed"/>
-<circle cx="96" cy="61" r="6.5" fill="#7c3aed"/>
-<circle cx="67" cy="59" r="2.5" fill="white"/>
-<circle cx="95" cy="59" r="2.5" fill="white"/>
-<!-- eyebrows - determined -->
-<path d="M56,48 Q66,43 76,47" stroke="#5b21b6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<path d="M84,47 Q94,43 104,48" stroke="#5b21b6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<!-- cheeks - slight blush -->
-<circle cx="52" cy="72" r="5" fill="#fda4af" opacity="0.4"/>
-<circle cx="108" cy="72" r="5" fill="#fda4af" opacity="0.4"/>
-<!-- mouth - confident smirk -->
-<path d="M74,78 Q80,82 86,78" stroke="#92400e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-<!-- body (Tokiwadai-style uniform, purple) -->
-<rect x="58" y="98" width="44" height="35" rx="8" fill="#7c3aed"/>
-<rect x="62" y="98" width="36" height="18" rx="4" fill="white"/>
-<path d="M68,98 L80,112 L92,98" fill="none" stroke="#7c3aed" stroke-width="2"/>
-<!-- skirt -->
-<path d="M55,130 Q58,145 52,155 L108,155 Q102,145 105,130 Q80,135 55,130Z" fill="#5b21b6"/>
-<!-- legs -->
-<rect x="65" y="152" width="8" height="16" rx="4" fill="#fde68a"/>
-<rect x="87" y="152" width="8" height="16" rx="4" fill="#fde68a"/>
-<!-- shoes -->
-<ellipse cx="69" cy="168" rx="8" ry="4" fill="#1e1b4b"/>
-<ellipse cx="91" cy="168" rx="8" ry="4" fill="#1e1b4b"/>
-<!-- right arm flicking coin -->
-<line x1="102" y1="108" x2="130" y2="90" stroke="#7c3aed" stroke-width="8" stroke-linecap="round"/>
-<circle cx="130" cy="86" r="3" fill="#fde68a"/>
-<!-- THE COIN - spinning mid-air -->
-<ellipse cx="138" cy="78" rx="8" ry="4" fill="url(#coin)" filter="url(#glow)" class="spark1">
-  <animateTransform attributeName="transform" type="rotate" from="0 138 78" to="360 138 78" dur="0.6s" repeatCount="indefinite"/>
+<!-- background ring -->
+<circle cx="80" cy="80" r="70" fill="none" stroke="#7c3aed" stroke-width="1.5" opacity="0.15"/>
+<circle cx="80" cy="80" r="55" fill="none" stroke="#7c3aed" stroke-width="0.8" opacity="0.1" stroke-dasharray="4 6"/>
+<!-- outer arc lightning -->
+<polyline points="25,60 40,40 55,65 70,30 85,55 100,25 115,50 130,35"
+  stroke="#fbbf24" stroke-width="2.5" fill="none" filter="url(#elecGlow)" opacity="0.7" class="spark1"/>
+<polyline points="30,100 50,120 65,90 80,130 95,100 110,125 125,95 135,110"
+  stroke="#c4b5fd" stroke-width="2" fill="none" filter="url(#elecGlow)" opacity="0.5" class="spark2"/>
+<!-- electric field lines radiating from center -->
+<line x1="80" y1="80" x2="20" y2="30" stroke="#fbbf24" stroke-width="0.6" opacity="0.3" class="spark3"/>
+<line x1="80" y1="80" x2="140" y2="35" stroke="#fbbf24" stroke-width="0.6" opacity="0.3" class="spark1"/>
+<line x1="80" y1="80" x2="15" y2="110" stroke="#c4b5fd" stroke-width="0.5" opacity="0.25" class="spark2"/>
+<line x1="80" y1="80" x2="145" y2="115" stroke="#c4b5fd" stroke-width="0.5" opacity="0.25" class="spark3"/>
+<!-- THE COIN — centered, spinning -->
+<ellipse cx="80" cy="72" rx="28" ry="28" fill="url(#coinGrad)" filter="url(#coinGlow)">
+  <animateTransform attributeName="transform" type="rotate" from="0 80 72" to="360 80 72" dur="8s" repeatCount="indefinite"/>
 </ellipse>
-<!-- coin detail -->
-<text x="136" y="81" font-size="6" fill="#92400e" font-weight="bold" text-anchor="middle">¥</text>
-<!-- left arm at side -->
-<line x1="58" y1="108" x2="42" y2="125" stroke="#7c3aed" stroke-width="8" stroke-linecap="round"/>
-<!-- ELECTRIC ARCS -->
-<polyline points="132,74 136,68 134,62" stroke="#fbbf24" stroke-width="1.5" fill="none" filter="url(#glow)" class="spark1"/>
-<polyline points="140,76 146,70 144,64" stroke="#fbbf24" stroke-width="1.2" fill="none" filter="url(#glow)" class="spark2"/>
-<polyline points="136,82 140,88 138,94" stroke="#fbbf24" stroke-width="1" fill="none" filter="url(#glow)" class="spark3"/>
-<polyline points="128,80 122,76 124,70" stroke="#c4b5fd" stroke-width="1" fill="none" filter="url(#glow)" class="spark2"/>
-<polyline points="144,82 150,86 148,92" stroke="#c4b5fd" stroke-width="0.8" fill="none" filter="url(#glow)" class="spark3"/>
-<!-- small sparks around coin -->
-<text x="150" y="72" font-size="8" fill="#fbbf24" class="spark1">⚡</text>
-<text x="122" y="68" font-size="6" fill="#c4b5fd" class="spark2">⚡</text>
+<ellipse cx="80" cy="72" rx="20" ry="20" fill="none" stroke="#d97706" stroke-width="1" opacity="0.5">
+  <animateTransform attributeName="transform" type="rotate" from="0 80 72" to="360 80 72" dur="8s" repeatCount="indefinite"/>
+</ellipse>
+<!-- coin inner detail — ¥ symbol -->
+<text x="80" y="80" font-size="24" fill="#92400e" text-anchor="middle" font-weight="900" font-family="serif" opacity="0.6">¥</text>
+<!-- spec text on coin ring -->
+<text x="80" y="68" font-size="6" fill="#d97706" text-anchor="middle" font-weight="700" letter-spacing="4" opacity="0.5">SPEC</text>
+<!-- electric discharge from coin -->
+<polyline points="108,72 120,65 118,58" stroke="#fbbf24" stroke-width="2.5" fill="none" filter="url(#elecGlow)" class="spark1">
+  <animate attributeName="opacity" values="1;0.3;1" dur="0.4s" repeatCount="indefinite"/>
+</polyline>
+<polyline points="108,78 122,85 120,92" stroke="#fbbf24" stroke-width="2" fill="none" filter="url(#elecGlow)" class="spark2">
+  <animate attributeName="opacity" values="0.3;1;0.3" dur="0.5s" repeatCount="indefinite"/>
+</polyline>
+<polyline points="52,68 38,62 40,55" stroke="#c4b5fd" stroke-width="1.8" fill="none" filter="url(#elecGlow)" class="spark3">
+  <animate attributeName="opacity" values="0.5;1;0.5" dur="0.6s" repeatCount="indefinite"/>
+</polyline>
+<polyline points="55,80 40,88 42,95" stroke="#c4b5fd" stroke-width="1.5" fill="none" filter="url(#elecGlow)" class="spark1">
+  <animate attributeName="opacity" values="1;0.4;1" dur="0.35s" repeatCount="indefinite"/>
+</polyline>
+<!-- small sparks -->
+<circle cx="125" cy="55" r="2" fill="#fbbf24" filter="url(#elecGlow)" class="spark2">
+  <animate attributeName="r" values="2;0.5;2" dur="0.5s" repeatCount="indefinite"/>
+</circle>
+<circle cx="35" cy="95" r="1.5" fill="#c4b5fd" filter="url(#elecGlow)" class="spark3">
+  <animate attributeName="r" values="0.5;2;0.5" dur="0.4s" repeatCount="indefinite"/>
+</circle>
 <!-- Level badge -->
-<rect x="60" y="140" width="40" height="12" rx="6" fill="#fbbf24" opacity="0.9"/>
-<text x="80" y="149" font-size="8" fill="#1e1b4b" text-anchor="middle" font-weight="bold">Lv.2</text>
+<rect x="55" y="110" width="50" height="18" rx="9" fill="#7c3aed"/>
+<text x="80" y="123" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="800" letter-spacing="1">Lv.2</text>
+<!-- tagline -->
+<text x="80" y="145" font-size="8" fill="#94a3b8" text-anchor="middle" font-weight="600" letter-spacing="2">RAILGUN</text>
 </svg>"""
 
-    return f"""<svg width="160" height="180" viewBox="0 0 160 180" class="{cls}" xmlns="http://www.w3.org/2000/svg">
+    return f"""<svg width="160" height="160" viewBox="0 0 160 160" class="{cls}" xmlns="http://www.w3.org/2000/svg">
 <defs>
-  <radialGradient id="rhair" cx="45%" cy="30%" r="65%">
-    <stop offset="0%" stop-color="#a78bfa"/>
-    <stop offset="100%" stop-color="#5b21b6"/>
+  <radialGradient id="rcoinGrad" cx="35%" cy="30%" r="65%">
+    <stop offset="0%" stop-color="#fde68a"/>
+    <stop offset="40%" stop-color="#f59e0b"/>
+    <stop offset="100%" stop-color="#d97706"/>
   </radialGradient>
-  <radialGradient id="rface" cx="50%" cy="40%" r="50%">
-    <stop offset="0%" stop-color="#fef3c7"/>
-    <stop offset="100%" stop-color="#fde68a"/>
-  </radialGradient>
-  <radialGradient id="drink" cx="50%" cy="50%" r="50%">
-    <stop offset="0%" stop-color="#fbbf24"/>
-    <stop offset="100%" stop-color="#f59e0b"/>
-  </radialGradient>
-  <filter id="rglow">
-    <feGaussianBlur stdDeviation="1.5" result="blur"/>
-    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  <filter id="rcoinGlow">
+    <feGaussianBlur stdDeviation="1" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
 </defs>
-<!-- shadow -->
-<ellipse cx="80" cy="172" rx="40" ry="5" fill="#7c3aed15"/>
-<!-- bench / ground -->
-<rect x="30" y="148" width="100" height="6" rx="3" fill="#334155"/>
-<!-- hair back -->
-<ellipse cx="80" cy="58" rx="48" ry="50" fill="url(#rhair)"/>
-<!-- face -->
-<ellipse cx="80" cy="65" rx="36" ry="38" fill="url(#rface)"/>
-<!-- hair bangs (slightly messy, relaxed) -->
-<path d="M44,48 Q52,28 66,38 Q56,22 72,25 Q64,18 80,22 Q76,28 82,34 Q74,26 70,38 Q62,32 52,44Z" fill="url(#rhair)"/>
-<!-- hair strands right -->
-<path d="M100,30 Q118,25 116,45 Q120,35 126,42" fill="url(#rhair)" opacity="0.6"/>
-<!-- hair clip -->
-<circle cx="55" cy="35" r="3.5" fill="#22c55e"/>
-<circle cx="55" cy="35" r="1.5" fill="#16a34a"/>
-<!-- eyes - happy closed arcs (content) -->
-<path d="M60,63 Q68,56 76,63" stroke="#5b21b6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<path d="M84,63 Q92,56 100,63" stroke="#5b21b6" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<!-- cheeks -->
-<circle cx="52" cy="74" r="5" fill="#fda4af" opacity="0.5"/>
-<circle cx="108" cy="74" r="5" fill="#fda4af" opacity="0.5"/>
-<!-- mouth - content smile -->
-<path d="M73,80 Q80,85 87,80" stroke="#92400e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-<!-- body sitting -->
-<rect x="58" y="102" width="44" height="32" rx="8" fill="#7c3aed"/>
-<rect x="62" y="102" width="36" height="16" rx="4" fill="white"/>
-<path d="M68,102 L80,114 L92,102" fill="none" stroke="#7c3aed" stroke-width="2"/>
-<!-- skirt sitting -->
-<path d="M55,132 Q50,145 48,148 L112,148 Q110,145 105,132 Q80,137 55,132Z" fill="#5b21b6"/>
-<!-- legs crossed sitting -->
-<ellipse cx="70" cy="155" rx="12" ry="5" fill="#fde68a"/>
-<ellipse cx="90" cy="150" rx="12" ry="5" fill="#fde68a"/>
-<!-- shoes -->
-<ellipse cx="65" cy="158" rx="7" ry="3.5" fill="#1e1b4b"/>
-<ellipse cx="95" cy="153" rx="7" ry="3.5" fill="#1e1b4b"/>
-<!-- right arm holding drink -->
-<line x1="102" y1="112" x2="118" y2="95" stroke="#7c3aed" stroke-width="7" stroke-linecap="round"/>
-<circle cx="118" cy="85" r="3" fill="#fde68a"/>
-<!-- drink can -->
-<rect x="112" y="72" width="14" height="18" rx="4" fill="url(#drink)"/>
-<rect x="114" y="74" width="10" height="3" rx="1" fill="white" opacity="0.3"/>
-<text x="119" y="86" font-size="5" fill="#92400e" text-anchor="middle" font-weight="bold">☕</text>
-<!-- left arm resting -->
-<line x1="58" y1="112" x2="44" y2="128" stroke="#7c3aed" stroke-width="7" stroke-linecap="round"/>
-<!-- Level badge on skirt -->
-<rect x="64" y="138" width="32" height="10" rx="5" fill="#fbbf24" opacity="0.8"/>
-<text x="80" y="146" font-size="7" fill="#1e1b4b" text-anchor="middle" font-weight="bold">Lv.2</text>
-<!-- zzz with tiny sparks -->
-<text x="128" y="50" font-size="14" fill="#a5b4fc" class="float-z" font-weight="700">z</text>
-<text x="138" y="40" font-size="11" fill="#a5b4fc" class="float-z2" font-weight="700">z</text>
-<text x="146" y="32" font-size="9" fill="#a5b4fc" class="float-z3" font-weight="700">z</text>
-<!-- tiny residual spark on fingertip -->
-<circle cx="118" cy="72" r="2" fill="#fbbf24" filter="rglow" class="spark1" opacity="0.5"/>
+<!-- background ring — dimmed -->
+<circle cx="80" cy="80" r="70" fill="none" stroke="#7c3aed" stroke-width="1" opacity="0.08"/>
+<!-- THE COIN — lying flat on surface, not spinning -->
+<ellipse cx="80" cy="85" rx="30" ry="12" fill="#d97706" opacity="0.3"/>
+<ellipse cx="80" cy="80" rx="30" ry="30" fill="url(#rcoinGrad)" filter="url(#rcoinGlow)" opacity="0.9"/>
+<ellipse cx="80" cy="80" rx="22" ry="22" fill="none" stroke="#d97706" stroke-width="1" opacity="0.4"/>
+<!-- coin detail -->
+<text x="80" y="88" font-size="24" fill="#92400e" text-anchor="middle" font-weight="900" font-family="serif" opacity="0.5">¥</text>
+<text x="80" y="76" font-size="6" fill="#d97706" text-anchor="middle" font-weight="700" letter-spacing="4" opacity="0.4">SPEC</text>
+<!-- faint residual spark -->
+<circle cx="105" cy="65" r="1.5" fill="#fbbf24" opacity="0.3" class="spark1">
+  <animate attributeName="opacity" values="0.3;0.1;0.3" dur="2s" repeatCount="indefinite"/>
+</circle>
+<circle cx="55" cy="70" r="1" fill="#c4b5fd" opacity="0.2" class="spark2">
+  <animate attributeName="opacity" values="0.2;0.05;0.2" dur="3s" repeatCount="indefinite"/>
+</circle>
+<!-- zzz floating -->
+<text x="115" y="55" font-size="16" fill="#a5b4fc" class="float-z" font-weight="700">z</text>
+<text x="128" y="43" font-size="13" fill="#a5b4fc" class="float-z2" font-weight="700">z</text>
+<text x="138" y="34" font-size="10" fill="#a5b4fc" class="float-z3" font-weight="700">z</text>
+<!-- Level badge — dimmed -->
+<rect x="55" y="118" width="50" height="16" rx="8" fill="#7c3aed" opacity="0.6"/>
+<text x="80" y="130" font-size="10" fill="#fbbf24" text-anchor="middle" font-weight="800" letter-spacing="1" opacity="0.7">Lv.2</text>
 </svg>"""
 
 
