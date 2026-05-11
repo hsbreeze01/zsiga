@@ -204,19 +204,28 @@ def _scan_templates(target_path: str, transport: Transport,
 def prefetch_mechanical(target_path: str, test_cmd: str, lint_cmd: str,
                         since_sha: str = None,
                         transport: Transport = None) -> dict:
+    from .utils import verify_mechanical
     transport = transport or LocalTransport()
-    results = {}
 
-    r = transport.run_shell(test_cmd, cwd=target_path, timeout=300)
-    results["test"] = {
-        "passed": r["exit_code"] == 0,
-        "output": r["stdout"][-2000:] if r["stdout"] else "",
+    passed, errors = verify_mechanical(
+        target_path, test_cmd, lint_cmd,
+        since_sha=since_sha, transport=transport,
+    )
+
+    test_passed = True
+    lint_passed = True
+    test_output = ""
+    lint_output = ""
+    if not passed:
+        for section in errors.split("\n"):
+            if section.startswith("tests:"):
+                test_passed = False
+                test_output = errors[errors.index("tests:"):]
+            elif section.startswith("lint:"):
+                lint_passed = False
+                lint_output = errors[errors.index("lint:"):]
+
+    return {
+        "test": {"passed": test_passed, "output": test_output[-2000:]},
+        "lint": {"passed": lint_passed, "output": lint_output[-2000:]},
     }
-
-    r = transport.run_shell(lint_cmd, cwd=target_path, timeout=120)
-    results["lint"] = {
-        "passed": r["exit_code"] == 0,
-        "output": r["stdout"][-2000:] if r["stdout"] else "",
-    }
-
-    return results

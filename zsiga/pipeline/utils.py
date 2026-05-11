@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import shutil
 import sys
@@ -74,6 +75,59 @@ def _wrap_cmd(cmd: str, target_path: str, transport: Transport = None) -> list[s
     return [sys.executable, "-m"] + parts
 
 
+def _get_changed_lines_by_file(target_path: str, since_sha: str,
+                               transport: Transport = None) -> dict[str, set[int]]:
+    """Get changed line numbers per file from git diff (unified format).
+
+    Returns {filepath: {line_numbers}} for lines added or modified.
+    """
+    transport = transport or LocalTransport()
+    r = transport.run_shell(
+        f"git diff -U0 {since_sha} HEAD -- '*.py'; "
+        f"git diff -U0 --cached -- '*.py'; "
+        f"git diff -U0 -- '*.py'",
+        cwd=target_path, timeout=30,
+    )
+    result = {}
+    current_file = None
+    for line in (r["stdout"] or "").split("\n"):
+        if line.startswith("+++ b/") or line.startswith("+++ /"):
+            current_file = line[6:]
+            if current_file not in result:
+                result[current_file] = set()
+        elif line.startswith("@@ ") and current_file:
+            match = re.search(r"\+(\d+)(?:,(\d+))?", line)
+            if match:
+                start = int(match.group(1))
+                count = int(match.group(2) or "1")
+                for n in range(start, start + count):
+                    result[current_file].add(n)
+    return result
+
+
+def _filter_lint_to_changed_lines(lint_output: str,
+                                  changed_lines: dict[str, set[int]]) -> str:
+    """Filter ruff lint output to only include errors on changed lines.
+
+    Ruff format: FILE:LINE:COL: CODE ...
+    If the error's FILE+LINE is not in changed_lines, skip it.
+    """
+    if not changed_lines:
+        return lint_output
+    filtered = []
+    for line in lint_output.split("\n"):
+        match = re.match(r"(.+\.py):(\d+):\d+: ", line)
+        if match:
+            filepath = match.group(1)
+            lineno = int(match.group(2))
+            file_lines = changed_lines.get(filepath, set())
+            if not file_lines or lineno in file_lines:
+                filtered.append(line)
+        elif line.strip():
+            filtered.append(line)
+    return "\n".join(filtered)
+
+
 def verify_mechanical(target_path: str, test_cmd: str, lint_cmd: str,
                       since_sha: str = None,
                       transport: Transport = None) -> tuple[bool, str]:
@@ -83,6 +137,7 @@ def verify_mechanical(target_path: str, test_cmd: str, lint_cmd: str,
 
     if since_sha:
         changed = _get_changed_files(target_path, since_sha, transport)
+        changed_lines = _get_changed_lines_by_file(target_path, since_sha, transport)
         if changed:
             r_fix = transport.run_shell(
                 " ".join(ruff + ["check", "--fix"] + changed),
@@ -93,7 +148,11 @@ def verify_mechanical(target_path: str, test_cmd: str, lint_cmd: str,
                 cwd=target_path, timeout=120,
             )
             if lint_r["exit_code"] != 0:
-                errors.append(f"lint:\n{lint_r['stdout'][:2000]}")
+                filtered = _filter_lint_to_changed_lines(
+                    lint_r["stdout"][:2000], changed_lines
+                )
+                if filtered.strip():
+                    errors.append(f"lint:\n{filtered}")
 
         test_targets = _get_test_targets(target_path, since_sha, changed, transport)
         if test_targets:

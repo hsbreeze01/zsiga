@@ -26,13 +26,46 @@ def record_lesson(title: str, context: str, takeaway: str,
 
 def record_outcome(change_name: str, project: str, success: bool,
                    phase: str, detail: str = None):
-    status = "PASS" if success else "FAIL"
-    title = f"{status}: {change_name} at {phase}"
+    if success:
+        return
+
+    title = f"FAIL: {change_name} at {phase}"
     ctx = f"project={project}, phase={phase}"
     if detail:
         ctx += f", detail={detail[:300]}"
-    takeaway = ("Success" if success
-                else f"Failed at {phase}: {detail[:200]}" if detail
-                else f"Failed at {phase}")
-    pattern_key = f"pipeline.{status.lower()}.{phase}"
+
+    error_type = _classify_error(detail or "")
+    takeaway = _generate_takeaway(error_type, phase, detail)
+    pattern_key = f"pipeline.fail.{phase}.{error_type}"
     record_lesson(title, ctx, takeaway, pattern_key, source="orchestrator")
+
+
+def _classify_error(detail: str) -> str:
+    if "E401" in detail:
+        return "lint_e401_multi_import"
+    if "E702" in detail:
+        return "lint_e702_semicolon"
+    if "E701" in detail:
+        return "lint_e701_one_line"
+    if "E722" in detail:
+        return "lint_e722_bare_except"
+    if "E501" in detail:
+        return "lint_e501_line_length"
+    if "FAILED" in detail or "test session" in detail.lower():
+        return "test_failure"
+    if "timeout" in detail.lower():
+        return "timeout"
+    return "unknown"
+
+
+def _generate_takeaway(error_type: str, phase: str, detail: str) -> str:
+    takeaways = {
+        "lint_e401_multi_import": "Pre-split multi-import lines in implementation; ruff --fix can auto-fix this",
+        "lint_e702_semicolon": "Never use semicolons to join statements; always use separate lines",
+        "lint_e701_one_line": "Never put if/for body on same line as keyword; always use newline + indent",
+        "lint_e722_bare_except": "Always use 'except Exception:' instead of bare 'except:'",
+        "lint_e501_line_length": "Keep lines under 88 chars; break long strings or function signatures",
+        "test_failure": "Check test output for specific assertion errors; verify test expectations match implementation API",
+        "timeout": "Task exceeded time budget; consider reducing scope or splitting into smaller changes",
+    }
+    return takeaways.get(error_type, f"Failed at {phase}: review error and adjust approach")
