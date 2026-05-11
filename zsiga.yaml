@@ -60,6 +60,12 @@ targets:
       user: root
       key_path: ~/.ssh/id_rsa
 
+  zsiga:
+    path: /Users/lancer.zhang/ProjectNIO/zsiga
+    test_cmd: "/opt/homebrew/bin/python3.11 -m pytest -x --tb=short"
+    lint_cmd: "/opt/homebrew/bin/python3.11 -m ruff check ."
+    transport: local
+
 intake:
   mode: dir_scan
   dir_scan:
@@ -72,7 +78,7 @@ pipeline:
   eval_fix_attempts: 3
   cycle_interval_hours: 8
   compaction:
-    enabled: true
+    enabled: false
     threshold_chars: 60000
     keep_recent: 3
     use_llm_summary: true

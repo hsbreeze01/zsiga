@@ -69,4 +69,9 @@ def _build_base_context() -> str:
         lines = [l for l in lines if l.strip()]
         parts.append(f"\n## Session History: {len(lines)} lessons recorded")
 
+    from .pattern_miner import mine_patterns, generate_warnings
+    patterns = mine_patterns()
+    if patterns:
+        parts.append(generate_warnings(patterns))
+
     return "\n".join(parts)

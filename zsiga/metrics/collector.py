@@ -33,7 +33,10 @@ def _count_task_deliverables(task_id: str, deliverables: list[str]) -> int:
                 found += 1
             continue
         if d.startswith("memory/"):
-            path = Path(__file__).resolve().parent.parent.parent / d.split(":")[0] if ":" in d else Path(__file__).resolve().parent.parent.parent / d
+            rel = d.split(":")[0] if ":" in d else d
+            path = Path(__file__).resolve().parent.parent.parent / rel
+            if not path.exists():
+                path = _ZSIGA_SRC / rel
             if path.exists():
                 found += 1
             continue

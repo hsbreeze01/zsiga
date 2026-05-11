@@ -108,14 +108,14 @@ MILESTONE_L3 = {
             "id": "specialist_sub_agents",
             "title": "专业子代理分化",
             "description": "区分 explore(快速搜索)、implement(写代码)、review(验证) 三种子代理角色，各自有专门 system prompt",
-            "deliverables": ["agent/roles.py", "roles: explore, implement, review", "sub_agent.py: create_with_role()"],
+            "deliverables": ["agent/roles.py", "agent/sub_agent.py"],
             "acceptance": "三种角色子代理可独立创建并执行，各有不同的 system prompt 和行为约束",
         },
         {
             "id": "pattern_mining",
             "title": "跨会话模式挖掘",
             "description": "从 learnings.jsonl 中提取 recurring patterns，自动识别重复失败模式并生成避坑建议",
-            "deliverables": ["memory/pattern_miner.py", "active_context: auto-inject recurring warnings"],
+            "deliverables": ["memory/pattern_miner.py", "memory/context.py"],
             "acceptance": "能从历史 learnings 中识别出现 ≥3 次的 pattern_key，自动注入到 active_context",
         },
         {
