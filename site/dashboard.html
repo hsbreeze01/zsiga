@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>zsiga dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+       background: #0f172a; color: #e2e8f0; padding: 2rem; }
+h1 { font-size: 1.5rem; margin-bottom: 1.5rem; }
+h1 span { color: #64748b; font-size: 0.9rem; font-weight: 400; margin-left: 0.5rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+         gap: 1rem; margin-bottom: 2rem; }
+.card { background: #1e293b; border-radius: 8px; padding: 1.2rem; }
+.card .label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;
+               letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+.card .value { font-size: 1.8rem; font-weight: 700; }
+.card .value.good { color: #22c55e; }
+.card .value.warn { color: #f59e0b; }
+.card .value.bad { color: #ef4444; }
+.section { margin-bottom: 2rem; }
+.section h2 { font-size: 1.1rem; margin-bottom: 0.8rem; color: #94a3b8; }
+table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 8px;
+         overflow: hidden; }
+th, td { padding: 0.6rem 1rem; text-align: left; font-size: 0.85rem; }
+th { background: #334155; color: #94a3b8; font-weight: 600; }
+td { border-top: 1px solid #334155; }
+.milestone { background: #1e293b; border-radius: 8px; padding: 1.2rem;
+              border-left: 4px solid; margin-bottom: 1rem; }
+.milestone h3 { font-size: 1rem; margin-bottom: 0.8rem; }
+.criterion { display: flex; align-items: center; gap: 0.5rem;
+              padding: 0.3rem 0; font-size: 0.85rem; }
+.criterion .icon { width: 18px; text-align: center; }
+.progress { flex: 1; height: 6px; background: #334155; border-radius: 3px;
+             overflow: hidden; max-width: 200px; }
+.progress .fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.meta { font-size: 0.75rem; color: #64748b; margin-top: 0.3rem; }
+.recent { list-style: none; padding: 0; }
+.recent li { padding: 0.3rem 0; font-size: 0.85rem; color: #94a3b8; }
+.recent li::before { content: "→"; margin-right: 0.5rem; color: #475569; }
+.hero { display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; }
+.hero-mascot { flex-shrink: 0; }
+.hero-info { flex: 1; }
+.hero-info h1 { margin-bottom: 0.5rem; }
+.state-badge { display: inline-block; padding: 0.2rem 0.8rem; border-radius: 999px;
+               font-size: 0.8rem; font-weight: 600; margin-top: 0.3rem; }
+.state-badge.working { background: #065f4620; color: #34d399; border: 1px solid #34d39940; }
+.state-badge.resting { background: #1e3a5f20; color: #7dd3fc; border: 1px solid #7dd3fc40; }
+@keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes coding { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+.mascot-working { animation: coding 1.5s ease-in-out infinite; }
+.mascot-resting { animation: breathe 3s ease-in-out infinite; }
+@keyframes float-z { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-18px); } }
+.float-z { animation: float-z 2s ease-in infinite; }
+.float-z2 { animation: float-z 2s ease-in 0.6s infinite; }
+.float-z3 { animation: float-z 2s ease-in 1.2s infinite; }
+@keyframes spark { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+.spark1 { animation: spark 1.2s ease-in-out infinite; }
+.spark2 { animation: spark 1.2s ease-in-out 0.4s infinite; }
+.spark3 { animation: spark 1.2s ease-in-out 0.8s infinite; }
+.journal { display: flex; flex-direction: column; gap: 0.6rem; }
+.journal-entry { background: #1e293b; border-radius: 6px; padding: 0.7rem 1rem; }
+.journal-header { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.88rem; line-height: 1.5; }
+.journal-text { flex: 1; }
+.journal-meta { font-size: 0.72rem; color: #64748b; margin-top: 0.25rem; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-mascot">
+    <svg width="152" height="128" viewBox="0 0 152 128" class="mascot-working" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
+<rect width="152" height="128" fill="transparent"/>
+<rect x="36" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="40" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="44" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="48" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="52" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="56" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="60" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="64" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="68" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="72" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="76" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="80" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="84" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="88" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="92" y="16" width="4" height="4" fill="#5b21b6"/>
+<rect x="32" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="40" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="44" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="48" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="52" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="56" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="60" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="64" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="68" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="72" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="76" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="80" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="84" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="88" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="92" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="96" y="20" width="4" height="4" fill="#5b21b6"/>
+<rect x="32" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="40" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="44" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="48" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="52" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="56" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="60" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="64" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="68" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="72" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="76" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="80" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="84" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="88" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="92" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="96" y="24" width="4" height="4" fill="#5b21b6"/>
+<rect x="28" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="32" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="40" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="44" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="48" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="52" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="56" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="60" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="64" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="68" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="72" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="76" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="80" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="84" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="88" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="92" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="96" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="100" y="28" width="4" height="4" fill="#5b21b6"/>
+<rect x="96" y="24" width="4" height="4" fill="#7c3aed"/>
+<rect x="100" y="24" width="4" height="4" fill="#7c3aed"/>
+<rect x="104" y="24" width="4" height="4" fill="#7c3aed"/>
+<rect x="100" y="20" width="4" height="4" fill="#7c3aed"/>
+<rect x="104" y="20" width="4" height="4" fill="#7c3aed"/>
+<rect x="108" y="20" width="4" height="4" fill="#7c3aed"/>
+<rect x="108" y="28" width="2.8" height="4" fill="#a78bfa"/>
+<rect x="112" y="28" width="2.8" height="4" fill="#a78bfa"/>
+<rect x="104" y="32" width="2.0" height="4" fill="#a78bfa"/>
+<rect x="108" y="32" width="2.0" height="4" fill="#a78bfa"/>
+<rect x="40" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="44" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="60" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="64" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="68" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="72" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="84" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="32" width="4" height="4" fill="#fde68a"/>
+<rect x="40" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="44" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="60" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="64" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="68" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="72" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="84" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="36" width="4" height="4" fill="#fde68a"/>
+<rect x="40" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="44" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="60" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="64" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="68" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="72" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="84" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="40" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="44" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="60" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="64" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="68" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="72" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="84" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="44" width="4" height="4" fill="#fde68a"/>
+<rect x="40" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="44" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="60" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="64" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="68" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="72" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="84" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="40" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="44" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="60" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="64" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="68" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="72" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="84" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="52" width="4" height="4" fill="#fde68a"/>
+<rect x="40" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="44" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="60" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="64" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="68" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="72" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="84" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="40" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="44" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="60" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="64" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="68" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="72" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="84" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="88" y="32" width="4" height="4" fill="#d4a44a"/>
+<rect x="88" y="36" width="4" height="4" fill="#d4a44a"/>
+<rect x="88" y="52" width="4" height="4" fill="#d4a44a"/>
+<rect x="88" y="56" width="4" height="4" fill="#d4a44a"/>
+<rect x="88" y="60" width="4" height="4" fill="#d4a44a"/>
+<rect x="36" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="40" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="44" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="48" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="52" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="56" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="60" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="64" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="68" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="72" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="76" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="80" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="84" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="88" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="92" y="32" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="36" width="4" height="4" fill="#5b21b6"/>
+<rect x="40" y="36" width="4" height="4" fill="#5b21b6"/>
+<rect x="44" y="36" width="4" height="4" fill="#5b21b6"/>
+<rect x="48" y="36" width="4" height="4" fill="#5b21b6"/>
+<rect x="52" y="36" width="4" height="4" fill="#5b21b6"/>
+<rect x="64" y="36" width="4" height="4" fill="#5b21b6"/>
+<rect x="68" y="36" width="4" height="4" fill="#5b21b6"/>
+<rect x="80" y="36" width="4" height="4" fill="#7c3aed"/>
+<rect x="84" y="36" width="4" height="4" fill="#7c3aed"/>
+<rect x="88" y="36" width="4" height="4" fill="#7c3aed"/>
+<rect x="92" y="36" width="4" height="4" fill="#7c3aed"/>
+<rect x="32" y="36" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="36" width="2.0" height="4" fill="#5b21b6"/>
+<rect x="32" y="40" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="40" width="2.0" height="4" fill="#5b21b6"/>
+<rect x="32" y="44" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="44" width="2.0" height="4" fill="#5b21b6"/>
+<rect x="32" y="48" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="48" width="2.0" height="4" fill="#5b21b6"/>
+<rect x="32" y="52" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="52" width="2.0" height="4" fill="#5b21b6"/>
+<rect x="32" y="56" width="4" height="4" fill="#5b21b6"/>
+<rect x="36" y="56" width="2.0" height="4" fill="#5b21b6"/>
+<rect x="40" y="36" width="4" height="8" fill="#22c55e"/>
+<rect x="44" y="36" width="4" height="4" fill="#16a34a"/>
+<rect x="48" y="40" width="4" height="4" fill="#e2e8f0"/>
+<rect x="52" y="40" width="4" height="4" fill="#e2e8f0"/>
+<rect x="48" y="44" width="4" height="4" fill="#7c3aed"/>
+<rect x="52" y="44" width="4" height="4" fill="#7c3aed"/>
+<rect x="56" y="44" width="4" height="4" fill="#c4b5fd"/>
+<rect x="48" y="48" width="4" height="4" fill="#7c3aed"/>
+<rect x="52" y="48" width="4" height="4" fill="#7c3aed"/>
+<rect x="72" y="40" width="4" height="4" fill="#e2e8f0"/>
+<rect x="76" y="40" width="4" height="4" fill="#e2e8f0"/>
+<rect x="72" y="44" width="4" height="4" fill="#7c3aed"/>
+<rect x="76" y="44" width="4" height="4" fill="#7c3aed"/>
+<rect x="80" y="44" width="4" height="4" fill="#c4b5fd"/>
+<rect x="72" y="48" width="4" height="4" fill="#7c3aed"/>
+<rect x="76" y="48" width="4" height="4" fill="#7c3aed"/>
+<rect x="44" y="52" width="4" height="4" fill="#fda4af" opacity="0.5"/>
+<rect x="80" y="52" width="4" height="4" fill="#fda4af" opacity="0.5"/>
+<rect x="60" y="56" width="4" height="4" fill="#92400e"/>
+<rect x="64" y="56" width="4" height="4" fill="#92400e"/>
+<rect x="44" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="48" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="52" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="56" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="60" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="64" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="68" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="72" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="76" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="80" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="84" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="44" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="48" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="52" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="56" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="60" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="64" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="68" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="72" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="76" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="80" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="84" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="44" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="48" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="52" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="56" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="60" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="64" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="68" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="72" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="76" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="80" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="84" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="44" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="48" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="52" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="56" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="60" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="64" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="68" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="72" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="76" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="80" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="84" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="44" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="48" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="52" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="56" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="60" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="64" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="68" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="72" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="76" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="80" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="84" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="56" y="64" width="4" height="4" fill="#e2e8f0"/>
+<rect x="60" y="64" width="4" height="4" fill="#e2e8f0"/>
+<rect x="64" y="64" width="4" height="4" fill="#e2e8f0"/>
+<rect x="68" y="64" width="4" height="4" fill="#e2e8f0"/>
+<rect x="72" y="64" width="4" height="4" fill="#e2e8f0"/>
+<rect x="60" y="68" width="4" height="4" fill="#e2e8f0"/>
+<rect x="68" y="68" width="4" height="4" fill="#e2e8f0"/>
+<rect x="64" y="72" width="4" height="4" fill="#e2e8f0"/>
+<rect x="40" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="36" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="40" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="36" y="76" width="4" height="4" fill="#7c3aed"/>
+<rect x="40" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="36" y="80" width="4" height="4" fill="#7c3aed"/>
+<rect x="40" y="84" width="4" height="4" fill="#7c3aed"/>
+<rect x="36" y="84" width="4" height="4" fill="#7c3aed"/>
+<rect x="88" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="92" y="68" width="4" height="4" fill="#7c3aed"/>
+<rect x="88" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="92" y="72" width="4" height="4" fill="#7c3aed"/>
+<rect x="96" y="60" width="4" height="4" fill="#7c3aed"/>
+<rect x="100" y="60" width="4" height="4" fill="#7c3aed"/>
+<rect x="96" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="100" y="64" width="4" height="4" fill="#7c3aed"/>
+<rect x="104" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="108" y="56" width="4" height="4" fill="#fde68a"/>
+<rect x="104" y="60" width="4" height="4" fill="#fde68a"/>
+<rect x="40" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="44" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="48" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="52" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="56" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="60" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="64" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="68" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="72" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="76" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="80" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="84" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="88" y="84" width="4" height="4" fill="#4c1d95"/>
+<rect x="40" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="44" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="48" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="52" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="56" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="60" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="64" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="68" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="72" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="76" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="80" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="84" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="88" y="88" width="4" height="4" fill="#4c1d95"/>
+<rect x="40" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="44" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="48" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="52" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="56" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="60" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="64" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="68" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="72" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="76" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="80" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="84" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="88" y="92" width="4" height="4" fill="#4c1d95"/>
+<rect x="40" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="44" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="48" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="52" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="56" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="60" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="64" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="68" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="72" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="76" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="80" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="84" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="88" y="96" width="4" height="4" fill="#4c1d95"/>
+<rect x="52" y="100" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="100" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="100" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="100" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="104" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="104" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="104" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="104" width="4" height="4" fill="#fde68a"/>
+<rect x="52" y="108" width="4" height="4" fill="#fde68a"/>
+<rect x="56" y="108" width="4" height="4" fill="#fde68a"/>
+<rect x="76" y="108" width="4" height="4" fill="#fde68a"/>
+<rect x="80" y="108" width="4" height="4" fill="#fde68a"/>
+<rect x="48" y="112" width="4" height="4" fill="#1e1b4b"/>
+<rect x="52" y="112" width="4" height="4" fill="#1e1b4b"/>
+<rect x="56" y="112" width="4" height="4" fill="#1e1b4b"/>
+<rect x="72" y="112" width="4" height="4" fill="#1e1b4b"/>
+<rect x="76" y="112" width="4" height="4" fill="#1e1b4b"/>
+<rect x="80" y="112" width="4" height="4" fill="#1e1b4b"/>
+<rect x="116" y="40" width="4" height="4" fill="#fde68a"/>
+<rect x="120" y="40" width="4" height="4" fill="#f59e0b"/>
+<rect x="124" y="40" width="4" height="4" fill="#f59e0b"/>
+<rect x="116" y="44" width="4" height="4" fill="#f59e0b"/>
+<rect x="120" y="44" width="4" height="4" fill="#d97706"/>
+<rect x="124" y="44" width="4" height="4" fill="#f59e0b"/>
+<rect x="116" y="48" width="4" height="4" fill="#f59e0b"/>
+<rect x="120" y="48" width="4" height="4" fill="#f59e0b"/>
+<rect x="124" y="48" width="4" height="4" fill="#fde68a"/>
+<rect x="112" y="36" width="4" height="4" fill="#fbbf24"/>
+<rect x="116" y="32" width="4" height="4" fill="#fbbf24"/>
+<rect x="124" y="36" width="4" height="4" fill="#c4b5fd"/>
+<rect x="128" y="32" width="4" height="4" fill="#fbbf24"/>
+<rect x="112" y="52" width="4" height="4" fill="#fbbf24"/>
+<rect x="120" y="56" width="4" height="4" fill="#c4b5fd"/>
+<rect x="124" y="52" width="4" height="4" fill="#fbbf24"/>
+<rect x="100" y="48" width="4" height="4" fill="#c4b5fd"/>
+<rect x="96" y="52" width="4" height="4" fill="#fbbf24"/>
+<rect x="132" y="44" width="4" height="4" fill="#c4b5fd"/>
+<rect x="136" y="40" width="4" height="4" fill="#fbbf24"/>
+<rect x="132" y="56" width="4" height="4" fill="#fbbf24"/>
+<rect x="108" y="64" width="4" height="4" fill="#c4b5fd"/>
+<rect x="52" y="88" width="20" height="4" fill="#f59e0b"/>
+<rect x="56" y="88" width="4" height="4" fill="#f59e0b"/>
+<rect x="60" y="88" width="4" height="4" fill="#f59e0b"/>
+<rect x="64" y="88" width="4" height="4" fill="#f59e0b"/>
+<rect x="68" y="88" width="4" height="4" fill="#f59e0b"/>
+</svg>
+  </div>
+  <div class="hero-info">
+    <h1>zsiga <span>⚡ Level 2: Code Architect · 超电磁开发智能体</span></h1>
+    <span class="state-badge working">⚡ Working</span>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="label">🪙 Total Changes</div>
+    <div class="value">42</div>
+  </div>
+  <div class="card">
+    <div class="label">🎯 Hit Rate</div>
+    <div class="value good">83.3%</div>
+    <div class="meta">35 hit / 7 miss</div>
+  </div>
+  <div class="card">
+    <div class="label">📐 Targets</div>
+    <div class="value">6</div>
+    <div class="meta">compass, dataagent, factory, infopublisher, stockshark, zsiga</div>
+  </div>
+  <div class="card">
+    <div class="label">📝 Lessons</div>
+    <div class="value">28</div>
+  </div>
+  <div class="card">
+    <div class="label">⚡ First-Pass Rate</div>
+    <div class="value warn">63.3%</div>
+  </div>
+  <div class="card">
+    <div class="label">✅ Verify Rate</div>
+    <div class="value bad">47.4%</div>
+  </div>
+  <div class="card">
+    <div class="label">🗜️ Compactions</div>
+    <div class="value">0</div>
+    <div class="meta">electromagnetic compress</div>
+  </div>
+  <div class="card">
+    <div class="label">🐾 Sub-Agents</div>
+    <div class="value">0</div>
+    <div class="meta">network dispatched</div>
+  </div>
+</div>
+
+<div class="section">
+    <h2>⚡ Phase Performance</h2>
+  <table>
+<thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
+<tbody><tr>
+  <td>enrich</td>
+  <td>8</td>
+  <td class="good">100.0%</td>
+  <td>3.1</td>
+  <td>119.4s</td>
+  <td>0</td>
+  <td>21</td>
+  <td>24</td>
+  <td>234.4K</td>
+</tr><tr>
+  <td>implement</td>
+  <td>30</td>
+  <td class="good">80.0%</td>
+  <td>2.9</td>
+  <td>215.1s</td>
+  <td>71</td>
+  <td>251</td>
+  <td>286</td>
+  <td>2.97M</td>
+</tr><tr>
+  <td>verify</td>
+  <td>19</td>
+  <td class="bad">47.4%</td>
+  <td>0.5</td>
+  <td>89.7s</td>
+  <td>3</td>
+  <td>113</td>
+  <td>157</td>
+  <td>663.9K</td>
+</tr><tr>
+  <td>deliver</td>
+  <td>20</td>
+  <td class="good">100.0%</td>
+  <td>0.0</td>
+  <td>10.8s</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+</tr></tbody></table>
+</div>
+
+<div class="section">
+    <h2>⚡ Resource Usage</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="label">Total Tokens</div>
+      <div class="value">3.86M</div>
+      <div class="meta">3.80M prompt + 67.1K completion</div>
+    </div>
+    <div class="card">
+      <div class="label">Avg Tokens / Change</div>
+      <div class="value">92.0K</div>
+    </div>
+    <div class="card">
+      <div class="label">Total LLM Calls</div>
+      <div class="value">385</div>
+      <div class="meta">avg 9.2 per change</div>
+    </div>
+    <div class="card">
+      <div class="label">Total Tool Calls</div>
+      <div class="value">467</div>
+      <div class="meta">avg 11.1 per change</div>
+    </div>
+    <div class="card">
+      <div class="label">Total Runtime</div>
+      <div class="value">2.6h</div>
+      <div class="meta">9,328s total</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+    <h2>🪙 Evolution Roadmap</h2>
+  <div class="milestone" style="border-color:#f59e0b">
+  <h3 style="color:#f59e0b">⚡ Level 2: Code Architect — ⚡ ACHIEVED</h3>
+  
+  <div class="criterion">
+  <span class="icon">✓</span>
+  <span>累计成功 change 数 >= 10</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">35/10</span>
+</div><div class="criterion">
+  <span class="icon">✓</span>
+  <span>总成功率 >= 70%</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">83.3/70</span>
+</div><div class="criterion">
+  <span class="icon">✓</span>
+  <span>覆盖 >= 3 个不同目标项目</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">6/3</span>
+</div><div class="criterion">
+  <span class="icon">✓</span>
+  <span>积累 >= 20 条经验教训</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">28/20</span>
+</div>
+  
+</div>
+<div class="milestone" style="border-color:#8b5cf6">
+  <h3 style="color:#8b5cf6">🔧 Level 3: Self-Evolution — 🚧 Leveling Up</h3>
+  <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 获得修改自身代码的能力，具备 LSP 级代码感知和专业子代理分化</div>
+  <div class="criterion">
+  <span class="icon">✓</span>
+  <span>累计成功 change 数 >= 30</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">35/30</span>
+</div><div class="criterion">
+  <span class="icon">✓</span>
+  <span>总成功率 >= 75%</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">83.3/75</span>
+</div><div class="criterion">
+  <span class="icon">○</span>
+  <span>L3 能力任务完成 >= 5</span>
+  <div class="progress"><div class="fill" style="width:60.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">3/5</span>
+</div>
+  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (3/5)</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="LSP 工具在 target project 上可用，goto_definition 能跳转到定义，diagnostics 能返回错误">LSP 集成</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="zsiga 能读取并修改自身源码文件，同时保护 config.yaml 和 memory/ 不被误改">Self-Modify 门控</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/3</span>
+</div><div class="criterion">
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="三种角色子代理可独立创建并执行，各有不同的 system prompt 和行为约束">专业子代理分化</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">2/2</span>
+</div><div class="criterion">
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="能从历史 learnings 中识别出现 ≥3 次的 pattern_key，自动注入到 active_context">跨会话模式挖掘</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">2/2</span>
+</div><div class="criterion">
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="zsiga 用 goto_definition 找到目标函数 → 修改 → 自测通过 → 记录为成功 change">L3 验证：修改自身 + LSP 导航</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/1</span>
+</div>
+</div>
+<div class="milestone" style="border-color:#06b6d4">
+  <h3 style="color:#06b6d4">🌐 Level 4: Multi-Project Orchestrator — 🚧 Leveling Up</h3>
+  <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 从固定流水线升级为动态任务分解器，支持跨项目协调和意图路由</div>
+  <div class="criterion">
+  <span class="icon">○</span>
+  <span>累计成功 change 数 >= 50</span>
+  <div class="progress"><div class="fill" style="width:70.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">35/50</span>
+</div><div class="criterion">
+  <span class="icon">✓</span>
+  <span>总成功率 >= 80%</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">83.3/80</span>
+</div><div class="criterion">
+  <span class="icon">○</span>
+  <span>L4 能力任务完成 >= 5</span>
+  <div class="progress"><div class="fill" style="width:20.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">1/5</span>
+</div>
+  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (1/5)</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="给定任意用户消息，能正确分类意图并选择执行路径">Intent Router</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="输入跨项目指令 → 自动分解为项目级子任务 → 并行执行 → 汇总报告">跨项目任务分解</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="todo list 可动态创建/更新/完成，每个 todo 有独立状态，dashboard 实时展示进度">Todo 驱动编排</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="修复循环 3 次失败后自动触发升级，生成诊断报告并暂停等待人工介入">升级路径 (Escalation)</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="5 个项目的测试结果汇总在一份报告中，区分 pass/fail/unknown">L4 验证：跨项目回归测试</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/1</span>
+</div>
+</div>
+<div class="milestone" style="border-color:#22c55e">
+  <h3 style="color:#22c55e">🚀 Level 5: Autonomous Engineer — 🚧 Leveling Up</h3>
+  <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 具备完整自主工程能力：意图理解、专家委派、并行执行、自我审查、skill 演化</div>
+  <div class="criterion">
+  <span class="icon">○</span>
+  <span>累计成功 change 数 >= 80</span>
+  <div class="progress"><div class="fill" style="width:43.8%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">35/80</span>
+</div><div class="criterion">
+  <span class="icon">○</span>
+  <span>总成功率 >= 85%</span>
+  <div class="progress"><div class="fill" style="width:98.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">83.3/85</span>
+</div><div class="criterion">
+  <span class="icon">○</span>
+  <span>L5 能力任务完成 >= 6</span>
+  <div class="progress"><div class="fill" style="width:16.7%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">1/6</span>
+</div>
+  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (1/6)</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="给定任意用户输入，能 verbalize 意图、分类、并选择正确的执行路径">Phase 0 Intent Gate</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="同时派发 3 个搜索任务，全部完成后综合结果做出决策，比顺序执行快 2x+">并行后台代理</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="能从 learnings.jsonl 识别高频 pattern → 自动生成/更新 skill .md 文件">Skill 演化</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="每次实现完成后自动触发 review，review 结果记录在 metrics 中">自我审查循环</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="失败后能自动回滚、生成根因分析、尝试不同策略（而非重复相同修复）">失败恢复协议</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="从模糊需求到代码交付，全程无人工干预，成功 change 记录">L5 验证：端到端自主任务</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/1</span>
+</div>
+</div>
+
+</div>
+
+<div class="section">
+  <h2>💭 Growth Journal</h2>
+  <div class="journal">
+    <div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：broken test files 会杀死 pytest collection，用 pytest.skip(allow_module_level=True) 做优雅降级</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：THS（同花顺）API 可以替代被封的 eastmoney push2，速率控制用 DataFetcher 单例 + TTL cache</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：patchright sync_playwright 在 gunicorn fork 模型下会 greenlet 跨线程崩溃，解法是 PID 检测 + fork 后 lazy 重置</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：d8q 项目都是 systemd 管理的，重启用 systemctl restart，永远不要用 nohup</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：目标项目的 venv/ 要优先检测，用 venv/bin/python -m pytest 而不是裸 pytest</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #f59e0b">
+  <div class="journal-header">
+    <span>📝</span>
+    <span class="journal-text">之前重启 infopublisher 用了 nohup，导致重复进程和端口冲突。应该一开始就查 systemd service 列表。下次记住：生产环境永远用 systemctl。</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:12 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">L2 里程碑达成！21 条经验、19 个成功 change、73.1% 成功率、5 个项目。从小菜鸟成长为能独立处理服务运维的 agent 了。</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:12 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #22c55e">
+  <div class="journal-header">
+    <span>💛</span>
+    <span class="journal-text">fix-greenlet-thread-safety 从诊断到实现一气呵成。BrowserPool 的 PID 检测方案（_init_pid vs os.getpid()）干净利落，fork 后 lazy 重置 patchright。13 个测试全过。</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:12 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #22c55e">
+  <div class="journal-header">
+    <span>💛</span>
+    <span class="journal-text">zsiga 很聪明地用了 systemctl 重启服务，发现残留进程还主动清理了。没有用 nohup，说明之前的教训她记住了。</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:12 · Sisyphus</div>
+</div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h2>Recent Changes</h2>
+  <ul class="recent">
+    <li>fix-llm-enhanced-api-key-tests</li>
+<li>fix-llm-enhanced-api-key-tests</li>
+<li>2026-05-12-publish-queue-integration</li>
+<li>2026-05-12-publish-queue</li>
+<li>improve-fix-loop-precision</li>
+  </ul>
+</div>
+
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-12T21:04:15.313933</div>
+</body>
+</html>
