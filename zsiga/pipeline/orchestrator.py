@@ -299,6 +299,7 @@ class ZsigaOrchestrator:
 
         changed = _get_changed_files(target_path, pre_sha, transport)
         changed_info = f"\n本次变更的文件（只修这些）: {', '.join(changed) if changed else '无'}"
+        path_hint = f"\n项目根目录: {target_path}"
 
         for attempt in range(1, max_attempts + 1):
             print(f"    Fix attempt {attempt}/{max_attempts}...")
@@ -307,23 +308,29 @@ class ZsigaOrchestrator:
 
             if attempt == 1:
                 await self.agent.run(
-                    "你是 zsiga 的修复引擎。严格遵守以下规则：\n"
+                    f"你是 zsiga 的修复引擎。项目根目录: {target_path}\n"
+                    "严格遵守以下规则：\n"
                     "1. 只修改本次变更引入的文件（上方列出的）\n"
                     "2. 绝对不要修改任何未列出的文件\n"
                     "3. 不要添加新路由、新端点、新功能 — 只修复错误\n"
-                    "4. 不要删除或替换 render_template、redirect 等现有调用",
-                    f"错误:\n{errors}{changed_info}\n\n"
+                    "4. 不要删除或替换 render_template、redirect 等现有调用\n"
+                    "5. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
+                    "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径",
+                    f"错误:\n{errors}{changed_info}{path_hint}\n\n"
                     f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                     max_turns=fix_turns,
                 )
             else:
                 await self.agent.run(
-                    "你是 zsiga 的修复引擎。上一次修复没有解决问题。严格遵守以下规则：\n"
+                    f"你是 zsiga 的修复引擎。项目根目录: {target_path}\n"
+                    "上一次修复没有解决问题。严格遵守以下规则：\n"
                     "1. 只修改本次变更引入的文件（上方列出的）\n"
                     "2. 绝对不要修改任何未列出的文件\n"
                     "3. 不要添加新路由、新端点、新功能\n"
-                    "4. 如果无法在限制内修复，回复 STOP",
-                    f"仍然存在的错误:\n{errors}{changed_info}\n\n"
+                    "4. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
+                    "5. 如果无法在限制内修复，回复 STOP\n"
+                    "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径",
+                    f"仍然存在的错误:\n{errors}{changed_info}{path_hint}\n\n"
                     f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                     max_turns=fix_turns,
                 )
@@ -343,6 +350,7 @@ class ZsigaOrchestrator:
 
         changed = _get_changed_files(target_path, pre_sha, transport)
         changed_info = f"\n本次变更的文件（只修这些）: {', '.join(changed) if changed else '无'}"
+        path_hint = f"\n项目根目录: {target_path}"
 
         for attempt in range(1, max_attempts + 1):
             print(f"    Eval fix attempt {attempt}/{max_attempts}...")
@@ -353,12 +361,15 @@ class ZsigaOrchestrator:
             self.agent.set_phase(f"eval-fix-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
             await self.agent.run(
-                "你是 zsiga 的修复引擎。严格遵守以下规则：\n"
+                f"你是 zsiga 的修复引擎。项目根目录: {target_path}\n"
+                "严格遵守以下规则：\n"
                 "1. 只修改本次变更涉及的文件（上方列出的）\n"
                 "2. 绝对不要修改任何未列出的文件\n"
                 "3. 不要添加新路由、新端点、新功能 — 只修复验证反馈中的问题\n"
-                "4. 不要删除或替换 render_template、redirect 等现有调用",
-                f"验证反馈:\n{feedback}{changed_info}\n\n"
+                "4. 不要删除或替换 render_template、redirect 等现有调用\n"
+                "5. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
+                "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径",
+                f"验证反馈:\n{feedback}{changed_info}{path_hint}\n\n"
                 f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                 max_turns=fix_turns,
             )

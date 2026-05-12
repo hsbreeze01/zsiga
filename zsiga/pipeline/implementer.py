@@ -42,7 +42,8 @@ IMPLEMENTER_SYSTEM = """你是 zsiga 的实现引擎。
 - 只改 task 要求的文件，不做额外重构
 - 不要运行 ruff format 或 ruff check . — lint 验证由系统自动处理
 - 只运行与当前 task 相关的测试文件，不要全项目 pytest
-- 如果 task 标记为 `scope: frontend`，跳过该 task 并标记 - [x]（前端由人工完成）"""
+- 如果 task 标记为 `scope: frontend`，跳过该 task 并标记 - [x]（前端由人工完成）
+- 如果 tasks.md 中包含不属于当前项目的任务（如引用了其他项目的路径或文件），跳过这些任务并标记 - [x]，只处理当前 target_path 下的文件"""
 
 
 async def implement(agent: AgentLoop, change_dir: str, target_path: str,

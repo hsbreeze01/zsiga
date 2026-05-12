@@ -111,6 +111,7 @@ def _filter_lint_to_changed_lines(lint_output: str,
 
     Ruff format: FILE:LINE:COL: CODE ...
     If the error's FILE+LINE is not in changed_lines, skip it.
+    Files not tracked in changed_lines are dropped entirely (not kept).
     """
     if not changed_lines:
         return lint_output
@@ -120,9 +121,11 @@ def _filter_lint_to_changed_lines(lint_output: str,
         if match:
             filepath = match.group(1)
             lineno = int(match.group(2))
-            file_lines = changed_lines.get(filepath, set())
-            if not file_lines or lineno in file_lines:
+            file_lines = changed_lines.get(filepath)
+            # Only keep if the file is tracked AND the error is on a changed line
+            if file_lines is not None and lineno in file_lines:
                 filtered.append(line)
+            # If file_lines is None (file not in diff at all), skip entirely
         elif line.strip():
             filtered.append(line)
     return "\n".join(filtered)
