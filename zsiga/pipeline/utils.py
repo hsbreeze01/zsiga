@@ -1,6 +1,4 @@
-import os
 import re
-import subprocess
 import shutil
 import sys
 from pathlib import Path
@@ -196,7 +194,7 @@ def _get_changed_files(target_path: str, since_sha: str,
     files = set()
     for line in r["stdout"].strip().split("\n"):
         f = line.strip()
-        if f and f.endswith(".py"):
+        if f and f.endswith(".py") and "/site-packages/" not in f:
             files.add(f)
     return sorted(files)
 

@@ -1,4 +1,3 @@
-import os
 import re
 
 from ..transport import Transport, LocalTransport

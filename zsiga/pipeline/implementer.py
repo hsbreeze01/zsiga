@@ -1,9 +1,7 @@
-import re
 
 from ..agent.loop import AgentLoop
-from ..agent.tools import register_tools
 from ..transport import Transport, LocalTransport
-from .utils import read_file, file_exists, dir_exists, list_files_recursive
+from .utils import read_file, dir_exists, list_files_recursive
 
 IMPLEMENTER_SYSTEM = """你是 zsiga 的实现引擎。
 

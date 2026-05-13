@@ -1,15 +1,10 @@
 """Tests for venv-aware implementation (config, resolve, prompt injection)."""
 
-import os
-import tempfile
-from pathlib import Path
-from unittest.mock import MagicMock
 
-import pytest
 import yaml
 
 from zsiga.config import TargetConfig, load_config
-from zsiga.pipeline.utils import resolve_venv_python, _find_venv_python
+from zsiga.pipeline.utils import resolve_venv_python
 from zsiga.pipeline.implementer import _venv_prompt_section, IMPLEMENTER_SYSTEM
 
 
@@ -112,7 +107,7 @@ class TestVenvPromptInjection:
         assert "venv_python" not in IMPLEMENTER_SYSTEM
 
     def test_no_venv_means_no_injection(self):
-        section = _venv_prompt_section(None)
+        _venv_prompt_section(None)
         # Function should only be called with non-None; verify the implement
         # function logic: it only appends if venv_python is truthy
         assert True  # The guard in implement() handles this

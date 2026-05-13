@@ -1,5 +1,4 @@
 from ..agent.loop import AgentLoop
-from ..agent.tools import register_tools
 from ..transport import Transport, LocalTransport
 from .utils import read_file, dir_exists, list_files_recursive
 
@@ -80,7 +79,7 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
 
     specs_dir = f"{change_dir}/specs"
     if not dir_exists(specs_dir, transport) or not list_files_recursive(specs_dir, "*.md", transport):
-        print(f"  ⚠️ specs/ directory empty or missing, retrying enrich...")
+        print("  ⚠️ specs/ directory empty or missing, retrying enrich...")
         transport.run_shell(f"mkdir -p '{specs_dir}'", timeout=5)
         retry_prompt = user_prompt + "\n\n注意：上一次你没有在 specs/ 子目录下创建文件。必须用 write_file 创建 {change_dir}/specs/<name>.md，不要创建 specs.md。"
         result = await agent.run(ENRICHER_SYSTEM, retry_prompt, **kwargs)

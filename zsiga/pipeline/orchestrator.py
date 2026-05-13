@@ -1,4 +1,3 @@
-import asyncio
 import time
 from datetime import datetime
 
@@ -11,7 +10,7 @@ from ..memory.context import load_active_context, update_active_context, load_re
 from ..memory.learn import record_outcome
 from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
 from ..metrics.collector import record_change
-from ..transport import Transport, LocalTransport, create_transport
+from ..transport import Transport, create_transport
 from .enricher import enrich
 from .implementer import implement
 from .verifier import verify, read_verdict
@@ -112,7 +111,7 @@ class ZsigaOrchestrator:
             print(f"  venv python: {venv_python}")
 
         # Prefetch project context once (shared by enrich + implement)
-        print(f"  Prefetching project context...")
+        print("  Prefetching project context...")
         t_pf = time.monotonic()
         proposal_text = read_file(f"{change_dir}/proposal.md", transport) or ""
         project_context = build_project_context(target_path, transport,
@@ -146,7 +145,7 @@ class ZsigaOrchestrator:
         if self.config.safety.require_approval:
             approved = self._ask_approval(change_name)
             if not approved:
-                print(f"  Skipped: not approved")
+                print("  Skipped: not approved")
                 rec.outcome = Outcome.SKIPPED
                 return False
 
@@ -171,7 +170,7 @@ class ZsigaOrchestrator:
         print(f"  Phase 2 done in {impl_seconds:.1f}s")
 
         # Mechanical verification (only check changed files)
-        print(f"\n  Mechanical verification...")
+        print("\n  Mechanical verification...")
         fix_attempts = 0
         t_mv = time.monotonic()
         passed, errors = verify_mechanical(
@@ -184,7 +183,7 @@ class ZsigaOrchestrator:
         else:
             print(f"  Mechanical verification FAILED ({mv_seconds:.1f}s)")
             print(f"  Errors: {errors[:300]}")
-            print(f"  Attempting fixes...")
+            print("  Attempting fixes...")
             fixed, fix_attempts = await self._fix_loop(
                 target_path, project_config,
                 errors, pre_sha=pre_sha, transport=transport,
@@ -218,7 +217,7 @@ class ZsigaOrchestrator:
         self.agent.set_phase("verify")
         register_tools(self.agent, target_path, transport=transport)
 
-        print(f"  Prefetching test/lint results...")
+        print("  Prefetching test/lint results...")
         t_mech = time.monotonic()
         mech_results = prefetch_mechanical(
             target_path, project_config.test_cmd, project_config.lint_cmd,
@@ -245,7 +244,7 @@ class ZsigaOrchestrator:
         eval_fix_attempts = 0
 
         if verdict == "FAIL":
-            print(f"  Verifier: FAIL, attempting eval fixes...")
+            print("  Verifier: FAIL, attempting eval fixes...")
             fixed, eval_fix_attempts = await self._eval_fix_loop(
                 change_dir, target_path, project_config,
                 pre_sha, transport=transport,
