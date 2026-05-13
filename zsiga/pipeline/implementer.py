@@ -47,11 +47,16 @@ IMPLEMENTER_SYSTEM = """你是 zsiga 的实现引擎。
 
 
 async def implement(agent: AgentLoop, change_dir: str, target_path: str,
-                    transport: Transport = None, project_context: str = "", **kwargs):
+                    transport: Transport = None, project_context: str = "",
+                    venv_python: str = None, **kwargs):
     transport = transport or LocalTransport()
     specs = _read_all_specs(change_dir, transport)
     design = read_file(f"{change_dir}/design.md", transport) or ""
     tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
+
+    system_prompt = IMPLEMENTER_SYSTEM
+    if venv_python:
+        system_prompt += _venv_prompt_section(venv_python)
 
     ctx_section = ""
     if project_context:
@@ -71,8 +76,24 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str,
 
 specs/design/tasks 已在上方提供。从第一个 - [ ] 开始实现，不需要再读取这些文件。"""
 
-    return await agent.run(IMPLEMENTER_SYSTEM, user_prompt,
+    return await agent.run(system_prompt, user_prompt,
                           **kwargs)
+
+
+def _venv_prompt_section(venv_python: str) -> str:
+    return f"""
+
+## venv 配置（必须遵守）
+
+项目使用 venv，所有命令 MUST 使用以下路径：
+- Python: {venv_python}
+- pip: {venv_python} -m pip
+- pytest: {venv_python} -m pytest
+
+规则：
+- 绝对不要使用 python、python3、pip、pip3 — 必须使用上方完整路径
+- 不要 pip install 项目已有依赖（venv 已包含所有依赖）
+- 只有在 import 失败且确认 venv 中确实缺少该包时才安装"""
 
 
 def _read_all_specs(change_dir: str, transport: Transport = None) -> str:

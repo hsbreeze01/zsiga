@@ -38,13 +38,14 @@ class SSHConfig:
 class TargetConfig:
     def __init__(self, name: str, path: str, test_cmd: str = "pytest -x --tb=short",
                  lint_cmd: str = "ruff check .", transport: str = "local",
-                 ssh: SSHConfig = None):
+                 ssh: SSHConfig = None, venv_path: str = None):
         self.name = name
         self.path = path
         self.test_cmd = test_cmd
         self.lint_cmd = lint_cmd
         self.transport = transport
         self.ssh = ssh
+        self.venv_path = venv_path
 
 
 class LLMConfig:
@@ -158,6 +159,7 @@ def load_config(path: str = None) -> ZsigaConfig:
             lint_cmd=tc.get("lint_cmd", "ruff check ."),
             transport=tc.get("transport", "ssh" if ssh else "local"),
             ssh=ssh,
+            venv_path=tc.get("venv_path"),
         )
 
     pipeline_raw = raw.get("pipeline", {})

@@ -27,6 +27,7 @@ def build_project_context(target_path: str, transport: Transport = None,
     sections.append(_scan_services(target_path, transport, keywords))
     sections.append(_scan_models(target_path, transport, keywords))
     sections.append(_scan_templates(target_path, transport, keywords))
+    sections.append(_scan_db_schema(target_path, transport))
 
     combined = "\n\n".join(s for s in sections if s)
     if len(combined) > MAX_CONTEXT_CHARS:
@@ -159,6 +160,87 @@ def _scan_models(target_path: str, transport: Transport,
                 content = content[:3000] + "\n... (truncated)"
             parts.append(f"### {rel}\n```\n{content}\n```")
     return "\n\n".join(parts)
+
+
+def _scan_db_schema(target_path: str, transport: Transport) -> str:
+    """Detect MySQL DB config and prefetch table schemas."""
+    db_info = _detect_db_config(target_path, transport)
+    if not db_info:
+        return ""
+
+    host, port, user, password, database = db_info
+    # Single query: get all table schemas + row counts in one round-trip
+    r = transport.run_shell(
+        f"mysql -u{user} -p{password} -h{host} -P{port} {database} -e '"
+        "SELECT TABLE_NAME, TABLE_ROWS, COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_COMMENT "
+        "FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME, ORDINAL_POSITION;' "
+        "2>/dev/null",
+        timeout=20,
+    )
+    if r["exit_code"] != 0 or not r["stdout"].strip():
+        return ""
+
+    rows = r["stdout"].strip().split("\n")
+    if len(rows) < 2:
+        return ""
+
+    # Parse into per-table sections
+    tables = {}
+    for line in rows[1:]:
+        parts = line.split("\t")
+        if len(parts) < 7:
+            continue
+        tname, trows, cname, ctype, nullable, ckey, ccomment = parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]
+        if tname not in tables:
+            tables[tname] = {"rows": trows, "columns": []}
+        tables[tname]["columns"].append(f"{cname} {ctype} {'NULL' if nullable == 'YES' else 'NOT NULL'}{(' ' + ckey) if ckey else ''}")
+
+    parts = [f"## Database Schema ({database}, {len(tables)} tables)"]
+    for tname, info in list(tables.items())[:20]:
+        parts.append(f"### {tname} (~{info['rows']} rows)\n```\n" + "\n".join(info["columns"]) + "\n```")
+
+    result = "\n\n".join(parts)
+    if len(result) > 8000:
+        result = result[:8000] + "\n\n... (truncated)"
+    return result
+
+
+def _detect_db_config(target_path: str, transport: Transport) -> tuple | None:
+    """Detect MySQL connection info from project config files."""
+    # Strategy: grep for common DB config patterns
+    r = transport.run_shell(
+        f"cd '{target_path}' && grep -rn --include='*.py' --include='*.yaml' --include='*.yml' --include='*.json' "
+        f"-E '(mysql|pymysql|host.*3306|database.*stock|DB_HOST|DBConnection)' "
+        f"--include='*.py' -l 2>/dev/null | grep -v venv | grep -v __pycache__ | head -5",
+        timeout=10,
+    )
+    if r["exit_code"] != 0 or not r["stdout"].strip():
+        return None
+
+    config_files = r["stdout"].strip().split("\n")
+    for cf in config_files:
+        content = read_file(cf, transport)
+        if not content:
+            continue
+
+        # Try to extract connection params
+        import re
+        host_m = re.search(r"host['\"]?\s*[:=]\s*['\"]?([^'\"\s,}]+)", content)
+        port_m = re.search(r"port['\"]?\s*[:=]\s*['\"]?(\d+)", content)
+        user_m = re.search(r"user['\"]?\s*[:=]\s*['\"]?([^'\"\s,}]+)", content)
+        pw_m = re.search(r"(?:password|passwd)['\"]?\s*[:=]\s*['\"]?([^'\"\s,}]+)", content)
+        db_m = re.search(r"(?:database|db)['\"]?\s*[:=]\s*['\"]?([^'\"\s,}]+)", content)
+
+        if host_m and db_m:
+            return (
+                host_m.group(1),
+                int(port_m.group(1)) if port_m else 3306,
+                user_m.group(1) if user_m else "root",
+                pw_m.group(1) if pw_m else "",
+                db_m.group(1),
+            )
+
+    return None
 
 
 def _prioritize(files: list[str], keywords: list[str], top: int = 5) -> list[str]:

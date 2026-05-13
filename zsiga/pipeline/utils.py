@@ -43,7 +43,7 @@ def list_files_recursive(base_path: str, pattern: str = "*.md",
 
 def _find_venv_python(target_path: str, transport: Transport = None) -> str | None:
     transport = transport or LocalTransport()
-    for candidate in ["venv/bin/python", ".venv/bin/python"]:
+    for candidate in [".venv/bin/python", "venv/bin/python"]:
         full = f"{target_path}/{candidate}"
         if isinstance(transport, LocalTransport):
             if Path(full).exists():
@@ -53,6 +53,14 @@ def _find_venv_python(target_path: str, transport: Transport = None) -> str | No
             if "EXISTS" in r.get("stdout", ""):
                 return full
     return None
+
+
+def resolve_venv_python(target_path: str, project_config=None,
+                        transport: Transport = None) -> str | None:
+    """Resolve venv python path with priority: config → .venv → venv → None."""
+    if project_config is not None and getattr(project_config, "venv_path", None):
+        return project_config.venv_path
+    return _find_venv_python(target_path, transport)
 
 
 def _ruff_prefix(target_path: str, transport: Transport = None) -> list[str]:

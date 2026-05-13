@@ -15,7 +15,7 @@ from ..transport import Transport, LocalTransport, create_transport
 from .enricher import enrich
 from .implementer import implement
 from .verifier import verify, read_verdict
-from .utils import verify_mechanical, archive_change, _get_changed_files, read_file
+from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python
 from .project_context import build_project_context, prefetch_mechanical
 
 
@@ -106,6 +106,11 @@ class ZsigaOrchestrator:
                           transport: Transport) -> bool:
         cycle_start = time.monotonic()
 
+        # Resolve venv python path once for all phases
+        venv_python = resolve_venv_python(target_path, project_config, transport)
+        if venv_python:
+            print(f"  venv python: {venv_python}")
+
         # Prefetch project context once (shared by enrich + implement)
         print(f"  Prefetching project context...")
         t_pf = time.monotonic()
@@ -157,6 +162,7 @@ class ZsigaOrchestrator:
         impl_result = await implement(self.agent, change_dir, target_path,
                        transport=transport,
                        project_context=project_context,
+                       venv_python=venv_python,
                        max_turns=self.config.pipeline.impl_max_turns,
                         timeout_seconds=self.config.pipeline.impl_timeout)
         impl_seconds = time.monotonic() - t0
@@ -183,6 +189,7 @@ class ZsigaOrchestrator:
                 target_path, project_config,
                 errors, pre_sha=pre_sha, transport=transport,
                 max_attempts=self.config.pipeline.fix_attempts,
+                venv_python=venv_python,
             )
             if not fixed:
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
@@ -243,6 +250,7 @@ class ZsigaOrchestrator:
                 change_dir, target_path, project_config,
                 pre_sha, transport=transport,
                 max_attempts=self.config.pipeline.eval_fix_attempts,
+                venv_python=venv_python,
             )
             if not fixed:
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
@@ -294,12 +302,23 @@ class ZsigaOrchestrator:
 
     async def _fix_loop(self, target_path, project_config, errors,
                         pre_sha: str, transport: Transport,
-                        max_attempts: int) -> tuple[bool, int]:
+                        max_attempts: int,
+                        venv_python: str = None) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
 
         changed = _get_changed_files(target_path, pre_sha, transport)
         changed_info = f"\n本次变更的文件（只修这些）: {', '.join(changed) if changed else '无'}"
         path_hint = f"\n项目根目录: {target_path}"
+        venv_hint = ""
+        if venv_python:
+            venv_hint = (
+                f"\n\n## venv 配置（必须遵守）\n"
+                f"项目使用 venv，所有命令 MUST 使用以下路径：\n"
+                f"- Python: {venv_python}\n"
+                f"- pip: {venv_python} -m pip\n"
+                f"- pytest: {venv_python} -m pytest\n"
+                f"不要使用 python、python3、pip、pip3 — 必须使用上方完整路径。"
+            )
 
         for attempt in range(1, max_attempts + 1):
             print(f"    Fix attempt {attempt}/{max_attempts}...")
@@ -315,7 +334,8 @@ class ZsigaOrchestrator:
                     "3. 不要添加新路由、新端点、新功能 — 只修复错误\n"
                     "4. 不要删除或替换 render_template、redirect 等现有调用\n"
                     "5. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
-                    "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径",
+                    "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径"
+                    f"{venv_hint}",
                     f"错误:\n{errors}{changed_info}{path_hint}\n\n"
                     f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                     max_turns=fix_turns,
@@ -329,7 +349,8 @@ class ZsigaOrchestrator:
                     "3. 不要添加新路由、新端点、新功能\n"
                     "4. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
                     "5. 如果无法在限制内修复，回复 STOP\n"
-                    "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径",
+                    "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径"
+                    f"{venv_hint}",
                     f"仍然存在的错误:\n{errors}{changed_info}{path_hint}\n\n"
                     f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                     max_turns=fix_turns,
@@ -345,12 +366,23 @@ class ZsigaOrchestrator:
 
     async def _eval_fix_loop(self, change_dir, target_path, project_config,
                              pre_sha, transport: Transport,
-                             max_attempts: int) -> tuple[bool, int]:
+                             max_attempts: int,
+                             venv_python: str = None) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
 
         changed = _get_changed_files(target_path, pre_sha, transport)
         changed_info = f"\n本次变更的文件（只修这些）: {', '.join(changed) if changed else '无'}"
         path_hint = f"\n项目根目录: {target_path}"
+        venv_hint = ""
+        if venv_python:
+            venv_hint = (
+                f"\n\n## venv 配置（必须遵守）\n"
+                f"项目使用 venv，所有命令 MUST 使用以下路径：\n"
+                f"- Python: {venv_python}\n"
+                f"- pip: {venv_python} -m pip\n"
+                f"- pytest: {venv_python} -m pytest\n"
+                f"不要使用 python、python3、pip、pip3 — 必须使用上方完整路径。"
+            )
 
         for attempt in range(1, max_attempts + 1):
             print(f"    Eval fix attempt {attempt}/{max_attempts}...")
@@ -368,7 +400,8 @@ class ZsigaOrchestrator:
                 "3. 不要添加新路由、新端点、新功能 — 只修复验证反馈中的问题\n"
                 "4. 不要删除或替换 render_template、redirect 等现有调用\n"
                 "5. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
-                "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径",
+                "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径"
+                f"{venv_hint}",
                 f"验证反馈:\n{feedback}{changed_info}{path_hint}\n\n"
                 f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                 max_turns=fix_turns,

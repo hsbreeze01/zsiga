@@ -507,12 +507,12 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">42</div>
+    <div class="value">45</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">83.3%</div>
-    <div class="meta">35 hit / 7 miss</div>
+    <div class="value good">84.4%</div>
+    <div class="meta">38 hit / 7 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -525,11 +525,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">63.3%</div>
+    <div class="value warn">65.6%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value bad">47.4%</div>
+    <div class="value bad">42.9%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -549,40 +549,40 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>8</td>
+  <td>9</td>
   <td class="good">100.0%</td>
-  <td>3.1</td>
-  <td>119.4s</td>
+  <td>2.8</td>
+  <td>128.5s</td>
   <td>0</td>
-  <td>21</td>
-  <td>24</td>
-  <td>234.4K</td>
+  <td>31</td>
+  <td>33</td>
+  <td>366.4K</td>
 </tr><tr>
   <td>implement</td>
-  <td>30</td>
-  <td class="good">80.0%</td>
-  <td>2.9</td>
-  <td>215.1s</td>
+  <td>32</td>
+  <td class="good">81.2%</td>
+  <td>2.7</td>
+  <td>226.7s</td>
   <td>71</td>
-  <td>251</td>
-  <td>286</td>
-  <td>2.97M</td>
+  <td>292</td>
+  <td>335</td>
+  <td>4.42M</td>
 </tr><tr>
   <td>verify</td>
-  <td>19</td>
-  <td class="bad">47.4%</td>
+  <td>21</td>
+  <td class="bad">42.9%</td>
   <td>0.5</td>
-  <td>89.7s</td>
+  <td>89.9s</td>
   <td>3</td>
-  <td>113</td>
-  <td>157</td>
-  <td>663.9K</td>
+  <td>137</td>
+  <td>189</td>
+  <td>1.11M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>20</td>
+  <td>22</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>10.8s</td>
+  <td>11.5s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -595,27 +595,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">3.86M</div>
-      <div class="meta">3.80M prompt + 67.1K completion</div>
+      <div class="value">5.89M</div>
+      <div class="meta">5.80M prompt + 94.1K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">92.0K</div>
+      <div class="value">131.0K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">385</div>
-      <div class="meta">avg 9.2 per change</div>
+      <div class="value">460</div>
+      <div class="meta">avg 10.2 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">467</div>
-      <div class="meta">avg 11.1 per change</div>
+      <div class="value">557</div>
+      <div class="meta">avg 12.4 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">2.6h</div>
-      <div class="meta">9,328s total</div>
+      <div class="value">2.9h</div>
+      <div class="meta">10,550s total</div>
     </div>
   </div>
 </div>
@@ -629,12 +629,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 10</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">35/10</span>
+  <span style="color:#94a3b8;font-size:0.8rem">38/10</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 70%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">83.3/70</span>
+  <span style="color:#94a3b8;font-size:0.8rem">84.4/70</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>覆盖 >= 3 个不同目标项目</span>
@@ -655,12 +655,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 30</span>
   <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">35/30</span>
+  <span style="color:#94a3b8;font-size:0.8rem">38/30</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 75%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">83.3/75</span>
+  <span style="color:#94a3b8;font-size:0.8rem">84.4/75</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L3 能力任务完成 >= 5</span>
@@ -700,13 +700,13 @@ td { border-top: 1px solid #334155; }
   <div class="criterion">
   <span class="icon">○</span>
   <span>累计成功 change 数 >= 50</span>
-  <div class="progress"><div class="fill" style="width:70.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">35/50</span>
+  <div class="progress"><div class="fill" style="width:76.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">38/50</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 80%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">83.3/80</span>
+  <span style="color:#94a3b8;font-size:0.8rem">84.4/80</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L4 能力任务完成 >= 5</span>
@@ -746,13 +746,13 @@ td { border-top: 1px solid #334155; }
   <div class="criterion">
   <span class="icon">○</span>
   <span>累计成功 change 数 >= 80</span>
-  <div class="progress"><div class="fill" style="width:43.8%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">35/80</span>
+  <div class="progress"><div class="fill" style="width:47.5%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">38/80</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>总成功率 >= 85%</span>
-  <div class="progress"><div class="fill" style="width:98.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">83.3/85</span>
+  <div class="progress"><div class="fill" style="width:99.3%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">84.4/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L5 能力任务完成 >= 6</span>
@@ -867,14 +867,14 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>fix-llm-enhanced-api-key-tests</li>
-<li>fix-llm-enhanced-api-key-tests</li>
-<li>2026-05-12-publish-queue-integration</li>
-<li>2026-05-12-publish-queue</li>
+    <li>2026-05-12-publish-queue</li>
 <li>improve-fix-loop-precision</li>
+<li>pipeline-stockshark-merge</li>
+<li>2026-05-12-publish-queue</li>
+<li>add-strategy-group-engine</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-12T21:04:15.313933</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-14T01:08:05.307993</div>
 </body>
 </html>
