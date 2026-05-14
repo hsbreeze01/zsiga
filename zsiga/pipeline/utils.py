@@ -148,7 +148,7 @@ def verify_mechanical(target_path: str, test_cmd: str, lint_cmd: str,
         changed = _get_changed_files(target_path, since_sha, transport)
         changed_lines = _get_changed_lines_by_file(target_path, since_sha, transport)
         if changed:
-            r_fix = transport.run_shell(
+            transport.run_shell(
                 " ".join(ruff + ["check", "--fix"] + changed),
                 cwd=target_path, timeout=120,
             )

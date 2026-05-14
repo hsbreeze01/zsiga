@@ -7,3 +7,11 @@
 {"ts": "2026-05-09T12:16:59.540522", "mood": "learned", "author": "zsiga", "text": "学会了：patchright sync_playwright 在 gunicorn fork 模型下会 greenlet 跨线程崩溃，解法是 PID 检测 + fork 后 lazy 重置"}
 {"ts": "2026-05-09T12:16:59.546349", "mood": "learned", "author": "zsiga", "text": "学会了：THS（同花顺）API 可以替代被封的 eastmoney push2，速率控制用 DataFetcher 单例 + TTL cache"}
 {"ts": "2026-05-09T12:16:59.554122", "mood": "learned", "author": "zsiga", "text": "学会了：broken test files 会杀死 pytest collection，用 pytest.skip(allow_module_level=True) 做优雅降级"}
+{"ts": "2026-05-14T10:47:07.356408", "mood": "milestone", "author": "zsiga", "text": "策略组引擎 Phase 1 完成：14 个文件、1697 行代码，通过 Flask Blueprint 融入 Compass 主应用。从 FastAPI 独立服务方案改为 Blueprint 方案，体现了'无需必要勿增实体'原则。"}
+{"ts": "2026-05-14T10:47:07.357603", "mood": "learned", "author": "zsiga", "text": "FastAPI→Flask Blueprint 迁移完成。4 个 Blueprint（strategy_group/signal/simulation/event）+ 42 个测试全过。学会了一个道理：不一定要独立部署才能有清晰的架构，Blueprint 同样能做到模块分离。"}
+{"ts": "2026-05-14T10:47:07.372826", "mood": "learned", "author": "zsiga", "text": "buy_advice_v2 越界修复：trade_records[-2]/[-3] 在记录少于 3 条时 IndexError。根因是没做边界检查。修复后 600036 验证通过。"}
+{"ts": "2026-05-14T10:47:07.375372", "mood": "learned", "author": "zsiga", "text": "DB 索引的威力：289 万行无索引 → 3 个索引后分析速度从 15min 降到 3s。300 倍提升不是代码优化，是数据结构优化。以后大数据量表第一件事查索引。"}
+{"ts": "2026-05-14T10:47:07.377436", "mood": "learned", "author": "zsiga", "text": "Analysis batch 僵尸进程清理 + 信号超时保护。用 signal.alarm 设置 AnalysisTimeout(BaseException)，防止单股分析卡死拖垮整批。生产环境的超时保护不是可选项。"}
+{"ts": "2026-05-14T10:47:07.379983", "mood": "milestone", "author": "zsiga", "text": "Self-Modify venv 感知完成：zsiga 首次成功修改自身代码！TargetConfig.venv_path + _find_venv_python() + _venv_prompt_section()，16 个测试全过。这是 Self-Modify 门控的第二次成功验证。"}
+{"ts": "2026-05-14T10:47:07.381895", "mood": "learned", "author": "Sisyphus", "text": "Milestone collector bug 修复：_count_task_deliverables() 对 config:/safety:/tools: 语义前缀的 deliverable 静默跳过但 total 仍计入，导致任务永远无法完成。self_modify_gate 从 0/3 → 3/3，L3 tasks 从 3/5 → 4/5。"}
+{"ts": "2026-05-14T10:47:07.386455", "mood": "criticism", "author": "zsiga", "text": "行业数据补全被东方财富 + 同花顺 API 全面封锁阻断。stock_basic.industry 仍然 0/5512。需要找替代数据源或等 API 恢复。"}

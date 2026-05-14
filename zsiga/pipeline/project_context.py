@@ -189,7 +189,7 @@ def _scan_db_schema(target_path: str, transport: Transport) -> str:
         parts = line.split("\t")
         if len(parts) < 7:
             continue
-        tname, trows, cname, ctype, nullable, ckey, ccomment = parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]
+        tname, trows, cname, ctype, nullable, ckey, _ = parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]
         if tname not in tables:
             tables[tname] = {"rows": trows, "columns": []}
         tables[tname]["columns"].append(f"{cname} {ctype} {'NULL' if nullable == 'YES' else 'NOT NULL'}{(' ' + ckey) if ckey else ''}")
@@ -210,7 +210,7 @@ def _detect_db_config(target_path: str, transport: Transport) -> tuple | None:
     r = transport.run_shell(
         f"cd '{target_path}' && grep -rn --include='*.py' --include='*.yaml' --include='*.yml' --include='*.json' "
         f"-E '(mysql|pymysql|host.*3306|database.*stock|DB_HOST|DBConnection)' "
-        f"--include='*.py' -l 2>/dev/null | grep -v venv | grep -v __pycache__ | head -5",
+        f"-l 2>/dev/null | grep -v venv | grep -v __pycache__ | grep -v pipeline/project_context.py | head -5",
         timeout=10,
     )
     if r["exit_code"] != 0 or not r["stdout"].strip():

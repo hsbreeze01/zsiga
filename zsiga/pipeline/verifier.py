@@ -1,10 +1,9 @@
 import re
 
 from ..agent.loop import AgentLoop
-from ..agent.tools import register_tools
-from ..transport import Transport, LocalTransport
+from ..transport import Transport
 from .. import git_ops
-from .utils import read_file, file_exists
+from .utils import read_file
 
 VERIFIER_SYSTEM = """你是 zsiga 的验证引擎。对比 specs 和实际代码改动，判断实现质量。
 

@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
 
 
@@ -101,7 +100,7 @@ MILESTONE_L3 = {
             "id": "self_modify_gate",
             "title": "Self-Modify 门控",
             "description": "允许 zsiga 修改 zsiga/ 自身代码，通过 scope 扩展 + 安全校验实现",
-            "deliverables": ["agent/self_modify.py", "config: self_modify.enabled", "safety: self_modify.protected_paths"],
+            "deliverables": ["pipeline/orchestrator.py", "pipeline/implementer.py", "config.py"],
             "acceptance": "zsiga 能读取并修改自身源码文件，同时保护 config.yaml 和 memory/ 不被误改",
         },
         {

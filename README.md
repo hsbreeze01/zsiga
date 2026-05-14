@@ -23,6 +23,7 @@
 │  🔍 电磁透视 — AST 代码骨架扫描              │
 │  🗜️ 电磁压缩 — Context Compaction           │
 │  🐾 御坂网络 — Sub-Agent 分身并行             │
+│  🔧 LSP 感知 — 跳转定义/引用/诊断             │
 │                                             │
 │  性格：                                      │
 │  · 硬币信徒（spec 是唯一弹药）                │
@@ -42,7 +43,7 @@
 |-------|------|----------|----------|------|
 | Level 1 | Shell Artisan | shell 工具 + OpenSpec 流程纪律 | — | ✅ ACHIEVED |
 | **Level 2** | **Code Architect** | **AST 透视 + 消息压缩 + 分身并行** | — | **✅ CURRENT** |
-| Level 3 | 🔧 Self-Evolution | LSP 集成 + 自我修改 + 专业子代理 + 模式挖掘 | LSP 集成, Self-Modify 门控, 专业子代理分化, 跨会话模式挖掘, L3 验证 | 🚧 Leveling Up |
+| Level 3 | 🔧 Self-Evolution | LSP 集成 + 自我修改 + 专业子代理 + 模式挖掘 | LSP 集成, Self-Modify 门控, 专业子代理分化, 跨会话模式挖掘, L3 验证 | ✅ READY |
 | Level 4 | 🌐 Multi-Project Orchestrator | 意图路由 + 跨项目分解 + Todo 编排 + 升级协议 | Intent Router, 跨项目任务分解, Todo 驱动编排, 升级路径, L4 验证 | 🔒 LOCKED |
 | Level 5 | 🚀 Autonomous Engineer | 意图门控 + 并行代理 + Skill 演化 + 自我审查 + 失败恢复 | Phase 0 Intent Gate, 并行后台代理, Skill 演化, 自我审查循环, 失败恢复协议, L5 验证 | 🔒 LOCKED |
 
@@ -386,9 +387,10 @@ zsiga/
     ├── git_ops.py               # Git 操作
     ├── agent/
     │   ├── loop.py              #   LLM Agent Loop + Context Compaction
-    │   ├── tools.py             #   8 个工具（L1 6个 + L2 ast_search/ast_replace）
+    │   ├── tools.py             #   11 个工具（L1 6个 + L2 ast_search/ast_replace + L3 lsp_tools）
     │   ├── compaction.py        #   ⚡ 电磁压缩（消息摘要 + fallback）
     │   ├── ast_tools.py         #   🔍 电磁透视（ast-grep-py AST 搜索/替换）
+│   ├── lsp_tools.py         #   🔧 LSP 感知（goto_definition/find_references/diagnostics）
     │   └── sub_agent.py         #   🐾 御坂网络（L1 分身 + Semaphore(2) 并行）
     ├── intake/
     │   └── scanner.py           #   目录扫描，发现 proposal
@@ -427,6 +429,13 @@ zsiga Level 2 注册 8 个工具，全部指向**目标项目**：
 |------|------|
 | `ast_search` | AST 模式搜索 — 用 `$VAR`/`$$$` 匹配代码结构，14种语言自动检测 |
 | `ast_replace` | AST 模式替换 — 保证语法正确性的精确代码替换 |
+
+### L3 新增工具（LSP 感知）
+| 工具 | 作用 |
+|------|------|
+| `goto_definition` | 跳转到定义 — 给定文件/行/列，找到符号的定义位置（jedi 本地 / grep 远程） |
+| `find_references` | 查找引用 — 找到符号在项目中的所有引用位置 |
+| `diagnostics` | 诊断文件 — 检查语法错误和 lint 问题（jedi + ruff） |
 
 ## 常见问题
 

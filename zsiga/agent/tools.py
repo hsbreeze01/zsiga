@@ -1,10 +1,9 @@
-import json
-import os
 import subprocess
 from pathlib import Path
 
 from ..transport import Transport, LocalTransport
 from ..agent.ast_tools import ast_search, ast_replace
+from ..agent.lsp_tools import lsp_goto_definition, lsp_find_references, lsp_diagnostics
 
 
 def _bash(transport: Transport, target_path, command, timeout=120):
@@ -257,4 +256,47 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             "required": ["pattern", "replacement", "path"],
         },
         func=lambda pattern, replacement, path, lang=None: ast_replace(transport, target_path, pattern, replacement, path, lang),
+    )
+
+    agent.register_tool(
+        name="goto_definition",
+        description="跳转到定义：给定文件路径、行号、列号，找到光标位置符号的定义位置",
+        parameters={
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "文件路径（相对目标项目根目录）"},
+                "line": {"type": "integer", "description": "行号（1-based）"},
+                "column": {"type": "integer", "description": "列号（1-based）"},
+            },
+            "required": ["path", "line", "column"],
+        },
+        func=lambda path, line, column: lsp_goto_definition(transport, target_path, path, line, column),
+    )
+
+    agent.register_tool(
+        name="find_references",
+        description="查找引用：给定文件路径、行号、列号，找到符号在项目中的所有引用位置",
+        parameters={
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "文件路径（相对目标项目根目录）"},
+                "line": {"type": "integer", "description": "行号（1-based）"},
+                "column": {"type": "integer", "description": "列号（1-based）"},
+            },
+            "required": ["path", "line", "column"],
+        },
+        func=lambda path, line, column: lsp_find_references(transport, target_path, path, line, column),
+    )
+
+    agent.register_tool(
+        name="diagnostics",
+        description="诊断文件：检查语法错误和 lint 问题（ruff check）",
+        parameters={
+            "type": "object",
+            "properties": {
+                "path": {"type": "string", "description": "文件路径（相对目标项目根目录）"},
+            },
+            "required": ["path"],
+        },
+        func=lambda path: lsp_diagnostics(transport, target_path, path),
     )

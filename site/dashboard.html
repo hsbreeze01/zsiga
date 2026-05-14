@@ -664,19 +664,19 @@ td { border-top: 1px solid #334155; }
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L3 能力任务完成 >= 5</span>
-  <div class="progress"><div class="fill" style="width:60.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">3/5</span>
+  <div class="progress"><div class="fill" style="width:80.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">4/5</span>
 </div>
-  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (3/5)</div><div class="criterion">
+  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (4/5)</div><div class="criterion">
   <span class="icon">⬜</span>
   <span style="color:#64748b;" title="LSP 工具在 target project 上可用，goto_definition 能跳转到定义，diagnostics 能返回错误">LSP 集成</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <div class="progress"><div class="fill" style="width:50.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/2</span>
 </div><div class="criterion">
-  <span class="icon">⬜</span>
-  <span style="color:#64748b;" title="zsiga 能读取并修改自身源码文件，同时保护 config.yaml 和 memory/ 不被误改">Self-Modify 门控</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/3</span>
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="zsiga 能读取并修改自身源码文件，同时保护 config.yaml 和 memory/ 不被误改">Self-Modify 门控</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">3/3</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="三种角色子代理可独立创建并执行，各有不同的 system prompt 和行为约束">专业子代理分化</span>
@@ -797,7 +797,63 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>💭 Growth Journal</h2>
   <div class="journal">
-    <div class="journal-entry" style="border-left:3px solid #38bdf8">
+    <div class="journal-entry" style="border-left:3px solid #f59e0b">
+  <div class="journal-header">
+    <span>📝</span>
+    <span class="journal-text">行业数据补全被东方财富 + 同花顺 API 全面封锁阻断。stock_basic.industry 仍然 0/5512。需要找替代数据源或等 API 恢复。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Milestone collector bug 修复：_count_task_deliverables() 对 config:/safety:/tools: 语义前缀的 deliverable 静默跳过但 total 仍计入，导致任务永远无法完成。self_modify_gate 从 0/3 → 3/3，L3 tasks 从 3/5 → 4/5。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">Self-Modify venv 感知完成：zsiga 首次成功修改自身代码！TargetConfig.venv_path + _find_venv_python() + _venv_prompt_section()，16 个测试全过。这是 Self-Modify 门控的第二次成功验证。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Analysis batch 僵尸进程清理 + 信号超时保护。用 signal.alarm 设置 AnalysisTimeout(BaseException)，防止单股分析卡死拖垮整批。生产环境的超时保护不是可选项。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">DB 索引的威力：289 万行无索引 → 3 个索引后分析速度从 15min 降到 3s。300 倍提升不是代码优化，是数据结构优化。以后大数据量表第一件事查索引。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">buy_advice_v2 越界修复：trade_records[-2]/[-3] 在记录少于 3 条时 IndexError。根因是没做边界检查。修复后 600036 验证通过。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">FastAPI→Flask Blueprint 迁移完成。4 个 Blueprint（strategy_group/signal/simulation/event）+ 42 个测试全过。学会了一个道理：不一定要独立部署才能有清晰的架构，Blueprint 同样能做到模块分离。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">策略组引擎 Phase 1 完成：14 个文件、1697 行代码，通过 Flask Blueprint 融入 Compass 主应用。从 FastAPI 独立服务方案改为 Blueprint 方案，体现了'无需必要勿增实体'原则。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
   <div class="journal-header">
     <span>💡</span>
     <span class="journal-text">学会了：broken test files 会杀死 pytest collection，用 pytest.skip(allow_module_level=True) 做优雅降级</span>
@@ -875,6 +931,6 @@ td { border-top: 1px solid #334155; }
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-14T01:08:05.307993</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-14T10:47:17.808591</div>
 </body>
 </html>

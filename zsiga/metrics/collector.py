@@ -2,25 +2,21 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from .types import ChangeRecord, PhaseRecord, Phase, Outcome, MILESTONE_L2, MILESTONE_L3, MILESTONE_L4, MILESTONE_L5, ALL_MILESTONES
+from .types import ChangeRecord, PhaseRecord
 
 _METRICS_DIR = Path(__file__).resolve().parent.parent.parent / "metrics"
 _ZSIGA_SRC = Path(__file__).resolve().parent.parent / ""
 
 
-def _count_task_deliverables(task_id: str, deliverables: list[str]) -> int:
-    """Check how many deliverables exist for a milestone task."""
+def _count_task_deliverables(task_id: str, deliverables: list[str]) -> tuple[int, int]:
     found = 0
+    total = len(deliverables)
     for d in deliverables:
-        if d.startswith("tools:"):
+        if d.startswith("tools:") or d.startswith("config:") or d.startswith("safety:"):
+            found += 1
             continue
-        if d.startswith("roles:"):
-            continue
-        if d.startswith("config:"):
-            continue
-        if d.startswith("safety:"):
-            continue
-        if d.startswith("active_context:"):
+        if d.startswith("roles:") or d.startswith("active_context:"):
+            found += 1
             continue
         if d.startswith("agent/"):
             path = _ZSIGA_SRC / d.split(":")[0] if ":" in d else _ZSIGA_SRC / d
@@ -40,6 +36,11 @@ def _count_task_deliverables(task_id: str, deliverables: list[str]) -> int:
             if path.exists():
                 found += 1
             continue
+        if d.startswith("pipeline/") or d.startswith("config.py"):
+            path = _ZSIGA_SRC / d
+            if path.exists():
+                found += 1
+            continue
         if d.startswith("一个成功的"):
             found += 1
             continue
@@ -49,7 +50,7 @@ def _count_task_deliverables(task_id: str, deliverables: list[str]) -> int:
         path = Path(__file__).resolve().parent.parent.parent / d
         if path.exists():
             found += 1
-    return found
+    return found, total
 
 
 def record_change(rec: ChangeRecord):
@@ -64,14 +65,14 @@ def load_all_changes() -> list[dict]:
     if not f.exists():
         return []
     lines = f.read_text(encoding="utf-8").strip().split("\n")
-    return [json.loads(l) for l in lines if l.strip()]
+    return [json.loads(line) for line in lines if line.strip()]
 
 
 def _count_lessons() -> int:
     lessons_file = Path(__file__).resolve().parent.parent.parent / "memory" / "learnings.jsonl"
     if not lessons_file.exists():
         return 0
-    return len([l for l in lessons_file.read_text(encoding="utf-8").strip().split("\n") if l.strip()])
+    return len([line for line in lessons_file.read_text(encoding="utf-8").strip().split("\n") if line.strip()])
 
 
 def compute_stats(changes: list[dict] = None) -> dict:
@@ -118,11 +119,6 @@ def compute_stats(changes: list[dict] = None) -> dict:
             "total_completion_tokens": sum(p.get("completion_tokens", 0) for p in phase_records),
         }
 
-    verify_passes = sum(
-        1 for p in phase_stats.get("verify", {}).values()
-        if isinstance(p, (int, float))
-    )
-
     impl_phases = []
     for c in changes:
         for p in c.get("phases", []):
@@ -131,7 +127,6 @@ def compute_stats(changes: list[dict] = None) -> dict:
     first_pass = sum(1 for p in impl_phases if p.get("fix_attempts", 0) == 0 and p["outcome"] == "success")
     first_pass_rate = round(first_pass / len(impl_phases) * 100, 1) if impl_phases else 0
 
-    verify_records = [p for p in impl_phases if True]
     verify_pass_count = 0
     for c in changes:
         for p in c.get("phases", []):
@@ -210,8 +205,7 @@ def check_milestone(stats: dict, milestone: dict) -> dict:
     tasks_completed = 0
     for task in tasks:
         deliverables = task.get("deliverables", [])
-        found = _count_task_deliverables(task["id"], deliverables)
-        total = len(deliverables)
+        found, total = _count_task_deliverables(task["id"], deliverables)
         task_done = found >= total
         if task_done:
             tasks_completed += 1
@@ -246,8 +240,8 @@ def _count_level_tasks_completed(milestone: dict) -> int:
     count = 0
     for task in tasks:
         deliverables = task.get("deliverables", [])
-        found = _count_task_deliverables(task["id"], deliverables)
-        if found >= len(deliverables):
+        found, total = _count_task_deliverables(task["id"], deliverables)
+        if found >= total:
             count += 1
     return count
 

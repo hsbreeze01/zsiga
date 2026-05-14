@@ -1,8 +1,7 @@
 from datetime import datetime
 from pathlib import Path
-import shutil
-from .collector import load_all_changes, compute_stats, check_milestone
-from .types import MILESTONE_L2, MILESTONE_L3, MILESTONE_L4, MILESTONE_L5, ALL_MILESTONES
+from .collector import compute_stats, check_milestone
+from .types import ALL_MILESTONES
 from ..memory.journal import load_journal
 
 _DASHBOARD_PATH = Path(__file__).resolve().parent.parent.parent / "site" / "dashboard.html"
@@ -207,7 +206,6 @@ def _pixel_misaka(state: str = "resting") -> str:
     def pxa(x, y, color, opacity, w=1, h=1):
         return f'<rect x="{x*s}" y="{y*s}" width="{w*s}" height="{h*s}" fill="{color}" opacity="{opacity}"/>'
 
-    BG = "#0f172a"
     HAIR_DARK = "#5b21b6"
     HAIR_MID = "#7c3aed"
     HAIR_LIGHT = "#a78bfa"
@@ -219,7 +217,6 @@ def _pixel_misaka(state: str = "resting") -> str:
     MOUTH = "#92400e"
     WHITE_TOP = "#e2e8f0"
     UNIFORM = "#7c3aed"
-    UNIFORM_DARK = "#5b21b6"
     SKIRT = "#4c1d95"
     SHOE = "#1e1b4b"
     COIN_GOLD = "#f59e0b"

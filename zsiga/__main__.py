@@ -1,17 +1,16 @@
 import asyncio
 import re
 import sys
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-import threading
+from http.server import HTTPServer, SimpleHTTPRequestHandler  # noqa: E402
 
 sys.stdout.reconfigure(line_buffering=True)
 sys.stderr.reconfigure(line_buffering=True)
 
-from .config import load_config
-from .pipeline.orchestrator import ZsigaOrchestrator
-from .metrics.dashboard import generate_dashboard
-from .metrics.collector import load_all_changes
-from .transport import LocalTransport, create_transport
+from .config import load_config  # noqa: E402
+from .pipeline.orchestrator import ZsigaOrchestrator  # noqa: E402
+from .metrics.dashboard import generate_dashboard  # noqa: E402
+from .metrics.collector import load_all_changes  # noqa: E402
+from .transport import create_transport  # noqa: E402
 
 
 def _slugify(text: str) -> str:
@@ -103,20 +102,18 @@ def cmd_propose(args: list[str]):
 
     if plan_only or not run_pipeline:
         if plan_only:
-            print(f"\n  --plan-only: stopping before pipeline")
+            print("\n  --plan-only: stopping before pipeline")
         else:
-            print(f"\n  Tip: add --run to start the pipeline")
+            print("\n  Tip: add --run to start the pipeline")
         return
 
-    print(f"\n  Starting pipeline...")
+    print("\n  Starting pipeline...")
     asyncio.run(_run_single(config, project_name, change_name, change_dir, target.path))
 
 
 async def _run_single(config, project_name, change_name, change_dir, target_path):
     orchestrator = ZsigaOrchestrator(config)
     try:
-        transport = create_transport(config.targets[project_name])
-
         prop = {
             "id": change_name,
             "project": project_name,
@@ -173,13 +170,13 @@ def cmd_status():
             for p in pending:
                 print(f"  ⏳ {p}")
         else:
-            print(f"  (no pending changes)")
+            print("  (no pending changes)")
         if archived:
             print(f"  📁 archive: {len(archived)} completed")
 
     if changes:
         print(f"\n{'='*60}")
-        print(f"Recent outcomes:")
+        print("Recent outcomes:")
         recent = changes[-10:]
         for c in reversed(recent):
             icon = {"success": "✅", "reverted": "❌", "fail": "❌", "skipped": "⏭️"}.get(c.get("outcome", ""), "❓")
@@ -265,7 +262,7 @@ def cmd_dashboard(args: list[str]):
 
         server = HTTPServer(("0.0.0.0", port), Handler)
         print(f"Serving at http://localhost:{port}")
-        print(f"Press Ctrl+C to stop")
+        print("Press Ctrl+C to stop")
         try:
             server.serve_forever()
         except KeyboardInterrupt:

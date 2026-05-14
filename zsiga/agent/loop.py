@@ -1,9 +1,6 @@
-import asyncio
 import inspect
 import json
 import time
-import subprocess
-from pathlib import Path
 from zai import ZaiClient
 from zsiga.agent.compaction import compact_messages, estimate_chars
 
@@ -116,7 +113,7 @@ class AgentLoop:
             if resp.usage:
                 prompt_tokens_total += getattr(resp.usage, "prompt_tokens", 0) or 0
                 completion_tokens_total += getattr(resp.usage, "completion_tokens", 0) or 0
-            llm_ms = (time.monotonic() - t_llm) * 1000
+            _ = (time.monotonic() - t_llm) * 1000
             msg = resp.choices[0].message
             messages.append(msg.model_dump())
 
@@ -146,7 +143,6 @@ class AgentLoop:
                     result_str = json.dumps({"error": str(e)})
                 tool_ms = (time.monotonic() - t_tool) * 1000
 
-                result_lines = result_str.count("\n") + 1
                 result_len = len(result_str)
                 print(f"  [{phase}]     → {tool_ms:.0f}ms, {result_len} chars")
 
