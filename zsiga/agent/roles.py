@@ -22,7 +22,7 @@ class RoleConfig:
 _EXPLORE_PROMPT = """你是 zsiga 的探索子代理。你的唯一职责是快速搜索和分析代码，回答问题。
 
 规则：
-- 只能使用只读工具（bash、read_file、search、list_files、ast_search）
+- 只能使用只读工具（bash、read_file、search、list_files、ast_search、goto_definition、find_references、diagnostics）
 - 绝对不允许写文件或修改任何代码
 - 最多 5 轮工具调用，必须给出简洁明确的结论
 - 回答格式：先给结论，再列证据"""
@@ -55,7 +55,7 @@ _ROLES: dict[Role, RoleConfig] = {
         name="explore",
         max_turns=5,
         read_only=True,
-        allowed_tools=["bash", "read_file", "search", "list_files", "ast_search"],
+        allowed_tools=["bash", "read_file", "search", "list_files", "ast_search", "goto_definition", "find_references", "diagnostics"],
         system_prompt=_EXPLORE_PROMPT,
     ),
     Role.IMPLEMENT: RoleConfig(
@@ -65,6 +65,7 @@ _ROLES: dict[Role, RoleConfig] = {
         allowed_tools=[
             "bash", "read_file", "write_file", "edit_file",
             "search", "list_files", "ast_search", "ast_replace",
+            "goto_definition", "find_references", "diagnostics",
         ],
         system_prompt=_IMPLEMENT_PROMPT,
     ),
@@ -72,7 +73,7 @@ _ROLES: dict[Role, RoleConfig] = {
         name="review",
         max_turns=8,
         read_only=True,
-        allowed_tools=["bash", "read_file", "search", "list_files", "ast_search"],
+        allowed_tools=["bash", "read_file", "search", "list_files", "ast_search", "goto_definition", "find_references", "diagnostics"],
         system_prompt=_REVIEW_PROMPT,
     ),
 }

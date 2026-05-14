@@ -29,7 +29,7 @@ def test_implement_role_has_all_tools():
     assert "write_file" in config.allowed_tools
     assert "edit_file" in config.allowed_tools
     assert "ast_replace" in config.allowed_tools
-    assert len(config.allowed_tools) == 8
+    assert len(config.allowed_tools) == 11
 
 
 def test_review_role_read_only():
