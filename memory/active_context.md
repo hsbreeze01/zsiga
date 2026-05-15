@@ -9,7 +9,7 @@ zsiga is an independent autonomous agent. It operates on external projects throu
 - Revert on failure, never leave code broken
 - Follow existing project patterns
 
-## Session History: 28 lessons recorded
+## Session History: 29 lessons recorded
 ## Pattern Warnings (auto-mined)
 
 🟢 **pipeline.pass.deliver** — 出现 17 次 (严重度: low)
@@ -32,7 +32,6 @@ E701 Multiple statements on one line (colon)
 
 
 ## Recent Lessons
-- [pipeline.pass.deliver] Success
 - [pipeline.pass.deliver] Success
 - [pipeline.fail.implement] Failed at implement: lint:
 E702 Multiple statements on one line (semicolon)
@@ -73,3 +72,4 @@ config
 - [pipeline.pass.deliver] Success
 - [pipeline.pass.deliver] Success
 - [pipeline.pass.deliver] Success
+- [pipeline.fail.verify.unknown] Failed at verify: review error and adjust approach

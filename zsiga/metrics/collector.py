@@ -2,9 +2,14 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from .db import record_change as _db_record
+from .db import load_all_changes as _db_load_changes
+from .db import count_lessons as _db_count_lessons
+from .db import save_stats_snapshot
 from .types import ChangeRecord, PhaseRecord
 
 _METRICS_DIR = Path(__file__).resolve().parent.parent.parent / "metrics"
+_MEMORY_DIR = Path(__file__).resolve().parent.parent.parent / "memory"
 _ZSIGA_SRC = Path(__file__).resolve().parent.parent / ""
 
 
@@ -55,24 +60,21 @@ def _count_task_deliverables(task_id: str, deliverables: list[str]) -> tuple[int
 
 def record_change(rec: ChangeRecord):
     rec.finished_at = datetime.now().isoformat()
+    rec_dict = rec.to_dict()
+
+    _db_record(rec_dict)
+
     _METRICS_DIR.mkdir(parents=True, exist_ok=True)
     with open(_METRICS_DIR / "changes.jsonl", "a", encoding="utf-8") as f:
-        f.write(json.dumps(rec.to_dict(), ensure_ascii=False) + "\n")
+        f.write(json.dumps(rec_dict, ensure_ascii=False) + "\n")
 
 
 def load_all_changes() -> list[dict]:
-    f = _METRICS_DIR / "changes.jsonl"
-    if not f.exists():
-        return []
-    lines = f.read_text(encoding="utf-8").strip().split("\n")
-    return [json.loads(line) for line in lines if line.strip()]
+    return _db_load_changes()
 
 
 def _count_lessons() -> int:
-    lessons_file = Path(__file__).resolve().parent.parent.parent / "memory" / "learnings.jsonl"
-    if not lessons_file.exists():
-        return 0
-    return len([line for line in lessons_file.read_text(encoding="utf-8").strip().split("\n") if line.strip()])
+    return _db_count_lessons()
 
 
 def compute_stats(changes: list[dict] = None) -> dict:
@@ -157,7 +159,7 @@ def compute_stats(changes: list[dict] = None) -> dict:
         p.get("sub_agent_count", 0) for c in changes for p in c.get("phases", [])
     )
 
-    return {
+    stats = {
         "total_changes": total,
         "successful_changes": len(successes),
         "failed_changes": total - len(successes),
@@ -179,12 +181,16 @@ def compute_stats(changes: list[dict] = None) -> dict:
         "last_updated": datetime.now().isoformat(),
     }
 
+    save_stats_snapshot(stats)
+
+    return stats
+
 
 def check_milestone(stats: dict, milestone: dict) -> dict:
     results = []
     all_met = True
     for key, threshold, desc in milestone["criteria"]:
-        if key in ("l3_tasks_completed", "l4_tasks_completed", "l5_tasks_completed"):
+        if key in ("l3_tasks_completed", "l4_tasks_completed", "l5_tasks_completed", "l6_tasks_completed"):
             value = _count_level_tasks_completed(milestone)
         else:
             value = stats.get(key, 0)

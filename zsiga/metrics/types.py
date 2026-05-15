@@ -173,11 +173,32 @@ MILESTONE_L4 = {
             "deliverables": ["一次成功的跨项目回归测试记录"],
             "acceptance": "5 个项目的测试结果汇总在一份报告中，区分 pass/fail/unknown",
         },
+        {
+            "id": "diagnose_mode",
+            "title": "结构化诊断循环",
+            "description": "verify 失败后自动进入 diagnose 循环：reproduce → hypothesise(3-5排序假设) → instrument(最小探测) → targeted fix。源自 mattpocock/skills /diagnose 理念",
+            "deliverables": ["pipeline/diagnoser.py", "agent/roles.py: diagnoser prompt"],
+            "acceptance": "verify 失败后自动生成 3+ 排序假设，基于探测结果修复成功率 > 盲目 retry",
+        },
+        {
+            "id": "vertical_slice_impl",
+            "title": "垂直切片实施",
+            "description": "IMPLEMENT 按 task 逐个执行（read→edit 1-2 files→lint→next），反对一次性改 4-5 个文件。源自 mattpocock/skills /tdd vertical slice 理念",
+            "deliverables": ["pipeline/implementer.py: vertical slice prompt"],
+            "acceptance": "多 task change 中每次只改 1-2 个文件，fix 成功率 > 一次性改多文件",
+        },
+        {
+            "id": "domain_glossary",
+            "title": "领域术语缓存",
+            "description": "project_context 预取阶段自动提取项目术语表，缓存到 memory/glossary/，减少 ENRICH 探索量。源自 mattpocock/skills /grill-with-docs CONTEXT.md 理念",
+            "deliverables": ["pipeline/glossary.py", "memory/glossary/"],
+            "acceptance": "第二次处理同项目 change 时 ENRICH 阶段节省 >=3 turns",
+        },
     ],
     "criteria": [
         ("successful_changes", 50, "累计成功 change 数 >= 50"),
         ("success_rate_pct", 80, "总成功率 >= 80%"),
-        ("l4_tasks_completed", 5, "L4 能力任务完成 >= 5"),
+        ("l4_tasks_completed", 8, "L4 能力任务完成 >= 8"),
     ],
 }
 
@@ -237,4 +258,60 @@ MILESTONE_L5 = {
     ],
 }
 
-ALL_MILESTONES = [MILESTONE_L2, MILESTONE_L3, MILESTONE_L4, MILESTONE_L5]
+MILESTONE_L6 = {
+    "label": "Level 6: Autonomous Sense",
+    "icon": "🔮",
+    "color": "#ec4899",
+    "description": "zsiga 不再需要人类指令——自主感知环境、判断价值、生成 proposal、自己执行。Sense→Judge→Propose 层在 pipeline 之前，信号检测纯规则驱动，只有 Proposer 用 LLM",
+    "tasks": [
+        {
+            "id": "sense_engine",
+            "title": "多信号源感知引擎",
+            "description": "Sensor 引擎支持 ≥4 种信号源：health_check、git_changes、log_errors、patterns",
+            "deliverables": ["intake/sensor.py", "4 种信号检测器"],
+            "acceptance": "sensor.scan() 返回 ≥4 种信号类型的检测结果",
+        },
+        {
+            "id": "value_judge",
+            "title": "价值判断与去重",
+            "description": "Judge 层评估信号优先级（CRITICAL/HIGH/MEDIUM/LOW/NOISE），24h 去重窗口，速率限制",
+            "deliverables": ["agent/judge.py", "memory/sense_history.jsonl"],
+            "acceptance": "同信号 24h 内不重复 proposal，按优先级排序",
+        },
+        {
+            "id": "auto_proposer",
+            "title": "自主提案生成",
+            "description": "Proposer 将判断后的信号转化为 proposal.md，符合 OpenSpec 格式，包含 signal_source 元数据",
+            "deliverables": ["intake/proposer.py", "LLM prompt"],
+            "acceptance": "自动生成符合 OpenSpec 格式的 proposal.md",
+        },
+        {
+            "id": "cycle_integration",
+            "title": "感知集成到 cycle",
+            "description": "run_cycle() 增加 Phase 0: Sense，自主 proposal 与手动 proposal 统一进入 pipeline",
+            "deliverables": ["pipeline/orchestrator.py"],
+            "acceptance": "一次完整 cycle：sense → propose → pipeline 自动完成",
+        },
+        {
+            "id": "sense_config",
+            "title": "感知配置体系",
+            "description": "zsiga.yaml 增加 sense 段，SenseConfig 数据类，支持信号源开关、端点配置、过滤规则",
+            "deliverables": ["config.py", "zsiga.yaml sense 段"],
+            "acceptance": "通过配置文件控制感知行为，无需改代码即可开关信号源",
+        },
+        {
+            "id": "l6_validation",
+            "title": "L6 验证：24h 自主运行",
+            "description": "24h 无人值守运行，自主生成 ≥2 个 proposal 并执行成功，误报率 ≤20%",
+            "deliverables": ["一次成功的 24h 自主运行记录"],
+            "acceptance": "24h 内自主生成 ≥2 个有效 proposal，成功率 ≥60%",
+        },
+    ],
+    "criteria": [
+        ("successful_changes", 100, "累计成功 change 数 >= 100"),
+        ("success_rate_pct", 85, "总成功率 >= 85%"),
+        ("l6_tasks_completed", 6, "L6 能力任务完成 >= 6"),
+    ],
+}
+
+ALL_MILESTONES = [MILESTONE_L2, MILESTONE_L3, MILESTONE_L4, MILESTONE_L5, MILESTONE_L6]

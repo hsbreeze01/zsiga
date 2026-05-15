@@ -3,7 +3,7 @@ agent:
   llm:
     provider: zhipuai
     model: glm-5.1
-    api_key: ${ZHIPUAI_API_KEY}
+    api_key: 5920f4fae4c4448e9b9789b360a2fb4c.cezqLK9T60yfqZOV
     base_url: https://open.bigmodel.cn/api/coding/paas/v4
     # proxy: http://proxy-chj.nioint.com:8080  # direct connection works; proxy breaks connectivity
     max_tokens: 4096

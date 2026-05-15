@@ -507,12 +507,12 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">47</div>
+    <div class="value">61</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">85.1%</div>
-    <div class="meta">40 hit / 7 miss</div>
+    <div class="value good">86.9%</div>
+    <div class="meta">53 hit / 8 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -521,15 +521,15 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">📝 Lessons</div>
-    <div class="value">28</div>
+    <div class="value">29</div>
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">66.7%</div>
+    <div class="value warn">67.4%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value bad">45.5%</div>
+    <div class="value bad">46.9%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -549,40 +549,40 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>9</td>
+  <td>15</td>
   <td class="good">100.0%</td>
-  <td>2.8</td>
-  <td>128.5s</td>
+  <td>1.7</td>
+  <td>146.3s</td>
   <td>0</td>
-  <td>31</td>
-  <td>33</td>
-  <td>366.4K</td>
+  <td>71</td>
+  <td>82</td>
+  <td>1.46M</td>
 </tr><tr>
   <td>implement</td>
-  <td>33</td>
-  <td class="good">81.8%</td>
-  <td>2.6</td>
-  <td>228.7s</td>
-  <td>71</td>
-  <td>322</td>
-  <td>378</td>
-  <td>5.82M</td>
+  <td>43</td>
+  <td class="good">86.0%</td>
+  <td>2.0</td>
+  <td>235.1s</td>
+  <td>78</td>
+  <td>487</td>
+  <td>567</td>
+  <td>11.53M</td>
 </tr><tr>
   <td>verify</td>
-  <td>22</td>
-  <td class="bad">45.5%</td>
-  <td>0.5</td>
-  <td>92.0s</td>
-  <td>3</td>
-  <td>147</td>
-  <td>203</td>
-  <td>1.22M</td>
+  <td>32</td>
+  <td class="bad">46.9%</td>
+  <td>0.3</td>
+  <td>93.4s</td>
+  <td>6</td>
+  <td>228</td>
+  <td>290</td>
+  <td>2.44M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>23</td>
+  <td>32</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>11.8s</td>
+  <td>12.3s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -595,27 +595,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">7.41M</div>
-      <div class="meta">7.30M prompt + 103.6K completion</div>
+      <div class="value">15.43M</div>
+      <div class="meta">15.21M prompt + 222.2K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">157.6K</div>
+      <div class="value">252.9K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">500</div>
-      <div class="meta">avg 10.6 per change</div>
+      <div class="value">786</div>
+      <div class="meta">avg 12.9 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">614</div>
-      <div class="meta">avg 13.1 per change</div>
+      <div class="value">939</div>
+      <div class="meta">avg 15.4 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">3.1h</div>
-      <div class="meta">10,996s total</div>
+      <div class="value">4.4h</div>
+      <div class="meta">15,688s total</div>
     </div>
   </div>
 </div>
@@ -629,12 +629,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 10</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">40/10</span>
+  <span style="color:#94a3b8;font-size:0.8rem">53/10</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 70%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">85.1/70</span>
+  <span style="color:#94a3b8;font-size:0.8rem">86.9/70</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>覆盖 >= 3 个不同目标项目</span>
@@ -644,7 +644,7 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>积累 >= 20 条经验教训</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">28/20</span>
+  <span style="color:#94a3b8;font-size:0.8rem">29/20</span>
 </div>
   
 </div>
@@ -655,12 +655,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 30</span>
   <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">40/30</span>
+  <span style="color:#94a3b8;font-size:0.8rem">53/30</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 75%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">85.1/75</span>
+  <span style="color:#94a3b8;font-size:0.8rem">86.9/75</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L3 能力任务完成 >= 5</span>
@@ -698,46 +698,61 @@ td { border-top: 1px solid #334155; }
   <h3 style="color:#06b6d4">🌐 Level 4: Multi-Project Orchestrator — 🚧 Leveling Up</h3>
   <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 从固定流水线升级为动态任务分解器，支持跨项目协调和意图路由</div>
   <div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>累计成功 change 数 >= 50</span>
-  <div class="progress"><div class="fill" style="width:80.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">40/50</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">53/50</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 80%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">85.1/80</span>
+  <span style="color:#94a3b8;font-size:0.8rem">86.9/80</span>
 </div><div class="criterion">
   <span class="icon">○</span>
-  <span>L4 能力任务完成 >= 5</span>
-  <div class="progress"><div class="fill" style="width:20.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">1/5</span>
+  <span>L4 能力任务完成 >= 8</span>
+  <div class="progress"><div class="fill" style="width:12.5%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">1/8</span>
 </div>
-  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (1/5)</div><div class="criterion">
+  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (1/8)</div><div class="criterion">
   <span class="icon">⬜</span>
   <span style="color:#64748b;" title="给定任意用户消息，能正确分类意图并选择执行路径">Intent Router</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <div class="progress"><div class="fill" style="width:50.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/2</span>
 </div><div class="criterion">
   <span class="icon">⬜</span>
   <span style="color:#64748b;" title="输入跨项目指令 → 自动分解为项目级子任务 → 并行执行 → 汇总报告">跨项目任务分解</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <div class="progress"><div class="fill" style="width:50.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/2</span>
 </div><div class="criterion">
   <span class="icon">⬜</span>
   <span style="color:#64748b;" title="todo list 可动态创建/更新/完成，每个 todo 有独立状态，dashboard 实时展示进度">Todo 驱动编排</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <div class="progress"><div class="fill" style="width:50.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/2</span>
 </div><div class="criterion">
   <span class="icon">⬜</span>
   <span style="color:#64748b;" title="修复循环 3 次失败后自动触发升级，生成诊断报告并暂停等待人工介入">升级路径 (Escalation)</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <div class="progress"><div class="fill" style="width:50.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="5 个项目的测试结果汇总在一份报告中，区分 pass/fail/unknown">L4 验证：跨项目回归测试</span>
   <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="verify 失败后自动生成 3+ 排序假设，基于探测结果修复成功率 > 盲目 retry">结构化诊断循环</span>
+  <div class="progress"><div class="fill" style="width:50.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="多 task change 中每次只改 1-2 个文件，fix 成功率 > 一次性改多文件">垂直切片实施</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/1</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="第二次处理同项目 change 时 ENRICH 阶段节省 >=3 turns">领域术语缓存</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
 </div>
 </div>
 <div class="milestone" style="border-color:#22c55e">
@@ -746,13 +761,13 @@ td { border-top: 1px solid #334155; }
   <div class="criterion">
   <span class="icon">○</span>
   <span>累计成功 change 数 >= 80</span>
-  <div class="progress"><div class="fill" style="width:50.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">40/80</span>
+  <div class="progress"><div class="fill" style="width:66.2%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">53/80</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">85.1/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">86.9/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L5 能力任务完成 >= 6</span>
@@ -791,13 +806,99 @@ td { border-top: 1px solid #334155; }
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
 </div>
 </div>
+<div class="milestone" style="border-color:#ec4899">
+  <h3 style="color:#ec4899">🔮 Level 6: Autonomous Sense — 🚧 Leveling Up</h3>
+  <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 不再需要人类指令——自主感知环境、判断价值、生成 proposal、自己执行。Sense→Judge→Propose 层在 pipeline 之前，信号检测纯规则驱动，只有 Proposer 用 LLM</div>
+  <div class="criterion">
+  <span class="icon">○</span>
+  <span>累计成功 change 数 >= 100</span>
+  <div class="progress"><div class="fill" style="width:53.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">53/100</span>
+</div><div class="criterion">
+  <span class="icon">✓</span>
+  <span>总成功率 >= 85%</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">86.9/85</span>
+</div><div class="criterion">
+  <span class="icon">○</span>
+  <span>L6 能力任务完成 >= 6</span>
+  <div class="progress"><div class="fill" style="width:33.3%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">2/6</span>
+</div>
+  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (2/6)</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="sensor.scan() 返回 ≥4 种信号类型的检测结果">多信号源感知引擎</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="同信号 24h 内不重复 proposal，按优先级排序">价值判断与去重</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="自动生成符合 OpenSpec 格式的 proposal.md">自主提案生成</span>
+  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+</div><div class="criterion">
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="一次完整 cycle：sense → propose → pipeline 自动完成">感知集成到 cycle</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#ec4899"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/1</span>
+</div><div class="criterion">
+  <span class="icon">⬜</span>
+  <span style="color:#64748b;" title="通过配置文件控制感知行为，无需改代码即可开关信号源">感知配置体系</span>
+  <div class="progress"><div class="fill" style="width:50.0%;background:#334155"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/2</span>
+</div><div class="criterion">
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="24h 内自主生成 ≥2 个有效 proposal，成功率 ≥60%">L6 验证：24h 自主运行</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#ec4899"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">1/1</span>
+</div>
+</div>
 
 </div>
 
 <div class="section">
   <h2>💭 Growth Journal</h2>
   <div class="journal">
-    <div class="journal-entry" style="border-left:3px solid #f59e0b">
+    <div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Datapipeline misfire 修复：APScheduler 默认 misfire_grace_time=1s 导致 kline 采集连续 2 天未执行。改为 300s。补采 5/13+5/14 共 20722 行。教训：生产环境的调度器配置不能依赖默认值。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Infopublisher 发布失败修复：_quick_login_check 时序问题（页面未加载完就检查登录状态）。改用 networkidle + 3-5s 延迟 + wait_for_selector(8s)。微软文章手动重发成功（task_id a9390d10）。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #22c55e">
+  <div class="journal-header">
+    <span>💛</span>
+    <span class="journal-text">前端迁移完成：策略组 SPA（loadStrategyDiscover/MyStrategy/Admin）注入 DataFactory index.html block 1。Compass 转为 API-only 后端。Script block 边界问题根因：JS 函数声明只在同一 script block 内提升。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">OpenSpec 管理原则确立：本地 AIDesign 为唯一权威源 → scp 分发到远端工程 → 各工程自己 commit & push。禁止 AIDesign 直接 push spec。跨工程 change 必须同步所有相关工程。归档需双向一致。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">L6 Autonomous Sense 愿景设计完成！Sense→Judge→Propose 闭环，信号检测纯规则驱动（不烧 token），只有 Proposer 用 LLM。4 大信号维度：代码/运行/质量/交叉。从"等人类写 proposal"到"自己看自己想自己做"。设计文档 459 行。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #f59e0b">
   <div class="journal-header">
     <span>📝</span>
     <span class="journal-text">行业数据补全被东方财富 + 同花顺 API 全面封锁阻断。stock_basic.industry 仍然 0/5512。需要找替代数据源或等 API 恢复。</span>
@@ -923,14 +1024,14 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>pipeline-stockshark-merge</li>
-<li>2026-05-12-publish-queue</li>
-<li>add-strategy-group-engine</li>
-<li>fix-self-lint-issues</li>
-<li>fix-self-lint-issues</li>
+    <li>strategy-form-ux</li>
+<li>fix-strategy-missing-tables</li>
+<li>replace-doubao-with-deepseek</li>
+<li>fix-strategy-scan-async</li>
+<li>fix-strategy-scan-async</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-14T13:45:21.071544</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-15T21:32:53.089227</div>
 </body>
 </html>
