@@ -1,0 +1,63 @@
+{
+  "session_id": "upgrade-intent-routerpy-to-use-llm-classification-with-keywo-b816b288",
+  "change_name": "upgrade-intent-routerpy-to-use-llm-classification-with-keywo",
+  "project": "zsiga",
+  "exported_at": "2026-05-18T17:39:29.351547",
+  "outcome": "success",
+  "started_at": "2026-05-18T17:31:29.071318",
+  "finished_at": "2026-05-18T17:39:29.320901",
+  "total_runtime_seconds": 471.7,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 84.0,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 9,
+      "prompt_tokens": 71981,
+      "completion_tokens": 2545
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 310.6,
+      "fix_attempts": 0,
+      "llm_calls": 20,
+      "tool_calls": 21,
+      "prompt_tokens": 436225,
+      "completion_tokens": 4205
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 68.6,
+      "fix_attempts": 0,
+      "llm_calls": 4,
+      "tool_calls": 5,
+      "prompt_tokens": 63559,
+      "completion_tokens": 1960
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 8.5,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 29,
+    "total_tool_calls": 35,
+    "total_prompt_tokens": 571765,
+    "total_completion_tokens": 8710
+  }
+}
