@@ -122,9 +122,9 @@ class ChangeConflictDetector:
             overlap_count[cp.change_ids[0]] = overlap_count.get(cp.change_ids[0], 0) + 1
             overlap_count[cp.change_ids[1]] = overlap_count.get(cp.change_ids[1], 0) + 1
 
-        # Sort: fewer overlaps first, then lexicographic id
+        # Sort: fewer overlaps first, then fewer target files, then lexicographic id
         sorted_changes = sorted(
             changes,
-            key=lambda c: (overlap_count.get(c.id, 0), c.id),
+            key=lambda c: (overlap_count.get(c.id, 0), len(c.target_files), c.id),
         )
         return [c.id for c in sorted_changes]

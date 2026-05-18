@@ -216,8 +216,8 @@ class TestSuggestOrder:
         ]
         detector = ChangeConflictDetector()
         result = detector.suggest_order(changes)
-        # No overlaps, so sort by overlap count (both 0), then lexicographic
-        assert result == ["A", "B"]
+        # No overlaps, so sort by overlap count (both 0), then fewer target files first
+        assert result == ["B", "A"]
 
     def test_overlapping_changes_after_non_overlapping(self):
         changes = [
