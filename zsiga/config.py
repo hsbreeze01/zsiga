@@ -81,11 +81,16 @@ class LLMConfig:
 
 class CompactionConfig:
     def __init__(self, enabled: bool = True, threshold_chars: int = 60000,
-                 keep_recent: int = 3, use_llm_summary: bool = True):
+                 keep_recent: int = 3, use_llm_summary: bool = True,
+                 total_budget: int = 200000, per_turn_limit: int = 8192,
+                 compaction_ratio: float = 0.8):
         self.enabled = enabled
         self.threshold_chars = threshold_chars
         self.keep_recent = keep_recent
         self.use_llm_summary = use_llm_summary
+        self.total_budget = total_budget
+        self.per_turn_limit = per_turn_limit
+        self.compaction_ratio = compaction_ratio
 
 
 class PipelineConfig:
@@ -266,6 +271,9 @@ def load_config(path: str = None) -> ZsigaConfig:
         threshold_chars=compaction_raw.get("threshold_chars", 60000),
         keep_recent=compaction_raw.get("keep_recent", 3),
         use_llm_summary=compaction_raw.get("use_llm_summary", True),
+        total_budget=compaction_raw.get("total_budget", 200000),
+        per_turn_limit=compaction_raw.get("per_turn_limit", 8192),
+        compaction_ratio=compaction_raw.get("compaction_ratio", 0.8),
     )
     pipeline = PipelineConfig(
         max_changes_per_cycle=pipeline_raw.get("max_changes_per_cycle", 3),

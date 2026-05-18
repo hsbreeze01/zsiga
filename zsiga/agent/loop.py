@@ -4,6 +4,7 @@ import logging
 import time
 from zai import ZaiClient
 from zsiga.agent.compaction import compact_messages, estimate_tokens
+from zsiga.agent.token_budget import TokenBudget
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +33,10 @@ class AgentLoop:
                  base_url: str = None, proxy: str = None,
                  compaction_enabled: bool = True,
                  compaction_threshold: int = 60000,
-                 compaction_keep_recent: int = 3):
+                 compaction_keep_recent: int = 3,
+                 total_budget: int = 200000,
+                 per_turn_limit: int = 8192,
+                 compaction_ratio: float = 0.8):
         kwargs = {"api_key": api_key}
         if base_url:
             kwargs["base_url"] = base_url
@@ -51,6 +55,12 @@ class AgentLoop:
         self.compaction_enabled = compaction_enabled
         self.compaction_threshold = compaction_threshold
         self.compaction_keep_recent = compaction_keep_recent
+        self.budget = TokenBudget(
+            total_budget=total_budget,
+            per_turn_limit=per_turn_limit,
+            compaction_threshold=compaction_threshold,
+            compaction_ratio=compaction_ratio,
+        )
 
     def set_phase(self, label: str):
         self._phase_label = label
@@ -102,7 +112,7 @@ class AgentLoop:
 
             t_llm = time.monotonic()
 
-            if self.compaction_enabled and turn > 0 and turn % 3 == 0:
+            if self.compaction_enabled and turn > 0 and self.budget.should_compact(messages, estimate_tokens):
                 messages, compacted = compact_messages(
                     messages,
                     threshold=self.compaction_threshold,
@@ -127,6 +137,24 @@ class AgentLoop:
                 prompt_tokens_total += getattr(resp.usage, "prompt_tokens", 0) or 0
                 completion_tokens_total += getattr(resp.usage, "completion_tokens", 0) or 0
             _ = (time.monotonic() - t_llm) * 1000
+
+            # Budget enforcement after recording token usage
+            if resp.usage:
+                budget_status = self.budget.record(
+                    getattr(resp.usage, "prompt_tokens", 0) or 0,
+                    getattr(resp.usage, "completion_tokens", 0) or 0,
+                )
+                if budget_status["session_exceeded"] or budget_status["turn_exceeded"]:
+                    elapsed = time.monotonic() - start
+                    log.warning(
+                        "🚫 BUDGET_EXCEEDED after turn %d | used=%d remaining=%d",
+                        turn + 1, budget_status["used"], budget_status["remaining"],
+                        extra={"phase": phase, "turn": turn + 1, **budget_status},
+                    )
+                    return RunResult(
+                        "BUDGET_EXCEEDED", llm_calls_total, tool_calls_total, elapsed,
+                        prompt_tokens_total, completion_tokens_total,
+                    )
             msg = resp.choices[0].message
             messages.append(msg.model_dump())
 
