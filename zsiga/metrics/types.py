@@ -219,7 +219,7 @@ MILESTONE_L5 = {
             "id": "parallel_background",
             "title": "并行后台代理",
             "description": "同时发射 2-5 个 explore agent，异步收集结果后综合决策；支持后台发射+回调收集模式",
-            "deliverables": ["agent/background_pool.py", "pool: dispatch_many() → collect_all()"],
+            "deliverables": ["agent/sub_agent.py", "pipeline/enricher.py"],
             "acceptance": "同时派发 3 个搜索任务，全部完成后综合结果做出决策，比顺序执行快 2x+",
         },
         {
