@@ -109,11 +109,14 @@ def compute_stats(changes: list[dict] = None) -> dict:
         total_llm_calls = sum(p.get("llm_calls", 0) for p in phase_records)
         total_tool_calls = sum(p.get("tool_calls", 0) for p in phase_records)
 
+        seconds_values = [p.get("seconds_used", 0) for p in phase_records]
         phase_stats[phase] = {
             "count": len(phase_records),
             "pass_rate": round(pass_count / len(phase_records) * 100, 1),
             "avg_turns": round(total_turns / len(phase_records), 1),
             "avg_seconds": round(total_seconds / len(phase_records), 1),
+            "min_seconds": round(min(seconds_values), 1),
+            "max_seconds": round(max(seconds_values), 1),
             "total_fixes": total_fixes,
             "total_llm_calls": total_llm_calls,
             "total_tool_calls": total_tool_calls,
