@@ -1,4 +1,3 @@
-import pytest
 from zsiga.agent.compaction import (
     estimate_chars,
     estimate_tokens,
@@ -441,10 +440,6 @@ def test_compact_phase1_only_sufficient():
     result, compacted = compact_messages(msgs, threshold=20000, keep_recent=3, client=None)
     assert compacted == 1
     # Phase 1 result should have merged messages, no summary
-    has_summary = any(
-        "[compacted summary" in m.get("content", "") for m in result
-    )
-    # Either Phase 1 alone was enough (no summary) or Phase 2 ran (has summary)
     # Just verify it compacted and returned valid structure
     assert result[0]["role"] == "system"
 

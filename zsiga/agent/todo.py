@@ -1,7 +1,7 @@
 """Todo 驱动编排 — 动态 todo list 替代固定 pipeline"""
 import json
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
 

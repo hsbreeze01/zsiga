@@ -6,7 +6,7 @@ from .db import record_change as _db_record
 from .db import load_all_changes as _db_load_changes
 from .db import count_lessons as _db_count_lessons
 from .db import save_stats_snapshot
-from .types import ChangeRecord, PhaseRecord
+from .types import ChangeRecord
 
 _METRICS_DIR = Path(__file__).resolve().parent.parent.parent / "metrics"
 _MEMORY_DIR = Path(__file__).resolve().parent.parent.parent / "memory"

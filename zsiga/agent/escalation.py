@@ -1,5 +1,4 @@
 """升级路径 — 3 次修复失败后自动升级，尝试不同策略并生成诊断报告"""
-import json
 import time
 from dataclasses import dataclass, field
 from enum import Enum

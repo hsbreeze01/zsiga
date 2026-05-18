@@ -266,7 +266,7 @@ def cmd_dashboard(args: list[str]):
         try:
             server.serve_forever()
         except KeyboardInterrupt:
-            print(f"\nStopped.")
+            print("\nStopped.")
 
 
 def main():
