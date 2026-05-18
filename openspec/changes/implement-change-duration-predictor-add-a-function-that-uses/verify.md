@@ -1,0 +1,6 @@
+Verdict: PASS
+Completeness: ✓ All spec requirements implemented — predict_change_duration with correct signature, linear regression via normal equations, median fallback for <3 records, DEFAULT_PHASE_SECONDS=30.0 for missing phase data, negative clamping to 0.0, _total key as sum, and module at zsiga/duration_predictor.py with valid import path.
+Correctness: ✓ Linear model y = a·x1 + b·x2 + c solved via Cramer's rule on 3×3 normal equations; degenerate cases handled; missing phase keys skipped gracefully; _total correctly sums all per-phase estimates; negative predictions clamped via max(0.0, predicted).
+Coherence: ✓ Pure-function design with no I/O or side effects; only stdlib dependency (statistics.median); internal helpers (_fit_linear, _predict_phase, _fallback_estimates) are independently testable; follows existing project patterns.
+Issues:
+  1. [WARNING] TestNegativeClamping.test_negative_prediction_clamped uses perfectly linear data (y proportional to x1,x2) so the prediction at (1,1) is still positive — the test never actually exercises the clamping path. Consider crafting data that forces a negative prediction (e.g., using a large intercept offset) to validate the clamp truly works.
