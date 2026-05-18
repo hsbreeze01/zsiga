@@ -1,0 +1,63 @@
+{
+  "session_id": "implement-adaptive-turn-limit-in-configpy-and-orchestratorpy-1254c760",
+  "change_name": "implement-adaptive-turn-limit-in-configpy-and-orchestratorpy",
+  "project": "zsiga",
+  "exported_at": "2026-05-18T16:20:18.658334",
+  "outcome": "success",
+  "started_at": "2026-05-18T16:18:49.815784",
+  "finished_at": "2026-05-18T16:20:18.621358",
+  "total_runtime_seconds": 85.8,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 65.2,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "prompt_tokens": 8278,
+      "completion_tokens": 49
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 5.3,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "prompt_tokens": 8254,
+      "completion_tokens": 110
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 7.4,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "prompt_tokens": 2141,
+      "completion_tokens": 126
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 7.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 3,
+    "total_tool_calls": 0,
+    "total_prompt_tokens": 18673,
+    "total_completion_tokens": 285
+  }
+}
