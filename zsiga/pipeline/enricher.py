@@ -57,13 +57,23 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
     transport = transport or LocalTransport()
     proposal = read_file(f"{change_dir}/proposal.md", transport) or ""
 
+    # Optional parallel explore pool (REQ-PP-04)
+    supplementary_context = kwargs.pop("supplementary_context", "")
+
     ctx_section = ""
     if project_context:
         ctx_section = f"\n## 项目代码上下文（已预读，不需要再用工具读取）\n{project_context}\n"
 
+    supp_section = ""
+    if supplementary_context:
+        supp_section = (
+            "\n## 并行探索结果（explore agents 已预先搜索）\n"
+            f"{supplementary_context}\n"
+        )
+
     user_prompt = f"""## Change 目录: {change_dir}
 ## 目标项目: {target_path}
-{ctx_section}
+{ctx_section}{supp_section}
 ## 已有 proposal.md:
 {proposal}
 
@@ -85,3 +95,30 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
         result = await agent.run(ENRICHER_SYSTEM, retry_prompt, **kwargs)
 
     return result
+
+
+def derive_explore_tasks(proposal_text: str) -> list[str]:
+    """Derive 2-5 focused explore instructions from proposal text.
+
+    Pure function — no LLM calls, deterministic output based on keyword
+    extraction from the proposal title / first line.
+    """
+    # Extract keywords from the first non-empty line (title)
+    lines = [line.strip() for line in proposal_text.splitlines() if line.strip()]
+    title = lines[0] if lines else ""
+    # Use the first 6 meaningful characters as keyword hint
+    keywords = title[:30] if len(title) >= 6 else title or "项目"
+
+    # Fixed set of exploration templates covering different aspects
+    templates = [
+        "搜索项目中与「{kw}」相关的现有代码和模块",
+        "查找项目的目录结构、入口文件、配置文件模式",
+        "搜索项目中与「{kw}」相关的测试文件和测试模式",
+        "查找项目的依赖管理和技术栈（requirements.txt, pyproject.toml, package.json 等）",
+        "搜索项目中与「{kw}」相关的数据库模型和数据结构",
+    ]
+
+    tasks = [t.format(kw=keywords) for t in templates]
+
+    # Always return at least 2, at most 5
+    return tasks[:5]

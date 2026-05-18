@@ -139,3 +139,111 @@ async def run_parallel(
             results[idx] = result
 
     return results
+
+
+# ---------------------------------------------------------------------------
+# L5: Parallel Explore Agent Pool (PoolHandle / dispatch_many / collect_all)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class PoolHandle:
+    """Opaque handle returned by dispatch_many; passed to collect_all."""
+
+    tasks: list[str]
+    pending: asyncio.Task | None
+    max_concurrency: int
+
+
+def dispatch_many(
+    tasks: list[str],
+    api_key: str,
+    model: str,
+    base_url: str = None,
+    proxy: str = None,
+    target_path: str = "/tmp",
+    transport: Transport | None = None,
+    max_concurrency: int = 3,
+    max_turns_per_task: int = 5,
+    timeout_per_task: int = 120,
+) -> PoolHandle:
+    """Create explore-role agents for *tasks* and return a PoolHandle immediately.
+
+    The agents are scheduled on the running event loop via ``asyncio.ensure_future``.
+    Callers later call ``await collect_all(handle)`` to retrieve ordered results.
+    """
+    from ..transport import LocalTransport
+
+    if transport is None:
+        transport = LocalTransport()
+
+    if not tasks:
+        return PoolHandle(tasks=tasks, pending=None, max_concurrency=max_concurrency)
+
+    sem = asyncio.Semaphore(max_concurrency)
+
+    async def _bounded_explore(
+        idx: int, instruction: str
+    ) -> tuple[int, SubAgentResult]:
+        async with sem:
+            agent = create_with_role("explore", api_key, model, base_url, proxy)
+            result = await run_sub_agent(
+                agent,
+                target_path,
+                transport,
+                instruction,
+                max_turns=max_turns_per_task,
+                timeout_seconds=timeout_per_task,
+            )
+            return idx, result
+
+    coros = [_bounded_explore(i, task) for i, task in enumerate(tasks)]
+
+    print(
+        f"  🔍 Dispatching {len(tasks)} explore agents "
+        f"(concurrency={max_concurrency})..."
+    )
+
+    pending = asyncio.ensure_future(asyncio.gather(*coros, return_exceptions=True))
+
+    return PoolHandle(tasks=tasks, pending=pending, max_concurrency=max_concurrency)
+
+
+async def collect_all(handle: PoolHandle) -> list[SubAgentResult]:
+    """Await all dispatched agents and return results in original task order."""
+    if handle.pending is None:
+        return []
+
+    indexed_results = await handle.pending
+    n = len(handle.tasks)
+    results: list[SubAgentResult] = [None] * n
+    succeeded = 0
+
+    for item in indexed_results:
+        if isinstance(item, Exception):
+            idx = indexed_results.index(item)
+            results[idx] = SubAgentResult(
+                content=f"SUB_AGENT_ERROR: {item}",
+                success=False,
+            )
+            print(
+                f"  🔍 explore-agent #{idx + 1} done "
+                f"(error, SUB_AGENT_ERROR)"
+            )
+        else:
+            idx, result = item
+            results[idx] = result
+            elapsed = result.elapsed_seconds
+            print(
+                f"  🔍 explore-agent #{idx + 1} done "
+                f"({elapsed:.1f}s, success={result.success})"
+            )
+            if result.success:
+                succeeded += 1
+
+    total_elapsed = sum(r.elapsed_seconds for r in results if r is not None)
+    print(
+        f"  🔍 Explore pool complete: "
+        f"{succeeded}/{n} succeeded (total {total_elapsed:.1f}s)"
+    )
+
+    return results

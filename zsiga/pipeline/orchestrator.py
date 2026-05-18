@@ -14,7 +14,7 @@ from ..memory.learn import record_outcome, record_lesson
 from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
 from ..metrics.collector import record_change
 from ..transport import Transport, create_transport
-from .enricher import enrich
+from .enricher import enrich, derive_explore_tasks
 from .implementer import implement
 from .verifier import verify, read_verdict
 from .diagnoser import Diagnoser
@@ -214,9 +214,44 @@ class ZsigaOrchestrator:
             self.agent.set_phase("enrich")
             register_tools(self.agent, target_path, transport=transport)
             t0 = time.monotonic()
+
+            # Optional parallel explore pool (REQ-PP-04)
+            supplementary_context = ""
+            if self.config.pipeline.enrich_parallel_explore:
+                from ..agent.sub_agent import dispatch_many, collect_all
+                explore_tasks = derive_explore_tasks(proposal_text)
+                pool_cfg = self.config.pipeline
+                handle = dispatch_many(
+                    tasks=explore_tasks,
+                    api_key=self.config.llm.api_key,
+                    model=self.config.llm.model,
+                    base_url=self.config.llm.base_url,
+                    proxy=self.config.llm.proxy,
+                    target_path=target_path,
+                    transport=transport,
+                    max_concurrency=pool_cfg.explore_pool_max_concurrency,
+                    max_turns_per_task=pool_cfg.explore_pool_max_turns,
+                    timeout_per_task=pool_cfg.explore_pool_timeout,
+                )
+                explore_results = await collect_all(handle)
+                parts = []
+                for idx, r in enumerate(explore_results):
+                    if r.success:
+                        parts.append(
+                            f"### Explore Agent #{idx + 1}\n{r.content}"
+                        )
+                    else:
+                        print(
+                            f"  ⚠️ explore-agent #{idx + 1} failed: "
+                            f"{r.content[:100]}"
+                        )
+                if parts:
+                    supplementary_context = "\n\n".join(parts)
+
             enrich_result = await enrich(self.agent, change_dir, target_path,
                         transport=transport,
                         project_context=project_context,
+                        supplementary_context=supplementary_context,
                         max_turns=self.config.pipeline.enrich_max_turns,
                          timeout_seconds=self.config.pipeline.enrich_timeout)
             enrich_calls = _extract_calls(enrich_result)
