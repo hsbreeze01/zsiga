@@ -3,7 +3,7 @@ import json
 import logging
 import time
 from zai import ZaiClient
-from zsiga.agent.compaction import compact_messages, estimate_chars
+from zsiga.agent.compaction import compact_messages, estimate_tokens
 
 log = logging.getLogger(__name__)
 
@@ -111,9 +111,9 @@ class AgentLoop:
                     model=self.model,
                 )
                 if compacted:
-                    new_chars = estimate_chars(messages)
-                    log.debug("🗜️ compacted → %d msgs, %d chars",
-                              len(messages), new_chars,
+                    new_tokens = estimate_tokens(messages)
+                    log.debug("🗜️ compacted → %d msgs, %d tokens",
+                              len(messages), new_tokens,
                               extra={"phase": phase})
 
             resp = self.client.chat.completions.create(
