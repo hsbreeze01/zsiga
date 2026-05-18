@@ -1,4 +1,6 @@
 import os
+import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
@@ -24,6 +26,22 @@ def _resolve_env_vars(value):
     if isinstance(value, list):
         return [_resolve_env_vars(v) for v in value]
     return value
+
+
+@dataclass
+class ValidationResult:
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    @property
+    def valid(self) -> bool:
+        return len(self.errors) == 0
+
+
+class ConfigValidationError(Exception):
+    def __init__(self, result: ValidationResult):
+        self.result = result
+        super().__init__("\n".join(result.errors))
 
 
 class SSHConfig:
@@ -141,6 +159,58 @@ class ZsigaConfig:
         self.safety = safety
 
 
+def validate_config(config: ZsigaConfig) -> ValidationResult:
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    # LLM validation
+    if not config.llm.provider:
+        errors.append("llm.provider is required and must be a non-empty string")
+    if not config.llm.model:
+        errors.append("llm.model is required and must be a non-empty string")
+    if not config.llm.api_key:
+        errors.append("llm.api_key is required and must be a non-empty string")
+    if not (0.0 <= config.llm.temperature <= 2.0):
+        warnings.append(
+            f"llm.temperature ({config.llm.temperature}) is outside the recommended range [0.0, 2.0]"
+        )
+    if config.llm.max_tokens <= 0:
+        warnings.append("llm.max_tokens should be a positive integer")
+
+    # Targets validation
+    if not config.targets:
+        errors.append("at least one target is required")
+    else:
+        for name, target in config.targets.items():
+            if not target.path:
+                errors.append(f"target '{name}': path must be a non-empty string")
+            if target.transport not in ("local", "ssh"):
+                errors.append(
+                    f"target '{name}': transport must be 'local' or 'ssh', got '{target.transport}'"
+                )
+            if target.transport == "ssh":
+                if target.ssh is None or not target.ssh.host:
+                    errors.append(
+                        f"target '{name}': SSH transport requires ssh config with a non-empty host"
+                    )
+
+    # Pipeline validation
+    if not (1 <= config.pipeline.max_changes_per_cycle <= 10):
+        warnings.append(
+            f"pipeline.max_changes_per_cycle ({config.pipeline.max_changes_per_cycle}) is outside the recommended range [1, 10]"
+        )
+    if not (1 <= config.pipeline.fix_attempts <= 20):
+        warnings.append(
+            f"pipeline.fix_attempts ({config.pipeline.fix_attempts}) is outside the recommended range [1, 20]"
+        )
+    if config.pipeline.enrich_max_turns <= 0:
+        warnings.append("pipeline.enrich_max_turns should be positive")
+    if config.pipeline.impl_max_turns <= 0:
+        warnings.append("pipeline.impl_max_turns should be positive")
+
+    return ValidationResult(errors=errors, warnings=warnings)
+
+
 def load_config(path: str = None) -> ZsigaConfig:
     config_path = Path(path) if path else _find_config()
     raw = yaml.safe_load(config_path.read_text())
@@ -227,4 +297,12 @@ def load_config(path: str = None) -> ZsigaConfig:
         dry_run=safety_raw.get("dry_run", False),
     )
 
-    return ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline, intake=intake, safety=safety)
+    config = ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline, intake=intake, safety=safety)
+
+    result = validate_config(config)
+    for w in result.warnings:
+        print(f"[config warning] {w}", file=sys.stderr)
+    if not result.valid:
+        raise ConfigValidationError(result)
+
+    return config
