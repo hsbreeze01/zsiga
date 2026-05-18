@@ -7,6 +7,7 @@ from ..agent.tools import register_tools
 from ..agent.intent_router import classify, route, IntentType
 from ..agent.task_decomposer import decompose, aggregate_results
 from ..agent.escalation import EscalationManager, Strategy
+from ..agent.recovery import RecoveryManager
 from ..config import ZsigaConfig
 from ..intake.scanner import DirectoryScanner
 from .. import git_ops
@@ -280,6 +281,12 @@ class ZsigaOrchestrator:
         self.agent.set_phase("impl")
         pre_sha = git_ops.rev_parse(target_path, transport=transport)
         print(f"  Pre-impl SHA: {pre_sha}")
+
+        # Recovery manager (REQ-RI-01)
+        recovery = RecoveryManager(
+            change_name, target_path=target_path, pre_sha=pre_sha,
+            transport=transport, persist_dir=change_dir,
+        )
         register_tools(self.agent, target_path, transport=transport)
         t0 = time.monotonic()
         impl_result = await implement(self.agent, change_dir, target_path,
@@ -314,6 +321,7 @@ class ZsigaOrchestrator:
                 max_attempts=self.config.pipeline.fix_attempts,
                 venv_python=venv_python,
                 escalation=escalation,
+                recovery=recovery,
             )
             if not fixed:
                 # Escalation abort check (REQ-ES-04)
@@ -321,6 +329,7 @@ class ZsigaOrchestrator:
                     self._handle_escalation_abort(
                         escalation, change_dir, change_name,
                         project_name, transport,
+                        recovery=recovery,
                     )
 
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
@@ -383,6 +392,7 @@ class ZsigaOrchestrator:
                 max_attempts=self.config.pipeline.eval_fix_attempts,
                 venv_python=venv_python,
                 escalation=escalation,
+                recovery=recovery,
             )
             if not fixed:
                 # Escalation abort check (REQ-ES-04)
@@ -390,6 +400,7 @@ class ZsigaOrchestrator:
                     self._handle_escalation_abort(
                         escalation, change_dir, change_name,
                         project_name, transport,
+                        recovery=recovery,
                     )
                 else:
                     # Run structured diagnosis before reverting
@@ -452,7 +463,8 @@ class ZsigaOrchestrator:
                         pre_sha: str, transport: Transport,
                         max_attempts: int,
                         venv_python: str = None,
-                        escalation: EscalationManager = None) -> tuple[bool, int]:
+                        escalation: EscalationManager = None,
+                        recovery: RecoveryManager = None) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
 
         changed = _get_changed_files(target_path, pre_sha, transport)
@@ -472,10 +484,14 @@ class ZsigaOrchestrator:
         for attempt in range(1, max_attempts + 1):
             print(f"    Fix attempt {attempt}/{max_attempts}...")
 
-            # Build strategy hint from escalation (REQ-ES-03)
+            # Build strategy hint from escalation or recovery (REQ-ES-03 / REQ-RI-05)
             strategy_hint = ""
             used_strategy = "same"
-            if escalation:
+            if recovery:
+                strategy = recovery.get_strategy()
+                used_strategy = strategy.value
+                strategy_hint = recovery.get_strategy_hint()
+            elif escalation:
                 strategy = escalation.next_strategy
                 used_strategy = strategy.value
                 if strategy == Strategy.DIFFERENT_APPROACH:
@@ -531,8 +547,14 @@ class ZsigaOrchestrator:
             if passed:
                 return True, attempt
 
-            # Record failure to escalation (REQ-ES-02)
-            if escalation:
+            # Record failure to escalation or recovery (REQ-ES-02 / REQ-RI-05)
+            if recovery:
+                action = recovery.record_failure(errors, phase="implement")
+                strategy_hint = action.strategy_hint
+                if action.should_rollback:
+                    print(f"  Recovery rollback after {attempt} fix attempts")
+                    return False, attempt
+            elif escalation:
                 escalation.record_failure(
                     errors, phase="implement", strategy=used_strategy,
                 )
@@ -546,7 +568,8 @@ class ZsigaOrchestrator:
                              pre_sha, transport: Transport,
                              max_attempts: int,
                              venv_python: str = None,
-                             escalation: EscalationManager = None) -> tuple[bool, int]:
+                             escalation: EscalationManager = None,
+                             recovery: RecoveryManager = None) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
 
         changed = _get_changed_files(target_path, pre_sha, transport)
@@ -566,10 +589,14 @@ class ZsigaOrchestrator:
         for attempt in range(1, max_attempts + 1):
             print(f"    Eval fix attempt {attempt}/{max_attempts}...")
 
-            # Build strategy hint from escalation (REQ-ES-03)
+            # Build strategy hint from escalation or recovery (REQ-ES-03 / REQ-RI-05)
             strategy_hint = ""
             used_strategy = "same"
-            if escalation:
+            if recovery:
+                strategy = recovery.get_strategy()
+                used_strategy = strategy.value
+                strategy_hint = recovery.get_strategy_hint()
+            elif escalation:
                 strategy = escalation.next_strategy
                 used_strategy = strategy.value
                 if strategy == Strategy.DIFFERENT_APPROACH:
@@ -610,8 +637,13 @@ class ZsigaOrchestrator:
                 since_sha=pre_sha, transport=transport,
             )
             if not passed:
-                # Record failure to escalation (REQ-ES-05)
-                if escalation:
+                # Record failure to escalation or recovery (REQ-ES-05 / REQ-RI-05)
+                if recovery:
+                    action = recovery.record_failure(mech_errors, phase="verify")
+                    if action.should_rollback:
+                        print(f"  Recovery rollback after {attempt} eval-fix attempts")
+                        return False, attempt
+                elif escalation:
                     escalation.record_failure(
                         mech_errors, phase="verify", strategy=used_strategy,
                     )
@@ -630,12 +662,17 @@ class ZsigaOrchestrator:
             if new_verdict == "PASS":
                 return True, attempt
 
-            # Re-verify still failed — record failure (REQ-ES-05)
+            # Re-verify still failed — record failure (REQ-ES-05 / REQ-RI-05)
             reverify_feedback = feedback
             r2 = transport.run_shell(f"cat '{verify_file}'", timeout=10)
             if r2["exit_code"] == 0:
                 reverify_feedback = r2["stdout"]
-            if escalation:
+            if recovery:
+                action = recovery.record_failure(reverify_feedback, phase="verify")
+                if action.should_rollback:
+                    print(f"  Recovery rollback after {attempt} eval-fix attempts")
+                    return False, attempt
+            elif escalation:
                 escalation.record_failure(
                     reverify_feedback, phase="verify", strategy=used_strategy,
                 )
@@ -648,8 +685,14 @@ class ZsigaOrchestrator:
     def _handle_escalation_abort(self, escalation: EscalationManager,
                                   change_dir: str, change_name: str,
                                   project_name: str,
-                                  transport: Transport) -> None:
+                                  transport: Transport,
+                                  recovery: RecoveryManager = None) -> None:
         """Handle escalation abort: generate diagnosis, save, record lesson."""
+        if recovery:
+            recovery.generate_diagnostic_report()
+            recovery.execute_rollback()
+            return
+
         report = escalation.generate_diagnosis()
         report_text = report.to_text()
 
