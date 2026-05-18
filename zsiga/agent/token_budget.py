@@ -19,7 +19,7 @@ class TokenBudget:
 
     def __init__(
         self,
-        total_budget: int = 200000,
+        total_budget: int = 400000,
         per_turn_limit: int = 8192,
         compaction_threshold: int = 60000,
         compaction_ratio: float = 0.8,
