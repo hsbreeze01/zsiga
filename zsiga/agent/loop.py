@@ -64,6 +64,7 @@ class AgentLoop:
 
     def set_phase(self, label: str):
         self._phase_label = label
+        self.budget._used = 0
 
     def register_tool(self, name, description, parameters, func):
         self.tools.append({
