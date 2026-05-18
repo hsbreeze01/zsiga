@@ -8,6 +8,7 @@ class Role(str, Enum):
     EXPLORE = "explore"
     IMPLEMENT = "implement"
     REVIEW = "review"
+    DIAGNOSER = "diagnoser"
 
 
 @dataclass
@@ -50,6 +51,20 @@ _REVIEW_PROMPT = """你是 zsiga 的验证子代理。你的职责是审查代�
   - 发现的问题列表
 - 最多 8 轮工具调用"""
 
+_DIAGNOSER_PROMPT = """你是 zsiga 的诊断子代理。你的职责是分析验证失败，生成根因假设并探测验证。
+
+规则：
+- 只能使用只读工具（bash、read_file、search、list_files、ast_search、goto_definition、find_references、diagnostics）
+- 绝对不允许写文件或修改任何代码
+- 基于错误输出生成 3-5 个假设，按置信度排序
+- 对每个假设运行只读探测（读文件、搜索、诊断）
+- 输出格式：
+  ## Root Cause: 确认的根因描述
+  ## Fix Plan: 修复建议
+  ## Affected Files: 受影响的文件列表
+  ## Hypotheses: 每个假设及其探测结果
+- 最多 6 轮工具调用"""
+
 _ROLES: dict[Role, RoleConfig] = {
     Role.EXPLORE: RoleConfig(
         name="explore",
@@ -75,6 +90,13 @@ _ROLES: dict[Role, RoleConfig] = {
         read_only=True,
         allowed_tools=["bash", "read_file", "search", "list_files", "ast_search", "goto_definition", "find_references", "diagnostics"],
         system_prompt=_REVIEW_PROMPT,
+    ),
+    Role.DIAGNOSER: RoleConfig(
+        name="diagnose",
+        max_turns=6,
+        read_only=True,
+        allowed_tools=["bash", "read_file", "search", "list_files", "ast_search", "goto_definition", "find_references", "diagnostics"],
+        system_prompt=_DIAGNOSER_PROMPT,
     ),
 }
 

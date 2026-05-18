@@ -46,10 +46,23 @@ def test_system_prompts_are_chinese():
         assert "zsiga" in prompt.lower() or "子代理" in prompt or "子 agent" in prompt
 
 
-def test_get_all_roles_returns_three():
+def test_get_all_roles_returns_four():
     all_roles = get_all_roles()
-    assert len(all_roles) == 3
-    assert set(all_roles.keys()) == {Role.EXPLORE, Role.IMPLEMENT, Role.REVIEW}
+    assert len(all_roles) == 4
+    assert set(all_roles.keys()) == {Role.EXPLORE, Role.IMPLEMENT, Role.REVIEW, Role.DIAGNOSER}
+
+
+def test_diagnoser_role_config():
+    config = get_role_config(Role.DIAGNOSER)
+    assert config.name == "diagnose"
+    assert config.read_only is True
+    assert 3 <= config.max_turns <= 8
+    assert "bash" in config.allowed_tools
+    assert "read_file" in config.allowed_tools
+    assert "search" in config.allowed_tools
+    assert "write_file" not in config.allowed_tools
+    assert "edit_file" not in config.allowed_tools
+    assert "ast_replace" not in config.allowed_tools
 
 
 def test_role_from_string():

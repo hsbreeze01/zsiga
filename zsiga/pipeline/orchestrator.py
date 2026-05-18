@@ -14,6 +14,7 @@ from ..transport import Transport, create_transport
 from .enricher import enrich
 from .implementer import implement
 from .verifier import verify, read_verdict
+from .diagnoser import Diagnoser
 from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python
 from .project_context import build_project_context, prefetch_mechanical
 
@@ -252,6 +253,15 @@ class ZsigaOrchestrator:
                 venv_python=venv_python,
             )
             if not fixed:
+                # Run structured diagnosis before reverting
+                try:
+                    self._run_diagnosis(
+                        change_dir, target_path, change_name,
+                        project_name, transport,
+                    )
+                except Exception as diag_err:
+                    print(f"  Diagnosis failed: {diag_err}")
+
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
                 print(f"  REVERTED: {change_name} (verify failed)")
                 rec.outcome = Outcome.REVERTED
@@ -422,6 +432,50 @@ class ZsigaOrchestrator:
             if read_verdict(change_dir, transport) == "PASS":
                 return True, attempt
         return False, max_attempts
+
+    def _run_diagnosis(self, change_dir: str, target_path: str,
+                       change_name: str, project_name: str,
+                       transport: Transport,
+                       verify_feedback: str = "") -> None:
+        """Run structured diagnosis and save report + record lesson."""
+        print("  Running structured diagnosis...")
+        diagnoser = Diagnoser()
+
+        # Read verify.md feedback if not provided
+        if not verify_feedback:
+            verify_file = f"{change_dir}/verify.md"
+            r = transport.run_shell(f"cat '{verify_file}'", timeout=10)
+            verify_feedback = r["stdout"] if r["exit_code"] == 0 else ""
+
+        # Read git diff for additional context
+        diff_r = transport.run_shell(
+            "git diff HEAD~1 --stat 2>/dev/null || echo ''",
+            cwd=target_path, timeout=10,
+        )
+        diff_stat = diff_r.get("stdout", "")
+
+        failure_info = {
+            "detail": verify_feedback[:3000],
+            "verify_feedback": verify_feedback[:3000],
+            "change_name": change_name,
+            "diff_stat": diff_stat[:500],
+        }
+
+        report = diagnoser.diagnose(failure_info, target_path, transport)
+        report.save(change_dir, transport)
+        print(f"  Diagnosis saved to {change_dir}/diagnosis.md")
+
+        # Record lesson
+        from ..memory.learn import record_lesson
+        root_cause = report.fix_plan.root_cause
+        record_lesson(
+            title=f"DIAGNOSED: {change_name}",
+            context=f"project={project_name}, root_cause={root_cause}",
+            takeaway=f"Diagnosed root cause: {root_cause}. "
+                     f"Fix: {report.fix_plan.fix_description}",
+            pattern_key="pipeline.fail.verify.diagnosed",
+            source="diagnoser",
+        )
 
     def _ask_approval(self, change_name: str) -> bool:
         try:
