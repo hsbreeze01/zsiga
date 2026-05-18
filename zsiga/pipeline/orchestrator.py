@@ -3,11 +3,14 @@ from datetime import datetime
 
 from ..agent.loop import AgentLoop, RunResult
 from ..agent.tools import register_tools
+from ..agent.intent_router import classify, route, IntentType
+from ..agent.task_decomposer import decompose, aggregate_results
+from ..agent.escalation import EscalationManager, Strategy
 from ..config import ZsigaConfig
 from ..intake.scanner import DirectoryScanner
 from .. import git_ops
 from ..memory.context import load_active_context, update_active_context, load_recent_lessons
-from ..memory.learn import record_outcome
+from ..memory.learn import record_outcome, record_lesson
 from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
 from ..metrics.collector import record_change
 from ..transport import Transport, create_transport
@@ -64,8 +67,50 @@ class ZsigaOrchestrator:
 
             print(f"\n--- {prop['id']} ({prop['project']}) ---")
 
-            if await self._process_change(prop):
+            # Cross-project decomposition (REQ-TD-01)
+            available_projects = list(self.config.targets.keys())
+            proposal_text = read_file(
+                f"{prop['change_dir']}/proposal.md",
+                self._get_transport(prop['project']),
+            ) or ""
+            decomp = decompose(proposal_text, available_projects)
+
+            if len(decomp.subtasks) > 1:
+                print(f"  Cross-project: {len(decomp.subtasks)} subtasks detected")
+                results = {}
+                for subtask in decomp.subtasks:
+                    target_cfg = self.config.targets.get(subtask.project)
+                    if not target_cfg:
+                        results[subtask.project] = {
+                            "status": "fail",
+                            "detail": "project not configured",
+                        }
+                        continue
+                    sub_prop = dict(prop)
+                    sub_prop["project"] = subtask.project
+                    sub_prop["target_path"] = target_cfg.path
+                    self._get_transport(subtask.project)
+                    success = await self._process_change(sub_prop)
+                    results[subtask.project] = {
+                        "status": "pass" if success else "fail",
+                    }
+
+                summary = aggregate_results(results)
+                print(
+                    f"  Decomposition summary: "
+                    f"{summary['passed']}/{summary['total']} passed"
+                )
+                record_lesson(
+                    title=f"Cross-project: {prop['id']}",
+                    context=f"subtasks={len(decomp.subtasks)}",
+                    takeaway=f"Results: {summary['passed']}/{summary['total']} passed",
+                    pattern_key="pipeline.cross_project",
+                    source="decomposer",
+                )
                 processed += 1
+            else:
+                if await self._process_change(prop):
+                    processed += 1
 
         self._update_memory()
 
@@ -87,6 +132,19 @@ class ZsigaOrchestrator:
         change_name = prop["id"]
         transport = self._get_transport(project_name)
 
+        # Intent classification (REQ-IR-01)
+        proposal_text = read_file(f"{change_dir}/proposal.md", transport) or ""
+        intent = classify(proposal_text)
+        route_path = route(intent)
+        print(
+            f"  Intent: {intent.intent_type.value} "
+            f"(confidence={intent.confidence:.2f}, route={route_path})"
+        )
+
+        if intent.intent_type not in (IntentType.IMPLEMENTATION, IntentType.AMBIGUOUS):
+            print(f"  Skipping non-pipeline intent: {route_path}")
+            return False
+
         rec = ChangeRecord(
             change_name=change_name,
             project=project_name,
@@ -105,6 +163,9 @@ class ZsigaOrchestrator:
                           project_name, project_config, change_name,
                           transport: Transport) -> bool:
         cycle_start = time.monotonic()
+
+        # Escalation manager (REQ-ES-01)
+        escalation = EscalationManager(change_name, persist_dir=change_dir)
 
         # Resolve venv python path once for all phases
         venv_python = resolve_venv_python(target_path, project_config, transport)
@@ -190,8 +251,16 @@ class ZsigaOrchestrator:
                 errors, pre_sha=pre_sha, transport=transport,
                 max_attempts=self.config.pipeline.fix_attempts,
                 venv_python=venv_python,
+                escalation=escalation,
             )
             if not fixed:
+                # Escalation abort check (REQ-ES-04)
+                if escalation.should_abort():
+                    self._handle_escalation_abort(
+                        escalation, change_dir, change_name,
+                        project_name, transport,
+                    )
+
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
                 print(f"  REVERTED: {change_name}")
                 rec.outcome = Outcome.REVERTED
@@ -251,16 +320,24 @@ class ZsigaOrchestrator:
                 pre_sha, transport=transport,
                 max_attempts=self.config.pipeline.eval_fix_attempts,
                 venv_python=venv_python,
+                escalation=escalation,
             )
             if not fixed:
-                # Run structured diagnosis before reverting
-                try:
-                    self._run_diagnosis(
-                        change_dir, target_path, change_name,
+                # Escalation abort check (REQ-ES-04)
+                if escalation.should_abort():
+                    self._handle_escalation_abort(
+                        escalation, change_dir, change_name,
                         project_name, transport,
                     )
-                except Exception as diag_err:
-                    print(f"  Diagnosis failed: {diag_err}")
+                else:
+                    # Run structured diagnosis before reverting
+                    try:
+                        self._run_diagnosis(
+                            change_dir, target_path, change_name,
+                            project_name, transport,
+                        )
+                    except Exception as diag_err:
+                        print(f"  Diagnosis failed: {diag_err}")
 
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
                 print(f"  REVERTED: {change_name} (verify failed)")
@@ -312,7 +389,8 @@ class ZsigaOrchestrator:
     async def _fix_loop(self, target_path, project_config, errors,
                         pre_sha: str, transport: Transport,
                         max_attempts: int,
-                        venv_python: str = None) -> tuple[bool, int]:
+                        venv_python: str = None,
+                        escalation: EscalationManager = None) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
 
         changed = _get_changed_files(target_path, pre_sha, transport)
@@ -331,6 +409,25 @@ class ZsigaOrchestrator:
 
         for attempt in range(1, max_attempts + 1):
             print(f"    Fix attempt {attempt}/{max_attempts}...")
+
+            # Build strategy hint from escalation (REQ-ES-03)
+            strategy_hint = ""
+            used_strategy = "same"
+            if escalation:
+                strategy = escalation.next_strategy
+                used_strategy = strategy.value
+                if strategy == Strategy.DIFFERENT_APPROACH:
+                    strategy_hint = (
+                        "\n\n⚠️ 之前多次修复失败。"
+                        "Try a fundamentally different approach. "
+                        "Your previous strategy failed multiple times."
+                    )
+                elif strategy == Strategy.SIMPLIFY:
+                    strategy_hint = (
+                        "\n\n⚠️ Simplify the fix. "
+                        "Remove complexity rather than adding more code."
+                    )
+
             self.agent.set_phase(f"fix-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
 
@@ -344,7 +441,7 @@ class ZsigaOrchestrator:
                     "4. 不要删除或替换 render_template、redirect 等现有调用\n"
                     "5. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
                     "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径"
-                    f"{venv_hint}",
+                    f"{venv_hint}{strategy_hint}",
                     f"错误:\n{errors}{changed_info}{path_hint}\n\n"
                     f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                     max_turns=fix_turns,
@@ -359,7 +456,7 @@ class ZsigaOrchestrator:
                     "4. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
                     "5. 如果无法在限制内修复，回复 STOP\n"
                     "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径"
-                    f"{venv_hint}",
+                    f"{venv_hint}{strategy_hint}",
                     f"仍然存在的错误:\n{errors}{changed_info}{path_hint}\n\n"
                     f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                     max_turns=fix_turns,
@@ -371,12 +468,23 @@ class ZsigaOrchestrator:
             )
             if passed:
                 return True, attempt
+
+            # Record failure to escalation (REQ-ES-02)
+            if escalation:
+                escalation.record_failure(
+                    errors, phase="implement", strategy=used_strategy,
+                )
+                if escalation.should_abort():
+                    print(f"  Escalation abort after {attempt} fix attempts")
+                    return False, attempt
+
         return False, max_attempts
 
     async def _eval_fix_loop(self, change_dir, target_path, project_config,
                              pre_sha, transport: Transport,
                              max_attempts: int,
-                             venv_python: str = None) -> tuple[bool, int]:
+                             venv_python: str = None,
+                             escalation: EscalationManager = None) -> tuple[bool, int]:
         fix_turns = self.config.pipeline.fix_max_turns
 
         changed = _get_changed_files(target_path, pre_sha, transport)
@@ -395,6 +503,25 @@ class ZsigaOrchestrator:
 
         for attempt in range(1, max_attempts + 1):
             print(f"    Eval fix attempt {attempt}/{max_attempts}...")
+
+            # Build strategy hint from escalation (REQ-ES-03)
+            strategy_hint = ""
+            used_strategy = "same"
+            if escalation:
+                strategy = escalation.next_strategy
+                used_strategy = strategy.value
+                if strategy == Strategy.DIFFERENT_APPROACH:
+                    strategy_hint = (
+                        "\n\n⚠️ 之前多次修复失败。"
+                        "Try a fundamentally different approach. "
+                        "Your previous strategy failed multiple times."
+                    )
+                elif strategy == Strategy.SIMPLIFY:
+                    strategy_hint = (
+                        "\n\n⚠️ Simplify the fix. "
+                        "Remove complexity rather than adding more code."
+                    )
+
             verify_file = f"{change_dir}/verify.md"
             r = transport.run_shell(f"cat '{verify_file}'", timeout=10)
             feedback = r["stdout"] if r["exit_code"] == 0 else "unknown"
@@ -410,17 +537,25 @@ class ZsigaOrchestrator:
                 "4. 不要删除或替换 render_template、redirect 等现有调用\n"
                 "5. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
                 "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径"
-                f"{venv_hint}",
+                f"{venv_hint}{strategy_hint}",
                 f"验证反馈:\n{feedback}{changed_info}{path_hint}\n\n"
                 f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                 max_turns=fix_turns,
             )
 
-            passed, _ = verify_mechanical(
+            passed, mech_errors = verify_mechanical(
                 target_path, project_config.test_cmd, project_config.lint_cmd,
                 since_sha=pre_sha, transport=transport,
             )
             if not passed:
+                # Record failure to escalation (REQ-ES-05)
+                if escalation:
+                    escalation.record_failure(
+                        mech_errors, phase="verify", strategy=used_strategy,
+                    )
+                    if escalation.should_abort():
+                        print(f"  Escalation abort after {attempt} eval-fix attempts")
+                        return False, attempt
                 return False, attempt
 
             self.agent.set_phase(f"re-verify-{attempt}")
@@ -429,9 +564,53 @@ class ZsigaOrchestrator:
                         transport=transport,
                         max_turns=self.config.pipeline.verify_max_turns,
                         timeout_seconds=self.config.pipeline.verify_timeout)
-            if read_verdict(change_dir, transport) == "PASS":
+            new_verdict = read_verdict(change_dir, transport)
+            if new_verdict == "PASS":
                 return True, attempt
+
+            # Re-verify still failed — record failure (REQ-ES-05)
+            reverify_feedback = feedback
+            r2 = transport.run_shell(f"cat '{verify_file}'", timeout=10)
+            if r2["exit_code"] == 0:
+                reverify_feedback = r2["stdout"]
+            if escalation:
+                escalation.record_failure(
+                    reverify_feedback, phase="verify", strategy=used_strategy,
+                )
+                if escalation.should_abort():
+                    print(f"  Escalation abort after {attempt} eval-fix attempts")
+                    return False, attempt
+
         return False, max_attempts
+
+    def _handle_escalation_abort(self, escalation: EscalationManager,
+                                  change_dir: str, change_name: str,
+                                  project_name: str,
+                                  transport: Transport) -> None:
+        """Handle escalation abort: generate diagnosis, save, record lesson."""
+        report = escalation.generate_diagnosis()
+        report_text = report.to_text()
+
+        # Save diagnosis report to change directory
+        report_path = f"{change_dir}/escalation-diagnosis.md"
+        escaped = report_text.replace("'", "'\\''")
+        transport.run_shell(
+            f"echo '{escaped}' > '{report_path}'",
+            timeout=10,
+        )
+        print(f"  Escalation diagnosis saved to {report_path}")
+
+        # Record lesson (REQ-ES-04)
+        record_lesson(
+            title=f"ESCALATION ABORT: {change_name}",
+            context=f"project={project_name}, attempts={escalation.attempts}",
+            takeaway=(
+                f"Aborted after {escalation.attempts} failures. "
+                f"{report.root_cause_hypothesis}"
+            ),
+            pattern_key="pipeline.fail.escalation",
+            source="escalation",
+        )
 
     def _run_diagnosis(self, change_dir: str, target_path: str,
                        change_name: str, project_name: str,
@@ -466,7 +645,6 @@ class ZsigaOrchestrator:
         print(f"  Diagnosis saved to {change_dir}/diagnosis.md")
 
         # Record lesson
-        from ..memory.learn import record_lesson
         root_cause = report.fix_plan.root_cause
         record_lesson(
             title=f"DIAGNOSED: {change_name}",

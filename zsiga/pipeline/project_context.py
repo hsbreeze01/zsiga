@@ -206,6 +206,9 @@ def _scan_db_schema(target_path: str, transport: Transport) -> str:
 
 def _detect_db_config(target_path: str, transport: Transport) -> tuple | None:
     """Detect MySQL connection info from project config files."""
+    # Skip DB scan for zsiga itself (no DB, and grep on large local dirs can timeout)
+    if "zsiga" in target_path and "d8q-" not in target_path:
+        return None
     # Strategy: grep for common DB config patterns
     r = transport.run_shell(
         f"cd '{target_path}' && grep -rn --include='*.py' --include='*.yaml' --include='*.yml' --include='*.json' "

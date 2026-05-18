@@ -1,7 +1,7 @@
 """Structured diagnosis loop for verify-phase failures."""
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
@@ -47,18 +47,18 @@ class DiagnosisReport:
     def to_markdown(self) -> str:
         lines = [
             f"# Diagnosis Report: {self.change_name}",
-            f"",
+            "",
             f"**Timestamp:** {self.timestamp}",
-            f"",
-            f"## Root Cause",
+            "",
+            "## Root Cause",
             f"{self.fix_plan.root_cause}",
-            f"",
+            "",
             f"**Confirmed:** {'Yes' if self.fix_plan.confirmed else 'No (best guess)'}",
-            f"",
-            f"## Fix Plan",
+            "",
+            "## Fix Plan",
             f"{self.fix_plan.fix_description}",
-            f"",
-            f"## Affected Files",
+            "",
+            "## Affected Files",
         ]
         for f in self.fix_plan.affected_files:
             lines.append(f"- `{f}`")
@@ -68,7 +68,7 @@ class DiagnosisReport:
             status = ""
             if h.probe_result:
                 status = " ✅ Confirmed" if h.probe_result.confirmed else " ❌ Denied"
-            lines.append(f"")
+            lines.append("")
             lines.append(f"### #{h.rank}: {h.description}")
             lines.append(f"- Confidence: {h.confidence:.2f}")
             lines.append(f"- Evidence: {h.evidence}")
@@ -83,7 +83,7 @@ class DiagnosisReport:
         # Escape single quotes in content for shell safety
         safe_content = content.replace("'", "'\\''")
         transport.run_shell(
-            f"cat > '{change_dir}/diagnosis.md' << 'ZSIGA_DIAG_EOF'\n{content}\nZSIGA_DIAG_EOF",
+            f"cat > '{change_dir}/diagnosis.md' << 'ZSIGA_DIAG_EOF'\n{safe_content}\nZSIGA_DIAG_EOF",
             timeout=10,
         )
 
