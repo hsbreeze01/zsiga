@@ -507,12 +507,12 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">78</div>
+    <div class="value">80</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">89.7%</div>
-    <div class="meta">70 hit / 8 miss</div>
+    <div class="value good">90.0%</div>
+    <div class="meta">72 hit / 8 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -525,11 +525,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">72.4%</div>
+    <div class="value warn">73.3%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value bad">48.9%</div>
+    <div class="value bad">46.9%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -549,40 +549,40 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>27</td>
+  <td>29</td>
   <td class="good">100.0%</td>
   <td>0.9</td>
-  <td>151.8s</td>
+  <td>151.1s</td>
   <td>0</td>
-  <td>188</td>
-  <td>278</td>
-  <td>4.25M</td>
+  <td>198</td>
+  <td>290</td>
+  <td>4.46M</td>
 </tr><tr>
   <td>implement</td>
-  <td>58</td>
-  <td class="good">89.7%</td>
-  <td>1.5</td>
-  <td>223.0s</td>
+  <td>60</td>
+  <td class="good">90.0%</td>
+  <td>1.4</td>
+  <td>218.4s</td>
   <td>80</td>
-  <td>746</td>
-  <td>856</td>
-  <td>18.31M</td>
+  <td>764</td>
+  <td>875</td>
+  <td>18.72M</td>
 </tr><tr>
   <td>verify</td>
-  <td>47</td>
-  <td class="bad">48.9%</td>
+  <td>49</td>
+  <td class="bad">46.9%</td>
   <td>0.2</td>
-  <td>85.3s</td>
+  <td>82.1s</td>
   <td>7</td>
-  <td>337</td>
+  <td>339</td>
   <td>408</td>
-  <td>3.76M</td>
+  <td>3.77M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>47</td>
+  <td>49</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>11.3s</td>
+  <td>11.1s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -595,27 +595,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">26.32M</div>
-      <div class="meta">25.97M prompt + 347.4K completion</div>
+      <div class="value">26.95M</div>
+      <div class="meta">26.59M prompt + 355.8K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">337.4K</div>
+      <div class="value">336.9K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">1,271</div>
+      <div class="value">1,301</div>
       <div class="meta">avg 16.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">1,542</div>
-      <div class="meta">avg 19.8 per change</div>
+      <div class="value">1,573</div>
+      <div class="meta">avg 19.7 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">6.0h</div>
-      <div class="meta">21,574s total</div>
+      <div class="value">6.1h</div>
+      <div class="meta">22,058s total</div>
     </div>
   </div>
 </div>
@@ -623,135 +623,135 @@ td { border-top: 1px solid #334155; }
 <div class="section">
     <h2>🪙 Evolution Roadmap</h2>
   <div class="milestone" style="border-color:#f59e0b">
-  <h3 style="color:#f59e0b">⚡ Level 2: Code Architect — ⚡ ACHIEVED</h3>
+  <h3 style="color:#f59e0b">⚡ Level 2: Code Architect — ⚡ ACHIEVED<span style="font-size:0.7rem;color:#64748b;margin-left:0.5rem">@ 2026-05-12T10:00</span></h3>
   
   <div class="criterion">
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 10</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">70/10</span>
+  <span style="color:#94a3b8;font-size:0.8rem">10/10</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 70%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">89.7/70</span>
+  <span style="color:#94a3b8;font-size:0.8rem">70/70</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>覆盖 >= 3 个不同目标项目</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">6/3</span>
+  <span style="color:#94a3b8;font-size:0.8rem">3/3</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>积累 >= 20 条经验教训</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">29/20</span>
+  <span style="color:#94a3b8;font-size:0.8rem">20/20</span>
 </div>
   
 </div>
 <div class="milestone" style="border-color:#8b5cf6">
-  <h3 style="color:#8b5cf6">🔧 Level 3: Self-Evolution — 🔧 ACHIEVED</h3>
+  <h3 style="color:#8b5cf6">🔧 Level 3: Self-Evolution — 🔧 ACHIEVED<span style="font-size:0.7rem;color:#64748b;margin-left:0.5rem">@ 2026-05-14T16:00</span></h3>
   <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 获得修改自身代码的能力，具备 LSP 级代码感知和专业子代理分化</div>
   <div class="criterion">
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 30</span>
   <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">70/30</span>
+  <span style="color:#94a3b8;font-size:0.8rem">30/30</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 75%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">89.7/75</span>
+  <span style="color:#94a3b8;font-size:0.8rem">75/75</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L3 能力任务完成 >= 5</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#94a3b8;font-size:0.8rem">5/5</span>
 </div>
   <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (5/5)</div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="LSP 工具在 target project 上可用，goto_definition 能跳转到定义，diagnostics 能返回错误">LSP 集成</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="zsiga 能读取并修改自身源码文件，同时保护 config.yaml 和 memory/ 不被误改">Self-Modify 门控</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">3/3</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="三种角色子代理可独立创建并执行，各有不同的 system prompt 和行为约束">专业子代理分化</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="能从历史 learnings 中识别出现 ≥3 次的 pattern_key，自动注入到 active_context">跨会话模式挖掘</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="zsiga 用 goto_definition 找到目标函数 → 修改 → 自测通过 → 记录为成功 change">L3 验证：修改自身 + LSP 导航</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
 </div>
 </div>
 <div class="milestone" style="border-color:#06b6d4">
-  <h3 style="color:#06b6d4">🌐 Level 4: Multi-Project Orchestrator — 🌐 ACHIEVED</h3>
+  <h3 style="color:#06b6d4">🌐 Level 4: Multi-Project Orchestrator — 🌐 ACHIEVED<span style="font-size:0.7rem;color:#64748b;margin-left:0.5rem">@ 2026-05-18T14:00</span></h3>
   <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 从固定流水线升级为动态任务分解器，支持跨项目协调和意图路由</div>
   <div class="criterion">
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 50</span>
   <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">70/50</span>
+  <span style="color:#94a3b8;font-size:0.8rem">50/50</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 80%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">89.7/80</span>
+  <span style="color:#94a3b8;font-size:0.8rem">80/80</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L4 能力任务完成 >= 8</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#94a3b8;font-size:0.8rem">8/8</span>
 </div>
   <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (8/8)</div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="给定任意用户消息，能正确分类意图并选择执行路径">Intent Router</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="输入跨项目指令 → 自动分解为项目级子任务 → 并行执行 → 汇总报告">跨项目任务分解</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="todo list 可动态创建/更新/完成，每个 todo 有独立状态，dashboard 实时展示进度">Todo 驱动编排</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="修复循环 3 次失败后自动触发升级，生成诊断报告并暂停等待人工介入">升级路径 (Escalation)</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="5 个项目的测试结果汇总在一份报告中，区分 pass/fail/unknown">L4 验证：跨项目回归测试</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="verify 失败后自动生成 3+ 排序假设，基于探测结果修复成功率 > 盲目 retry">结构化诊断循环</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="多 task change 中每次只改 1-2 个文件，fix 成功率 > 一次性改多文件">垂直切片实施</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="第二次处理同项目 change 时 ENRICH 阶段节省 >=3 turns">领域术语缓存</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div>
 </div>
@@ -761,13 +761,13 @@ td { border-top: 1px solid #334155; }
   <div class="criterion">
   <span class="icon">○</span>
   <span>累计成功 change 数 >= 80</span>
-  <div class="progress"><div class="fill" style="width:87.5%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">70/80</span>
+  <div class="progress"><div class="fill" style="width:90.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">72/80</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">89.7/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">90.0/85</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L5 能力任务完成 >= 6</span>
@@ -812,13 +812,13 @@ td { border-top: 1px solid #334155; }
   <div class="criterion">
   <span class="icon">○</span>
   <span>累计成功 change 数 >= 100</span>
-  <div class="progress"><div class="fill" style="width:70.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">70/100</span>
+  <div class="progress"><div class="fill" style="width:72.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">72/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">89.7/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">90.0/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1026,14 +1026,14 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>implement-change-conflict-detector-in-pipelinedependencypy-c</li>
-<li>implement-session-summary-exporter-in-memoryjournalpy-add-ex</li>
-<li>implement-token-budget-manager-in-agentlooppy-create-tokenbu</li>
+    <li>implement-token-budget-manager-in-agentlooppy-create-tokenbu</li>
 <li>implement-adaptive-turn-limit-in-configpy-and-orchestratorpy</li>
 <li>implement-file-change-impact-analyzer-in-pipelineimpactpy-cr</li>
+<li>upgrade-intent-routerpy-from-keyword-regex-to-llm-based-clas</li>
+<li>implement-multi-model-config-and-llm-based-intent-classifica</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-18T16:30:16.513023</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-18T17:29:36.037628</div>
 </body>
 </html>

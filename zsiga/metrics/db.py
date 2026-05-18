@@ -56,6 +56,18 @@ CREATE TABLE IF NOT EXISTS stats_snapshots (
     created_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now'))
 );
 
+CREATE TABLE IF NOT EXISTS level_snapshots (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    level_tag       TEXT NOT NULL UNIQUE,
+    snapshot_time   TEXT NOT NULL,
+    successful      INTEGER DEFAULT 0,
+    success_pct     REAL DEFAULT 0,
+    total_changes   INTEGER DEFAULT 0,
+    tasks_completed INTEGER DEFAULT 0,
+    snapshot_json   TEXT DEFAULT '{}',
+    created_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_changes_name ON changes(change_name);
 CREATE INDEX IF NOT EXISTS idx_changes_project ON changes(project);
 CREATE INDEX IF NOT EXISTS idx_journal_ts ON journal(ts);
@@ -315,3 +327,51 @@ def _migrate_lessons(conn: sqlite3.Connection, base: Path):
                 entry.get("text", entry.get("lesson", "")),
             ),
         )
+
+
+# ── Level Snapshots ──────────────────────────────────────────
+
+def save_level_snapshot(level_tag: str, stats: dict, tasks_completed: int = 0,
+                        db_path: Optional[Path] = None):
+    """Persist the stats snapshot when a level is first achieved.
+
+    Uses INSERT OR IGNORE so the first achievement is permanent.
+    """
+    conn = _get_conn(db_path)
+    try:
+        conn.execute(
+            """INSERT OR IGNORE INTO level_snapshots
+               (level_tag, snapshot_time, successful, success_pct,
+                total_changes, tasks_completed, snapshot_json)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (
+                level_tag,
+                stats.get("last_updated", datetime.now().isoformat()),
+                stats.get("successful_changes", 0),
+                stats.get("success_rate_pct", 0),
+                stats.get("total_changes", 0),
+                tasks_completed,
+                json.dumps(stats, ensure_ascii=False, default=str),
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def load_level_snapshot(level_tag: str, db_path: Optional[Path] = None) -> Optional[dict]:
+    """Load the snapshot for a specific level. Returns None if not yet achieved."""
+    conn = _get_conn(db_path)
+    try:
+        row = conn.execute(
+            "SELECT snapshot_json, tasks_completed, snapshot_time FROM level_snapshots WHERE level_tag = ?",
+            (level_tag,),
+        ).fetchone()
+        if row:
+            data = json.loads(row["snapshot_json"])
+            data["_level_tasks_completed"] = row["tasks_completed"]
+            data["_level_achieved_at"] = row["snapshot_time"]
+            return data
+        return None
+    finally:
+        conn.close()

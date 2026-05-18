@@ -570,21 +570,40 @@ def _phase_table(phase_stats: dict) -> str:
 
 
 def _milestone_card(m: dict) -> str:
+    from .db import load_level_snapshot
     color = m.get("color", "#8b5cf6")
     icon = m.get("icon", "⚡")
-    status = f"{icon} ACHIEVED" if m["all_met"] else "🚧 Leveling Up"
+    level_tag = m.get("level_tag", "")
+
+    level_snap = load_level_snapshot(level_tag) if level_tag else None
+
+    if level_snap:
+        status = f"{icon} ACHIEVED"
+        snap_time = level_snap.get("_level_achieved_at", "")[:16]
+        status += f'<span style="font-size:0.7rem;color:#64748b;margin-left:0.5rem">@ {snap_time}</span>'
+    else:
+        status = "🚧 Leveling Up"
+
     desc = m.get("description", "")
     desc_html = f'<div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">{desc}</div>' if desc else ''
 
     criteria_html = ""
     for c in m["criteria"]:
-        c_icon = "✓" if c["met"] else "○"
-        fill_color = color if c["met"] else "#475569"
+        if level_snap:
+            c_icon = "✓"
+            fill_color = color
+            display_current = c["threshold"]
+            display_pct = 100
+        else:
+            c_icon = "✓" if c["met"] else "○"
+            fill_color = color if c["met"] else "#475569"
+            display_current = c["current"]
+            display_pct = c["progress_pct"]
         criteria_html += f"""<div class="criterion">
   <span class="icon">{c_icon}</span>
   <span>{c['description']}</span>
-  <div class="progress"><div class="fill" style="width:{c['progress_pct']}%;background:{fill_color}"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">{c['current']}/{c['threshold']}</span>
+  <div class="progress"><div class="fill" style="width:{display_pct}%;background:{fill_color}"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">{display_current}/{c['threshold']}</span>
 </div>"""
 
     tasks_html = ""
@@ -594,14 +613,23 @@ def _milestone_card(m: dict) -> str:
         tasks_total = m.get("tasks_total", len(tasks))
         tasks_html = f'<div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks ({tasks_completed}/{tasks_total})</div>'
         for t in tasks:
-            t_icon = "✅" if t["done"] else "⬜"
-            t_style = "color:#94a3b8;" if t["done"] else "color:#64748b;"
-            bar_color = color if t["done"] else "#334155"
+            if level_snap:
+                t_icon = "✅"
+                t_style = "color:#94a3b8;"
+                bar_color = color
+                t_pct = 100
+                t_found = t["total"]
+            else:
+                t_icon = "✅" if t["done"] else "⬜"
+                t_style = "color:#94a3b8;" if t["done"] else "color:#64748b;"
+                bar_color = color if t["done"] else "#334155"
+                t_pct = t["progress_pct"]
+                t_found = t["found"]
             tasks_html += f"""<div class="criterion">
   <span class="icon">{t_icon}</span>
   <span style="{t_style}" title="{t.get('acceptance', '')}">{t['title']}</span>
-  <div class="progress"><div class="fill" style="width:{t['progress_pct']}%;background:{bar_color}"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">{t['found']}/{t['total']}</span>
+  <div class="progress"><div class="fill" style="width:{t_pct}%;background:{bar_color}"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">{t_found}/{t['total']}</span>
 </div>"""
 
     return f"""<div class="milestone" style="border-color:{color}">

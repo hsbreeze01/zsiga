@@ -5,7 +5,7 @@ from pathlib import Path
 from .db import record_change as _db_record
 from .db import load_all_changes as _db_load_changes
 from .db import count_lessons as _db_count_lessons
-from .db import save_stats_snapshot
+from .db import save_stats_snapshot, save_level_snapshot, load_level_snapshot
 from .types import ChangeRecord
 
 _METRICS_DIR = Path(__file__).resolve().parent.parent.parent / "metrics"
@@ -226,6 +226,13 @@ def check_milestone(stats: dict, milestone: dict) -> dict:
             "total": total,
         })
 
+    import re
+    level_match = re.search(r'Level (\d+)', milestone.get("label", ""))
+    level_tag = f"level_{level_match.group(1)}" if level_match else "level_unknown"
+
+    if all_met:
+        save_level_snapshot(level_tag, stats, tasks_completed=len([t for t in task_results if t["done"]]))
+
     return {
         "label": milestone["label"],
         "icon": milestone.get("icon", "⚡"),
@@ -236,6 +243,7 @@ def check_milestone(stats: dict, milestone: dict) -> dict:
         "tasks": task_results,
         "tasks_completed": tasks_completed,
         "tasks_total": len(tasks),
+        "level_tag": level_tag,
     }
 
 
