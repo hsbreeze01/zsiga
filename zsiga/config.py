@@ -79,6 +79,14 @@ class LLMConfig:
         self.temperature = temperature
 
 
+class LLMFastConfig:
+    def __init__(self, api_key: str, model: str = "glm-4-flash",
+                 base_url: str = "https://open.bigmodel.cn/api/paas/v4"):
+        self.api_key = api_key
+        self.model = model
+        self.base_url = base_url
+
+
 class CompactionConfig:
     def __init__(self, enabled: bool = True, threshold_chars: int = 60000,
                  keep_recent: int = 3, use_llm_summary: bool = True,
@@ -156,13 +164,15 @@ class SafetyConfig:
 class ZsigaConfig:
     def __init__(self, llm: LLMConfig, targets: dict[str, TargetConfig],
                  pipeline: PipelineConfig, intake: IntakeConfig,
-                 safety: SafetyConfig, logging_config: 'LoggingConfig' = None):
+                 safety: SafetyConfig, logging_config: 'LoggingConfig' = None,
+                 llm_fast: 'LLMFastConfig' = None):
         self.llm = llm
         self.targets = targets
         self.pipeline = pipeline
         self.intake = intake
         self.safety = safety
         self.logging_config = logging_config
+        self.llm_fast = llm_fast
 
 
 class LoggingConfig:
@@ -242,6 +252,15 @@ def load_config(path: str = None) -> ZsigaConfig:
         max_tokens=llm_raw.get("max_tokens", 4096),
         temperature=llm_raw.get("temperature", 0.3),
     )
+
+    llm_fast_raw = raw["agent"].get("llm_fast")
+    llm_fast = None
+    if llm_fast_raw:
+        llm_fast = LLMFastConfig(
+            api_key=llm_fast_raw.get("api_key", llm.api_key),
+            model=llm_fast_raw.get("model", "glm-4-flash"),
+            base_url=llm_fast_raw.get("base_url", "https://open.bigmodel.cn/api/paas/v4"),
+        )
 
     targets = {}
     for name, tc in raw.get("targets", {}).items():
@@ -324,7 +343,7 @@ def load_config(path: str = None) -> ZsigaConfig:
     )
 
     config = ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline, intake=intake, safety=safety,
-                         logging_config=logging_config)
+                         logging_config=logging_config, llm_fast=llm_fast)
 
     result = validate_config(config)
     for w in result.warnings:

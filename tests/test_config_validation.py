@@ -3,6 +3,7 @@ import pytest
 from zsiga.config import (
     ConfigValidationError,
     LLMConfig,
+    LLMFastConfig,
     PipelineConfig,
     SSHConfig,
     SafetyConfig,
@@ -32,7 +33,8 @@ def _make_config(**overrides) -> ZsigaConfig:
     intake = overrides.get("intake", IntakeConfig())
     safety = overrides.get("safety", SafetyConfig())
     return ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline,
-                       intake=intake, safety=safety)
+                       intake=intake, safety=safety,
+                       llm_fast=overrides.get("llm_fast"))
 
 
 class TestValidationResult:
@@ -315,3 +317,109 @@ targets:
         from zsiga.config import load_config
         config = load_config(path=str(config_file))
         assert config.llm.provider == "openai"
+
+
+# ============================================================================
+# LLMFastConfig tests
+# ============================================================================
+
+class TestLLMFastConfig:
+    def test_default_model_and_base_url(self):
+        cfg = LLMFastConfig(api_key="sk-fast")
+        assert cfg.model == "glm-4-flash"
+        assert cfg.base_url == "https://open.bigmodel.cn/api/paas/v4"
+
+    def test_custom_model_and_base_url(self):
+        cfg = LLMFastConfig(api_key="sk-fast", model="gpt-3.5",
+                            base_url="https://api.openai.com/v1")
+        assert cfg.model == "gpt-3.5"
+        assert cfg.base_url == "https://api.openai.com/v1"
+
+    def test_zsigaconfig_llm_fast_none_by_default(self):
+        config = _make_config()
+        assert config.llm_fast is None
+
+    def test_zsigaconfig_with_llm_fast(self):
+        llm_fast = LLMFastConfig(api_key="sk-fast")
+        config = _make_config(llm_fast=llm_fast)
+        assert config.llm_fast is not None
+        assert config.llm_fast.api_key == "sk-fast"
+
+    def test_load_config_llm_fast_absent(self, tmp_path):
+        config_file = tmp_path / "zsiga.yaml"
+        config_file.write_text("""
+agent:
+  llm:
+    provider: openai
+    model: gpt-4
+    api_key: sk-test
+targets:
+  default:
+    path: /tmp/test
+    transport: local
+""")
+        from zsiga.config import load_config
+        config = load_config(path=str(config_file))
+        assert config.llm_fast is None
+
+    def test_load_config_llm_fast_present(self, tmp_path):
+        config_file = tmp_path / "zsiga.yaml"
+        config_file.write_text("""
+agent:
+  llm:
+    provider: openai
+    model: gpt-4
+    api_key: sk-test
+  llm_fast:
+    api_key: sk-fast
+    model: glm-4-flash
+targets:
+  default:
+    path: /tmp/test
+    transport: local
+""")
+        from zsiga.config import load_config
+        config = load_config(path=str(config_file))
+        assert config.llm_fast is not None
+        assert config.llm_fast.api_key == "sk-fast"
+        assert config.llm_fast.model == "glm-4-flash"
+
+    def test_load_config_llm_fast_inherits_api_key(self, tmp_path):
+        config_file = tmp_path / "zsiga.yaml"
+        config_file.write_text("""
+agent:
+  llm:
+    provider: openai
+    model: gpt-4
+    api_key: sk-main
+  llm_fast:
+    model: glm-4-flash
+targets:
+  default:
+    path: /tmp/test
+    transport: local
+""")
+        from zsiga.config import load_config
+        config = load_config(path=str(config_file))
+        assert config.llm_fast is not None
+        assert config.llm_fast.api_key == "sk-main"
+
+    def test_load_config_llm_fast_defaults(self, tmp_path):
+        config_file = tmp_path / "zsiga.yaml"
+        config_file.write_text("""
+agent:
+  llm:
+    provider: openai
+    model: gpt-4
+    api_key: sk-main
+  llm_fast:
+    api_key: sk-fast
+targets:
+  default:
+    path: /tmp/test
+    transport: local
+""")
+        from zsiga.config import load_config
+        config = load_config(path=str(config_file))
+        assert config.llm_fast.model == "glm-4-flash"
+        assert config.llm_fast.base_url == "https://open.bigmodel.cn/api/paas/v4"
