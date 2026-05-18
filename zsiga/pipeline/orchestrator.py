@@ -7,6 +7,8 @@ from ..agent.intent_router import classify, route, IntentType
 from ..agent.task_decomposer import decompose, aggregate_results
 from ..agent.escalation import EscalationManager, Strategy
 from ..agent.recovery import RecoveryManager
+from ..agent.sub_agent import create_with_role, run_sub_agent
+from ..agent.reviewer import run_review, parse_review_verdict
 from ..config import ZsigaConfig
 from ..intake.scanner import DirectoryScanner
 from .. import git_ops
@@ -153,15 +155,15 @@ class ZsigaOrchestrator:
 
         if route_path == "dispatch_explore":
             print("  Dispatching explore sub-agent for research intent")
-            return False
+            return await self._dispatch_explore(prop, change_dir, target_path, transport)
 
         if route_path == "dispatch_diagnoser":
             print("  Dispatching diagnoser sub-agent for investigation intent")
-            return False
+            return await self._dispatch_diagnoser(prop, change_dir, target_path, transport)
 
         if route_path == "dispatch_review":
             print("  Dispatching review sub-agent for evaluation intent")
-            return False
+            return await self._dispatch_review(prop, change_dir, target_path, transport)
 
         if route_path == "pipeline_fix":
             print("  Running shortened pipeline (IMPLEMENT → VERIFY) for fix intent")
@@ -767,6 +769,54 @@ class ZsigaOrchestrator:
             return answer in ("y", "yes")
         except (EOFError, KeyboardInterrupt):
             return False
+
+    async def _dispatch_explore(self, prop, change_dir, target_path, transport) -> bool:
+        """Dispatch explore-role sub-agent for research/investigation intents."""
+        proposal_text = read_file(f"{change_dir}/proposal.md", transport) or prop.get("id", "")
+        agent = create_with_role(
+            "explore",
+            api_key=self.agent.client.api_key,
+            model=self.agent.model,
+            base_url=getattr(self.agent.client, "base_url", None),
+        )
+        result = await run_sub_agent(
+            agent, target_path, transport, proposal_text,
+            max_turns=15, timeout_seconds=300,
+        )
+        print(f"  Explore agent done: success={result.success}, {result.elapsed_seconds:.1f}s")
+        print(f"  Result: {result.content[:200]}...")
+        return result.success
+
+    async def _dispatch_diagnoser(self, prop, change_dir, target_path, transport) -> bool:
+        """Dispatch diagnoser for investigation intents."""
+        proposal_text = read_file(f"{change_dir}/proposal.md", transport) or prop.get("id", "")
+        agent = create_with_role(
+            "diagnoser",
+            api_key=self.agent.client.api_key,
+            model=self.agent.model,
+            base_url=getattr(self.agent.client, "base_url", None),
+        )
+        result = await run_sub_agent(
+            agent, target_path, transport, proposal_text,
+            max_turns=15, timeout_seconds=300,
+        )
+        print(f"  Diagnoser agent done: success={result.success}, {result.elapsed_seconds:.1f}s")
+        print(f"  Diagnosis: {result.content[:200]}...")
+        return result.success
+
+    async def _dispatch_review(self, prop, change_dir, target_path, transport) -> bool:
+        """Dispatch review sub-agent for evaluation intents."""
+        pre_sha = git_ops.rev_parse(target_path, transport=transport)
+        await run_review(
+            self.agent, change_dir, target_path, pre_sha, transport,
+            max_turns=10, timeout_seconds=180,
+        )
+        verdict, issues = parse_review_verdict(change_dir, transport)
+        print(f"  Review verdict: {verdict}")
+        if issues:
+            for issue in issues:
+                print(f"    [{issue['severity']}] {issue['description'][:80]}")
+        return verdict in ("CLEAN", "UNKNOWN")
 
     def close(self):
         for transport in self._transports.values():
