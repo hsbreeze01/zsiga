@@ -226,7 +226,7 @@ MILESTONE_L5 = {
             "id": "skill_evolution",
             "title": "Skill 演化",
             "description": "从历史会话中自动发现 recurring patterns → 提炼为可复用的 skill markdown → 自动更新 skills/",
-            "deliverables": ["skills/skill_evolver.py", "skills/_evolution_log.md"],
+            "deliverables": ["skills/skill_evolver.py", "tests/test_skill_evolver.py"],
             "acceptance": "能从 learnings.jsonl 识别高频 pattern → 自动生成/更新 skill .md 文件",
         },
         {
