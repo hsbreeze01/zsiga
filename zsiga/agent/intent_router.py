@@ -50,7 +50,7 @@ _IMPL_KEYWORDS = re.compile(
 _INVESTIGATION_KEYWORDS = re.compile(
     r"排查|调试|追踪|诊断|报错|错误|异常|崩溃|死锁|"
     r"debug|trace|diagnose|crash|error|exception|stack|traceback|"
-    r"为什么报错|什么原因|哪里出了|\bhang\b|卡住",
+    r"investigate|为什么报错|什么原因|哪里出了|\bhang\b|卡住",
     re.IGNORECASE,
 )
 
@@ -131,12 +131,17 @@ def _verbalize(message: str) -> str:
 _CLASSIFICATION_SYSTEM_PROMPT = (
     "You are an intent classifier. Given a user message, classify it into exactly one "
     "of the following intent types:\n"
-    "- research\n"
-    "- implementation\n"
-    "- investigation\n"
-    "- evaluation\n"
-    "- fix\n"
-    "- open-ended\n\n"
+    "- research: user wants to UNDERSTAND or ANALYZE existing code/system\n"
+    "- implementation: user wants to BUILD, CREATE, or ADD new functionality\n"
+    "- investigation: user wants to DEBUG or DIAGNOSE a problem/crash/error\n"
+    "- evaluation: user wants to REVIEW or COMPARE existing code/decisions\n"
+    "- fix: user wants to FIX a known bug, test failure, or lint error\n"
+    "- open-ended: unclear intent requiring clarification\n\n"
+    "CRITICAL RULE: If the user describes BUILDING a feature that involves searching, "
+    "exploring, or investigating AS FUNCTIONALITY (e.g. 'implement search feature', "
+    "'build an explorer tool'), classify as 'implementation', NOT 'research' or "
+    "'investigation'. Only classify as 'research' when the user wants to PASSIVELY "
+    "understand existing code, and as 'investigation' when debugging a problem.\n\n"
     "Respond with ONLY a valid JSON object (no markdown, no extra text) with these fields:\n"
     '- "intent_type": one of the six intent types listed above (string)\n'
     '- "confidence": a float between 0 and 1\n'
@@ -155,7 +160,8 @@ def _classify_via_llm(message: str, config: LLMFastConfig,
     try:
         from zai import ZaiClient
 
-        client = ZaiClient(api_key=config.api_key, base_url=config.base_url)
+        client = ZaiClient(api_key=config.api_key, base_url=config.base_url,
+                           timeout=timeout)
         response = client.chat.completions.create(
             model=config.model,
             messages=[
@@ -273,11 +279,10 @@ def classify(message: str, config: ZsigaConfig | None = None) -> Intent:
 
     if impl_matches:
         has_target = bool(re.search(
-            r"[\w]+功能|[\w]+模块|[\w]+接口|feature|endpoint|API|函数|类|class",
+            r"[\w]*功能|[\w]*模块|[\w]*接口|feature|endpoint|API|函数|function|类|class|module",
             text, re.IGNORECASE,
         ))
-        # Boost score by 2 when a specific target is found for higher confidence
-        impl_score = len(impl_matches) + (2 if has_target else 0)
+        impl_score = len(impl_matches) + (2 if has_target else 0) + 1
         scores.append((impl_score, IntentType.IMPLEMENTATION,
                        f"实现类关键词 ({len(impl_matches)} 个匹配)"
                        + (" + 具体目标" if has_target else "")))
