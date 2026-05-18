@@ -1,0 +1,31 @@
+{
+  "project": "myproject",
+  "extracted_at": "2026-05-18T13:33:25.583341",
+  "entries": [
+    {
+      "name": "App",
+      "category": "class",
+      "file": "app.py"
+    },
+    {
+      "name": "run_server",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "test_route",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/v1/test",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "DEBUG",
+      "category": "config",
+      "file": "app.py"
+    }
+  ]
+}

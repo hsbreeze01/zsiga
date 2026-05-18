@@ -1,6 +1,8 @@
 import re
+from pathlib import Path
 
 from ..transport import Transport, LocalTransport
+from .glossary import load_glossary
 from .utils import read_file, file_exists
 
 
@@ -27,6 +29,10 @@ def build_project_context(target_path: str, transport: Transport = None,
     sections.append(_scan_models(target_path, transport, keywords))
     sections.append(_scan_templates(target_path, transport, keywords))
     sections.append(_scan_db_schema(target_path, transport))
+
+    glossary_section = _glossary_section(target_path, transport)
+    if glossary_section:
+        sections.append(glossary_section)
 
     combined = "\n\n".join(s for s in sections if s)
     if len(combined) > MAX_CONTEXT_CHARS:
@@ -283,6 +289,16 @@ def _scan_templates(target_path: str, transport: Transport,
                 content = content[:4000] + "\n... (truncated)"
             parts.append(f"### {rel}\n```\n{content}\n```")
     return "\n\n".join(parts)
+
+
+def _glossary_section(target_path: str, transport: Transport) -> str:
+    """Load or extract glossary and return a summary section."""
+    project_name = Path(target_path).name
+    glossary = load_glossary(project_name, target_path=target_path,
+                             transport=transport)
+    if not glossary:
+        return ""
+    return glossary.summary(top_n=30)
 
 
 def prefetch_mechanical(target_path: str, test_cmd: str, lint_cmd: str,

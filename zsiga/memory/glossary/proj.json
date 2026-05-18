@@ -1,0 +1,11 @@
+{
+  "project": "proj",
+  "extracted_at": "2026-05-18T13:33:25.637593",
+  "entries": [
+    {
+      "name": "public_func",
+      "category": "function",
+      "file": "mod.py"
+    }
+  ]
+}

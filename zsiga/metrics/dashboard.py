@@ -1,3 +1,5 @@
+import json
+import os
 from datetime import datetime
 from pathlib import Path
 from .collector import compute_stats, check_milestone
@@ -41,6 +43,7 @@ def _render(stats: dict, milestones: list[dict], state: str = "resting") -> str:
     recent = _recent_list(stats.get("recent_changes", []))
     usage_section = _usage_section(stats)
     journal = _journal_section()
+    todo = _todo_section()
     mascot = _mascot_img(state)
 
     state_label = "⚡ Working" if state == "working" else "💤 Resting"
@@ -177,6 +180,8 @@ td {{ border-top: 1px solid #334155; }}
     <h2>🪙 Evolution Roadmap</h2>
   {milestone_cards}
 </div>
+
+{todo}
 
 {journal}
 
@@ -716,4 +721,83 @@ def _journal_section() -> str:
   <div class="journal">
     {rows}
   </div>
+</div>"""
+
+
+_TODO_STATUS_ICONS = {
+    "completed": "✅",
+    "in_progress": "🔄",
+    "pending": "⬜",
+    "cancelled": "🚫",
+    "blocked": "🔒",
+}
+
+
+def _load_todos(base_path: str = None) -> list[dict]:
+    """Scan data/todos/*.json, sort by mtime (newest first), return top 5."""
+    if base_path is None:
+        base_path = str(Path(__file__).resolve().parent.parent.parent)
+    todos_dir = Path(base_path) / "data" / "todos"
+    if not todos_dir.exists():
+        return []
+    files = list(todos_dir.glob("*.json"))
+    if not files:
+        return []
+    files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+    files = files[:5]
+    results = []
+    for fpath in files:
+        raw = fpath.read_text(encoding="utf-8").strip()
+        if not raw:
+            continue
+        try:
+            items = json.loads(raw)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if not isinstance(items, list):
+            continue
+        name = fpath.stem
+        total = len(items)
+        completed = sum(1 for it in items if it.get("status") == "completed")
+        pct = round(completed / total * 100) if total else 0
+        results.append({
+            "name": name,
+            "summary": f"{completed}/{total} completed ({pct}%)",
+            "pct": pct,
+            "items": items,
+        })
+    return results
+
+
+def _todo_section(base_path: str = None) -> str:
+    """Render todo progress cards. Returns empty string if no todos."""
+    todos = _load_todos(base_path)
+    if not todos:
+        return ""
+    cards = ""
+    for td in todos:
+        items_html = ""
+        for it in td["items"]:
+            status = it.get("status", "pending")
+            icon = _TODO_STATUS_ICONS.get(status, "⬜")
+            content = it.get("content", "").replace("<", "&lt;").replace(">", "&gt;")
+            items_html += f"""<div class="criterion">
+  <span class="icon">{icon}</span>
+  <span>{content}</span>
+</div>
+"""
+        color = "#22c55e" if td["pct"] == 100 else "#7c3aed"
+        fill_bg = "#22c55e" if td["pct"] == 100 else "#7c3aed"
+        cards += f"""<div class="milestone" style="border-color:{color}">
+  <h3 style="color:{color}">📋 {td['name']} — {td['summary']}</h3>
+  {items_html}
+  <div class="criterion">
+    <div class="progress"><div class="fill" style="width:{td['pct']}%;background:{fill_bg}"></div></div>
+    <span style="color:#94a3b8;font-size:0.8rem">{td['pct']}%</span>
+  </div>
+</div>
+"""
+    return f"""<div class="section">
+  <h2>📋 Todo Progress</h2>
+  {cards}
 </div>"""
