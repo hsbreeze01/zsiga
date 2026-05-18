@@ -241,7 +241,7 @@ MILESTONE_L5 = {
             "id": "failure_recovery",
             "title": "失败恢复协议",
             "description": "3 次失败→回滚→分析根因→换策略→再试→不行则生成诊断报告给用户",
-            "deliverables": ["agent/recovery.py", "recovery: rollback → diagnose → retry_with_strategy → report"],
+            "deliverables": ["agent/recovery.py", "pipeline/orchestrator.py"],
             "acceptance": "失败后能自动回滚、生成根因分析、尝试不同策略（而非重复相同修复）",
         },
         {
