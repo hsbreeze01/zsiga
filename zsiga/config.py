@@ -82,7 +82,11 @@ class PipelineConfig:
                  enrich_parallel_explore: bool = False,
                  explore_pool_max_concurrency: int = 3,
                  explore_pool_max_turns: int = 5,
-                 explore_pool_timeout: int = 120):
+                 explore_pool_timeout: int = 120,
+                 review_max_turns: int = 10,
+                 review_timeout: int = 180,
+                 review_max_rounds: int = 2,
+                 review_fix_max_turns: int = 6):
         self.max_changes_per_cycle = max_changes_per_cycle
         self.impl_timeout_minutes = impl_timeout_minutes
         self.fix_attempts = fix_attempts
@@ -100,6 +104,10 @@ class PipelineConfig:
         self.explore_pool_max_concurrency = explore_pool_max_concurrency
         self.explore_pool_max_turns = explore_pool_max_turns
         self.explore_pool_timeout = explore_pool_timeout
+        self.review_max_turns = review_max_turns
+        self.review_timeout = review_timeout
+        self.review_max_rounds = review_max_rounds
+        self.review_fix_max_turns = review_fix_max_turns
 
 
 class IntakeConfig:
@@ -196,6 +204,10 @@ def load_config(path: str = None) -> ZsigaConfig:
         explore_pool_max_concurrency=pipeline_raw.get("explore_pool", {}).get("max_concurrency", 3),
         explore_pool_max_turns=pipeline_raw.get("explore_pool", {}).get("max_turns_per_task", 5),
         explore_pool_timeout=pipeline_raw.get("explore_pool", {}).get("timeout_per_task", 120),
+        review_max_turns=pipeline_raw.get("review_max_turns", 10),
+        review_timeout=pipeline_raw.get("review_timeout", 180),
+        review_max_rounds=pipeline_raw.get("review_max_rounds", 2),
+        review_fix_max_turns=pipeline_raw.get("review_fix_max_turns", 6),
     )
 
     intake_raw = raw.get("intake", {})

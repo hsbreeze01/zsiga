@@ -5,6 +5,7 @@ from enum import Enum
 class Phase(str, Enum):
     ENRICH = "enrich"
     IMPLEMENT = "implement"
+    REVIEW = "review"
     VERIFY = "verify"
     DELIVER = "deliver"
 
