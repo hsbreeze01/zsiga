@@ -1,0 +1,63 @@
+{
+  "session_id": "implement-token-budget-manager-in-agentlooppy-create-tokenbu-ec99c11b",
+  "change_name": "implement-token-budget-manager-in-agentlooppy-create-tokenbu",
+  "project": "zsiga",
+  "exported_at": "2026-05-18T16:18:17.715708",
+  "outcome": "success",
+  "started_at": "2026-05-18T16:10:28.691655",
+  "finished_at": "2026-05-18T16:18:17.671353",
+  "total_runtime_seconds": 460.2,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 148.9,
+      "fix_attempts": 0,
+      "llm_calls": 8,
+      "tool_calls": 13,
+      "prompt_tokens": 149642,
+      "completion_tokens": 3976
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 214.1,
+      "fix_attempts": 0,
+      "llm_calls": 25,
+      "tool_calls": 26,
+      "prompt_tokens": 597782,
+      "completion_tokens": 4834
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 89.2,
+      "fix_attempts": 0,
+      "llm_calls": 7,
+      "tool_calls": 9,
+      "prompt_tokens": 109695,
+      "completion_tokens": 1722
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 8.0,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 40,
+    "total_tool_calls": 48,
+    "total_prompt_tokens": 857119,
+    "total_completion_tokens": 10532
+  }
+}
