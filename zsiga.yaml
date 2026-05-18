@@ -9,6 +9,10 @@ agent:
     max_tokens: 4096
     temperature: 0.3
 
+  llm_fast:
+    model: glm-4-flash
+    base_url: https://open.bigmodel.cn/api/paas/v4
+
 targets:
   factory:
     path: /home/ecs-assist-user/d8q-intelligentengine-datafactory

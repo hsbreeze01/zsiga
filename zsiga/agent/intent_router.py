@@ -8,7 +8,7 @@ import re
 from enum import Enum
 from dataclasses import dataclass
 
-from zsiga.config import LLMFastConfig
+from zsiga.config import LLMFastConfig, ZsigaConfig
 
 
 class IntentType(str, Enum):
@@ -202,15 +202,17 @@ def _classify_via_llm(message: str, config: LLMFastConfig,
 # Classification
 # ---------------------------------------------------------------------------
 
-def classify(message: str) -> Intent:
+def classify(message: str, config: ZsigaConfig | None = None) -> Intent:
     """分类用户消息的意图。
 
-    先进行 verbalization，再基于关键词匹配分类为六种意图之一。
+    先尝试 LLM 分类（如果配置可用），失败时回退到关键词匹配。
 
     Parameters
     ----------
     message : str
         用户输入的原始消息
+    config : ZsigaConfig | None, optional
+        全局配置，包含 llm_fast 设置。为 None 时尝试自动加载。
 
     Returns
     -------
@@ -228,6 +230,27 @@ def classify(message: str) -> Intent:
             suggested_action="ask_user: 请提供更多信息",
         )
 
+    # --- LLM-first classification attempt ---
+    llm_intent: Intent | None = None
+    llm_fast_config = None
+
+    if config is not None:
+        llm_fast_config = getattr(config, "llm_fast", None)
+    else:
+        try:
+            from zsiga.config import load_config
+            loaded = load_config()
+            llm_fast_config = getattr(loaded, "llm_fast", None)
+        except Exception:
+            pass
+
+    if llm_fast_config is not None:
+        llm_intent = _classify_via_llm(text, llm_fast_config, timeout=3.0)
+
+    if llm_intent is not None:
+        return llm_intent
+
+    # --- Keyword fallback ---
     verbalization = _verbalize(text)
 
     # Count keyword matches for each category

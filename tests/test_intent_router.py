@@ -1,5 +1,6 @@
 """Tests for Phase 0 Intent Gate — 6-category intent router."""
 import pytest
+from unittest.mock import patch
 
 from zsiga.agent.intent_router import (
     IntentType,
@@ -8,6 +9,14 @@ from zsiga.agent.intent_router import (
     classify,
     route,
 )
+from zsiga.config import ZsigaConfig, LLMConfig, LLMFastConfig, PipelineConfig, IntakeConfig, SafetyConfig
+
+
+# Autouse fixture: mock _classify_via_llm so existing keyword tests run fast
+@pytest.fixture(autouse=True)
+def _mock_llm_classify():
+    with patch("zsiga.agent.intent_router._classify_via_llm", return_value=None):
+        yield
 
 
 # ============================================================================
@@ -314,3 +323,83 @@ class TestIntentTypeEnum:
                     "evaluation", "fix", "open-ended"}
         actual = {e.value for e in IntentType}
         assert actual == expected
+
+
+# ============================================================================
+# REQ-IRLC: LLM Classification with Keyword Fallback
+# ============================================================================
+
+class TestClassifyWithLLM:
+    """Tests for LLM-first classification with keyword fallback."""
+
+    @pytest.fixture
+    def mock_config(self):
+        """Build a minimal ZsigaConfig with llm_fast."""
+        return ZsigaConfig(
+            llm=LLMConfig(provider="zhipuai", model="glm-4-flash",
+                          api_key="test-key"),
+            targets={},
+            pipeline=PipelineConfig(),
+            intake=IntakeConfig(),
+            safety=SafetyConfig(),
+            llm_fast=LLMFastConfig(api_key="test-key", model="glm-4-flash"),
+        )
+
+    def test_llm_returns_valid_intent(self, mock_config):
+        """LLM returns a valid Intent → use it."""
+        llm_result = Intent(
+            verbalization="User wants to fix a bug",
+            intent_type=IntentType.FIX,
+            confidence=0.92,
+            reasoning="LLM classified as fix",
+            suggested_action="pipeline_fix: IMPLEMENT (fix) → VERIFY",
+        )
+        with patch("zsiga.agent.intent_router._classify_via_llm",
+                   return_value=llm_result) as mock_llm:
+            result = classify("fix the broken login", config=mock_config)
+            mock_llm.assert_called_once()
+            assert result.intent_type == IntentType.FIX
+            assert result.confidence == 0.92
+            assert result.reasoning == "LLM classified as fix"
+
+    def test_llm_returns_none_falls_back_to_keywords(self, mock_config):
+        """LLM fails → keyword fallback produces same result as before."""
+        with patch("zsiga.agent.intent_router._classify_via_llm",
+                   return_value=None):
+            result = classify("修复这个 bug", config=mock_config)
+            # Keyword path should classify this as FIX
+            assert result.intent_type == IntentType.FIX
+            assert result.confidence >= 0.6
+
+    def test_config_none_falls_back_to_keywords(self):
+        """config=None and LLM unavailable → keyword path."""
+        # The autouse fixture mocks _classify_via_llm to return None,
+        # and load_config() is also effectively mocked via the same patch
+        result = classify("分析一下代码")
+        assert result.intent_type == IntentType.RESEARCH
+
+    def test_config_without_llm_fast_uses_keywords(self):
+        """Config present but llm_fast=None → skip LLM, use keywords."""
+        config_no_fast = ZsigaConfig(
+            llm=LLMConfig(provider="zhipuai", model="glm-4-flash",
+                          api_key="test-key"),
+            targets={},
+            pipeline=PipelineConfig(),
+            intake=IntakeConfig(),
+            safety=SafetyConfig(),
+            llm_fast=None,
+        )
+        # _classify_via_llm should NOT be called (autouse mock still in place)
+        with patch("zsiga.agent.intent_router._classify_via_llm",
+                   return_value=None) as mock_llm:
+            result = classify("实现新功能", config=config_no_fast)
+            mock_llm.assert_not_called()
+            assert result.intent_type == IntentType.IMPLEMENTATION
+
+    def test_llm_timeout_3_seconds(self, mock_config):
+        """Verify _classify_via_llm is called with timeout=3.0."""
+        with patch("zsiga.agent.intent_router._classify_via_llm",
+                   return_value=None) as mock_llm:
+            classify("fix the bug", config=mock_config)
+            call_args = mock_llm.call_args
+            assert call_args[1].get("timeout") == 3.0 or call_args[0][2] == 3.0
