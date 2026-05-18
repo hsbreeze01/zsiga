@@ -151,12 +151,23 @@ class SafetyConfig:
 class ZsigaConfig:
     def __init__(self, llm: LLMConfig, targets: dict[str, TargetConfig],
                  pipeline: PipelineConfig, intake: IntakeConfig,
-                 safety: SafetyConfig):
+                 safety: SafetyConfig, logging_config: 'LoggingConfig' = None):
         self.llm = llm
         self.targets = targets
         self.pipeline = pipeline
         self.intake = intake
         self.safety = safety
+        self.logging_config = logging_config
+
+
+class LoggingConfig:
+    """Logging configuration parsed from the ``logging`` section of zsiga.yaml."""
+
+    def __init__(self, level: str = "INFO", fmt: str = "text",
+                 file: str = None):
+        self.level = level.upper()
+        self.fmt = fmt
+        self.file = file
 
 
 def validate_config(config: ZsigaConfig) -> ValidationResult:
@@ -297,7 +308,15 @@ def load_config(path: str = None) -> ZsigaConfig:
         dry_run=safety_raw.get("dry_run", False),
     )
 
-    config = ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline, intake=intake, safety=safety)
+    logging_raw = raw.get("logging", {})
+    logging_config = LoggingConfig(
+        level=logging_raw.get("level", "INFO"),
+        fmt=logging_raw.get("format", "text"),
+        file=logging_raw.get("file"),
+    )
+
+    config = ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline, intake=intake, safety=safety,
+                         logging_config=logging_config)
 
     result = validate_config(config)
     for w in result.warnings:
