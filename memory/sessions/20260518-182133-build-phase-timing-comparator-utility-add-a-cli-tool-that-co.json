@@ -1,0 +1,46 @@
+{
+  "session_id": "build-phase-timing-comparator-utility-add-a-cli-tool-that-co-ead4a632",
+  "change_name": "build-phase-timing-comparator-utility-add-a-cli-tool-that-co",
+  "project": "zsiga",
+  "exported_at": "2026-05-18T18:21:33.765808",
+  "outcome": "reverted",
+  "started_at": "2026-05-18T18:16:49.734438",
+  "finished_at": "2026-05-18T18:21:33.675015",
+  "total_runtime_seconds": 255.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 123.3,
+      "fix_attempts": 0,
+      "llm_calls": 11,
+      "tool_calls": 17,
+      "prompt_tokens": 347549,
+      "completion_tokens": 3154
+    },
+    {
+      "phase": "implement",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 131.8,
+      "fix_attempts": 3,
+      "llm_calls": 11,
+      "tool_calls": 13,
+      "prompt_tokens": 247961,
+      "completion_tokens": 4694
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "pipeline.fail.implement.unknown",
+      "takeaway": "Failed at implement: review error and adjust approach"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 22,
+    "total_tool_calls": 30,
+    "total_prompt_tokens": 595510,
+    "total_completion_tokens": 7848
+  }
+}
