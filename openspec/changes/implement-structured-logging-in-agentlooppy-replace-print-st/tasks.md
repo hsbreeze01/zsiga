@@ -8,7 +8,7 @@
 
 ## Group 2: Replace print() in Agent Loop
 
-- [ ] 2.1 Replace all `print()` in `zsiga/agent/loop.py` with structured `log.info/debug/warning` calls, preserving phase labels and emoji prefixes in message text
+- [x] 2.1 Replace all `print()` in `zsiga/agent/loop.py` with structured `log.info/debug/warning` calls, preserving phase labels and emoji prefixes in message text
 
 ## Group 3: Replace print() in Pipeline Modules
 

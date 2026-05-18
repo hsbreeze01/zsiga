@@ -1,8 +1,11 @@
 import inspect
 import json
+import logging
 import time
 from zai import ZaiClient
 from zsiga.agent.compaction import compact_messages, estimate_chars
+
+log = logging.getLogger(__name__)
 
 
 class RunResult:
@@ -80,12 +83,20 @@ class AgentLoop:
         prompt_tokens_total = 0
         completion_tokens_total = 0
 
-        print(f"  [{phase}] starting (max={max_turns} turns, timeout={timeout_seconds or '∞'}s)")
+        log.info("starting (max=%d turns, timeout=%ss)",
+                 max_turns, timeout_seconds or '∞',
+                 extra={"phase": phase, "max_turns": max_turns,
+                        "timeout_seconds": timeout_seconds})
 
         for turn in range(max_turns):
             elapsed = time.monotonic() - start
             if timeout_seconds and elapsed > timeout_seconds:
-                print(f"  [{phase}] ⏱️ TIMEOUT after {turn} turns, {elapsed:.1f}s, {llm_calls_total} LLM calls, {tool_calls_total} tool calls")
+                log.warning("⏱️ TIMEOUT after %d turns, %.1fs, %d LLM calls, %d tool calls",
+                            turn, elapsed, llm_calls_total, tool_calls_total,
+                            extra={"phase": phase, "turn": turn,
+                                   "elapsed_seconds": round(elapsed, 1),
+                                   "llm_calls": llm_calls_total,
+                                   "tool_calls": tool_calls_total})
                 return RunResult("TIMEOUT", llm_calls_total, tool_calls_total, elapsed,
                                  prompt_tokens_total, completion_tokens_total)
 
@@ -101,7 +112,9 @@ class AgentLoop:
                 )
                 if compacted:
                     new_chars = estimate_chars(messages)
-                    print(f"  [{phase}] 🗜️ compacted → {len(messages)} msgs, {new_chars} chars")
+                    log.debug("🗜️ compacted → %d msgs, %d chars",
+                              len(messages), new_chars,
+                              extra={"phase": phase})
 
             resp = self.client.chat.completions.create(
                 model=self.model,
@@ -120,7 +133,10 @@ class AgentLoop:
             if not msg.tool_calls:
                 elapsed = time.monotonic() - start
                 content_preview = (msg.content or "")[:80].replace("\n", " ")
-                print(f"  [{phase}] ✅ done in {elapsed:.1f}s | {llm_calls_total} LLM calls, {tool_calls_total} tool calls | response: {content_preview}...")
+                log.info("✅ done in %.1fs | %d LLM calls, %d tool calls | response: %s...",
+                         elapsed, llm_calls_total, tool_calls_total, content_preview,
+                         extra={"phase": phase, "elapsed_seconds": round(elapsed, 1),
+                                "llm_calls": llm_calls_total, "tool_calls": tool_calls_total})
                 return RunResult(msg.content, llm_calls_total, tool_calls_total, elapsed,
                                  prompt_tokens_total, completion_tokens_total)
 
@@ -131,7 +147,9 @@ class AgentLoop:
                 name = tc.function.name
                 args = json.loads(tc.function.arguments)
                 args_preview = json.dumps(args, ensure_ascii=False)[:120]
-                print(f"  [{phase}] turn {turn+1}: 🔧 {name}({args_preview})")
+                log.debug("turn %d: 🔧 %s(%s)", turn + 1, name, args_preview,
+                          extra={"phase": phase, "turn": turn + 1,
+                                 "tool_name": name, "args_preview": args_preview})
 
                 t_tool = time.monotonic()
                 try:
@@ -144,7 +162,9 @@ class AgentLoop:
                 tool_ms = (time.monotonic() - t_tool) * 1000
 
                 result_len = len(result_str)
-                print(f"  [{phase}]     → {tool_ms:.0f}ms, {result_len} chars")
+                log.debug("    → %.0fms, %d chars", tool_ms, result_len,
+                          extra={"phase": phase, "tool_name": name,
+                                 "tool_ms": round(tool_ms)})
 
                 messages.append({
                     "role": "tool",
@@ -153,6 +173,10 @@ class AgentLoop:
                 })
 
         elapsed = time.monotonic() - start
-        print(f"  [{phase}] ⚠️ MAX_TURNS ({max_turns}) reached after {elapsed:.1f}s, {tool_calls_total} tool calls")
+        log.warning("⚠️ MAX_TURNS (%d) reached after %.1fs, %d tool calls",
+                    max_turns, elapsed, tool_calls_total,
+                    extra={"phase": phase, "max_turns": max_turns,
+                           "elapsed_seconds": round(elapsed, 1),
+                           "tool_calls": tool_calls_total})
         return RunResult("MAX_TURNS_REACHED", llm_calls_total, tool_calls_total, elapsed,
                          prompt_tokens_total, completion_tokens_total)
