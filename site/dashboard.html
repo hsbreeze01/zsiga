@@ -507,12 +507,12 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">67</div>
+    <div class="value">78</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">88.1%</div>
-    <div class="meta">59 hit / 8 miss</div>
+    <div class="value good">89.7%</div>
+    <div class="meta">70 hit / 8 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -525,11 +525,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">68.1%</div>
+    <div class="value warn">72.4%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value warn">50.0%</div>
+    <div class="value bad">48.9%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -549,40 +549,40 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>16</td>
+  <td>27</td>
   <td class="good">100.0%</td>
-  <td>1.6</td>
-  <td>150.4s</td>
+  <td>0.9</td>
+  <td>151.8s</td>
   <td>0</td>
-  <td>79</td>
-  <td>89</td>
-  <td>1.59M</td>
+  <td>188</td>
+  <td>278</td>
+  <td>4.25M</td>
 </tr><tr>
   <td>implement</td>
-  <td>47</td>
-  <td class="good">87.2%</td>
-  <td>1.8</td>
-  <td>229.4s</td>
-  <td>79</td>
-  <td>543</td>
-  <td>631</td>
-  <td>12.75M</td>
+  <td>58</td>
+  <td class="good">89.7%</td>
+  <td>1.5</td>
+  <td>223.0s</td>
+  <td>80</td>
+  <td>746</td>
+  <td>856</td>
+  <td>18.31M</td>
 </tr><tr>
   <td>verify</td>
-  <td>36</td>
-  <td class="warn">50.0%</td>
-  <td>0.3</td>
-  <td>91.8s</td>
-  <td>6</td>
-  <td>263</td>
-  <td>331</td>
-  <td>2.96M</td>
+  <td>47</td>
+  <td class="bad">48.9%</td>
+  <td>0.2</td>
+  <td>85.3s</td>
+  <td>7</td>
+  <td>337</td>
+  <td>408</td>
+  <td>3.76M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>36</td>
+  <td>47</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>12.3s</td>
+  <td>11.3s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -595,27 +595,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">17.30M</div>
-      <div class="meta">17.05M prompt + 245.9K completion</div>
+      <div class="value">26.32M</div>
+      <div class="meta">25.97M prompt + 347.4K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">258.1K</div>
+      <div class="value">337.4K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">885</div>
-      <div class="meta">avg 13.2 per change</div>
+      <div class="value">1,271</div>
+      <div class="meta">avg 16.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">1,051</div>
-      <div class="meta">avg 15.7 per change</div>
+      <div class="value">1,542</div>
+      <div class="meta">avg 19.8 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">4.7h</div>
-      <div class="meta">16,932s total</div>
+      <div class="value">6.0h</div>
+      <div class="meta">21,574s total</div>
     </div>
   </div>
 </div>
@@ -629,12 +629,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 10</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">59/10</span>
+  <span style="color:#94a3b8;font-size:0.8rem">70/10</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 70%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">88.1/70</span>
+  <span style="color:#94a3b8;font-size:0.8rem">89.7/70</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>覆盖 >= 3 个不同目标项目</span>
@@ -655,12 +655,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 30</span>
   <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">59/30</span>
+  <span style="color:#94a3b8;font-size:0.8rem">70/30</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 75%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">88.1/75</span>
+  <span style="color:#94a3b8;font-size:0.8rem">89.7/75</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L3 能力任务完成 >= 5</span>
@@ -701,12 +701,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 50</span>
   <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">59/50</span>
+  <span style="color:#94a3b8;font-size:0.8rem">70/50</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 80%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">88.1/80</span>
+  <span style="color:#94a3b8;font-size:0.8rem">89.7/80</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L4 能力任务完成 >= 8</span>
@@ -761,44 +761,44 @@ td { border-top: 1px solid #334155; }
   <div class="criterion">
   <span class="icon">○</span>
   <span>累计成功 change 数 >= 80</span>
-  <div class="progress"><div class="fill" style="width:73.8%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">59/80</span>
+  <div class="progress"><div class="fill" style="width:87.5%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">70/80</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">88.1/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">89.7/85</span>
 </div><div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>L5 能力任务完成 >= 6</span>
-  <div class="progress"><div class="fill" style="width:16.7%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">1/6</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">6/6</span>
 </div>
-  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (1/6)</div><div class="criterion">
-  <span class="icon">⬜</span>
-  <span style="color:#64748b;" title="给定任意用户输入，能 verbalize 意图、分类、并选择正确的执行路径">Phase 0 Intent Gate</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (6/6)</div><div class="criterion">
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="给定任意用户输入，能 verbalize 意图、分类、并选择正确的执行路径">Phase 0 Intent Gate</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
-  <span class="icon">⬜</span>
-  <span style="color:#64748b;" title="同时派发 3 个搜索任务，全部完成后综合结果做出决策，比顺序执行快 2x+">并行后台代理</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="同时派发 3 个搜索任务，全部完成后综合结果做出决策，比顺序执行快 2x+">并行后台代理</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
-  <span class="icon">⬜</span>
-  <span style="color:#64748b;" title="能从 learnings.jsonl 识别高频 pattern → 自动生成/更新 skill .md 文件">Skill 演化</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="能从 learnings.jsonl 识别高频 pattern → 自动生成/更新 skill .md 文件">Skill 演化</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
-  <span class="icon">⬜</span>
-  <span style="color:#64748b;" title="每次实现完成后自动触发 review，review 结果记录在 metrics 中">自我审查循环</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="每次实现完成后自动触发 review，review 结果记录在 metrics 中">自我审查循环</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
-  <span class="icon">⬜</span>
-  <span style="color:#64748b;" title="失败后能自动回滚、生成根因分析、尝试不同策略（而非重复相同修复）">失败恢复协议</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#334155"></div></div>
-  <span style="color:#64748b;font-size:0.75rem">0/2</span>
+  <span class="icon">✅</span>
+  <span style="color:#94a3b8;" title="失败后能自动回滚、生成根因分析、尝试不同策略（而非重复相同修复）">失败恢复协议</span>
+  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="从模糊需求到代码交付，全程无人工干预，成功 change 记录">L5 验证：端到端自主任务</span>
@@ -812,13 +812,13 @@ td { border-top: 1px solid #334155; }
   <div class="criterion">
   <span class="icon">○</span>
   <span>累计成功 change 数 >= 100</span>
-  <div class="progress"><div class="fill" style="width:59.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">59/100</span>
+  <div class="progress"><div class="fill" style="width:70.0%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">70/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">88.1/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">89.7/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1026,14 +1026,14 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>fix-strategy-scan-async</li>
-<li>publisher-anti-detection-p0</li>
-<li>fix-strategy-scan-async</li>
-<li>autonomous-sense</li>
-<li>l4-diagnoser</li>
+    <li>implement-change-conflict-detector-in-pipelinedependencypy-c</li>
+<li>implement-session-summary-exporter-in-memoryjournalpy-add-ex</li>
+<li>implement-token-budget-manager-in-agentlooppy-create-tokenbu</li>
+<li>implement-adaptive-turn-limit-in-configpy-and-orchestratorpy</li>
+<li>implement-file-change-impact-analyzer-in-pipelineimpactpy-cr</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-18T13:36:21.040056</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-18T16:30:16.513023</div>
 </body>
 </html>
