@@ -1,0 +1,63 @@
+{
+  "session_id": "implement-phase-duration-histogram-in-metrics-dashboard-add--c08dbc41",
+  "change_name": "implement-phase-duration-histogram-in-metrics-dashboard-add-",
+  "project": "zsiga",
+  "exported_at": "2026-05-18T18:04:53.755746",
+  "outcome": "success",
+  "started_at": "2026-05-18T18:00:35.013864",
+  "finished_at": "2026-05-18T18:04:53.695107",
+  "total_runtime_seconds": 246.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 153.9,
+      "fix_attempts": 0,
+      "llm_calls": 10,
+      "tool_calls": 9,
+      "prompt_tokens": 442848,
+      "completion_tokens": 3101
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 79.9,
+      "fix_attempts": 0,
+      "llm_calls": 7,
+      "tool_calls": 8,
+      "prompt_tokens": 171394,
+      "completion_tokens": 1701
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 3.8,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "prompt_tokens": 3835,
+      "completion_tokens": 76
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 8.5,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 18,
+    "total_tool_calls": 17,
+    "total_prompt_tokens": 618077,
+    "total_completion_tokens": 4878
+  }
+}
