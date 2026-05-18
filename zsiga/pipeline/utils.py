@@ -1,6 +1,9 @@
+import asyncio
+import random
 import re
 import shutil
 import sys
+import time
 from pathlib import Path
 
 from ..transport import Transport, LocalTransport
@@ -253,3 +256,79 @@ def archive_change(target_path: str, change_name: str,
         return
 
     transport.run_shell(f"mv '{src}' '{dst}'")
+
+
+async def retry_with_backoff(
+    fn,
+    max_attempts: int = 3,
+    base_delay: float = 1.0,
+    max_delay: float = 30.0,
+    jitter: bool = True,
+    retry_on: tuple = (Exception,),
+):
+    """Retry an async callable with exponential backoff.
+
+    Args:
+        fn: Async callable to invoke.
+        max_attempts: Maximum number of invocation attempts.
+        base_delay: Base delay in seconds for the first retry.
+        max_delay: Maximum delay cap in seconds.
+        jitter: If True, randomize delay between base_delay*0.5 and computed delay.
+        retry_on: Tuple of exception types that trigger a retry.
+
+    Returns:
+        The result of the async callable on success.
+
+    Raises:
+        The last exception if all attempts fail, or immediately if the
+        exception is not in retry_on.
+    """
+    last_exc = None
+    for attempt in range(max_attempts):
+        try:
+            return await fn()
+        except retry_on as exc:
+            last_exc = exc
+            if attempt < max_attempts - 1:
+                raw_delay = min(base_delay * (2 ** attempt), max_delay)
+                if jitter:
+                    delay = random.uniform(raw_delay * 0.5, raw_delay)
+                else:
+                    delay = raw_delay
+                print(
+                    f"[retry] attempt {attempt + 1}/{max_attempts} "
+                    f"failed ({type(exc).__name__}), "
+                    f"retrying in {delay:.2f}s"
+                )
+                await asyncio.sleep(delay)
+    raise last_exc
+
+
+def retry_sync(
+    fn,
+    max_attempts: int = 3,
+    base_delay: float = 1.0,
+    max_delay: float = 30.0,
+    jitter: bool = True,
+    retry_on: tuple = (Exception,),
+):
+    """Synchronous counterpart of retry_with_backoff for non-async callables."""
+    last_exc = None
+    for attempt in range(max_attempts):
+        try:
+            return fn()
+        except retry_on as exc:
+            last_exc = exc
+            if attempt < max_attempts - 1:
+                raw_delay = min(base_delay * (2 ** attempt), max_delay)
+                if jitter:
+                    delay = random.uniform(raw_delay * 0.5, raw_delay)
+                else:
+                    delay = raw_delay
+                print(
+                    f"[retry] attempt {attempt + 1}/{max_attempts} "
+                    f"failed ({type(exc).__name__}), "
+                    f"retrying in {delay:.2f}s"
+                )
+                time.sleep(delay)
+    raise last_exc
