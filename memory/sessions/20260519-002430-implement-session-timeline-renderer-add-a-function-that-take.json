@@ -1,0 +1,63 @@
+{
+  "session_id": "implement-session-timeline-renderer-add-a-function-that-take-8774a1f5",
+  "change_name": "implement-session-timeline-renderer-add-a-function-that-take",
+  "project": "zsiga",
+  "exported_at": "2026-05-19T00:24:30.414815",
+  "outcome": "success",
+  "started_at": "2026-05-19T00:18:26.013061",
+  "finished_at": "2026-05-19T00:24:30.393671",
+  "total_runtime_seconds": 351.7,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 133.0,
+      "fix_attempts": 0,
+      "llm_calls": 8,
+      "tool_calls": 12,
+      "prompt_tokens": 249179,
+      "completion_tokens": 3877
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 180.1,
+      "fix_attempts": 0,
+      "llm_calls": 14,
+      "tool_calls": 16,
+      "prompt_tokens": 296604,
+      "completion_tokens": 4853
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 30.1,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 3,
+      "prompt_tokens": 33616,
+      "completion_tokens": 792
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 8.5,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 25,
+    "total_tool_calls": 31,
+    "total_prompt_tokens": 579399,
+    "total_completion_tokens": 9522
+  }
+}
