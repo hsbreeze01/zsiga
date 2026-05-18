@@ -1,14 +1,13 @@
 """Tests for session summary export (export_session, load_sessions)."""
 
 import json
-import sqlite3
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
-from zsiga.metrics.db import _get_conn, record_change
+from zsiga.metrics.db import _get_conn
 from zsiga.memory.journal import export_session, load_sessions
 
 
@@ -199,7 +198,7 @@ class TestExportSession:
         assert data["outcome"] == "fail"
         assert len(data["lessons"]) == 2
         assert all(
-            l["pattern_key"] == "pipeline.fail.implement" for l in data["lessons"]
+            item["pattern_key"] == "pipeline.fail.implement" for item in data["lessons"]
         )
         assert len(data["phases"]) == 1
 
