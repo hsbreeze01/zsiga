@@ -1,0 +1,35 @@
+{
+  "session_id": "implement-real-sub-agent-dispatch-in-orchestratorpy-replace--518ec64a",
+  "change_name": "implement-real-sub-agent-dispatch-in-orchestratorpy-replace-",
+  "project": "zsiga",
+  "exported_at": "2026-05-18T17:47:58.137320",
+  "outcome": "reverted",
+  "started_at": "2026-05-18T17:43:56.433515",
+  "finished_at": "2026-05-18T17:47:58.061475",
+  "total_runtime_seconds": 206.7,
+  "phases": [
+    {
+      "phase": "implement",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 206.7,
+      "fix_attempts": 3,
+      "llm_calls": 23,
+      "tool_calls": 22,
+      "prompt_tokens": 625790,
+      "completion_tokens": 5488
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "pipeline.fail.implement.test_failure",
+      "takeaway": "Check test output for specific assertion errors; verify test expectations match implementation API"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 23,
+    "total_tool_calls": 22,
+    "total_prompt_tokens": 625790,
+    "total_completion_tokens": 5488
+  }
+}
