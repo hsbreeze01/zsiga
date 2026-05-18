@@ -1,0 +1,886 @@
+{
+  "project": "zsiga",
+  "extracted_at": "2026-05-18T13:53:31.504818",
+  "entries": [
+    {
+      "name": "test_detect_lang",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_search_python",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_search_no_matches",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_search_file_not_found",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_search_unknown_lang",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_search_explicit_lang",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_search_multiple_matches",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_replace_basic",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_replace_no_match",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_replace_preserves_surrounding",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_ast_replace_multiple",
+      "category": "function",
+      "file": "tests/test_ast_tools.py"
+    },
+    {
+      "name": "test_estimate_chars_string_content",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_estimate_chars_list_content",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_estimate_chars_mixed",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_compact_below_threshold",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_compact_too_few_messages",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_compact_with_fallback_summary",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_compact_no_system_message",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_compact_preserves_recent_order",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_fallback_summary_counts_tool_calls",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "test_compact_threshold_exact_match",
+      "category": "function",
+      "file": "tests/test_compaction.py"
+    },
+    {
+      "name": "TestDiagnoserImport",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestHypothesize",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestInstrument",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestTargetedFix",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestDiagnosisReport",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestFullDiagnoseCycle",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestGlossaryDataclass",
+      "category": "class",
+      "file": "tests/test_glossary.py"
+    },
+    {
+      "name": "TestGlossaryExtraction",
+      "category": "class",
+      "file": "tests/test_glossary.py"
+    },
+    {
+      "name": "TestGlossaryLoading",
+      "category": "class",
+      "file": "tests/test_glossary.py"
+    },
+    {
+      "name": "TestGlossaryIntegration",
+      "category": "class",
+      "file": "tests/test_glossary.py"
+    },
+    {
+      "name": "/api/v1/test",
+      "category": "route",
+      "file": "tests/test_glossary.py"
+    },
+    {
+      "name": "TestIntentRouter",
+      "category": "class",
+      "file": "tests/test_l4_capabilities.py"
+    },
+    {
+      "name": "TestTaskDecomposer",
+      "category": "class",
+      "file": "tests/test_l4_capabilities.py"
+    },
+    {
+      "name": "TestTodoList",
+      "category": "class",
+      "file": "tests/test_l4_capabilities.py"
+    },
+    {
+      "name": "TestEscalation",
+      "category": "class",
+      "file": "tests/test_l4_capabilities.py"
+    },
+    {
+      "name": "test_mine_patterns_empty_file",
+      "category": "function",
+      "file": "tests/test_pattern_miner.py"
+    },
+    {
+      "name": "test_mine_patterns_below_threshold",
+      "category": "function",
+      "file": "tests/test_pattern_miner.py"
+    },
+    {
+      "name": "test_mine_patterns_extracts_recurring",
+      "category": "function",
+      "file": "tests/test_pattern_miner.py"
+    },
+    {
+      "name": "test_severity_classification",
+      "category": "function",
+      "file": "tests/test_pattern_miner.py"
+    },
+    {
+      "name": "test_generate_warnings_format",
+      "category": "function",
+      "file": "tests/test_pattern_miner.py"
+    },
+    {
+      "name": "test_generate_warnings_empty",
+      "category": "function",
+      "file": "tests/test_pattern_miner.py"
+    },
+    {
+      "name": "test_mine_patterns_skips_no_key",
+      "category": "function",
+      "file": "tests/test_pattern_miner.py"
+    },
+    {
+      "name": "test_role_enum_values",
+      "category": "function",
+      "file": "tests/test_roles.py"
+    },
+    {
+      "name": "test_explore_role_config",
+      "category": "function",
+      "file": "tests/test_roles.py"
+    },
+    {
+      "name": "test_implement_role_has_all_tools",
+      "category": "function",
+      "file": "tests/test_roles.py"
+    },
+    {
+      "name": "test_review_role_read_only",
+      "category": "function",
+      "file": "tests/test_roles.py"
+    },
+    {
+      "name": "test_system_prompts_are_chinese",
+      "category": "function",
+      "file": "tests/test_roles.py"
+    },
+    {
+      "name": "test_get_all_roles_returns_four",
+      "category": "function",
+      "file": "tests/test_roles.py"
+    },
+    {
+      "name": "test_diagnoser_role_config",
+      "category": "function",
+      "file": "tests/test_roles.py"
+    },
+    {
+      "name": "test_role_from_string",
+      "category": "function",
+      "file": "tests/test_roles.py"
+    },
+    {
+      "name": "TestLoadTodos",
+      "category": "class",
+      "file": "tests/test_todo_card.py"
+    },
+    {
+      "name": "TestTodoSection",
+      "category": "class",
+      "file": "tests/test_todo_card.py"
+    },
+    {
+      "name": "TestTargetConfigVenvPath",
+      "category": "class",
+      "file": "tests/test_venv_usage.py"
+    },
+    {
+      "name": "TestResolveVenvPython",
+      "category": "class",
+      "file": "tests/test_venv_usage.py"
+    },
+    {
+      "name": "TestVenvPromptInjection",
+      "category": "class",
+      "file": "tests/test_venv_usage.py"
+    },
+    {
+      "name": "TestOrchestratorVenvPassing",
+      "category": "class",
+      "file": "tests/test_venv_usage.py"
+    },
+    {
+      "name": "cmd_propose",
+      "category": "function",
+      "file": "zsiga/__main__.py"
+    },
+    {
+      "name": "cmd_run",
+      "category": "function",
+      "file": "zsiga/__main__.py"
+    },
+    {
+      "name": "cmd_projects",
+      "category": "function",
+      "file": "zsiga/__main__.py"
+    },
+    {
+      "name": "cmd_status",
+      "category": "function",
+      "file": "zsiga/__main__.py"
+    },
+    {
+      "name": "cmd_log",
+      "category": "function",
+      "file": "zsiga/__main__.py"
+    },
+    {
+      "name": "cmd_dashboard",
+      "category": "function",
+      "file": "zsiga/__main__.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "zsiga/__main__.py"
+    },
+    {
+      "name": "ast_search",
+      "category": "function",
+      "file": "zsiga/agent/ast_tools.py"
+    },
+    {
+      "name": "ast_replace",
+      "category": "function",
+      "file": "zsiga/agent/ast_tools.py"
+    },
+    {
+      "name": "LANG_MAP",
+      "category": "config",
+      "file": "zsiga/agent/ast_tools.py"
+    },
+    {
+      "name": "estimate_chars",
+      "category": "function",
+      "file": "zsiga/agent/compaction.py"
+    },
+    {
+      "name": "compact_messages",
+      "category": "function",
+      "file": "zsiga/agent/compaction.py"
+    },
+    {
+      "name": "EscalationLevel",
+      "category": "class",
+      "file": "zsiga/agent/escalation.py"
+    },
+    {
+      "name": "Strategy",
+      "category": "class",
+      "file": "zsiga/agent/escalation.py"
+    },
+    {
+      "name": "FailureRecord",
+      "category": "class",
+      "file": "zsiga/agent/escalation.py"
+    },
+    {
+      "name": "DiagnosisReport",
+      "category": "class",
+      "file": "zsiga/agent/escalation.py"
+    },
+    {
+      "name": "EscalationManager",
+      "category": "class",
+      "file": "zsiga/agent/escalation.py"
+    },
+    {
+      "name": "IntentType",
+      "category": "class",
+      "file": "zsiga/agent/intent_router.py"
+    },
+    {
+      "name": "Intent",
+      "category": "class",
+      "file": "zsiga/agent/intent_router.py"
+    },
+    {
+      "name": "classify",
+      "category": "function",
+      "file": "zsiga/agent/intent_router.py"
+    },
+    {
+      "name": "route",
+      "category": "function",
+      "file": "zsiga/agent/intent_router.py"
+    },
+    {
+      "name": "RunResult",
+      "category": "class",
+      "file": "zsiga/agent/loop.py"
+    },
+    {
+      "name": "AgentLoop",
+      "category": "class",
+      "file": "zsiga/agent/loop.py"
+    },
+    {
+      "name": "lsp_goto_definition",
+      "category": "function",
+      "file": "zsiga/agent/lsp_tools.py"
+    },
+    {
+      "name": "lsp_find_references",
+      "category": "function",
+      "file": "zsiga/agent/lsp_tools.py"
+    },
+    {
+      "name": "lsp_diagnostics",
+      "category": "function",
+      "file": "zsiga/agent/lsp_tools.py"
+    },
+    {
+      "name": "Role",
+      "category": "class",
+      "file": "zsiga/agent/roles.py"
+    },
+    {
+      "name": "RoleConfig",
+      "category": "class",
+      "file": "zsiga/agent/roles.py"
+    },
+    {
+      "name": "get_role_config",
+      "category": "function",
+      "file": "zsiga/agent/roles.py"
+    },
+    {
+      "name": "get_role_system_prompt",
+      "category": "function",
+      "file": "zsiga/agent/roles.py"
+    },
+    {
+      "name": "get_all_roles",
+      "category": "function",
+      "file": "zsiga/agent/roles.py"
+    },
+    {
+      "name": "SubAgentResult",
+      "category": "class",
+      "file": "zsiga/agent/sub_agent.py"
+    },
+    {
+      "name": "create_sub_agent",
+      "category": "function",
+      "file": "zsiga/agent/sub_agent.py"
+    },
+    {
+      "name": "create_with_role",
+      "category": "function",
+      "file": "zsiga/agent/sub_agent.py"
+    },
+    {
+      "name": "SubTask",
+      "category": "class",
+      "file": "zsiga/agent/task_decomposer.py"
+    },
+    {
+      "name": "Decomposition",
+      "category": "class",
+      "file": "zsiga/agent/task_decomposer.py"
+    },
+    {
+      "name": "decompose",
+      "category": "function",
+      "file": "zsiga/agent/task_decomposer.py"
+    },
+    {
+      "name": "aggregate_results",
+      "category": "function",
+      "file": "zsiga/agent/task_decomposer.py"
+    },
+    {
+      "name": "TodoStatus",
+      "category": "class",
+      "file": "zsiga/agent/todo.py"
+    },
+    {
+      "name": "TodoItem",
+      "category": "class",
+      "file": "zsiga/agent/todo.py"
+    },
+    {
+      "name": "TodoList",
+      "category": "class",
+      "file": "zsiga/agent/todo.py"
+    },
+    {
+      "name": "register_tools",
+      "category": "function",
+      "file": "zsiga/agent/tools.py"
+    },
+    {
+      "name": "SSHConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "TargetConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "LLMConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "CompactionConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "PipelineConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "IntakeConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "SafetyConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "ZsigaConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "load_config",
+      "category": "function",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "rev_parse",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "reset_hard",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "add_all",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "commit",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "tag",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "push",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "diff",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "has_uncommitted_changes",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "create_branch",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "checkout",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "DirectoryScanner",
+      "category": "class",
+      "file": "zsiga/intake/scanner.py"
+    },
+    {
+      "name": "load_active_context",
+      "category": "function",
+      "file": "zsiga/memory/context.py"
+    },
+    {
+      "name": "update_active_context",
+      "category": "function",
+      "file": "zsiga/memory/context.py"
+    },
+    {
+      "name": "load_recent_lessons",
+      "category": "function",
+      "file": "zsiga/memory/context.py"
+    },
+    {
+      "name": "write_entry",
+      "category": "function",
+      "file": "zsiga/memory/journal.py"
+    },
+    {
+      "name": "load_journal",
+      "category": "function",
+      "file": "zsiga/memory/journal.py"
+    },
+    {
+      "name": "record_lesson",
+      "category": "function",
+      "file": "zsiga/memory/learn.py"
+    },
+    {
+      "name": "record_outcome",
+      "category": "function",
+      "file": "zsiga/memory/learn.py"
+    },
+    {
+      "name": "Pattern",
+      "category": "class",
+      "file": "zsiga/memory/pattern_miner.py"
+    },
+    {
+      "name": "mine_patterns",
+      "category": "function",
+      "file": "zsiga/memory/pattern_miner.py"
+    },
+    {
+      "name": "generate_warnings",
+      "category": "function",
+      "file": "zsiga/memory/pattern_miner.py"
+    },
+    {
+      "name": "record_change",
+      "category": "function",
+      "file": "zsiga/metrics/collector.py"
+    },
+    {
+      "name": "load_all_changes",
+      "category": "function",
+      "file": "zsiga/metrics/collector.py"
+    },
+    {
+      "name": "compute_stats",
+      "category": "function",
+      "file": "zsiga/metrics/collector.py"
+    },
+    {
+      "name": "check_milestone",
+      "category": "function",
+      "file": "zsiga/metrics/collector.py"
+    },
+    {
+      "name": "generate_dashboard",
+      "category": "function",
+      "file": "zsiga/metrics/dashboard.py"
+    },
+    {
+      "name": "record_change",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "load_all_changes",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "write_journal_entry",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "load_journal",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "record_lesson",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "count_lessons",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "save_stats_snapshot",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "load_latest_snapshot",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "migrate_from_jsonl",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "Phase",
+      "category": "class",
+      "file": "zsiga/metrics/types.py"
+    },
+    {
+      "name": "Outcome",
+      "category": "class",
+      "file": "zsiga/metrics/types.py"
+    },
+    {
+      "name": "PhaseRecord",
+      "category": "class",
+      "file": "zsiga/metrics/types.py"
+    },
+    {
+      "name": "ChangeRecord",
+      "category": "class",
+      "file": "zsiga/metrics/types.py"
+    },
+    {
+      "name": "ALL_MILESTONES",
+      "category": "config",
+      "file": "zsiga/metrics/types.py"
+    },
+    {
+      "name": "ProbeResult",
+      "category": "class",
+      "file": "zsiga/pipeline/diagnoser.py"
+    },
+    {
+      "name": "Hypothesis",
+      "category": "class",
+      "file": "zsiga/pipeline/diagnoser.py"
+    },
+    {
+      "name": "FixPlan",
+      "category": "class",
+      "file": "zsiga/pipeline/diagnoser.py"
+    },
+    {
+      "name": "DiagnosisReport",
+      "category": "class",
+      "file": "zsiga/pipeline/diagnoser.py"
+    },
+    {
+      "name": "Diagnoser",
+      "category": "class",
+      "file": "zsiga/pipeline/diagnoser.py"
+    },
+    {
+      "name": "ENRICHER_SYSTEM",
+      "category": "config",
+      "file": "zsiga/pipeline/enricher.py"
+    },
+    {
+      "name": "GlossaryEntry",
+      "category": "class",
+      "file": "zsiga/pipeline/glossary.py"
+    },
+    {
+      "name": "Glossary",
+      "category": "class",
+      "file": "zsiga/pipeline/glossary.py"
+    },
+    {
+      "name": "load_glossary",
+      "category": "function",
+      "file": "zsiga/pipeline/glossary.py"
+    },
+    {
+      "name": "extract_glossary",
+      "category": "function",
+      "file": "zsiga/pipeline/glossary.py"
+    },
+    {
+      "name": "IMPLEMENTER_SYSTEM",
+      "category": "config",
+      "file": "zsiga/pipeline/implementer.py"
+    },
+    {
+      "name": "ZsigaOrchestrator",
+      "category": "class",
+      "file": "zsiga/pipeline/orchestrator.py"
+    },
+    {
+      "name": "build_project_context",
+      "category": "function",
+      "file": "zsiga/pipeline/project_context.py"
+    },
+    {
+      "name": "prefetch_mechanical",
+      "category": "function",
+      "file": "zsiga/pipeline/project_context.py"
+    },
+    {
+      "name": "MAX_CONTEXT_CHARS",
+      "category": "config",
+      "file": "zsiga/pipeline/project_context.py"
+    },
+    {
+      "name": "read_file",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "file_exists",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "dir_exists",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "list_files_recursive",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "resolve_venv_python",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "verify_mechanical",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "archive_change",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "read_verdict",
+      "category": "function",
+      "file": "zsiga/pipeline/verifier.py"
+    },
+    {
+      "name": "VERIFIER_SYSTEM",
+      "category": "config",
+      "file": "zsiga/pipeline/verifier.py"
+    },
+    {
+      "name": "Transport",
+      "category": "class",
+      "file": "zsiga/transport.py"
+    },
+    {
+      "name": "LocalTransport",
+      "category": "class",
+      "file": "zsiga/transport.py"
+    },
+    {
+      "name": "SSHTransport",
+      "category": "class",
+      "file": "zsiga/transport.py"
+    },
+    {
+      "name": "create_transport",
+      "category": "function",
+      "file": "zsiga/transport.py"
+    }
+  ]
+}

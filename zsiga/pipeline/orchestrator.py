@@ -132,7 +132,7 @@ class ZsigaOrchestrator:
         change_name = prop["id"]
         transport = self._get_transport(project_name)
 
-        # Intent classification (REQ-IR-01)
+        # Intent classification (REQ-IG-01 / REQ-IG-02 / REQ-IG-05)
         proposal_text = read_file(f"{change_dir}/proposal.md", transport) or ""
         intent = classify(proposal_text)
         route_path = route(intent)
@@ -140,8 +140,32 @@ class ZsigaOrchestrator:
             f"  Intent: {intent.intent_type.value} "
             f"(confidence={intent.confidence:.2f}, route={route_path})"
         )
+        # REQ-IG-05: Log verbalization, category, confidence, route
+        print(
+            f"  Verbalization: {intent.verbalization}"
+        )
 
-        if intent.intent_type not in (IntentType.IMPLEMENTATION, IntentType.AMBIGUOUS):
+        if route_path == "ask_user":
+            print(f"  Intent unclear, asking user for clarification: {intent.verbalization}")
+            return False
+
+        if route_path == "dispatch_explore":
+            print("  Dispatching explore sub-agent for research intent")
+            return False
+
+        if route_path == "dispatch_diagnoser":
+            print("  Dispatching diagnoser sub-agent for investigation intent")
+            return False
+
+        if route_path == "dispatch_review":
+            print("  Dispatching review sub-agent for evaluation intent")
+            return False
+
+        if route_path == "pipeline_fix":
+            print("  Running shortened pipeline (IMPLEMENT → VERIFY) for fix intent")
+
+        # IMPLEMENTATION and FIX intents proceed to pipeline
+        if intent.intent_type not in (IntentType.IMPLEMENTATION, IntentType.FIX):
             print(f"  Skipping non-pipeline intent: {route_path}")
             return False
 
@@ -153,15 +177,17 @@ class ZsigaOrchestrator:
         )
 
         try:
+            skip_enrich = intent.intent_type == IntentType.FIX
             return await self._run_phases(prop, rec, change_dir, target_path,
                                           project_name, project_config, change_name,
-                                          transport)
+                                          transport, skip_enrich=skip_enrich)
         finally:
             record_change(rec)
 
     async def _run_phases(self, prop, rec, change_dir, target_path,
                           project_name, project_config, change_name,
-                          transport: Transport) -> bool:
+                          transport: Transport,
+                          skip_enrich: bool = False) -> bool:
         cycle_start = time.monotonic()
 
         # Escalation manager (REQ-ES-01)
@@ -180,8 +206,8 @@ class ZsigaOrchestrator:
                                                  proposal=proposal_text)
         print(f"  Project context ready ({len(project_context)} chars, {time.monotonic() - t_pf:.1f}s)")
 
-        # Phase 1: ENRICH
-        if not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
+        # Phase 1: ENRICH (skipped for pipeline_fix — FIX intent)
+        if not skip_enrich and not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
             print(f"\n  {'='*50}")
             print(f"  Phase 1/4: ENRICH {change_name}")
             print(f"  {'='*50}")

@@ -11,13 +11,13 @@ from zsiga.agent.escalation import EscalationManager, EscalationLevel, Strategy
 
 
 class TestIntentRouter:
-    def test_trivial_greeting(self):
+    def test_open_ended_greeting(self):
         intent = classify("hi")
-        assert intent.intent_type == IntentType.TRIVIAL
+        assert intent.intent_type == IntentType.OPEN_ENDED
 
-    def test_trivial_short_message(self):
+    def test_open_ended_short_message(self):
         intent = classify("ok")
-        assert intent.intent_type == IntentType.TRIVIAL
+        assert intent.intent_type == IntentType.OPEN_ENDED
 
     def test_implementation_request(self):
         intent = classify("添加一个新的用户认证模块")
@@ -28,26 +28,26 @@ class TestIntentRouter:
         intent = classify("implement a new API endpoint for user registration")
         assert intent.intent_type == IntentType.IMPLEMENTATION
 
-    def test_exploration_request(self):
+    def test_research_request(self):
         intent = classify("这个模块是怎么工作的？")
-        assert intent.intent_type == IntentType.EXPLORATION
+        assert intent.intent_type == IntentType.RESEARCH
 
-    def test_exploration_english(self):
+    def test_research_english(self):
         intent = classify("how does the auth system work?")
-        assert intent.intent_type == IntentType.EXPLORATION
+        assert intent.intent_type == IntentType.RESEARCH
 
-    def test_ambiguous_empty(self):
+    def test_open_ended_empty(self):
         intent = classify("")
-        assert intent.intent_type == IntentType.AMBIGUOUS
+        assert intent.intent_type == IntentType.OPEN_ENDED
 
-    def test_ambiguous_unclear(self):
+    def test_open_ended_unclear(self):
         intent = classify("这个东西不太对")
-        assert intent.intent_type == IntentType.AMBIGUOUS
+        assert intent.intent_type == IntentType.OPEN_ENDED
 
-    def test_route_trivial(self):
-        assert route(classify("hello")) == "respond_directly"
+    def test_route_open_ended(self):
+        assert route(classify("hello")) == "ask_user"
 
-    def test_route_exploration(self):
+    def test_route_research(self):
         assert route(classify("find the auth module")) == "dispatch_explore"
 
     def test_route_implementation(self):
