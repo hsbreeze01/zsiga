@@ -234,7 +234,7 @@ MILESTONE_L5 = {
             "id": "self_review",
             "title": "自我审查循环",
             "description": "完成实现后自动触发 review 子代理 → 发现问题 → 修复 → 再审，最多 2 轮",
-            "deliverables": ["agent/reviewer.py", "pipeline: impl → review → fix → re-review"],
+            "deliverables": ["agent/reviewer.py", "pipeline/orchestrator.py"],
             "acceptance": "每次实现完成后自动触发 review，review 结果记录在 metrics 中",
         },
         {
