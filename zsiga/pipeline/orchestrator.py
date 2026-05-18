@@ -14,6 +14,7 @@ from ..memory.context import load_active_context, update_active_context, load_re
 from ..memory.learn import record_outcome, record_lesson
 from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
 from ..metrics.collector import record_change
+from ..memory.journal import export_session
 from ..transport import Transport, create_transport
 from .enricher import enrich, derive_explore_tasks
 from .implementer import implement
@@ -184,6 +185,7 @@ class ZsigaOrchestrator:
                                           transport, skip_enrich=skip_enrich)
         finally:
             record_change(rec)
+            export_session(change_name)
 
     async def _run_phases(self, prop, rec, change_dir, target_path,
                           project_name, project_config, change_name,
