@@ -1,15 +1,10 @@
 """Tests for proposal deduplication checker (PDC-01 through PDC-05)."""
 
-import os
-import tempfile
 
 from zsiga.pipeline.dedup import (
-    ArchivedProposal,
-    DuplicateMatch,
     check_duplicates,
     compute_similarity,
     load_archived_proposals,
-    normalize,
 )
 
 
