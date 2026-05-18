@@ -1,7 +1,8 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from .collector import compute_stats, check_milestone
+from .collector import compute_stats, check_milestone, compute_rolling_rates
+from .db import load_all_changes
 from .types import ALL_MILESTONES
 from ..memory.journal import load_journal
 
@@ -533,6 +534,46 @@ def _mascot_svg(state: str = "resting") -> str:
 <rect x="55" y="118" width="50" height="16" rx="8" fill="#7c3aed" opacity="0.6"/>
 <text x="80" y="130" font-size="10" fill="#fbbf24" text-anchor="middle" font-weight="800" letter-spacing="1" opacity="0.7">Lv.2</text>
 </svg>"""
+
+
+_SPARKLINE_CHARS = "▁▂▃▄▅▆▇█"
+
+
+def _sparkline_html(rates: list[float]) -> str:
+    """Render rolling success rates as an ASCII sparkline with trend coloring.
+
+    Takes the last 20 data points. Maps values linearly to Unicode block chars.
+    Wraps each char in a <span> with class="trend-down" if rate is lower than predecessor.
+    Returns HTML string for the sparkline card.
+    """
+    if not rates:
+        return '<div class="value">—</div>'
+
+    recent = rates[-20:]
+
+    if all(r == recent[0] for r in recent):
+        char = "▄"
+        spans = []
+        for i, _ in enumerate(recent):
+            cls = ' class="trend-down"' if (i > 0 and recent[i] < recent[i - 1]) else ""
+            spans.append(f"<span{cls}>{char}</span>")
+        return f'<div class="value" style="font-size:1.2rem;letter-spacing:2px">{"".join(spans)}</div>'
+
+    min_val = min(recent)
+    max_val = max(recent)
+    val_range = max_val - min_val
+
+    spans = []
+    for i, r in enumerate(recent):
+        if val_range == 0:
+            idx = 3
+        else:
+            idx = min(int((r - min_val) / val_range * 7), 7)
+        char = _SPARKLINE_CHARS[idx]
+        cls = ' class="trend-down"' if (i > 0 and recent[i] < recent[i - 1]) else ""
+        spans.append(f"<span{cls}>{char}</span>")
+
+    return f'<div class="value" style="font-size:1.2rem;letter-spacing:2px">{"".join(spans)}</div>'
 
 
 def _rate_class(pct: float) -> str:

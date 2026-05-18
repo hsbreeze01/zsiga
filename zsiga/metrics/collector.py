@@ -263,6 +263,25 @@ def _count_level_tasks_completed(milestone: dict) -> int:
     return count
 
 
+def compute_rolling_rates(changes: list[dict], window: int = 10) -> list[float]:
+    """Compute rolling success rate from ordered change history.
+
+    For each position i, calculates success rate of changes[max(0, i-window+1)..i].
+    Returns list of percentages rounded to 1 decimal.
+    """
+    if not changes:
+        return []
+
+    rates = []
+    for i in range(len(changes)):
+        start = max(0, i - window + 1)
+        subset = changes[start : i + 1]
+        successes = sum(1 for c in subset if c["outcome"] == "success")
+        rate = round(successes / len(subset) * 100, 1)
+        rates.append(rate)
+    return rates
+
+
 def _empty_stats(lessons_count: int = 0) -> dict:
     return {
         "total_changes": 0,
