@@ -1,11 +1,14 @@
 """意图路由器 — Phase 0 Intent Gate
 
 将用户输入先 verbalize（一句话总结），再分类为六种意图，
-最后路由到对应执行路径。基于关键词模式匹配 + 启发式规则，无需 LLM 调用。
+最后路由到对应执行路径。支持关键词匹配和 LLM 增强分类。
 """
+import json
 import re
 from enum import Enum
 from dataclasses import dataclass
+
+from zsiga.config import LLMFastConfig
 
 
 class IntentType(str, Enum):
@@ -119,6 +122,80 @@ def _verbalize(message: str) -> str:
     if has_chinese:
         return "用户意图不明确，需要进一步澄清"
     return "User intent is ambiguous, needs clarification"
+
+
+# ---------------------------------------------------------------------------
+# LLM-Based Classification
+# ---------------------------------------------------------------------------
+
+_CLASSIFICATION_SYSTEM_PROMPT = (
+    "You are an intent classifier. Given a user message, classify it into exactly one "
+    "of the following intent types:\n"
+    "- research\n"
+    "- implementation\n"
+    "- investigation\n"
+    "- evaluation\n"
+    "- fix\n"
+    "- open-ended\n\n"
+    "Respond with ONLY a valid JSON object (no markdown, no extra text) with these fields:\n"
+    '- "intent_type": one of the six intent types listed above (string)\n'
+    '- "confidence": a float between 0 and 1\n'
+    '- "verbalization": a one-sentence summary of the user intent (string)\n'
+    '- "reasoning": a brief explanation of why this intent was chosen (string)'
+)
+
+
+def _classify_via_llm(message: str, config: LLMFastConfig,
+                       timeout: float = 3.0) -> Intent | None:
+    """Attempt to classify intent using a fast LLM.
+
+    Returns an ``Intent`` on success, or ``None`` on any failure
+    (timeout, parse error, invalid intent_type).
+    """
+    try:
+        from zai import ZaiClient
+
+        client = ZaiClient(api_key=config.api_key, base_url=config.base_url)
+        response = client.chat.completions.create(
+            model=config.model,
+            messages=[
+                {"role": "system", "content": _CLASSIFICATION_SYSTEM_PROMPT},
+                {"role": "user", "content": message},
+            ],
+            timeout=timeout,
+        )
+
+        content = response.choices[0].message.content.strip()
+        data = json.loads(content)
+
+        intent_type_str = data.get("intent_type", "")
+        try:
+            intent_type = IntentType(intent_type_str)
+        except ValueError:
+            return None
+
+        verbalization = data.get("verbalization", "")
+        confidence = float(data.get("confidence", 0.5))
+        reasoning = data.get("reasoning", "")
+
+        action_map = {
+            IntentType.RESEARCH: "dispatch_explore: 派发 explore 子代理搜索代码库",
+            IntentType.IMPLEMENTATION: "pipeline: ENRICH → IMPLEMENT → VERIFY → DELIVER",
+            IntentType.INVESTIGATION: "dispatch_diagnoser: 派发 diagnoser 子代理排查问题",
+            IntentType.EVALUATION: "dispatch_review: 派发 review 子代理评估审查",
+            IntentType.FIX: "pipeline_fix: IMPLEMENT (fix) → VERIFY",
+            IntentType.OPEN_ENDED: "ask_user: 请提供更多信息",
+        }
+
+        return Intent(
+            verbalization=verbalization,
+            intent_type=intent_type,
+            confidence=round(max(0.0, min(1.0, confidence)), 2),
+            reasoning=reasoning,
+            suggested_action=action_map[intent_type],
+        )
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------------
