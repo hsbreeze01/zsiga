@@ -212,7 +212,7 @@ MILESTONE_L5 = {
             "id": "phase0_intent_gate",
             "title": "Phase 0 Intent Gate",
             "description": "每条消息先分类再路由，支持 research/implementation/investigation/evaluation/fix/open-ended 六种意图",
-            "deliverables": ["agent/intent_gate.py", "gate: verbalize → classify → route"],
+            "deliverables": ["agent/intent_router.py", "tests/test_intent_router.py"],
             "acceptance": "给定任意用户输入，能 verbalize 意图、分类、并选择正确的执行路径",
         },
         {
