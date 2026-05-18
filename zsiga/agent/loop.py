@@ -34,7 +34,7 @@ class AgentLoop:
                  compaction_enabled: bool = True,
                  compaction_threshold: int = 60000,
                  compaction_keep_recent: int = 3,
-                 total_budget: int = 200000,
+                 total_budget: int = 600000,
                  per_turn_limit: int = 8192,
                  compaction_ratio: float = 0.8):
         kwargs = {"api_key": api_key}

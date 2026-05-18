@@ -1,0 +1,63 @@
+{
+  "session_id": "upgrade-intent-routerpy-from-keyword-regex-to-llm-based-clas-822118ea",
+  "change_name": "upgrade-intent-routerpy-from-keyword-regex-to-llm-based-clas",
+  "project": "zsiga",
+  "exported_at": "2026-05-18T17:05:43.590155",
+  "outcome": "success",
+  "started_at": "2026-05-18T17:03:15.570366",
+  "finished_at": "2026-05-18T17:05:43.548800",
+  "total_runtime_seconds": 145.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 121.7,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "prompt_tokens": 8318,
+      "completion_tokens": 62
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 9.3,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "prompt_tokens": 8257,
+      "completion_tokens": 140
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 6.5,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 0,
+      "prompt_tokens": 2147,
+      "completion_tokens": 101
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 7.6,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 3,
+    "total_tool_calls": 0,
+    "total_prompt_tokens": 18722,
+    "total_completion_tokens": 303
+  }
+}
