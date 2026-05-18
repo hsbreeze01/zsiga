@@ -47,7 +47,7 @@ _IMPL_KEYWORDS = re.compile(
 _INVESTIGATION_KEYWORDS = re.compile(
     r"排查|调试|追踪|诊断|报错|错误|异常|崩溃|死锁|"
     r"debug|trace|diagnose|crash|error|exception|stack|traceback|"
-    r"为什么报错|什么原因|哪里出了|hang|卡住",
+    r"为什么报错|什么原因|哪里出了|\bhang\b|卡住",
     re.IGNORECASE,
 )
 
