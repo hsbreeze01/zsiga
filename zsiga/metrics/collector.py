@@ -5,7 +5,7 @@ from pathlib import Path
 from .db import record_change as _db_record
 from .db import load_all_changes as _db_load_changes
 from .db import count_lessons as _db_count_lessons
-from .db import save_stats_snapshot, save_level_snapshot, load_level_snapshot
+from .db import save_stats_snapshot, save_level_snapshot
 from .types import ChangeRecord
 
 _METRICS_DIR = Path(__file__).resolve().parent.parent.parent / "metrics"
