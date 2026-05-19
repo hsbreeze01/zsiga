@@ -1,0 +1,52 @@
+{
+  "session_id": "l5-intent-gate-实现-phase-0-intent-gate每条消息先-verbalize-意图分类为-r-ab969a20",
+  "change_name": "l5-intent-gate-实现-phase-0-intent-gate每条消息先-verbalize-意图分类为-r",
+  "project": "zsiga",
+  "exported_at": "2026-05-19T23:27:00.880907",
+  "outcome": "success",
+  "started_at": "2026-05-19T23:25:17.177484",
+  "finished_at": "2026-05-19T23:27:00.847618",
+  "total_runtime_seconds": 103.4,
+  "phases": [
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 25.7,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 3,
+      "prompt_tokens": 36267,
+      "completion_tokens": 539
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 72.1,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 87996,
+      "completion_tokens": 456
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 5.6,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 15,
+    "total_tool_calls": 15,
+    "total_prompt_tokens": 124263,
+    "total_completion_tokens": 995
+  }
+}

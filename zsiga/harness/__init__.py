@@ -33,7 +33,26 @@ def run_capability_tests(
     """
     runner = HarnessRunner()
     return runner.run_pytest(
-        [str(Path("tests/test_l4_capabilities.py"))],
+        [
+            str(Path("zsiga/harness/capability")),
+        ],
+        output_path=output_path,
+    )
+
+
+def run_behavioral_tests(
+    output_path: str = "harness-results.jsonl",
+) -> list[TestReport]:
+    """Execute the behavioral (adversarial + boundary) test suite.
+
+    Returns:
+        A list of :class:`TestReport` instances, one per test item.
+    """
+    runner = HarnessRunner()
+    return runner.run_pytest(
+        [
+            str(Path("zsiga/harness/behavioral")),
+        ],
         output_path=output_path,
     )
 
