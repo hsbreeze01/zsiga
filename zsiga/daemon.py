@@ -10,6 +10,7 @@ Features:
 - Cycle interval from config: pipeline.cycle_interval_hours (default 8)
 """
 
+import json
 import os
 import signal
 import sys
@@ -17,6 +18,7 @@ import time
 import asyncio
 import fcntl
 from pathlib import Path
+from datetime import datetime
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 
@@ -33,6 +35,36 @@ def _lock_path() -> Path:
     data_dir = Path(home) / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir / "lock.pid"
+
+
+def _daemon_state_path() -> Path:
+    """Return daemon state file path."""
+    home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+    return Path(home) / "data" / "daemon_state.json"
+
+
+def _write_daemon_state(
+    started_at: str,
+    cycle: int,
+    state: str = "running",
+    current_change: str | None = None,
+    current_phase: str | None = None,
+    current_project: str | None = None,
+):
+    """Write daemon_state.json with current daemon status."""
+    data = {
+        "pid": os.getpid(),
+        "started_at": started_at,
+        "cycle": cycle,
+        "state": state,
+        "current_change": current_change,
+        "current_phase": current_phase,
+        "current_project": current_project,
+        "last_heartbeat": datetime.now().isoformat(),
+    }
+    path = _daemon_state_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def acquire_lock():
@@ -124,6 +156,7 @@ def daemon_loop(config, dashboard_port=None):
 
     try:
         cycle_count = 0
+        started_at = datetime.now().isoformat()
         while not state.shutdown:
             if state.paused:
                 print("  ⏸  Paused — waiting for SIGUSR2 to resume...")
@@ -136,6 +169,12 @@ def daemon_loop(config, dashboard_port=None):
             print(f"\n{'='*60}")
             print(f"zsiga daemon — cycle #{cycle_count} @ {time.strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"{'='*60}")
+
+            _write_daemon_state(
+                started_at=started_at,
+                cycle=cycle_count,
+                state="paused" if state.paused else "running",
+            )
 
             orchestrator = ZsigaOrchestrator(config)
             try:
@@ -165,6 +204,16 @@ def daemon_loop(config, dashboard_port=None):
             if state.shutdown:
                 break
 
+            # Idle state between cycles
+            _write_daemon_state(
+                started_at=started_at,
+                cycle=cycle_count,
+                state="running",
+                current_change=None,
+                current_phase=None,
+                current_project=None,
+            )
+
             interval = config.pipeline.cycle_interval_hours * 3600
             print(f"\n  💤 Next cycle in {config.pipeline.cycle_interval_hours}h...")
 
@@ -176,5 +225,13 @@ def daemon_loop(config, dashboard_port=None):
                 slept += 30
 
     finally:
+        _write_daemon_state(
+            started_at=started_at,
+            cycle=cycle_count,
+            state="stopped",
+            current_change=None,
+            current_phase=None,
+            current_project=None,
+        )
         release_lock(lock_fd)
         print(f"\n⚡ zsiga daemon stopped (ran {cycle_count} cycles)")

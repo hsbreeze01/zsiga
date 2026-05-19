@@ -32,7 +32,8 @@ _PROJECT_PATTERNS = {
 _ALL_PROJECTS = list(_PROJECT_PATTERNS.keys())
 
 
-def decompose(instruction: str, available_projects: list[str] = None) -> Decomposition:
+def decompose(instruction: str, available_projects: list[str] = None,
+              originating_project: str = None) -> Decomposition:
     """将高层指令分解为项目级子任务列表。
 
     Parameters
@@ -41,6 +42,9 @@ def decompose(instruction: str, available_projects: list[str] = None) -> Decompo
         高层用户指令（如"给所有项目做回归测试"）
     available_projects : list[str], optional
         可用项目列表，默认全部
+    originating_project : str, optional
+        change 所属的原始项目。如果提供且 keyword 只匹配到 1 个其他项目，
+        则视为 keyword 噪声，不触发跨项目分解。
 
     Returns
     -------
@@ -52,6 +56,9 @@ def decompose(instruction: str, available_projects: list[str] = None) -> Decompo
 
     if not matched:
         matched = projects
+
+    if originating_project:
+        matched = [originating_project]
 
     generic_tasks = _detect_generic_tasks(instruction)
 

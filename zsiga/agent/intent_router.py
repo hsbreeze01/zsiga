@@ -213,7 +213,7 @@ def _classify_via_llm(message: str, config: LLMFastConfig,
 # Classification
 # ---------------------------------------------------------------------------
 
-def classify(message: str, config: ZsigaConfig | None = None) -> Intent:
+def classify(message: str, config: ZsigaConfig | None = None, source: str = None) -> Intent:
     """分类用户消息的意图。
 
     先尝试 LLM 分类（如果配置可用），失败时回退到关键词匹配。
@@ -239,6 +239,15 @@ def classify(message: str, config: ZsigaConfig | None = None) -> Intent:
             confidence=0.9,
             reasoning="空消息",
             suggested_action="ask_user: 请提供更多信息",
+        )
+
+    if source == "openspec":
+        return Intent(
+            verbalization="OpenSpec proposal — implementation intent",
+            intent_type=IntentType.IMPLEMENTATION,
+            confidence=0.95,
+            reasoning="Proposal from openspec/changes/ — always implementation",
+            suggested_action="pipeline: ENRICH → IMPLEMENT → VERIFY → DELIVER",
         )
 
     # --- LLM-first classification attempt ---
@@ -272,7 +281,7 @@ def classify(message: str, config: ZsigaConfig | None = None) -> Intent:
     scores: list[tuple[int, IntentType, str]] = []
 
     if fix_matches:
-        scores.append((len(fix_matches) + 1, IntentType.FIX,
+        scores.append((len(fix_matches), IntentType.FIX,
                        f"修复类关键词 ({len(fix_matches)} 个匹配)"))
 
     if invest_matches:
