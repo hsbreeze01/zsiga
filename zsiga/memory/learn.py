@@ -69,3 +69,48 @@ def _generate_takeaway(error_type: str, phase: str, detail: str) -> str:
         "timeout": "Task exceeded time budget; consider reducing scope or splitting into smaller changes",
     }
     return takeaways.get(error_type, f"Failed at {phase}: review error and adjust approach")
+
+
+def search_learnings(keywords: list[str], pattern_key: str | None = None) -> list[dict]:
+    """Search learnings.jsonl by keywords with optional pattern_key filter.
+
+    Returns entries ranked by number of unique keyword matches (descending),
+    then by recency (most recent first). Each result includes a ``_score`` field.
+    """
+    learnings_file = _MEMORY_DIR / "learnings.jsonl"
+    if not learnings_file.exists():
+        return []
+
+    keywords_lower = [kw.lower() for kw in keywords]
+    results: list[dict] = []
+
+    with open(learnings_file, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            if pattern_key is not None and entry.get("pattern_key") != pattern_key:
+                continue
+
+            searchable = " ".join(
+                str(entry.get(field, ""))
+                for field in ("title", "context", "takeaway")
+            ).lower()
+
+            matched = sum(1 for kw in keywords_lower if kw in searchable)
+            if matched == 0:
+                continue
+
+            entry["_score"] = matched
+            results.append(entry)
+
+    # Sort: higher score first; within same score, newer (higher ts) first
+    # Use stable multi-key sort: first by ts desc, then by score desc
+    results.sort(key=lambda e: e.get("ts", ""), reverse=True)
+    results.sort(key=lambda e: e["_score"], reverse=True)
+    return results
