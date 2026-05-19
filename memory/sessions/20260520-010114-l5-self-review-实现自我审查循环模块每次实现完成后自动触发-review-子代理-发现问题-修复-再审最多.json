@@ -1,0 +1,63 @@
+{
+  "session_id": "l5-self-review-实现自我审查循环模块每次实现完成后自动触发-review-子代理-发现问题-修复-再审最多-eddfdb1e",
+  "change_name": "l5-self-review-实现自我审查循环模块每次实现完成后自动触发-review-子代理-发现问题-修复-再审最多",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T01:01:14.598145",
+  "outcome": "success",
+  "started_at": "2026-05-20T00:55:35.310156",
+  "finished_at": "2026-05-20T01:01:14.587245",
+  "total_runtime_seconds": 339.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 171.3,
+      "fix_attempts": 0,
+      "llm_calls": 16,
+      "tool_calls": 23,
+      "prompt_tokens": 452481,
+      "completion_tokens": 5374
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 120.0,
+      "fix_attempts": 0,
+      "llm_calls": 18,
+      "tool_calls": 20,
+      "prompt_tokens": 604136,
+      "completion_tokens": 3375
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 41.8,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 85832,
+      "completion_tokens": 431
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 6.0,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 46,
+    "total_tool_calls": 55,
+    "total_prompt_tokens": 1142449,
+    "total_completion_tokens": 9180
+  }
+}

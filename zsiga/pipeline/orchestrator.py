@@ -389,6 +389,23 @@ class ZsigaOrchestrator:
                 detail=_summarize_issues(review_result.last_issues),
             ))
 
+            # Record lesson for critical review issues (REQ-RL-01)
+            if review_result.had_critical:
+                critical_issues = [
+                    i for i in review_result.last_issues
+                    if i.get("severity") == "CRITICAL"
+                ]
+                issue_summary = "; ".join(
+                    i.get("description", "")[:80] for i in critical_issues
+                )[:200]
+                record_lesson(
+                    title=f"REVIEW CRITICAL: {change_name}",
+                    context=f"project={project_name}, rounds={review_result.rounds_executed}",
+                    takeaway=f"Review found critical issues: {issue_summary}",
+                    pattern_key="pipeline.review.critical",
+                    source="reviewer",
+                )
+
         # Phase 3: VERIFY
         print(f"\n  {'='*50}")
         print(f"  Phase 3/4: VERIFY {change_name}")

@@ -23,26 +23,6 @@ class ReviewLoopResult:
     last_issues: list[dict] = field(default_factory=list)
     had_critical: bool = False
 
-REVIEW_SYSTEM = """你是 zsiga 的代码审查引擎。你的职责是审查实现变更，判断是否满足规格要求。
-
-规则：
-- 只能使用只读工具（bash、read_file、search、list_files、ast_search、goto_definition、find_references、diagnostics）
-- 逐条检查每条 spec 要求是否在代码 diff 中被覆盖
-- 检查常见代码质量问题（死代码、缺失错误处理、命名）
-- 输出 review.md 文件到指定目录
-
-review.md 格式（严格遵守）：
-```
-Verdict: CLEAN 或 ISSUES_FOUND
-
-Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
-1. [CRITICAL] 描述 + 代码证据
-2. [SUGGESTION] 描述 + 代码证据
-```
-
-如果所有 spec 要求都被覆盖且无代码质量问题，Verdict 为 CLEAN。
-如果发现任何问题，Verdict 为 ISSUES_FOUND，并按严重程度分类为 CRITICAL 或 SUGGESTION。
-"""
 
 
 async def run_review(

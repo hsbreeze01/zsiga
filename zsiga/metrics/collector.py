@@ -91,7 +91,7 @@ def compute_stats(changes: list[dict] = None) -> dict:
     projects = set(c["project"] for c in changes)
 
     phase_stats = {}
-    for phase in ["enrich", "implement", "verify", "deliver"]:
+    for phase in ["enrich", "implement", "review", "verify", "deliver"]:
         phase_records = []
         for c in changes:
             for p in c.get("phases", []):
