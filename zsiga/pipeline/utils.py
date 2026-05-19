@@ -4,6 +4,7 @@ import re
 import shutil
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 from ..transport import Transport, LocalTransport
@@ -332,3 +333,75 @@ def retry_sync(
                 )
                 time.sleep(delay)
     raise last_exc
+
+
+# ---------------------------------------------------------------------------
+# Dependency-tracking convenience functions (delegate to pipeline/dependency)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ConflictResult:
+    """Structured result from cross-change conflict detection."""
+
+    change_count: int                         # total pending changes scanned
+    conflicts: list                           # list[ConflictPair] from dependency.py
+    has_high_severity: bool                   # True if any .py file overlap
+
+
+def detect_change_conflicts(target_path: str) -> ConflictResult:
+    """Scan pending changes for file-level conflicts.
+
+    Returns a :class:`ConflictResult` with the number of changes scanned,
+    conflict pairs, and a flag indicating whether any HIGH-severity
+    (``.py`` file) overlap exists.
+    """
+    from .dependency import ChangeConflictDetector
+
+    changes_dir = f"{target_path}/openspec/changes"
+    detector = ChangeConflictDetector()
+    changes = detector.scan_changes(changes_dir)
+    conflicts = detector.find_overlaps(changes)
+
+    has_high = any(
+        any(f.endswith(".py") for f in cp.shared_files)
+        for cp in conflicts
+    )
+    return ConflictResult(
+        change_count=len(changes),
+        conflicts=conflicts,
+        has_high_severity=has_high,
+    )
+
+
+def suggest_merge_order(target_path: str) -> list[str]:
+    """Return an ordered list of change IDs representing the recommended
+    execution sequence.
+
+    Uses :func:`build_dependency_graph` and topological sort internally.
+    """
+    from .dependency import ChangeConflictDetector, build_dependency_graph
+
+    changes_dir = f"{target_path}/openspec/changes"
+    detector = ChangeConflictDetector()
+    changes = detector.scan_changes(changes_dir)
+    if not changes:
+        return []
+    graph = build_dependency_graph(changes)
+    return graph.topological_order()
+
+
+def warn_change_conflicts(target_path: str) -> str | None:
+    """Return a human-readable warning string if conflicts exist, or
+    ``None`` when no conflicts are detected.
+    """
+    from .dependency import ChangeConflictDetector, build_dependency_graph
+
+    changes_dir = f"{target_path}/openspec/changes"
+    detector = ChangeConflictDetector()
+    changes = detector.scan_changes(changes_dir)
+    if not changes:
+        return None
+    graph = build_dependency_graph(changes)
+    if not graph.edges:
+        return None
+    return graph.conflict_report()

@@ -726,3 +726,216 @@ class TestChangeGraphExecutionOrder:
         # Overriding _changes to create an artificial scenario won't
         # produce a cycle with lex ordering. Just verify the class exists.
         assert issubclass(CycleError, Exception)
+
+
+# ---------------------------------------------------------------------------
+# Pipeline utils: detect_change_conflicts
+# ---------------------------------------------------------------------------
+
+class TestDetectChangeConflicts:
+    """Tests for zsiga.pipeline.utils.detect_change_conflicts."""
+
+    def _make_project(self, tree: dict) -> str:
+        """Create a temp project with openspec/changes/ populated from *tree*.
+
+        tree maps change_id -> {filename: content}.
+        """
+        import tempfile
+        tmpdir = tempfile.mkdtemp()
+        changes_dir = os.path.join(tmpdir, "openspec", "changes")
+        os.makedirs(changes_dir, exist_ok=True)
+        for change_id, files in tree.items():
+            change_path = os.path.join(changes_dir, change_id)
+            os.makedirs(change_path, exist_ok=True)
+            if isinstance(files, dict):
+                for fname, content in files.items():
+                    with open(os.path.join(change_path, fname), "w") as f:
+                        f.write(content)
+        return tmpdir
+
+    def test_conflicts_found_with_py_overlap(self):
+        from zsiga.pipeline.utils import detect_change_conflicts
+
+        tmpdir = self._make_project({
+            "change-A": {
+                "design.md": "Modify `zsiga/pipeline/utils.py` and `other.py`",
+                "tasks.md": "# Tasks A",
+            },
+            "change-B": {
+                "design.md": "Modify `zsiga/pipeline/utils.py`",
+                "tasks.md": "# Tasks B",
+            },
+        })
+        result = detect_change_conflicts(tmpdir)
+        assert result.change_count == 2
+        assert len(result.conflicts) == 1
+        assert result.has_high_severity is True
+        cp = result.conflicts[0]
+        assert cp.change_ids == ("change-A", "change-B")
+        assert "zsiga/pipeline/utils.py" in cp.shared_files
+
+    def test_no_conflicts(self):
+        from zsiga.pipeline.utils import detect_change_conflicts
+
+        tmpdir = self._make_project({
+            "change-A": {
+                "design.md": "Modify `a.py`",
+                "tasks.md": "# Tasks",
+            },
+            "change-B": {
+                "design.md": "Modify `b.py`",
+                "tasks.md": "# Tasks",
+            },
+            "change-C": {
+                "design.md": "Modify `c.py`",
+                "tasks.md": "# Tasks",
+            },
+        })
+        result = detect_change_conflicts(tmpdir)
+        assert result.change_count == 3
+        assert result.conflicts == []
+        assert result.has_high_severity is False
+
+    def test_missing_changes_directory(self):
+        from zsiga.pipeline.utils import detect_change_conflicts
+
+        import tempfile
+        tmpdir = tempfile.mkdtemp()
+        result = detect_change_conflicts(tmpdir)
+        assert result.change_count == 0
+        assert result.conflicts == []
+        assert result.has_high_severity is False
+
+
+# ---------------------------------------------------------------------------
+# Pipeline utils: suggest_merge_order
+# ---------------------------------------------------------------------------
+
+class TestSuggestMergeOrder:
+    """Tests for zsiga.pipeline.utils.suggest_merge_order."""
+
+    def _make_project(self, tree: dict) -> str:
+        import tempfile
+        tmpdir = tempfile.mkdtemp()
+        changes_dir = os.path.join(tmpdir, "openspec", "changes")
+        os.makedirs(changes_dir, exist_ok=True)
+        for change_id, files in tree.items():
+            change_path = os.path.join(changes_dir, change_id)
+            os.makedirs(change_path, exist_ok=True)
+            if isinstance(files, dict):
+                for fname, content in files.items():
+                    with open(os.path.join(change_path, fname), "w") as f:
+                        f.write(content)
+        return tmpdir
+
+    def test_overlapping_changes_ordered(self):
+        from zsiga.pipeline.utils import suggest_merge_order
+
+        tmpdir = self._make_project({
+            "change-A": {
+                "design.md": "Modify `zsiga/pipeline/utils.py` and `extra.py`",
+                "tasks.md": "# Tasks A",
+            },
+            "change-B": {
+                "design.md": "Modify `zsiga/pipeline/utils.py`",
+                "tasks.md": "# Tasks B",
+            },
+        })
+        order = suggest_merge_order(tmpdir)
+        assert len(order) == 2
+        # Both must be present
+        assert set(order) == {"change-A", "change-B"}
+        # change-B has fewer target files so should come first
+        assert order.index("change-B") < order.index("change-A")
+
+    def test_all_independent_lexicographic(self):
+        from zsiga.pipeline.utils import suggest_merge_order
+
+        tmpdir = self._make_project({
+            "gamma": {
+                "design.md": "Modify `g.py`",
+                "tasks.md": "# Tasks",
+            },
+            "alpha": {
+                "design.md": "Modify `a.py`",
+                "tasks.md": "# Tasks",
+            },
+            "beta": {
+                "design.md": "Modify `b.py`",
+                "tasks.md": "# Tasks",
+            },
+        })
+        order = suggest_merge_order(tmpdir)
+        assert order == ["alpha", "beta", "gamma"]
+
+    def test_empty_changes_directory(self):
+        from zsiga.pipeline.utils import suggest_merge_order
+
+        import tempfile
+        tmpdir = tempfile.mkdtemp()
+        assert suggest_merge_order(tmpdir) == []
+
+
+# ---------------------------------------------------------------------------
+# Pipeline utils: warn_change_conflicts
+# ---------------------------------------------------------------------------
+
+class TestWarnChangeConflicts:
+    """Tests for zsiga.pipeline.utils.warn_change_conflicts."""
+
+    def _make_project(self, tree: dict) -> str:
+        import tempfile
+        tmpdir = tempfile.mkdtemp()
+        changes_dir = os.path.join(tmpdir, "openspec", "changes")
+        os.makedirs(changes_dir, exist_ok=True)
+        for change_id, files in tree.items():
+            change_path = os.path.join(changes_dir, change_id)
+            os.makedirs(change_path, exist_ok=True)
+            if isinstance(files, dict):
+                for fname, content in files.items():
+                    with open(os.path.join(change_path, fname), "w") as f:
+                        f.write(content)
+        return tmpdir
+
+    def test_conflicts_produce_warning_string(self):
+        from zsiga.pipeline.utils import warn_change_conflicts
+
+        tmpdir = self._make_project({
+            "change-A": {
+                "design.md": "Modify `zsiga/pipeline/utils.py`",
+                "tasks.md": "# Tasks A",
+            },
+            "change-B": {
+                "design.md": "Modify `zsiga/pipeline/utils.py`",
+                "tasks.md": "# Tasks B",
+            },
+        })
+        warning = warn_change_conflicts(tmpdir)
+        assert warning is not None
+        assert "HIGH" in warning
+        assert "change-A" in warning
+        assert "change-B" in warning
+        assert "zsiga/pipeline/utils.py" in warning
+        assert "Suggested execution order" in warning
+
+    def test_no_conflicts_returns_none(self):
+        from zsiga.pipeline.utils import warn_change_conflicts
+
+        tmpdir = self._make_project({
+            "change-X": {
+                "design.md": "Modify `a.py`",
+                "tasks.md": "# Tasks",
+            },
+            "change-Y": {
+                "design.md": "Modify `b.py`",
+                "tasks.md": "# Tasks",
+            },
+        })
+        assert warn_change_conflicts(tmpdir) is None
+
+    def test_empty_changes_returns_none(self):
+        from zsiga.pipeline.utils import warn_change_conflicts
+
+        import tempfile
+        tmpdir = tempfile.mkdtemp()
+        assert warn_change_conflicts(tmpdir) is None
