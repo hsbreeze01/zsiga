@@ -507,12 +507,12 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">111</div>
+    <div class="value">119</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">91.0%</div>
-    <div class="meta">101 hit / 10 miss</div>
+    <div class="value good">91.6%</div>
+    <div class="meta">109 hit / 10 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -525,11 +525,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">74.2%</div>
+    <div class="value warn">75.3%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value warn">60.5%</div>
+    <div class="value warn">60.7%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -549,40 +549,40 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>55</td>
+  <td>59</td>
   <td class="good">100.0%</td>
-  <td>0.5</td>
-  <td>129.8s</td>
+  <td>0.4</td>
+  <td>127.3s</td>
   <td>0</td>
-  <td>389</td>
-  <td>541</td>
-  <td>8.88M</td>
+  <td>427</td>
+  <td>592</td>
+  <td>9.54M</td>
 </tr><tr>
   <td>implement</td>
-  <td>89</td>
-  <td class="good">91.0%</td>
-  <td>1.0</td>
-  <td>188.8s</td>
-  <td>91</td>
-  <td>1122</td>
-  <td>1255</td>
-  <td>26.59M</td>
+  <td>97</td>
+  <td class="good">91.8%</td>
+  <td>0.9</td>
+  <td>185.8s</td>
+  <td>92</td>
+  <td>1227</td>
+  <td>1372</td>
+  <td>29.11M</td>
 </tr><tr>
   <td>verify</td>
-  <td>76</td>
-  <td class="warn">60.5%</td>
+  <td>84</td>
+  <td class="warn">60.7%</td>
   <td>0.1</td>
-  <td>67.9s</td>
+  <td>67.3s</td>
   <td>7</td>
-  <td>452</td>
-  <td>532</td>
-  <td>4.94M</td>
+  <td>523</td>
+  <td>626</td>
+  <td>6.00M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>76</td>
+  <td>84</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>11.2s</td>
+  <td>10.6s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -595,27 +595,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">40.40M</div>
-      <div class="meta">39.86M prompt + 544.3K completion</div>
+      <div class="value">44.65M</div>
+      <div class="meta">44.04M prompt + 610.1K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">364.0K</div>
+      <div class="value">375.2K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">1,963</div>
-      <div class="meta">avg 17.7 per change</div>
+      <div class="value">2,177</div>
+      <div class="meta">avg 18.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">2,328</div>
-      <div class="meta">avg 21.0 per change</div>
+      <div class="value">2,590</div>
+      <div class="meta">avg 21.8 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">8.3h</div>
-      <div class="meta">29,955s total</div>
+      <div class="value">8.9h</div>
+      <div class="meta">32,081s total</div>
     </div>
   </div>
 </div>
@@ -813,12 +813,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">101/100</span>
+  <span style="color:#94a3b8;font-size:0.8rem">109/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">91.0/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">91.6/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1096,14 +1096,14 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>migrate-last-3-monitor-get-db</li>
-<li>migrate-remaining-get-db-to-ctx</li>
-<li>cleanup-dbclient-comments</li>
-<li>cleanup-dbclient-dead-code</li>
-<li>refactor-db-asi-kdj-base</li>
+    <li>implement-change-dependency-tracking-in-pipelineutilspy-add-</li>
+<li>implement-learnings-search-in-memory-module-add-search-learn</li>
+<li>implement-prompt-compaction-strategy-in-agentlooppy-replace-</li>
+<li>implement-structured-logging-in-agentlooppy-replace-print-st</li>
+<li>l4-remaining-实现-dashboard-todo-卡片implementer-vertical-slice-</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-19T19:08:08.202735</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-19T23:24:23.474736</div>
 </body>
 </html>
