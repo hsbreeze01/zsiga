@@ -1,0 +1,52 @@
+{
+  "session_id": "implement-prompt-compaction-strategy-in-agentlooppy-replace--99f218b6",
+  "change_name": "implement-prompt-compaction-strategy-in-agentlooppy-replace-",
+  "project": "zsiga",
+  "exported_at": "2026-05-19T19:42:06.476402",
+  "outcome": "success",
+  "started_at": "2026-05-19T19:40:55.208721",
+  "finished_at": "2026-05-19T19:42:06.456190",
+  "total_runtime_seconds": 71.1,
+  "phases": [
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 20.4,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 2,
+      "prompt_tokens": 36639,
+      "completion_tokens": 463
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 45.6,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 78215,
+      "completion_tokens": 495
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 5.1,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 15,
+    "total_tool_calls": 14,
+    "total_prompt_tokens": 114854,
+    "total_completion_tokens": 958
+  }
+}
