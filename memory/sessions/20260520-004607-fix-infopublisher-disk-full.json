@@ -1,0 +1,73 @@
+{
+  "session_id": "fix-infopublisher-disk-full-c5e06555",
+  "change_name": "fix-infopublisher-disk-full",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T00:46:07.794671",
+  "outcome": "reverted",
+  "started_at": "2026-05-20T00:30:58.219818",
+  "finished_at": "2026-05-20T00:46:07.776676",
+  "total_runtime_seconds": 474.0,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 125.3,
+      "fix_attempts": 0,
+      "llm_calls": 7,
+      "tool_calls": 6,
+      "prompt_tokens": 70112,
+      "completion_tokens": 4021
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 249.8,
+      "fix_attempts": 0,
+      "llm_calls": 30,
+      "tool_calls": 31,
+      "prompt_tokens": 570875,
+      "completion_tokens": 8088
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 98.9,
+      "fix_attempts": 3,
+      "llm_calls": 11,
+      "tool_calls": 14,
+      "prompt_tokens": 150768,
+      "completion_tokens": 2441
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 0/4 passed"
+    },
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 0/4 passed"
+    },
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 0/4 passed"
+    },
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 0/4 passed"
+    },
+    {
+      "pattern_key": "pipeline.fail.verify.unknown",
+      "takeaway": "Failed at verify: review error and adjust approach"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 48,
+    "total_tool_calls": 51,
+    "total_prompt_tokens": 791755,
+    "total_completion_tokens": 14550
+  }
+}

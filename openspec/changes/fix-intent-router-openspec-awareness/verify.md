@@ -1,0 +1,7 @@
+Verdict: PASS
+Completeness: ✓ All spec requirements implemented — `_CONSTRUCTION_MARKERS` regex added, INVESTIGATION score reduction by 4 (floor 0) in `classify()`, `_verbalize()` skips investigation branch when construction markers present, OpenSpec source bypass preserved unchanged.
+Correctness: ✓ Logic matches spec precisely: construction markers only affect INVESTIGATION scoring and verbalization; IMPLEMENTATION/FIX/EVALUATION/RESEARCH scores are untouched; verbalization falls through correctly when both investigation keywords and construction markers match.
+Coherence: ✓ Implementation follows existing patterns (regex constants, scoring blocks, verbalization branching). ADR decisions in design.md are accurately reflected in code.
+Issues:
+  1. [WARNING] `test_dashboard_monitoring_classified_as_implementation` uses `source="openspec"` which tests the OpenSpec bypass path, not the construction marker keyword-scoring path. The task description said `classify("Dashboard 实时监控与异常诊断增强")` without source. However, the first test already validates the construction marker keyword path, and the OpenSpec bypass is the primary defense per ADR-1, so functionally correct.
+  2. [WARNING] No explicit test for the spec scenario "Construction markers have no effect on non-INVESTIGATION scores" (e.g., verifying FIX/EVAL scores are unchanged). This is implicitly correct since the code only modifies `invest_score`, but lacks a dedicated regression guard.

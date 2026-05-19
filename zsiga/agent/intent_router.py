@@ -289,7 +289,7 @@ def classify(message: str, config: ZsigaConfig | None = None, source: str = None
     scores: list[tuple[int, IntentType, str]] = []
 
     if fix_matches:
-        scores.append((len(fix_matches), IntentType.FIX,
+        scores.append((len(fix_matches) + 1, IntentType.FIX,
                        f"修复类关键词 ({len(fix_matches)} 个匹配)"))
 
     if invest_matches:
