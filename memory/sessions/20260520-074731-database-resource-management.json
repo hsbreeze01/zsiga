@@ -1,0 +1,74 @@
+{
+  "session_id": "database-resource-management-140d6a33",
+  "change_name": "database-resource-management",
+  "project": "factory",
+  "exported_at": "2026-05-20T07:47:31.301091",
+  "outcome": "success",
+  "started_at": "2026-05-20T07:32:26.239928",
+  "finished_at": "2026-05-20T07:38:20.541947",
+  "total_runtime_seconds": 334.5,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 170.8,
+      "fix_attempts": 0,
+      "llm_calls": 14,
+      "tool_calls": 17,
+      "prompt_tokens": 444599,
+      "completion_tokens": 5809
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 104.4,
+      "fix_attempts": 0,
+      "llm_calls": 17,
+      "tool_calls": 16,
+      "prompt_tokens": 629404,
+      "completion_tokens": 2414
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 6.3,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 42.6,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 143772,
+      "completion_tokens": 653
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 10.4,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 43,
+    "total_tool_calls": 45,
+    "total_prompt_tokens": 1217775,
+    "total_completion_tokens": 8876
+  }
+}

@@ -2,9 +2,9 @@
 
 ## 1. 结构化失败记录层（zsiga/memory/learn.py）
 
-- [ ] 1.1 扩展 `record_outcome()` 签名，增加 `error_domain`/`root_cause`/`prevention` 参数（默认 None）；重命名 `_classify_error` → `_classify_failure`，扩展为两层分类返回 dict（含 error_domain/root_cause_key/prevention），自动覆盖所有现有 lint 码 + test 细分 + pipeline 级；`record_outcome` 失败记录增加 error_domain/root_cause/prevention/what_happened 字段写入 learnings.jsonl
-- [ ] 1.2 新增 `record_success(change_name, project, phase_records, total_turns, total_seconds)` 函数，计算 first_pass 和 fix_attempts，写入 type="success_pattern" 记录到 learnings.jsonl
-- [ ] 1.3 新增 `tests/test_structured_failure.py` 覆盖 `_classify_failure` 两层分类、`record_outcome` 新参数向后兼容、lesson 新字段格式、`record_success` 记录格式
+- [x] 1.1 扩展 `record_outcome()` 签名，增加 `error_domain`/`root_cause`/`prevention` 参数（默认 None）；重命名 `_classify_error` → `_classify_failure`，扩展为两层分类返回 dict（含 error_domain/root_cause_key/prevention），自动覆盖所有现有 lint 码 + test 细分 + pipeline 级；`record_outcome` 失败记录增加 error_domain/root_cause/prevention/what_happened 字段写入 learnings.jsonl
+- [x] 1.2 新增 `record_success(change_name, project, phase_records, total_turns, total_seconds)` 函数，计算 first_pass 和 fix_attempts，写入 type="success_pattern" 记录到 learnings.jsonl
+- [x] 1.3 新增 `tests/test_structured_failure.py` 覆盖 `_classify_failure` 两层分类、`record_outcome` 新参数向后兼容、lesson 新字段格式、`record_success` 记录格式
 
 ## 2. Pipeline 自诊断钩子（zsiga/pipeline/orchestrator.py）
 

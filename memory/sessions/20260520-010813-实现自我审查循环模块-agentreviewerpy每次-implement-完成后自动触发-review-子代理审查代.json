@@ -1,0 +1,63 @@
+{
+  "session_id": "实现自我审查循环模块-agentreviewerpy每次-implement-完成后自动触发-review-子代理审查代-b9222fd7",
+  "change_name": "实现自我审查循环模块-agentreviewerpy每次-implement-完成后自动触发-review-子代理审查代",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T01:08:13.107502",
+  "outcome": "success",
+  "started_at": "2026-05-20T01:01:14.608318",
+  "finished_at": "2026-05-20T01:08:13.097810",
+  "total_runtime_seconds": 417.0,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 202.8,
+      "fix_attempts": 0,
+      "llm_calls": 16,
+      "tool_calls": 29,
+      "prompt_tokens": 546533,
+      "completion_tokens": 6821
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 151.8,
+      "fix_attempts": 0,
+      "llm_calls": 20,
+      "tool_calls": 28,
+      "prompt_tokens": 605040,
+      "completion_tokens": 4707
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 57.7,
+      "fix_attempts": 0,
+      "llm_calls": 8,
+      "tool_calls": 12,
+      "prompt_tokens": 205018,
+      "completion_tokens": 1762
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.7,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 44,
+    "total_tool_calls": 69,
+    "total_prompt_tokens": 1356591,
+    "total_completion_tokens": 13290
+  }
+}
