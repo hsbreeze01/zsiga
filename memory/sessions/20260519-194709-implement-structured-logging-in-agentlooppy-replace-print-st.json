@@ -1,0 +1,52 @@
+{
+  "session_id": "implement-structured-logging-in-agentlooppy-replace-print-st-710933af",
+  "change_name": "implement-structured-logging-in-agentlooppy-replace-print-st",
+  "project": "zsiga",
+  "exported_at": "2026-05-19T19:47:09.143400",
+  "outcome": "success",
+  "started_at": "2026-05-19T19:42:25.032647",
+  "finished_at": "2026-05-19T19:47:09.134206",
+  "total_runtime_seconds": 283.9,
+  "phases": [
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 237.5,
+      "fix_attempts": 0,
+      "llm_calls": 7,
+      "tool_calls": 11,
+      "prompt_tokens": 201254,
+      "completion_tokens": 12074
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 42.3,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 96293,
+      "completion_tokens": 555
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.1,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 19,
+    "total_tool_calls": 23,
+    "total_prompt_tokens": 297547,
+    "total_completion_tokens": 12629
+  }
+}
