@@ -1,0 +1,72 @@
+{
+  "session_id": "enhance-dashboard-realtime-monitoring-44606e2a",
+  "change_name": "enhance-dashboard-realtime-monitoring",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T00:23:06.004089",
+  "outcome": "success",
+  "started_at": "2026-05-20T00:17:51.600178",
+  "finished_at": "2026-05-20T00:23:05.990537",
+  "total_runtime_seconds": 313.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 159.2,
+      "fix_attempts": 0,
+      "llm_calls": 10,
+      "tool_calls": 9,
+      "prompt_tokens": 113838,
+      "completion_tokens": 5584
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 109.5,
+      "fix_attempts": 0,
+      "llm_calls": 16,
+      "tool_calls": 20,
+      "prompt_tokens": 643338,
+      "completion_tokens": 3345
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 38.3,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 92558,
+      "completion_tokens": 368
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 6.1,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 1/2 passed"
+    },
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 1/2 passed"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 38,
+    "total_tool_calls": 41,
+    "total_prompt_tokens": 849734,
+    "total_completion_tokens": 9297
+  }
+}

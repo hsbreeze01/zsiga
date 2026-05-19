@@ -25,7 +25,10 @@ def record_lesson(title: str, context: str, takeaway: str,
 
 
 def record_outcome(change_name: str, project: str, success: bool,
-                   phase: str, detail: str = None):
+                   phase: str, detail: str = None,
+                   error_domain: str = None,
+                   root_cause: str = None,
+                   prevention: str = None):
     if success:
         return
 
@@ -34,41 +37,173 @@ def record_outcome(change_name: str, project: str, success: bool,
     if detail:
         ctx += f", detail={detail[:300]}"
 
-    error_type = _classify_error(detail or "")
-    takeaway = _generate_takeaway(error_type, phase, detail)
-    pattern_key = f"pipeline.fail.{phase}.{error_type}"
-    record_lesson(title, ctx, takeaway, pattern_key, source="orchestrator")
+    # Auto-infer classification when not provided
+    classification = _classify_failure(detail or "")
+    if error_domain is None:
+        error_domain = classification["error_domain"]
+    if root_cause is None:
+        root_cause = classification["root_cause_key"]
+    if prevention is None:
+        prevention = classification["prevention"]
 
+    pattern_key = f"{error_domain}.{root_cause}"
+    what_happened = title if not detail else f"{title}: {detail[:200]}"
 
-def _classify_error(detail: str) -> str:
-    if "E401" in detail:
-        return "lint_e401_multi_import"
-    if "E702" in detail:
-        return "lint_e702_semicolon"
-    if "E701" in detail:
-        return "lint_e701_one_line"
-    if "E722" in detail:
-        return "lint_e722_bare_except"
-    if "E501" in detail:
-        return "lint_e501_line_length"
-    if "FAILED" in detail or "test session" in detail.lower():
-        return "test_failure"
-    if "timeout" in detail.lower():
-        return "timeout"
-    return "unknown"
-
-
-def _generate_takeaway(error_type: str, phase: str, detail: str) -> str:
-    takeaways = {
-        "lint_e401_multi_import": "Pre-split multi-import lines in implementation; ruff --fix can auto-fix this",
-        "lint_e702_semicolon": "Never use semicolons to join statements; always use separate lines",
-        "lint_e701_one_line": "Never put if/for body on same line as keyword; always use newline + indent",
-        "lint_e722_bare_except": "Always use 'except Exception:' instead of bare 'except:'",
-        "lint_e501_line_length": "Keep lines under 88 chars; break long strings or function signatures",
-        "test_failure": "Check test output for specific assertion errors; verify test expectations match implementation API",
-        "timeout": "Task exceeded time budget; consider reducing scope or splitting into smaller changes",
+    # Write structured lesson record
+    lesson = {
+        "type": "lesson",
+        "ts": datetime.now().isoformat(),
+        "source": "orchestrator",
+        "title": title,
+        "context": ctx,
+        "takeaway": prevention,
+        "pattern_key": pattern_key,
+        "error_domain": error_domain,
+        "root_cause": root_cause,
+        "prevention": prevention,
+        "what_happened": what_happened,
     }
-    return takeaways.get(error_type, f"Failed at {phase}: review error and adjust approach")
+
+    learnings_file = _MEMORY_DIR / "learnings.jsonl"
+    learnings_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(learnings_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(lesson, ensure_ascii=False) + "\n")
+
+
+def _classify_failure(detail: str) -> dict:
+    """Two-layer error classification: domain + root_cause_key.
+
+    Returns dict with keys: error_domain, root_cause_key, prevention.
+    """
+    # Lint errors → code domain
+    lint_rules = {
+        "E401": {
+            "root_cause_key": "lint.e401",
+            "prevention": "Pre-split multi-import lines in implementation; ruff --fix can auto-fix this",
+        },
+        "E702": {
+            "root_cause_key": "lint.e702",
+            "prevention": "Never use semicolons to join statements; always use separate lines",
+        },
+        "E701": {
+            "root_cause_key": "lint.e701",
+            "prevention": "Never put if/for body on same line as keyword; always use newline + indent",
+        },
+        "E722": {
+            "root_cause_key": "lint.e722",
+            "prevention": "Always use 'except Exception:' instead of bare 'except:'",
+        },
+        "E501": {
+            "root_cause_key": "lint.e501",
+            "prevention": "Keep lines under 88 chars; break long strings or function signatures",
+        },
+        "E741": {
+            "root_cause_key": "lint.e741",
+            "prevention": "Avoid ambiguous variable names like 'l', 'O', 'I'; use descriptive names",
+        },
+    }
+    for code, info in lint_rules.items():
+        if code in detail:
+            return {
+                "error_domain": "code",
+                "root_cause_key": info["root_cause_key"],
+                "prevention": info["prevention"],
+            }
+
+    # Test failures → code domain with subcategories
+    if "AssertionError" in detail or "assertion" in detail.lower():
+        return {
+            "error_domain": "code",
+            "root_cause_key": "test.assertion",
+            "prevention": "Check test output for specific assertion errors; verify test expectations match implementation API",
+        }
+    if "ImportError" in detail or "ModuleNotFoundError" in detail:
+        return {
+            "error_domain": "code",
+            "root_cause_key": "test.import",
+            "prevention": "Verify import paths and module structure; ensure __init__.py exists",
+        }
+    if "FAILED" in detail or "test session" in detail.lower():
+        return {
+            "error_domain": "code",
+            "root_cause_key": "test.assertion",
+            "prevention": "Check test output for specific assertion errors; verify test expectations match implementation API",
+        }
+    if "ssh" in detail.lower():
+        return {
+            "error_domain": "infrastructure",
+            "root_cause_key": "ssh.timeout",
+            "prevention": "Verify SSH connectivity and retry with backoff",
+        }
+    if "rate_limit" in detail.lower() or "429" in detail:
+        return {
+            "error_domain": "infrastructure",
+            "root_cause_key": "api.rate_limit",
+            "prevention": "Implement exponential backoff for API calls",
+        }
+    if "timeout" in detail.lower():
+        return {
+            "error_domain": "infrastructure",
+            "root_cause_key": "timeout",
+            "prevention": "Task exceeded time budget; consider reducing scope or splitting into smaller changes",
+        }
+
+    # Pipeline-level errors
+    if "decompose" in detail.lower() and "false" in detail.lower():
+        return {
+            "error_domain": "pipeline",
+            "root_cause_key": "decompose.false_positive",
+            "prevention": "Validate cross-project change_dir existence before decomposing",
+        }
+    if "proposal" in detail.lower() and "empty" in detail.lower():
+        return {
+            "error_domain": "pipeline",
+            "root_cause_key": "proposal.empty",
+            "prevention": "Check proposal file content before processing",
+        }
+
+    # Default: code domain with unknown root cause
+    return {
+        "error_domain": "code",
+        "root_cause_key": "unknown",
+        "prevention": "review error and adjust approach",
+    }
+
+
+def record_success(
+    change_name: str,
+    project: str,
+    phase_records: list[dict] = None,
+    total_turns: int = 0,
+    total_seconds: float = 0.0,
+):
+    """Record a successful change completion to learnings.jsonl."""
+    # Calculate first_pass and fix_attempts from phase_records
+    fix_attempts = 0
+    if phase_records:
+        for phase_rec in phase_records:
+            fix_attempts += phase_rec.get("fix_attempts", 0)
+    first_pass = fix_attempts == 0
+
+    record = {
+        "type": "success_pattern",
+        "ts": datetime.now().isoformat(),
+        "source": "orchestrator",
+        "change_name": change_name,
+        "project": project,
+        "pattern_key": "pipeline.pass.deliver",
+        "error_domain": "success",
+        "first_pass": first_pass,
+        "fix_attempts": fix_attempts,
+        "total_turns": total_turns,
+        "total_seconds": total_seconds,
+        "severity": "low",
+    }
+
+    learnings_file = _MEMORY_DIR / "learnings.jsonl"
+    learnings_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(learnings_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 def search_learnings(keywords: list[str], pattern_key: str | None = None) -> list[dict]:
