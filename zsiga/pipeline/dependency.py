@@ -2,9 +2,18 @@
 
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from ..transport import Transport, LocalTransport
 from .utils import read_file
+
+
+# ---------------------------------------------------------------------------
+# Exceptions
+# ---------------------------------------------------------------------------
+
+class CycleError(Exception):
+    """Raised when a cycle is detected during topological sort."""
 
 
 # ---------------------------------------------------------------------------
@@ -357,3 +366,139 @@ def build_dependency_graph(
     )
     graph.detect_cycles()
     return graph
+
+
+# ---------------------------------------------------------------------------
+# ChangeGraph — simpler dependency analysis via proposal.md
+# ---------------------------------------------------------------------------
+
+_PROPOSAL_FILE_RE = re.compile(
+    r"`([^`]+\.(?:py|md|html|toml|yaml|yml|json))`"
+)
+_BULLET_RE = re.compile(r"^\s*[-*]\s+")
+
+
+def _extract_proposal_target_files(content: str) -> list[str]:
+    """Extract target file paths from proposal.md content.
+
+    Looks for backtick-quoted file paths with known extensions across all
+    lines, as well as bullet-list items that contain file-like paths.
+    """
+    paths: set[str] = set()
+    # Extract backtick-quoted paths
+    for match in _PROPOSAL_FILE_RE.finditer(content):
+        paths.add(match.group(1))
+    # Also extract file paths from bullet-list lines
+    for line in content.splitlines():
+        if _BULLET_RE.match(line):
+            for match in _PROPOSAL_FILE_RE.finditer(line):
+                paths.add(match.group(1))
+    return sorted(paths)
+
+
+class ChangeGraph:
+    """Dependency analyser that reads proposal.md files from an openspec directory.
+
+    Parameters
+    ----------
+    openspec_dir : str | Path
+        Path to the openspec directory.  Must exist on the filesystem.
+    """
+
+    def __init__(self, openspec_dir) -> None:
+        self._dir = Path(openspec_dir)
+        if not self._dir.exists():
+            raise FileNotFoundError(
+                f"openspec directory not found: {self._dir}"
+            )
+        self._changes: dict[str, list[str]] = {}
+
+    # ------------------------------------------------------------------
+    # add_change
+    # ------------------------------------------------------------------
+
+    def add_change(self, change_name: str) -> None:
+        """Register a change by reading its *proposal.md*.
+
+        Raises ``FileNotFoundError`` if the proposal file is missing.
+        Raises ``ValueError`` if the change name has already been registered.
+        """
+        if change_name in self._changes:
+            raise ValueError(
+                f"change '{change_name}' has already been added"
+            )
+        proposal_path = self._dir / "changes" / change_name / "proposal.md"
+        if not proposal_path.exists():
+            raise FileNotFoundError(
+                f"proposal not found: {proposal_path}"
+            )
+        content = proposal_path.read_text(encoding="utf-8")
+        self._changes[change_name] = _extract_proposal_target_files(content)
+
+    # ------------------------------------------------------------------
+    # check_conflicts
+    # ------------------------------------------------------------------
+
+    def check_conflicts(self) -> list[tuple[str, str, list[str]]]:
+        """Return pairs of changes that share target files.
+
+        Each entry is ``(change_a, change_b, overlapping_files)`` where
+        *change_a* is lexicographically before *change_b*.
+        """
+        names = sorted(self._changes)
+        conflicts: list[tuple[str, str, list[str]]] = []
+        for i, name_a in enumerate(names):
+            set_a = set(self._changes[name_a])
+            for name_b in names[i + 1:]:
+                set_b = set(self._changes[name_b])
+                overlap = sorted(set_a & set_b)
+                if overlap:
+                    conflicts.append((name_a, name_b, overlap))
+        return conflicts
+
+    # ------------------------------------------------------------------
+    # execution_order
+    # ------------------------------------------------------------------
+
+    def execution_order(self) -> list[str]:
+        """Return change names in a valid topological order.
+
+        Dependency edges are created for every conflicting pair: the
+        lexicographically earlier name depends on the later one.  Ties are
+        broken by lexicographic name via Kahn's algorithm.
+
+        Raises ``CycleError`` if a cycle is detected.
+        """
+        names = sorted(self._changes)
+        if not names:
+            return []
+
+        # Build adjacency from conflicts (lexicographic earlier -> later)
+        in_degree: dict[str, int] = {n: 0 for n in names}
+        adjacency: dict[str, set[str]] = {n: set() for n in names}
+
+        for change_a, change_b, _ in self.check_conflicts():
+            adjacency[change_a].add(change_b)
+            in_degree[change_b] += 1
+
+        # Kahn's algorithm
+        available = sorted(
+            [n for n in names if in_degree[n] == 0]
+        )
+        order: list[str] = []
+
+        while available:
+            node = available.pop(0)
+            order.append(node)
+            for nb in sorted(adjacency[node]):
+                in_degree[nb] -= 1
+                if in_degree[nb] == 0:
+                    available.append(nb)
+                    available.sort()
+
+        if len(order) != len(names):
+            raise CycleError(
+                "cycle detected in change dependency graph"
+            )
+
+        return order
