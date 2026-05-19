@@ -68,6 +68,12 @@ _FIX_KEYWORDS = re.compile(
     re.IGNORECASE,
 )
 
+_CONSTRUCTION_MARKERS = re.compile(
+    r"新增|面板|模块|功能|卡片|组件|页面|feature|panel|module|component|"
+    r"widget|card|section|展示|显示|图表|dashboard|趋势",
+    re.IGNORECASE,
+)
+
 
 # ---------------------------------------------------------------------------
 # Verbalization
@@ -101,9 +107,11 @@ def _verbalize(message: str) -> str:
         return "User wants to fix a known issue"
 
     if _INVESTIGATION_KEYWORDS.search(text):
-        if has_chinese:
-            return "用户想要排查或调试某个问题"
-        return "User wants to investigate or debug an issue"
+        has_construction = bool(_CONSTRUCTION_MARKERS.search(text))
+        if not has_construction:
+            if has_chinese:
+                return "用户想要排查或调试某个问题"
+            return "User wants to investigate or debug an issue"
 
     if _IMPL_KEYWORDS.search(text):
         if has_chinese:
@@ -285,8 +293,15 @@ def classify(message: str, config: ZsigaConfig | None = None, source: str = None
                        f"修复类关键词 ({len(fix_matches)} 个匹配)"))
 
     if invest_matches:
-        scores.append((len(invest_matches), IntentType.INVESTIGATION,
-                       f"排查/调试类关键词 ({len(invest_matches)} 个匹配)"))
+        invest_score = len(invest_matches)
+        has_construction = bool(_CONSTRUCTION_MARKERS.search(text))
+        if has_construction:
+            invest_score = max(0, invest_score - 4)
+        if invest_score > 0:
+            scores.append((invest_score, IntentType.INVESTIGATION,
+                           f"排查/调试类关键词 ({len(invest_matches)} 个匹配"
+                           + ("，含建设性标记扣减4分" if has_construction else "")
+                           + ")"))
 
     if impl_matches:
         has_target = bool(re.search(

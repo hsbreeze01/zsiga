@@ -403,3 +403,36 @@ class TestClassifyWithLLM:
             classify("fix the bug", config=mock_config)
             call_args = mock_llm.call_args
             assert call_args[1].get("timeout") == 3.0 or call_args[0][2] == 3.0
+
+
+# ============================================================================
+# Construction Marker Semantic Distinction
+# ============================================================================
+
+class TestConstructionMarkers:
+    """Tests for construction marker detection reducing INVESTIGATION score."""
+
+    def test_investigation_score_reduced_with_construction_markers(self):
+        """'实现异常诊断面板' has investigation + construction markers → IMPL wins."""
+        result = classify("实现异常诊断面板功能")
+        assert result.intent_type == IntentType.IMPLEMENTATION
+
+    def test_investigation_unchanged_without_construction_markers(self):
+        """'排查报错' without construction markers → still INVESTIGATION."""
+        result = classify("排查一下报错原因")
+        assert result.intent_type == IntentType.INVESTIGATION
+
+    def test_verbalize_skips_investigation_with_construction(self):
+        """_verbalize with construction markers does NOT say 排查或调试."""
+        result = _verbalize("新增异常诊断面板")
+        assert "排查或调试" not in result
+
+    def test_verbalize_preserves_investigation_without_construction(self):
+        """_verbalize without construction markers still says 排查或调试."""
+        result = _verbalize("排查一下报错")
+        assert "排查或调试" in result
+
+    def test_dashboard_monitoring_classified_as_implementation(self):
+        """'Dashboard 实时监控与异常诊断增强' with source=openspec → IMPLEMENTATION."""
+        result = classify("Dashboard 实时监控与异常诊断增强", source="openspec")
+        assert result.intent_type == IntentType.IMPLEMENTATION
