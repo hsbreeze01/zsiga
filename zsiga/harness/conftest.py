@@ -7,6 +7,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 
 class MockLLMClient:
     """Deterministic mock of the LLM client used by zsiga.
@@ -26,6 +28,15 @@ class MockLLMClient:
     def set_response(self, text: str) -> None:
         """Configure the response returned by subsequent chat() calls."""
         self._response = text
+
+    def complete(self, prompt: str) -> str:
+        """Return a deterministic JSON response with ``choices`` key.
+
+        Matches the spec requirement: response includes a ``choices`` list
+        with a ``text`` field.
+        """
+        self.calls.append((prompt,))
+        return self._response
 
 
 class MockTransport:
@@ -49,6 +60,16 @@ class MockTransport:
     def set_result(self, result: dict[str, Any]) -> None:
         """Configure the result returned by subsequent call() invocations."""
         self._result = result
+
+    def send(self, data: Any) -> None:
+        """No-op send — records the call without performing real I/O."""
+
+    def receive(self) -> None:
+        """No-op receive — returns None without performing real I/O."""
+        return None
+
+    def close(self) -> None:
+        """No-op close — performs no cleanup."""
 
 
 class TempGitRepo:
@@ -127,3 +148,49 @@ def temp_git_repo(initial_commit: bool = False) -> TempGitRepo:
         initial_commit: If True, create an initial commit on the default branch.
     """
     return TempGitRepo(initial_commit=initial_commit)
+
+
+# ---------------------------------------------------------------------------
+# Pytest fixtures (spec-driven)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture()
+def mock_llm_client_fixture() -> MockLLMClient:
+    """Pytest fixture returning a MockLLMClient with preset JSON response."""
+    client = MockLLMClient()
+    client.set_response('{"choices": [{"text": "mock response"}]}')
+    return client
+
+
+@pytest.fixture()
+def mock_transport_fixture() -> MockTransport:
+    """Pytest fixture returning a MockTransport with no-op methods."""
+    return MockTransport()
+
+
+@pytest.fixture()
+def temp_git_repo_fixture(tmp_path: Path) -> Path:
+    """Create a temporary git repository, yield its path, then clean up.
+
+    The yielded path points to an initialised git repo (``.git/`` exists).
+    The temporary directory is removed after the test completes.
+    """
+    repo_dir = tmp_path / "test_repo"
+    repo_dir.mkdir()
+    subprocess.run(
+        ["git", "init"], cwd=repo_dir, capture_output=True, check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "test@zsiga.dev"],
+        cwd=repo_dir,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "zsiga test"],
+        cwd=repo_dir,
+        capture_output=True,
+        check=True,
+    )
+    yield repo_dir

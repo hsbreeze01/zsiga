@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import time
 import traceback
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -66,6 +68,34 @@ class HarnessResult:
     failed: int = 0
     errors: int = 0
     events: list[TestEvent] = field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Structured report dataclasses (spec-driven)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class TestReport:
+    """Structured report for a single test result."""
+
+    __test__ = False  # prevent pytest collection
+
+    name: str
+    status: str  # "passed" | "failed" | "error"
+    duration_s: float
+    message: str
+
+
+@dataclass
+class QualificationReport:
+    """Combined report from capability + regression test suites."""
+
+    __test__ = False
+
+    capability_results: list[TestReport]
+    regression_results: list[TestReport]
+    passed: bool  # True only if ALL results have status "passed"
 
 
 # ---------------------------------------------------------------------------
@@ -198,3 +228,89 @@ class HarnessRunner:
                     ),
                 )
                 self._result.errors += 1
+
+    # -- pytest-based execution (spec-driven) --------------------------------
+
+    def run_pytest(
+        self,
+        test_paths: list[str],
+        output_path: str = "harness-results.jsonl",
+    ) -> list[TestReport]:
+        """Execute tests via ``pytest.main()`` and return :class:`TestReport` list.
+
+        Args:
+            test_paths: Paths passed to pytest (files or directories).
+            output_path: File path for JSONL event output.
+
+        Returns:
+            A list of :class:`TestReport` instances, one per test item.
+        """
+        plugin = _HarnessCollectorPlugin(output_path=output_path)
+        args = list(test_paths) + ["-p", "no:cacheprovider", "--tb=short"]
+
+        import pytest
+
+        pytest.main(args, plugins=[plugin])
+
+        return plugin.reports
+
+
+# ---------------------------------------------------------------------------
+# Internal pytest plugin for collecting TestReport objects
+# ---------------------------------------------------------------------------
+
+
+class _HarnessCollectorPlugin:
+    """A pytest plugin that collects ``TestReport`` objects and emits JSONL."""
+
+    def __init__(self, output_path: str = "harness-results.jsonl") -> None:
+        self.output_path = output_path
+        self.reports: list[TestReport] = []
+        self._start_times: dict[str, float] = {}
+
+    def pytest_collection_modifyitems(self, session: Any, items: Any) -> None:
+        # Record no-op; collection is handled by pytest
+        pass
+
+    def pytest_runtest_logstart(self, nodeid: str, location: Any) -> None:
+        self._start_times[nodeid] = time.time()
+
+    def pytest_runtest_logreport(self, report: Any) -> None:
+        # We only care about the "call" phase for test results
+        if report.when != "call":
+            return
+
+        duration_s = getattr(report, "duration", 0.0)
+        message = ""
+
+        if report.passed:
+            status = "passed"
+        elif report.failed:
+            status = "failed"
+            message = str(report.longrepr) if report.longrepr else ""
+        else:
+            status = "error"
+            message = str(report.longrepr) if report.longrepr else ""
+
+        test_report = TestReport(
+            name=report.nodeid,
+            status=status,
+            duration_s=round(duration_s, 6),
+            message=message,
+        )
+        self.reports.append(test_report)
+        self._append_jsonl(test_report)
+
+    def _append_jsonl(self, report: TestReport) -> None:
+        """Append one JSON line to the JSONL output file."""
+        line = json.dumps(
+            {
+                "name": report.name,
+                "status": report.status,
+                "duration_s": report.duration_s,
+                "message": report.message,
+                "timestamp": datetime.now(tz=timezone.utc).isoformat(),
+            },
+        )
+        with open(self.output_path, "a") as fh:
+            fh.write(line + "\n")
