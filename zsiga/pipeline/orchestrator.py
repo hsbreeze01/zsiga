@@ -8,7 +8,7 @@ from ..agent.task_decomposer import decompose, aggregate_results
 from ..agent.escalation import EscalationManager, Strategy
 from ..agent.recovery import RecoveryManager
 from ..agent.sub_agent import create_with_role, run_sub_agent
-from ..agent.reviewer import run_review, parse_review_verdict
+from ..agent.reviewer import run_review, parse_review_verdict, run_review_loop
 from ..config import ZsigaConfig
 from ..intake.scanner import DirectoryScanner
 from .. import git_ops
@@ -357,6 +357,37 @@ class ZsigaOrchestrator:
             llm_calls=impl_calls[0], tool_calls=impl_calls[1],
             prompt_tokens=impl_tokens[0], completion_tokens=impl_tokens[1],
         ))
+
+        # Phase 2.5: REVIEW (self-review loop)
+        if self.config.pipeline.review_max_rounds > 0:
+            print(f"\n  {'='*50}")
+            print(f"  Phase 2.5: REVIEW {change_name}")
+            print(f"  {'='*50}")
+            t_review = time.monotonic()
+            review_result = await run_review_loop(
+                self.agent, change_dir, target_path, pre_sha, transport,
+                max_rounds=self.config.pipeline.review_max_rounds,
+                review_max_turns=self.config.pipeline.review_max_turns,
+                review_timeout=self.config.pipeline.review_timeout,
+                fix_max_turns=self.config.pipeline.review_fix_max_turns,
+            )
+            review_seconds = time.monotonic() - t_review
+            review_outcome = (
+                Outcome.SUCCESS
+                if review_result.final_verdict == "CLEAN"
+                else Outcome.FAIL
+            )
+            print(
+                f"  Review: verdict={review_result.final_verdict} "
+                f"rounds={review_result.rounds_executed} "
+                f"fixes={review_result.fix_attempts} ({review_seconds:.1f}s)"
+            )
+            rec.phases.append(PhaseRecord(
+                phase=Phase.REVIEW, outcome=review_outcome,
+                seconds_used=review_seconds,
+                fix_attempts=review_result.fix_attempts,
+                detail=_summarize_issues(review_result.last_issues),
+            ))
 
         # Phase 3: VERIFY
         print(f"\n  {'='*50}")
@@ -838,3 +869,12 @@ def _extract_tokens(result) -> tuple[int, int]:
     if isinstance(result, RunResult):
         return (result.prompt_tokens, result.completion_tokens)
     return (0, 0)
+
+
+def _summarize_issues(issues: list[dict]) -> str:
+    """Summarize review issues for PhaseRecord.detail (max 200 chars)."""
+    if not issues:
+        return ""
+    parts = [f"[{i.get('severity', '?')}] {i.get('description', '')[:60]}" for i in issues]
+    text = "; ".join(parts)
+    return text[:200]

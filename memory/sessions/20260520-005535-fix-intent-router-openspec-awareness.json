@@ -1,0 +1,68 @@
+{
+  "session_id": "fix-intent-router-openspec-awareness-1478e06c",
+  "change_name": "fix-intent-router-openspec-awareness",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T00:55:35.304187",
+  "outcome": "success",
+  "started_at": "2026-05-20T00:46:07.801447",
+  "finished_at": "2026-05-20T00:55:35.287926",
+  "total_runtime_seconds": 369.6,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 112.0,
+      "fix_attempts": 0,
+      "llm_calls": 9,
+      "tool_calls": 12,
+      "prompt_tokens": 195997,
+      "completion_tokens": 3821
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 201.7,
+      "fix_attempts": 1,
+      "llm_calls": 26,
+      "tool_calls": 26,
+      "prompt_tokens": 578593,
+      "completion_tokens": 5659
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 51.1,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 3,
+      "prompt_tokens": 42472,
+      "completion_tokens": 1879
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.8,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 0/2 passed"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 38,
+    "total_tool_calls": 41,
+    "total_prompt_tokens": 817062,
+    "total_completion_tokens": 11359
+  }
+}
