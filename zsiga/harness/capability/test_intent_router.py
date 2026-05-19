@@ -6,7 +6,6 @@ keyword-path logic is deterministically exercised.
 """
 
 import pytest
-from unittest.mock import patch
 
 from zsiga.agent.intent_router import (
     Intent,

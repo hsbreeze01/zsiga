@@ -1,0 +1,18 @@
+{
+  "session_id": "test-change-ff6869e6",
+  "change_name": "test-change",
+  "project": "testproj",
+  "exported_at": "2026-05-19T11:26:46.258713",
+  "outcome": "success",
+  "started_at": "2026-05-19T11:26:46.212239",
+  "finished_at": "2026-05-19T11:26:46.212269",
+  "total_runtime_seconds": 0,
+  "phases": [],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 0,
+    "total_tool_calls": 0,
+    "total_prompt_tokens": 0,
+    "total_completion_tokens": 0
+  }
+}
