@@ -709,7 +709,6 @@ class TestChangeGraphExecutionOrder:
         assert order.index("alpha") < order.index("beta")
 
     def test_cycle_detection_raises_cycle_error(self):
-        import pytest
         # Cycle is not possible with ChangeGraph's rule (edge from lex
         # earlier to later), but we test the mechanism by manually
         # injecting a cycle into _changes and adjacency.
