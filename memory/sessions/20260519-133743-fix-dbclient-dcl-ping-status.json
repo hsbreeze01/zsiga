@@ -1,0 +1,63 @@
+{
+  "session_id": "fix-dbclient-dcl-ping-status-cb610182",
+  "change_name": "fix-dbclient-dcl-ping-status",
+  "project": "compass",
+  "exported_at": "2026-05-19T13:37:43.143445",
+  "outcome": "success",
+  "started_at": "2026-05-19T13:33:12.864130",
+  "finished_at": "2026-05-19T13:37:43.108014",
+  "total_runtime_seconds": 177.7,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 70.9,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 4,
+      "prompt_tokens": 60620,
+      "completion_tokens": 2263
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 72.4,
+      "fix_attempts": 1,
+      "llm_calls": 11,
+      "tool_calls": 10,
+      "prompt_tokens": 170556,
+      "completion_tokens": 1792
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 23.0,
+      "fix_attempts": 0,
+      "llm_calls": 2,
+      "tool_calls": 1,
+      "prompt_tokens": 16279,
+      "completion_tokens": 715
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 11.4,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 18,
+    "total_tool_calls": 15,
+    "total_prompt_tokens": 247455,
+    "total_completion_tokens": 4770
+  }
+}

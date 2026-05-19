@@ -1,0 +1,52 @@
+{
+  "session_id": "refactor-db-asi-kdj-base-e85dc5eb",
+  "change_name": "refactor-db-asi-kdj-base",
+  "project": "compass",
+  "exported_at": "2026-05-19T19:01:42.145035",
+  "outcome": "success",
+  "started_at": "2026-05-19T18:59:41.293738",
+  "finished_at": "2026-05-19T19:01:42.131960",
+  "total_runtime_seconds": 94.1,
+  "phases": [
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 31.2,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 5,
+      "prompt_tokens": 43901,
+      "completion_tokens": 767
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 52.0,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 14,
+      "prompt_tokens": 133497,
+      "completion_tokens": 577
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 10.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 15,
+    "total_tool_calls": 19,
+    "total_prompt_tokens": 177398,
+    "total_completion_tokens": 1344
+  }
+}

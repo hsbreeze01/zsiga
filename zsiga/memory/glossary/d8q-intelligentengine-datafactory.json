@@ -1,0 +1,2266 @@
+{
+  "project": "d8q-intelligentengine-datafactory",
+  "extracted_at": "2026-05-19T13:38:55.980863",
+  "entries": [
+    {
+      "name": "ReportCache",
+      "category": "class",
+      "file": "app.py"
+    },
+    {
+      "name": "get_db",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "agent_request",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "index",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "stock_detail",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_tracks",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_tracks_keywords_write",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "weekly_generate",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "meta",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "news",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "list_tasks",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "create_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "update_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "delete_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "run_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "toggle_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "shark_request",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "compass_request",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "resolve_stock",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "stock_comprehensive",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "stock_announcements",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "stock_reports",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "stock_quote",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "stock_valuation",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "stock_financial",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "stock_supply_chain",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "search_by_keyword",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "recommendation_daily",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "recommendation_generate",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "search_by_industry",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "search_by_concept",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "search_by_theme",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "list_industries",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "list_concepts",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "list_concepts_summary",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "list_sectors",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "list_industries_summary",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "report_stock_query",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "content_create",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "content_articles",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "content_article_read",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "list_content_tasks",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "create_content_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "delete_content_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "update_content_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "toggle_content_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "run_content_task",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "get_exec_log",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "keyword_suggestions",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "update_keyword_suggestions",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "get_llm_config",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "update_llm_config",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "get_push_config",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "update_push_config",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "service_status",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "get_user_subscriptions",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "subscribe_track",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "unsubscribe_track",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "get_user_preferences",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "set_user_preference",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "get_watchlist",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "add_watchlist",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "del_watchlist",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "research_by_track",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "analytics_overview",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "analytics_functions",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "analytics_users",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "analytics_trends",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "analytics_cold_hot",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "send_email",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "test_email_config",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "classify_policy",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "get_monitor_rules",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "create_monitor_rule",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "update_monitor_rule",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "delete_monitor_rule",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "monitor_status",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_cookie_capture",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_cookie_capture_status",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_cookie_capture_screenshot",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_cookie_capture_switch_phone",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_cookie_capture_submit_phone",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_cookie_capture_submit_code",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_cookie_import",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_groups",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_group",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_group_status",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_subscribe",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_subscription",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_unsubscribe",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_my_subscriptions",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_subscriptions",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_events",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_event",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_event_close",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_event_trend",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_event_micro",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_event_macro",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_event_info",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_group_stats",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_group_backtest",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_group_runs",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_group_signals",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_group_run_trigger",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "proxy_strategy_scan",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "spa_fallback",
+      "category": "function",
+      "file": "app.py"
+    },
+    {
+      "name": "/",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/track",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/feed",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/weekly",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/tasks",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/stock",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/report",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/settings",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/policy",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/follows",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/monitor",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/recommend",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/stock/<code>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/tracks",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/tracks/heat",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/tracks/heat/latest",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/tracks/<int:track_id>/news",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/tracks/<int:track_id>/keywords",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/tracks/<int:track_id>/keywords",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/tracks/<int:track_id>/keywords/<path:keyword>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/weekly/generate",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/meta",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/news",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/tasks",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/tasks",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/tasks/<task_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/tasks/<task_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/tasks/<task_id>/run",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/tasks/<task_id>/toggle",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/stock/comprehensive",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/stock/announcements",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/stock/reports",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/stock/quote",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/stock/valuation",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/stock/financial",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/stock/supply-chain",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/by-keyword",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/recommendation/daily",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/proxy/recommendation/generate",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/by-industry",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/by-concept",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/by-theme",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/industries",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/concepts",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/concepts/summary",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/sectors",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/search/industries/summary",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/report/stock",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/create",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/articles",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/article",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/tasks",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/tasks",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/tasks/<task_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/tasks/<task_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/tasks/<task_id>/toggle",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/tasks/<task_id>/run",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/content/exec-log",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/keyword-suggestions",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/keyword-suggestions",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/llm-config",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/llm-config",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/push/config",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/push/config",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/service-status",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/user/subscriptions",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/user/subscribe",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/user/subscribe/<int:track_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/user/preferences",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/user/preferences",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/watchlist",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/watchlist",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/watchlist/<stock_code>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/research/track/<int:track_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/analytics/overview",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/analytics/functions",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/analytics/users",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/analytics/trends",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/analytics/cold-hot",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/notify/email",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/notify/test",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/policy/classify",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/monitor/rules",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/monitor/rules",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/monitor/rules/<int:rule_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/monitor/rules/<int:rule_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/monitor/status",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/cookie/capture",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/cookie/capture-status",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/cookie/capture-screenshot",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/cookie/capture-switch-phone",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/cookie/capture-submit-phone",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/cookie/capture-submit-code",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/cookie/import",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/groups",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/groups/<int:group_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/groups/<int:group_id>/status",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/subscribe",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/subscription",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/subscription/<int:group_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/subscription/mine",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/subscriptions/",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/events",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/events/<int:event_id>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/events/<int:event_id>/close",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/events/<int:event_id>/trend",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/events/<int:event_id>/micro",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/events/<int:event_id>/macro",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/events/<int:event_id>/info",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/groups/<int:group_id>/stats/",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/groups/<int:group_id>/backtest/",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/groups/<int:group_id>/runs/",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/groups/<int:group_id>/signals/",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/groups/<int:group_id>/run/trigger/",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/api/strategy/<int:group_id>/scan",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "/<path:path>",
+      "category": "route",
+      "file": "app.py"
+    },
+    {
+      "name": "DB_PATH",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "AGENT_API",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "SHARK_API",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "COMPASS_API",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "PUBLISHER_API",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "TMPL_DIR",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "FUNCTION_MAP",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "ARTICLES_DIR",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "TASK_STORE_PATH",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "EXEC_LOG_PATH",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "SMTP_CFG",
+      "category": "config",
+      "file": "app.py"
+    },
+    {
+      "name": "check_auth",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "login_page",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "login",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "logout",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "me",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "list_users",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "create_user",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "delete_user",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "change_password",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "freeze_user",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "change_role",
+      "category": "function",
+      "file": "auth.py"
+    },
+    {
+      "name": "/login",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/login",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/logout",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/me",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/users",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/users",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/users/<username>",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/users/<username>/password",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/users/<username>/freeze",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "/api/auth/users/<username>/role",
+      "category": "route",
+      "file": "auth.py"
+    },
+    {
+      "name": "DATA_DIR",
+      "category": "config",
+      "file": "auth.py"
+    },
+    {
+      "name": "USERS_PATH",
+      "category": "config",
+      "file": "auth.py"
+    },
+    {
+      "name": "ROLE_PERMS",
+      "category": "config",
+      "file": "auth.py"
+    },
+    {
+      "name": "WRITE_ROUTES",
+      "category": "config",
+      "file": "auth.py"
+    },
+    {
+      "name": "PUBLIC_PATHS",
+      "category": "config",
+      "file": "auth.py"
+    },
+    {
+      "name": "INTERNAL_IPS",
+      "category": "config",
+      "file": "auth.py"
+    },
+    {
+      "name": "compass_index",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "compass_dashboard",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "compass_recommended",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "compass_report",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "compass_policy",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_discover",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_my",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_event_detail",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_admin_list",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_admin_new",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_admin_edit",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_admin_detail",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_admin_backtest",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "strategy_admin_run",
+      "category": "function",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/compass/",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/compass/dashboard",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/compass/recommended/<date>",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/compass/report",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/compass/policy",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/discover/",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/my/",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/events/<int:event_id>/",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/admin/groups/",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/admin/groups/new",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/admin/groups/<int:group_id>/edit",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/admin/groups/<int:group_id>/",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/admin/groups/<int:group_id>/backtest/",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "/strategy/admin/groups/<int:group_id>/run/",
+      "category": "route",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "COMPASS_API",
+      "category": "config",
+      "file": "compass_pages.py"
+    },
+    {
+      "name": "weekly_export",
+      "category": "function",
+      "file": "export_weekly.py"
+    },
+    {
+      "name": "/api/weekly/export",
+      "category": "route",
+      "file": "export_weekly.py"
+    },
+    {
+      "name": "detect_heat_anomaly",
+      "category": "function",
+      "file": "heat_anomaly.py"
+    },
+    {
+      "name": "run_policy_analysis",
+      "category": "function",
+      "file": "heat_anomaly.py"
+    },
+    {
+      "name": "run_investment_collection",
+      "category": "function",
+      "file": "heat_anomaly.py"
+    },
+    {
+      "name": "DB_PATH",
+      "category": "config",
+      "file": "heat_anomaly.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "init_admin.py"
+    },
+    {
+      "name": "USERS_PATH",
+      "category": "config",
+      "file": "init_admin.py"
+    },
+    {
+      "name": "PromptManager",
+      "category": "class",
+      "file": "prompt_loader.py"
+    },
+    {
+      "name": "get_prompt_manager",
+      "category": "function",
+      "file": "prompt_loader.py"
+    },
+    {
+      "name": "DEFAULT_PROMPTS_DIR",
+      "category": "config",
+      "file": "prompt_loader.py"
+    },
+    {
+      "name": "list_prompts",
+      "category": "function",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "get_prompt",
+      "category": "function",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "update_prompt",
+      "category": "function",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "list_all_services",
+      "category": "function",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "update_remote_prompt",
+      "category": "function",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "/api/prompts",
+      "category": "route",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "/api/prompts/<path:prompt_id>",
+      "category": "route",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "/api/prompts/<path:prompt_id>",
+      "category": "route",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "/api/prompts/all",
+      "category": "route",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "/api/prompts/<service>/<path:prompt_id>",
+      "category": "route",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "PROMPTS_DIR",
+      "category": "config",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "SERVICES",
+      "category": "config",
+      "file": "prompts_api.py"
+    },
+    {
+      "name": "send_daily_brief",
+      "category": "function",
+      "file": "push_service.py"
+    },
+    {
+      "name": "send_heat_alert",
+      "category": "function",
+      "file": "push_service.py"
+    },
+    {
+      "name": "DB_PATH",
+      "category": "config",
+      "file": "push_service.py"
+    },
+    {
+      "name": "SMTP_HOST",
+      "category": "config",
+      "file": "push_service.py"
+    },
+    {
+      "name": "SMTP_PORT",
+      "category": "config",
+      "file": "push_service.py"
+    },
+    {
+      "name": "SMTP_USER",
+      "category": "config",
+      "file": "push_service.py"
+    },
+    {
+      "name": "SMTP_PASS",
+      "category": "config",
+      "file": "push_service.py"
+    },
+    {
+      "name": "SMTP_SSL",
+      "category": "config",
+      "file": "push_service.py"
+    },
+    {
+      "name": "start_scheduler",
+      "category": "function",
+      "file": "scheduler.py"
+    },
+    {
+      "name": "TASKS_PATH",
+      "category": "config",
+      "file": "scheduler.py"
+    },
+    {
+      "name": "EXEC_LOG_PATH",
+      "category": "config",
+      "file": "scheduler.py"
+    },
+    {
+      "name": "LOCK_PATH",
+      "category": "config",
+      "file": "scheduler.py"
+    },
+    {
+      "name": "DEFAULT_RUN_AT",
+      "category": "config",
+      "file": "scheduler.py"
+    },
+    {
+      "name": "fail",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "warn",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "info",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "parse_module_spec",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "parse_tasks_md",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "collect_symbols",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "collect_imports",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "validate_spec_workflow_structure",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "validate_tasks_md",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "validate_implementation_logs",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "validate_spec_workflow_specs",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "validate_spec_workflow_integration",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "PROJECT_ROOT",
+      "category": "config",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "SPEC_DIR",
+      "category": "config",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "SPEC_WORKFLOW_DIR",
+      "category": "config",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "SRC_DIR",
+      "category": "config",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "FORBIDDEN_IMPORTS",
+      "category": "config",
+      "file": "scripts/validate_spec.py"
+    },
+    {
+      "name": "get_expected_structure",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "fail",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "warn",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "info",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "validate_base_structure",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "validate_spec_files",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "validate_steering_files",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "validate_source_files",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "validate_script_files",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "validate_readme_files",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "validate_agent_file",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "PROJECT_ROOT",
+      "category": "config",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "SPEC_DIR",
+      "category": "config",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "SRC_DIR",
+      "category": "config",
+      "file": "scripts/validate_structure.py"
+    },
+    {
+      "name": "BM25",
+      "category": "class",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "detect_domain",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "search",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "search_stack",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "DATA_DIR",
+      "category": "config",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "MAX_RESULTS",
+      "category": "config",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "CSV_CONFIG",
+      "category": "config",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "STACK_CONFIG",
+      "category": "config",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "AVAILABLE_STACKS",
+      "category": "config",
+      "file": ".shared/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "DesignSystemGenerator",
+      "category": "class",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_ascii_box",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_markdown",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "generate_design_system",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "persist_design_system",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_master_md",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_page_override_md",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "REASONING_FILE",
+      "category": "config",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "SEARCH_CONFIG",
+      "category": "config",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "BOX_WIDTH",
+      "category": "config",
+      "file": ".shared/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_output",
+      "category": "function",
+      "file": ".shared/ui-ux-pro-max/scripts/search.py"
+    },
+    {
+      "name": "fetch_news",
+      "category": "function",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "render_news_brief",
+      "category": "function",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "render_deep_analysis",
+      "category": "function",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "render_investment_weekly",
+      "category": "function",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "create_article",
+      "category": "function",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "DB_PATH",
+      "category": "config",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "ARTICLES_DIR",
+      "category": "config",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "FREQ_DAYS",
+      "category": "config",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "STYLE_RENDERERS",
+      "category": "config",
+      "file": "src/datafactory/content/creator.py"
+    },
+    {
+      "name": "load_config",
+      "category": "function",
+      "file": "src/datafactory/content/llm_config.py"
+    },
+    {
+      "name": "save_config",
+      "category": "function",
+      "file": "src/datafactory/content/llm_config.py"
+    },
+    {
+      "name": "CONFIG_PATH",
+      "category": "config",
+      "file": "src/datafactory/content/llm_config.py"
+    },
+    {
+      "name": "DEFAULTS",
+      "category": "config",
+      "file": "src/datafactory/content/llm_config.py"
+    },
+    {
+      "name": "create_news_brief",
+      "category": "function",
+      "file": "src/datafactory/content/llm_creator.py"
+    },
+    {
+      "name": "create_research_report",
+      "category": "function",
+      "file": "src/datafactory/content/llm_creator.py"
+    },
+    {
+      "name": "DB_PATH",
+      "category": "config",
+      "file": "src/datafactory/content/llm_creator.py"
+    },
+    {
+      "name": "ARTICLES_DIR",
+      "category": "config",
+      "file": "src/datafactory/content/llm_creator.py"
+    },
+    {
+      "name": "SHARK_API",
+      "category": "config",
+      "file": "src/datafactory/content/llm_creator.py"
+    },
+    {
+      "name": "FREQ_DAYS",
+      "category": "config",
+      "file": "src/datafactory/content/llm_creator.py"
+    },
+    {
+      "name": "STYLE_CREATORS",
+      "category": "config",
+      "file": "src/datafactory/content/llm_creator.py"
+    },
+    {
+      "name": "NewsItem",
+      "category": "class",
+      "file": "src/datafactory/domain/models/news.py"
+    },
+    {
+      "name": "AgentDBReader",
+      "category": "class",
+      "file": "src/datafactory/infrastructure/agent_datasource/db_reader.py"
+    },
+    {
+      "name": "DEFAULT_AGENT_DATA_DIR",
+      "category": "config",
+      "file": "src/datafactory/infrastructure/agent_datasource/db_reader.py"
+    },
+    {
+      "name": "AgentDataReader",
+      "category": "class",
+      "file": "src/datafactory/infrastructure/agent_datasource/reader.py"
+    },
+    {
+      "name": "DEFAULT_AGENT_DATA_DIR",
+      "category": "config",
+      "file": "src/datafactory/infrastructure/agent_datasource/reader.py"
+    },
+    {
+      "name": "TestMonitorCookieAlert",
+      "category": "class",
+      "file": "tests/test_monitor_cookie_alert.py"
+    },
+    {
+      "name": "TestStockReportsRoute",
+      "category": "class",
+      "file": "tests/test_recommend_routes.py"
+    },
+    {
+      "name": "TestTrackHeatRoute",
+      "category": "class",
+      "file": "tests/test_recommend_routes.py"
+    },
+    {
+      "name": "TestSearchByKeywordRoute",
+      "category": "class",
+      "file": "tests/test_recommend_routes.py"
+    },
+    {
+      "name": "TestCompassRecommendationDaily",
+      "category": "class",
+      "file": "tests/test_recommend_routes.py"
+    },
+    {
+      "name": "TestCompassRecommendationGenerate",
+      "category": "class",
+      "file": "tests/test_recommend_routes.py"
+    },
+    {
+      "name": "TestCreationOffsetRange",
+      "category": "class",
+      "file": "tests/test_scheduler_offset.py"
+    },
+    {
+      "name": "TestPublishGreaterThanCreation",
+      "category": "class",
+      "file": "tests/test_scheduler_offset.py"
+    },
+    {
+      "name": "TestSameDayStability",
+      "category": "class",
+      "file": "tests/test_scheduler_offset.py"
+    },
+    {
+      "name": "TestDailyRegeneration",
+      "category": "class",
+      "file": "tests/test_scheduler_offset.py"
+    },
+    {
+      "name": "TestTickOffsetApplication",
+      "category": "class",
+      "file": "tests/test_scheduler_offset.py"
+    },
+    {
+      "name": "TestStockDetailRoute",
+      "category": "class",
+      "file": "tests/test_smoke.py"
+    },
+    {
+      "name": "test_smoke",
+      "category": "function",
+      "file": "tests/test_smoke.py"
+    },
+    {
+      "name": "TestStrategyScanProxy",
+      "category": "class",
+      "file": "tests/test_strategy_scan_proxy.py"
+    },
+    {
+      "name": "TestCalcMACalcEMA",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestCalcMACD",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestCalcKDJ",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestCalcBOLL",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestCalcRSI",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestDrawTechCharts",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestEvalSignals",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestSDTechPanel",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestTechStyles",
+      "category": "class",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TMPL",
+      "category": "config",
+      "file": "tests/test_tech_analysis.py"
+    },
+    {
+      "name": "TestKeywordsProxy",
+      "category": "class",
+      "file": "tests/test_track_task_ui.py"
+    },
+    {
+      "name": "TestTrackTaskListBadge",
+      "category": "class",
+      "file": "tests/test_track_task_ui.py"
+    },
+    {
+      "name": "TestCollectTaskSubmit",
+      "category": "class",
+      "file": "tests/test_track_task_ui.py"
+    },
+    {
+      "name": "TestFrontendContainsTrackUI",
+      "category": "class",
+      "file": "tests/test_track_task_ui.py"
+    },
+    {
+      "name": "BM25",
+      "category": "class",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "detect_domain",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "search",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "search_stack",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "DATA_DIR",
+      "category": "config",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "MAX_RESULTS",
+      "category": "config",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "CSV_CONFIG",
+      "category": "config",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "STACK_CONFIG",
+      "category": "config",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "AVAILABLE_STACKS",
+      "category": "config",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/core.py"
+    },
+    {
+      "name": "DesignSystemGenerator",
+      "category": "class",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_ascii_box",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_markdown",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "generate_design_system",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "persist_design_system",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_master_md",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_page_override_md",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "REASONING_FILE",
+      "category": "config",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "SEARCH_CONFIG",
+      "category": "config",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "BOX_WIDTH",
+      "category": "config",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/design_system.py"
+    },
+    {
+      "name": "format_output",
+      "category": "function",
+      "file": ".trae/skills/ui-ux-pro-max/scripts/search.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "verify_data_access.py"
+    }
+  ]
+}

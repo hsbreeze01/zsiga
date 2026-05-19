@@ -43,7 +43,9 @@ _RESEARCH_KEYWORDS = re.compile(
 _IMPL_KEYWORDS = re.compile(
     r"实现|添加|创建|增加|写|开发|构建|部署|安装|"
     r"implement|add|create|build|deploy|install|write|"
-    r"refactor|重构|优化|optimize|配置|config|setup",
+    r"refactor|重构|优化|optimize|配置|config|setup|"
+    r"cleanup|clean|清理|migrate|迁移|remove|删除|替换|replace|"
+    r"eliminate|消除|convert|转换|统一|unify",
     re.IGNORECASE,
 )
 
@@ -131,17 +133,20 @@ def _verbalize(message: str) -> str:
 _CLASSIFICATION_SYSTEM_PROMPT = (
     "You are an intent classifier. Given a user message, classify it into exactly one "
     "of the following intent types:\n"
-    "- research: user wants to UNDERSTAND or ANALYZE existing code/system\n"
-    "- implementation: user wants to BUILD, CREATE, or ADD new functionality\n"
+    "- research: user wants to UNDERSTAND or ANALYZE existing code/system (passive reading)\n"
+    "- implementation: user wants to BUILD, CREATE, ADD, MODIFY, CLEANUP, MIGRATE, REMOVE, "
+    "REPLACE, REFACTOR, or OPTIMIZE code — ANY active code change\n"
     "- investigation: user wants to DEBUG or DIAGNOSE a problem/crash/error\n"
     "- evaluation: user wants to REVIEW or COMPARE existing code/decisions\n"
     "- fix: user wants to FIX a known bug, test failure, or lint error\n"
     "- open-ended: unclear intent requiring clarification\n\n"
-    "CRITICAL RULE: If the user describes BUILDING a feature that involves searching, "
-    "exploring, or investigating AS FUNCTIONALITY (e.g. 'implement search feature', "
-    "'build an explorer tool'), classify as 'implementation', NOT 'research' or "
-    "'investigation'. Only classify as 'research' when the user wants to PASSIVELY "
-    "understand existing code, and as 'investigation' when debugging a problem.\n\n"
+    "CRITICAL RULES:\n"
+    "1. cleanup, migrate, remove, delete, replace, convert, unify → ALWAYS 'implementation'\n"
+    "2. If the user describes BUILDING a feature that involves searching, exploring, or "
+    "investigating AS FUNCTIONALITY, classify as 'implementation', NOT 'research'.\n"
+    "3. Only classify as 'research' when the user wants to PASSIVELY understand existing code.\n"
+    "4. Only classify as 'investigation' when debugging a PROBLEM (error, crash, unexpected behavior).\n"
+    "5. If the message starts with 'IMPLEMENT' or describes a concrete code change, always use 'implementation'.\n\n"
     "Respond with ONLY a valid JSON object (no markdown, no extra text) with these fields:\n"
     '- "intent_type": one of the six intent types listed above (string)\n'
     '- "confidence": a float between 0 and 1\n'
@@ -253,10 +258,7 @@ def classify(message: str, config: ZsigaConfig | None = None) -> Intent:
     if llm_fast_config is not None:
         llm_intent = _classify_via_llm(text, llm_fast_config, timeout=3.0)
 
-    if llm_intent is not None:
-        return llm_intent
-
-    # --- Keyword fallback ---
+    # --- Keyword scoring (always computed for cross-validation) ---
     verbalization = _verbalize(text)
 
     # Count keyword matches for each category
@@ -295,29 +297,7 @@ def classify(message: str, config: ZsigaConfig | None = None) -> Intent:
         scores.append((len(research_matches), IntentType.RESEARCH,
                        f"研究/探索类关键词 ({len(research_matches)} 个匹配)"))
 
-    # No matches → open-ended
-    if not scores:
-        return Intent(
-            verbalization=verbalization,
-            intent_type=IntentType.OPEN_ENDED,
-            confidence=0.4,
-            reasoning="未匹配到明确的意图关键词",
-            suggested_action="ask_user: 请提供更多上下文",
-        )
-
-    # Pick highest score
-    scores.sort(key=lambda s: s[0], reverse=True)
-    best_score, best_type, best_reasoning = scores[0]
-
-    # Confidence based on score gap and match count
-    if len(scores) == 1:
-        confidence = min(0.95, 0.6 + best_score * 0.1)
-    else:
-        gap = best_score - scores[1][0]
-        confidence = min(0.95, 0.55 + gap * 0.15 + best_score * 0.05)
-
-    confidence = max(0.4, min(1.0, confidence))
-
+    # --- Cross-validation: LLM vs keyword ---
     action_map = {
         IntentType.RESEARCH: "dispatch_explore: 派发 explore 子代理搜索代码库",
         IntentType.IMPLEMENTATION: "pipeline: ENRICH → IMPLEMENT → VERIFY → DELIVER",
@@ -327,12 +307,66 @@ def classify(message: str, config: ZsigaConfig | None = None) -> Intent:
         IntentType.OPEN_ENDED: "ask_user: 请提供更多信息",
     }
 
+    # Pick highest keyword score
+    scores.sort(key=lambda s: s[0], reverse=True)
+    kw_best_score, kw_best_type, kw_reasoning = scores[0] if scores else (0, IntentType.OPEN_ENDED, "无关键词匹配")
+
+    if len(scores) == 1:
+        kw_confidence = min(0.95, 0.6 + kw_best_score * 0.1)
+    elif scores:
+        gap = kw_best_score - scores[1][0]
+        kw_confidence = min(0.95, 0.55 + gap * 0.15 + kw_best_score * 0.05)
+    else:
+        kw_confidence = 0.3
+
+    kw_confidence = max(0.4, min(1.0, kw_confidence))
+
+    # Decision logic: LLM high confidence (>0.7) and agrees with keywords → trust LLM
+    # LLM low confidence or disagrees with strong keyword match → trust keywords
+    if llm_intent is not None:
+        llm_agrees_with_kw = llm_intent.intent_type == kw_best_type
+        kw_impl_match = _IMPL_KEYWORDS.search(text) is not None
+
+        # Override LLM when it misclassifies cleanup/migrate/remove as non-implementation
+        if kw_impl_match and llm_intent.intent_type not in (IntentType.IMPLEMENTATION, IntentType.FIX):
+            return Intent(
+                verbalization=verbalization,
+                intent_type=IntentType.IMPLEMENTATION,
+                confidence=max(llm_intent.confidence, kw_confidence),
+                reasoning=f"LLM={llm_intent.intent_type.value} 但关键词检测到实现类动词，强制路由到 pipeline",
+                suggested_action=action_map[IntentType.IMPLEMENTATION],
+            )
+
+        if llm_agrees_with_kw or llm_intent.confidence >= 0.7:
+            return llm_intent
+
+        # Both disagree and LLM is low confidence → trust whichever is higher
+        if kw_confidence >= llm_intent.confidence:
+            return Intent(
+                verbalization=verbalization,
+                intent_type=kw_best_type,
+                confidence=round(kw_confidence, 2),
+                reasoning=kw_reasoning,
+                suggested_action=action_map[kw_best_type],
+            )
+        return llm_intent
+
+    # No LLM result → pure keyword fallback
+    if not scores:
+        return Intent(
+            verbalization=verbalization,
+            intent_type=IntentType.OPEN_ENDED,
+            confidence=0.4,
+            reasoning="未匹配到明确的意图关键词",
+            suggested_action="ask_user: 请提供更多上下文",
+        )
+
     return Intent(
         verbalization=verbalization,
-        intent_type=best_type,
-        confidence=round(confidence, 2),
-        reasoning=best_reasoning,
-        suggested_action=action_map[best_type],
+        intent_type=kw_best_type,
+        confidence=round(kw_confidence, 2),
+        reasoning=kw_reasoning,
+        suggested_action=action_map[kw_best_type],
     )
 
 

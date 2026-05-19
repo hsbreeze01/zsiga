@@ -1,0 +1,63 @@
+{
+  "session_id": "create-stockfetch-db-base-class-4e2876f0",
+  "change_name": "create-stockfetch-db-base-class",
+  "project": "compass",
+  "exported_at": "2026-05-19T12:44:14.327773",
+  "outcome": "success",
+  "started_at": "2026-05-19T12:35:08.688898",
+  "finished_at": "2026-05-19T12:44:14.257512",
+  "total_runtime_seconds": 378.8,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 173.0,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 18,
+      "prompt_tokens": 235412,
+      "completion_tokens": 4111
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 148.5,
+      "fix_attempts": 1,
+      "llm_calls": 15,
+      "tool_calls": 16,
+      "prompt_tokens": 271920,
+      "completion_tokens": 4309
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 45.4,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 4,
+      "prompt_tokens": 39054,
+      "completion_tokens": 1261
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 11.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 30,
+    "total_tool_calls": 38,
+    "total_prompt_tokens": 546386,
+    "total_completion_tokens": 9681
+  }
+}

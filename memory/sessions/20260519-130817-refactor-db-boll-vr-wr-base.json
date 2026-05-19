@@ -1,0 +1,63 @@
+{
+  "session_id": "refactor-db-boll-vr-wr-base-ac69618a",
+  "change_name": "refactor-db-boll-vr-wr-base",
+  "project": "compass",
+  "exported_at": "2026-05-19T13:08:17.877102",
+  "outcome": "success",
+  "started_at": "2026-05-19T13:02:43.988713",
+  "finished_at": "2026-05-19T13:08:17.801821",
+  "total_runtime_seconds": 293.2,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 141.4,
+      "fix_attempts": 0,
+      "llm_calls": 9,
+      "tool_calls": 14,
+      "prompt_tokens": 157081,
+      "completion_tokens": 3734
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 108.1,
+      "fix_attempts": 0,
+      "llm_calls": 11,
+      "tool_calls": 14,
+      "prompt_tokens": 204322,
+      "completion_tokens": 3034
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 31.7,
+      "fix_attempts": 0,
+      "llm_calls": 4,
+      "tool_calls": 8,
+      "prompt_tokens": 46833,
+      "completion_tokens": 548
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 12.0,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 24,
+    "total_tool_calls": 36,
+    "total_prompt_tokens": 408236,
+    "total_completion_tokens": 7316
+  }
+}

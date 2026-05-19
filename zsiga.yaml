@@ -3,9 +3,8 @@ agent:
   llm:
     provider: zhipuai
     model: glm-5.1
-    api_key: 5920f4fae4c4448e9b9789b360a2fb4c.cezqLK9T60yfqZOV
+    api_key: 6f0cf15381114026987ba060209f608c.yGMlkw9kWcELd2si
     base_url: https://open.bigmodel.cn/api/coding/paas/v4
-    # proxy: http://proxy-chj.nioint.com:8080  # direct connection works; proxy breaks connectivity
     max_tokens: 4096
     temperature: 0.3
 
@@ -22,7 +21,7 @@ targets:
     ssh:
       host: 47.99.57.152
       user: root
-      key_path: ~/.ssh/id_rsa
+      key_path: /home/lancer/.ssh/id_ed25519
 
   compass:
     path: /home/ecs-assist-user/d8q-intelligentengine-stockcompass
@@ -32,7 +31,7 @@ targets:
     ssh:
       host: 47.99.57.152
       user: root
-      key_path: ~/.ssh/id_rsa
+      key_path: /home/lancer/.ssh/id_ed25519
 
   dataagent:
     path: /home/ecs-assist-user/d8q-data-agent
@@ -42,7 +41,7 @@ targets:
     ssh:
       host: 47.99.57.152
       user: root
-      key_path: ~/.ssh/id_rsa
+      key_path: /home/lancer/.ssh/id_ed25519
 
   stockshark:
     path: /home/ecs-assist-user/d8q-intelligentengine-stockshark
@@ -52,7 +51,7 @@ targets:
     ssh:
       host: 47.99.57.152
       user: root
-      key_path: ~/.ssh/id_rsa
+      key_path: /home/lancer/.ssh/id_ed25519
 
   infopublisher:
     path: /home/ecs-assist-user/d8q-intelligentengine-infopublisher
@@ -62,12 +61,12 @@ targets:
     ssh:
       host: 47.99.57.152
       user: root
-      key_path: ~/.ssh/id_rsa
+      key_path: /home/lancer/.ssh/id_ed25519
 
   zsiga:
-    path: /Users/lancer.zhang/ProjectNIO/zsiga
-    test_cmd: "/opt/homebrew/bin/python3.11 -m pytest -x --tb=short"
-    lint_cmd: "/opt/homebrew/bin/python3.11 -m ruff check ."
+    path: /home/zsiga/repo
+    test_cmd: "venv/bin/python -m pytest -x --tb=short"
+    lint_cmd: "venv/bin/python -m ruff check ."
     transport: local
 
 intake:
@@ -76,7 +75,7 @@ intake:
     scan_interval_seconds: 60
 
 pipeline:
-  max_changes_per_cycle: 3
+  max_changes_per_cycle: 10
   enrich_max_turns: 35
   enrich_timeout: 1200
   impl_max_turns: 30

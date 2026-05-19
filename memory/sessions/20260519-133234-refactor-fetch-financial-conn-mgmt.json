@@ -1,0 +1,63 @@
+{
+  "session_id": "refactor-fetch-financial-conn-mgmt-d44b576b",
+  "change_name": "refactor-fetch-financial-conn-mgmt",
+  "project": "compass",
+  "exported_at": "2026-05-19T13:32:34.919904",
+  "outcome": "success",
+  "started_at": "2026-05-19T13:26:00.794322",
+  "finished_at": "2026-05-19T13:32:34.880200",
+  "total_runtime_seconds": 307.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 125.1,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 13,
+      "prompt_tokens": 176902,
+      "completion_tokens": 3008
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 111.3,
+      "fix_attempts": 1,
+      "llm_calls": 11,
+      "tool_calls": 13,
+      "prompt_tokens": 189100,
+      "completion_tokens": 3026
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 58.4,
+      "fix_attempts": 0,
+      "llm_calls": 4,
+      "tool_calls": 5,
+      "prompt_tokens": 45455,
+      "completion_tokens": 1424
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 12.3,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 27,
+    "total_tool_calls": 31,
+    "total_prompt_tokens": 411457,
+    "total_completion_tokens": 7458
+  }
+}

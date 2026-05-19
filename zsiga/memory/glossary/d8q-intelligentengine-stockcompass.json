@@ -1,0 +1,3926 @@
+{
+  "project": "d8q-intelligentengine-stockcompass",
+  "extracted_at": "2026-05-19T12:36:40.788576",
+  "entries": [
+    {
+      "name": "get_price_day_tx",
+      "category": "function",
+      "file": "Ashare/Ashare.py"
+    },
+    {
+      "name": "get_price_min_tx",
+      "category": "function",
+      "file": "Ashare/Ashare.py"
+    },
+    {
+      "name": "get_price_sina",
+      "category": "function",
+      "file": "Ashare/Ashare.py"
+    },
+    {
+      "name": "get_price",
+      "category": "function",
+      "file": "Ashare/Ashare.py"
+    },
+    {
+      "name": "get_stock_quote",
+      "category": "function",
+      "file": "Ashare/Ashare.py"
+    },
+    {
+      "name": "CLOSE",
+      "category": "config",
+      "file": "Ashare/Demo2.py"
+    },
+    {
+      "name": "HIGH",
+      "category": "config",
+      "file": "Ashare/Demo2.py"
+    },
+    {
+      "name": "RD",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "RET",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "ABS",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "MAX",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "MIN",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "MA",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "REF",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "DIFF",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "STD",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "IF",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "SUM",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "HHV",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "LLV",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "EMA",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "SMA",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "AVEDEV",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "SLOPE",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "COUNT",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "EVERY",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "LAST",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "EXIST",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "BARSLAST",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "FORCAST",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "CROSS",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "MACD",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "KDJ",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "RSI",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "WR",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "BIAS",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "BOLL",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "PSY",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "CCI",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "ATR",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "BBI",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "DMI",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "TAQ",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "TRIX",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "VR",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "EMV",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "DPO",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "BRAR",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "DMA",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "MTM",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "ROC",
+      "category": "function",
+      "file": "Ashare/MyTT.py"
+    },
+    {
+      "name": "get_stock_info",
+      "category": "function",
+      "file": "Ashare/test.py"
+    },
+    {
+      "name": "all_stock_concepts",
+      "category": "function",
+      "file": "Ashare/test.py"
+    },
+    {
+      "name": "StockToday",
+      "category": "class",
+      "file": "buy/bean/StockToday.py"
+    },
+    {
+      "name": "DicStockFactory",
+      "category": "class",
+      "file": "buy/cache/DicStockFactory.py"
+    },
+    {
+      "name": "TaskConfig",
+      "category": "class",
+      "file": "buy/Config.py"
+    },
+    {
+      "name": "DBClient",
+      "category": "class",
+      "file": "buy/DBClient.py"
+    },
+    {
+      "name": "job",
+      "category": "function",
+      "file": "buy/main.py"
+    },
+    {
+      "name": "run_threaded",
+      "category": "function",
+      "file": "buy/main.py"
+    },
+    {
+      "name": "job2",
+      "category": "function",
+      "file": "buy/main.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "buy/main.py"
+    },
+    {
+      "name": "GetUrls",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "GetData",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "GetStock",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "GetLimitup",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "GetDate",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "ReadCsv",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "GetMsg",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "SendEmail",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "Gather",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "Postman",
+      "category": "function",
+      "file": "buy/sina1.py"
+    },
+    {
+      "name": "getChinaStockIndexInfo",
+      "category": "function",
+      "file": "buy/sina2.py"
+    },
+    {
+      "name": "getChinaStockIndividualInfo",
+      "category": "function",
+      "file": "buy/sina2.py"
+    },
+    {
+      "name": "getWorldStockIndexInfo",
+      "category": "function",
+      "file": "buy/sina2.py"
+    },
+    {
+      "name": "test_china_index_data",
+      "category": "function",
+      "file": "buy/sina2.py"
+    },
+    {
+      "name": "test_china_individual_data",
+      "category": "function",
+      "file": "buy/sina2.py"
+    },
+    {
+      "name": "test_global_index_data",
+      "category": "function",
+      "file": "buy/sina2.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "buy/sina2.py"
+    },
+    {
+      "name": "genUrl",
+      "category": "function",
+      "file": "buy/sina3.py"
+    },
+    {
+      "name": "getPage",
+      "category": "function",
+      "file": "buy/sina3.py"
+    },
+    {
+      "name": "BaseStockCheckTask",
+      "category": "class",
+      "file": "buy/task/BaseStockCheckTask.py"
+    },
+    {
+      "name": "CurrentStockTask",
+      "category": "class",
+      "file": "buy/task/CurrentStockTask.py"
+    },
+    {
+      "name": "DailyStockCheckTask",
+      "category": "class",
+      "file": "buy/task/DailyStockCheckTask.py"
+    },
+    {
+      "name": "Task",
+      "category": "class",
+      "file": "buy/task/Task.py"
+    },
+    {
+      "name": "dayDif",
+      "category": "function",
+      "file": "buy/utils/DateUtil.py"
+    },
+    {
+      "name": "isSameDay",
+      "category": "function",
+      "file": "buy/utils/DateUtil.py"
+    },
+    {
+      "name": "getDate",
+      "category": "function",
+      "file": "buy/utils/DateUtil.py"
+    },
+    {
+      "name": "getHistoryUrls",
+      "category": "function",
+      "file": "buy/utils/SinaWeb.py"
+    },
+    {
+      "name": "getCurrentUrls",
+      "category": "function",
+      "file": "buy/utils/SinaWeb.py"
+    },
+    {
+      "name": "create_app",
+      "category": "function",
+      "file": "compass/api/app.py"
+    },
+    {
+      "name": "/health",
+      "category": "route",
+      "file": "compass/api/app.py"
+    },
+    {
+      "name": "list_tasks",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "create_task",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "update_task",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "delete_task",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "stats_overview",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "daily_active",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "action_stats",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "user_stats",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "list_users",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "admin_tasks_page",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "admin_stats_page",
+      "category": "function",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/tasks",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/tasks",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/tasks/<int:task_id>",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/tasks/<int:task_id>",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/stats",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/stats/daily-active",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/stats/actions",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/stats/users",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/api/admin/users",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/admin/tasks",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "/admin/stats",
+      "category": "route",
+      "file": "compass/api/routes/admin.py"
+    },
+    {
+      "name": "llm_analyze",
+      "category": "function",
+      "file": "compass/api/routes/analysis.py"
+    },
+    {
+      "name": "dual_llm_analyze",
+      "category": "function",
+      "file": "compass/api/routes/analysis.py"
+    },
+    {
+      "name": "buy_advice",
+      "category": "function",
+      "file": "compass/api/routes/analysis.py"
+    },
+    {
+      "name": "/llm/analyze",
+      "category": "route",
+      "file": "compass/api/routes/analysis.py"
+    },
+    {
+      "name": "/api/analysis/dual-llm",
+      "category": "route",
+      "file": "compass/api/routes/analysis.py"
+    },
+    {
+      "name": "/api/strategy/buy_advice",
+      "category": "route",
+      "file": "compass/api/routes/analysis.py"
+    },
+    {
+      "name": "COMPASS_ROOT",
+      "category": "config",
+      "file": "compass/api/routes/analysis.py"
+    },
+    {
+      "name": "login",
+      "category": "function",
+      "file": "compass/api/routes/auth.py"
+    },
+    {
+      "name": "login2",
+      "category": "function",
+      "file": "compass/api/routes/auth.py"
+    },
+    {
+      "name": "logout",
+      "category": "function",
+      "file": "compass/api/routes/auth.py"
+    },
+    {
+      "name": "register",
+      "category": "function",
+      "file": "compass/api/routes/auth.py"
+    },
+    {
+      "name": "/login",
+      "category": "route",
+      "file": "compass/api/routes/auth.py"
+    },
+    {
+      "name": "/login2",
+      "category": "route",
+      "file": "compass/api/routes/auth.py"
+    },
+    {
+      "name": "/logout",
+      "category": "route",
+      "file": "compass/api/routes/auth.py"
+    },
+    {
+      "name": "/register",
+      "category": "route",
+      "file": "compass/api/routes/auth.py"
+    },
+    {
+      "name": "verify",
+      "category": "function",
+      "file": "compass/api/routes/backtest/backtest.py"
+    },
+    {
+      "name": "/api/backtest/verify",
+      "category": "route",
+      "file": "compass/api/routes/backtest/backtest.py"
+    },
+    {
+      "name": "add",
+      "category": "function",
+      "file": "compass/api/routes/favorites.py"
+    },
+    {
+      "name": "delete",
+      "category": "function",
+      "file": "compass/api/routes/favorites.py"
+    },
+    {
+      "name": "list",
+      "category": "function",
+      "file": "compass/api/routes/favorites.py"
+    },
+    {
+      "name": "/favorite/add",
+      "category": "route",
+      "file": "compass/api/routes/favorites.py"
+    },
+    {
+      "name": "/favorite/delete",
+      "category": "route",
+      "file": "compass/api/routes/favorites.py"
+    },
+    {
+      "name": "/favorite/list",
+      "category": "route",
+      "file": "compass/api/routes/favorites.py"
+    },
+    {
+      "name": "get_dataagent",
+      "category": "function",
+      "file": "compass/api/routes/market_data.py"
+    },
+    {
+      "name": "get_heat_index",
+      "category": "function",
+      "file": "compass/api/routes/market_data.py"
+    },
+    {
+      "name": "get_track_heat",
+      "category": "function",
+      "file": "compass/api/routes/market_data.py"
+    },
+    {
+      "name": "/api/market/heat",
+      "category": "route",
+      "file": "compass/api/routes/market_data.py"
+    },
+    {
+      "name": "/api/market/heat/<int:track_id>",
+      "category": "route",
+      "file": "compass/api/routes/market_data.py"
+    },
+    {
+      "name": "send_email",
+      "category": "function",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "test_email",
+      "category": "function",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "/api/notify/email",
+      "category": "route",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "/api/notify/email/test",
+      "category": "route",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "SMTP_SERVER",
+      "category": "config",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "SMTP_PORT",
+      "category": "config",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "SMTP_USER",
+      "category": "config",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "SMTP_PASSWORD",
+      "category": "config",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "SMTP_RECEIVER",
+      "category": "config",
+      "file": "compass/api/routes/notify.py"
+    },
+    {
+      "name": "get_dataagent",
+      "category": "function",
+      "file": "compass/api/routes/policy.py"
+    },
+    {
+      "name": "classify_policy",
+      "category": "function",
+      "file": "compass/api/routes/policy.py"
+    },
+    {
+      "name": "policy_analysis",
+      "category": "function",
+      "file": "compass/api/routes/policy.py"
+    },
+    {
+      "name": "policy_page",
+      "category": "function",
+      "file": "compass/api/routes/policy.py"
+    },
+    {
+      "name": "/api/policy/classify",
+      "category": "route",
+      "file": "compass/api/routes/policy.py"
+    },
+    {
+      "name": "/api/policy/analysis",
+      "category": "route",
+      "file": "compass/api/routes/policy.py"
+    },
+    {
+      "name": "/policy",
+      "category": "route",
+      "file": "compass/api/routes/policy.py"
+    },
+    {
+      "name": "list_prompts",
+      "category": "function",
+      "file": "compass/api/routes/prompts.py"
+    },
+    {
+      "name": "get_prompt",
+      "category": "function",
+      "file": "compass/api/routes/prompts.py"
+    },
+    {
+      "name": "update_prompt",
+      "category": "function",
+      "file": "compass/api/routes/prompts.py"
+    },
+    {
+      "name": "/api/prompts",
+      "category": "route",
+      "file": "compass/api/routes/prompts.py"
+    },
+    {
+      "name": "/api/prompts/<path:prompt_id>",
+      "category": "route",
+      "file": "compass/api/routes/prompts.py"
+    },
+    {
+      "name": "/api/prompts/<path:prompt_id>",
+      "category": "route",
+      "file": "compass/api/routes/prompts.py"
+    },
+    {
+      "name": "PROMPTS_DIR",
+      "category": "config",
+      "file": "compass/api/routes/prompts.py"
+    },
+    {
+      "name": "get_daily_recommendation",
+      "category": "function",
+      "file": "compass/api/routes/recommendation.py"
+    },
+    {
+      "name": "generate_recommendation",
+      "category": "function",
+      "file": "compass/api/routes/recommendation.py"
+    },
+    {
+      "name": "get_recommendation_performance",
+      "category": "function",
+      "file": "compass/api/routes/recommendation.py"
+    },
+    {
+      "name": "/api/recommendation/daily",
+      "category": "route",
+      "file": "compass/api/routes/recommendation.py"
+    },
+    {
+      "name": "/api/recommendation/generate",
+      "category": "route",
+      "file": "compass/api/routes/recommendation.py"
+    },
+    {
+      "name": "/api/recommendation/performance",
+      "category": "route",
+      "file": "compass/api/routes/recommendation.py"
+    },
+    {
+      "name": "get_default_template",
+      "category": "function",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "load_templates",
+      "category": "function",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "save_templates",
+      "category": "function",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "get_track_data",
+      "category": "function",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "get_templates",
+      "category": "function",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "save_template",
+      "category": "function",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "generate_report",
+      "category": "function",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "report_page",
+      "category": "function",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "/api/report/templates",
+      "category": "route",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "/api/report/templates",
+      "category": "route",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "/api/report/generate",
+      "category": "route",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "/report",
+      "category": "route",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "COMPASS_ROOT",
+      "category": "config",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "TEMPLATES_FILE",
+      "category": "config",
+      "file": "compass/api/routes/report.py"
+    },
+    {
+      "name": "status",
+      "category": "function",
+      "file": "compass/api/routes/security.py"
+    },
+    {
+      "name": "dashboard",
+      "category": "function",
+      "file": "compass/api/routes/security.py"
+    },
+    {
+      "name": "/security/status",
+      "category": "route",
+      "file": "compass/api/routes/security.py"
+    },
+    {
+      "name": "/security/dashboard",
+      "category": "route",
+      "file": "compass/api/routes/security.py"
+    },
+    {
+      "name": "index",
+      "category": "function",
+      "file": "compass/api/routes/simulation.py"
+    },
+    {
+      "name": "deal",
+      "category": "function",
+      "file": "compass/api/routes/simulation.py"
+    },
+    {
+      "name": "/simulation",
+      "category": "route",
+      "file": "compass/api/routes/simulation.py"
+    },
+    {
+      "name": "/simulation/deal",
+      "category": "route",
+      "file": "compass/api/routes/simulation.py"
+    },
+    {
+      "name": "get_user_tracks",
+      "category": "function",
+      "file": "compass/api/routes/subscription.py"
+    },
+    {
+      "name": "add_user_track",
+      "category": "function",
+      "file": "compass/api/routes/subscription.py"
+    },
+    {
+      "name": "remove_user_track",
+      "category": "function",
+      "file": "compass/api/routes/subscription.py"
+    },
+    {
+      "name": "/api/user/tracks",
+      "category": "route",
+      "file": "compass/api/routes/subscription.py"
+    },
+    {
+      "name": "/api/user/tracks",
+      "category": "route",
+      "file": "compass/api/routes/subscription.py"
+    },
+    {
+      "name": "/api/user/tracks/<int:track_id>",
+      "category": "route",
+      "file": "compass/api/routes/subscription.py"
+    },
+    {
+      "name": "trigger_sync",
+      "category": "function",
+      "file": "compass/api/routes/sync.py"
+    },
+    {
+      "name": "sync_status",
+      "category": "function",
+      "file": "compass/api/routes/sync.py"
+    },
+    {
+      "name": "/api/sync/dic-stock",
+      "category": "route",
+      "file": "compass/api/routes/sync.py"
+    },
+    {
+      "name": "/api/sync/dic-stock/status",
+      "category": "route",
+      "file": "compass/api/routes/sync.py"
+    },
+    {
+      "name": "Config",
+      "category": "class",
+      "file": "compass/config.py"
+    },
+    {
+      "name": "DevelopmentConfig",
+      "category": "class",
+      "file": "compass/config.py"
+    },
+    {
+      "name": "ProductionConfig",
+      "category": "class",
+      "file": "compass/config.py"
+    },
+    {
+      "name": "TestingConfig",
+      "category": "class",
+      "file": "compass/config.py"
+    },
+    {
+      "name": "get_config",
+      "category": "function",
+      "file": "compass/config.py"
+    },
+    {
+      "name": "Database",
+      "category": "class",
+      "file": "compass/data/database.py"
+    },
+    {
+      "name": "LLM",
+      "category": "class",
+      "file": "compass/llm/base.py"
+    },
+    {
+      "name": "DeepSeekLLM",
+      "category": "class",
+      "file": "compass/llm/deepseek.py"
+    },
+    {
+      "name": "DoubaoLLM",
+      "category": "class",
+      "file": "compass/llm/doubao.py"
+    },
+    {
+      "name": "session_required",
+      "category": "function",
+      "file": "compass/middleware/auth.py"
+    },
+    {
+      "name": "check_private_routes",
+      "category": "function",
+      "file": "compass/middleware/auth.py"
+    },
+    {
+      "name": "PRIVATE_ROUTES",
+      "category": "config",
+      "file": "compass/middleware/auth.py"
+    },
+    {
+      "name": "SESSION_MAX_AGE",
+      "category": "config",
+      "file": "compass/middleware/auth.py"
+    },
+    {
+      "name": "SecurityMiddleware",
+      "category": "class",
+      "file": "compass/middleware/security.py"
+    },
+    {
+      "name": "SCAN_PATTERNS",
+      "category": "config",
+      "file": "compass/middleware/security.py"
+    },
+    {
+      "name": "HONEYPOT_PATHS",
+      "category": "config",
+      "file": "compass/middleware/security.py"
+    },
+    {
+      "name": "MALICIOUS_UA_PATTERNS",
+      "category": "config",
+      "file": "compass/middleware/security.py"
+    },
+    {
+      "name": "DANGEROUS_CHARS",
+      "category": "config",
+      "file": "compass/middleware/security.py"
+    },
+    {
+      "name": "SECURITY_HEADERS",
+      "category": "config",
+      "file": "compass/middleware/security.py"
+    },
+    {
+      "name": "track_action",
+      "category": "function",
+      "file": "compass/middleware/tracking.py"
+    },
+    {
+      "name": "track_analysis",
+      "category": "function",
+      "file": "compass/middleware/tracking.py"
+    },
+    {
+      "name": "track_search",
+      "category": "function",
+      "file": "compass/middleware/tracking.py"
+    },
+    {
+      "name": "track_favorite",
+      "category": "function",
+      "file": "compass/middleware/tracking.py"
+    },
+    {
+      "name": "track_page_view",
+      "category": "function",
+      "file": "compass/middleware/tracking.py"
+    },
+    {
+      "name": "PromptManager",
+      "category": "class",
+      "file": "compass/prompt_loader.py"
+    },
+    {
+      "name": "get_prompt_manager",
+      "category": "function",
+      "file": "compass/prompt_loader.py"
+    },
+    {
+      "name": "DEFAULT_PROMPTS_DIR",
+      "category": "config",
+      "file": "compass/prompt_loader.py"
+    },
+    {
+      "name": "DailyAnalysisTask",
+      "category": "class",
+      "file": "compass/scheduler/tasks.py"
+    },
+    {
+      "name": "DailyRecommendationTask",
+      "category": "class",
+      "file": "compass/scheduler/tasks.py"
+    },
+    {
+      "name": "DataAgentFetcher",
+      "category": "class",
+      "file": "compass/services/data_gateway.py"
+    },
+    {
+      "name": "SharkFetcher",
+      "category": "class",
+      "file": "compass/services/data_gateway.py"
+    },
+    {
+      "name": "DataGateway",
+      "category": "class",
+      "file": "compass/services/data_gateway.py"
+    },
+    {
+      "name": "DATAAGENT_BASE",
+      "category": "config",
+      "file": "compass/services/data_gateway.py"
+    },
+    {
+      "name": "SHARK_BASE",
+      "category": "config",
+      "file": "compass/services/data_gateway.py"
+    },
+    {
+      "name": "TIMEOUT",
+      "category": "config",
+      "file": "compass/services/data_gateway.py"
+    },
+    {
+      "name": "DualLLMAnalysisService",
+      "category": "class",
+      "file": "compass/services/llm_analysis.py"
+    },
+    {
+      "name": "RecommendationService",
+      "category": "class",
+      "file": "compass/services/recommendation.py"
+    },
+    {
+      "name": "WEIGHT_TECHNICAL",
+      "category": "config",
+      "file": "compass/services/recommendation.py"
+    },
+    {
+      "name": "WEIGHT_TREND",
+      "category": "config",
+      "file": "compass/services/recommendation.py"
+    },
+    {
+      "name": "WEIGHT_FUNDAMENTAL",
+      "category": "config",
+      "file": "compass/services/recommendation.py"
+    },
+    {
+      "name": "WEIGHT_VOLUME",
+      "category": "config",
+      "file": "compass/services/recommendation.py"
+    },
+    {
+      "name": "MIN_TURNOVER_AMOUNT",
+      "category": "config",
+      "file": "compass/services/recommendation.py"
+    },
+    {
+      "name": "MIN_TURNOVER_RATE",
+      "category": "config",
+      "file": "compass/services/recommendation.py"
+    },
+    {
+      "name": "MAX_CHANGE_PERCENTAGE",
+      "category": "config",
+      "file": "compass/services/recommendation.py"
+    },
+    {
+      "name": "register_blueprints",
+      "category": "function",
+      "file": "compass/strategy/app.py"
+    },
+    {
+      "name": "init_strategy_engine",
+      "category": "function",
+      "file": "compass/strategy/app.py"
+    },
+    {
+      "name": "init_tables",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "insert_strategy_group",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "update_strategy_group",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "soft_delete_strategy_group",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "update_strategy_group_status",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_strategy_group",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "list_strategy_groups",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "list_active_groups",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "create_run",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "update_run",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_run",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_latest_run",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "cleanup_stale_runs",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "insert_signal_snapshots",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "query_signals",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "calc_sector_change_pct",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "insert_group_event",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "update_group_event",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_group_event",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "query_group_events",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "find_open_event",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "close_expired_events",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "insert_subscription",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "delete_subscription",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_subscription",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "list_user_subscriptions",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "count_subscribers",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "list_strategy_groups_with_subscription",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_event_micro_data",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_event_macro_data",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_event_info_data",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "insert_trend_tracking",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_latest_trend_tracking",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_trend_tracking_history",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "update_event_lifecycle",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "update_event_llm_result",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "append_event_news_matched",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "list_tracking_events",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "get_recent_trend_trackings",
+      "category": "function",
+      "file": "compass/strategy/db.py"
+    },
+    {
+      "name": "Condition",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "AggregationRule",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "StrategyGroupCreate",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "StrategyGroupUpdate",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "StrategyGroupStatusUpdate",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "StrategyGroupResponse",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "SignalSnapshotResponse",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "GroupEventResponse",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "ScanResult",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "IndustrySyncResponse",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "IndustryStatsItem",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "IndustryStatusResponse",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "PaginatedResponse",
+      "category": "class",
+      "file": "compass/strategy/models.py"
+    },
+    {
+      "name": "query_events",
+      "category": "function",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "get_event",
+      "category": "function",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "close_event",
+      "category": "function",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "get_event_trend",
+      "category": "function",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "get_event_micro",
+      "category": "function",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "get_event_macro",
+      "category": "function",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "get_event_info",
+      "category": "function",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "/events",
+      "category": "route",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "/events/<int:event_id>",
+      "category": "route",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "/events/<int:event_id>/close",
+      "category": "route",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "/events/<int:event_id>/trend",
+      "category": "route",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "/events/<int:event_id>/micro",
+      "category": "route",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "/events/<int:event_id>/macro",
+      "category": "route",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "/events/<int:event_id>/info",
+      "category": "route",
+      "file": "compass/strategy/routes/events.py"
+    },
+    {
+      "name": "trigger_industry_sync",
+      "category": "function",
+      "file": "compass/strategy/routes/industry_sync.py"
+    },
+    {
+      "name": "industry_sync_status",
+      "category": "function",
+      "file": "compass/strategy/routes/industry_sync.py"
+    },
+    {
+      "name": "industry_stats",
+      "category": "function",
+      "file": "compass/strategy/routes/industry_sync.py"
+    },
+    {
+      "name": "industry_completion_status",
+      "category": "function",
+      "file": "compass/strategy/routes/industry_sync.py"
+    },
+    {
+      "name": "/admin/industry/sync",
+      "category": "route",
+      "file": "compass/strategy/routes/industry_sync.py"
+    },
+    {
+      "name": "/admin/industry/sync/status",
+      "category": "route",
+      "file": "compass/strategy/routes/industry_sync.py"
+    },
+    {
+      "name": "/admin/industry/stats",
+      "category": "route",
+      "file": "compass/strategy/routes/industry_sync.py"
+    },
+    {
+      "name": "/admin/industry/status",
+      "category": "route",
+      "file": "compass/strategy/routes/industry_sync.py"
+    },
+    {
+      "name": "trigger_scan",
+      "category": "function",
+      "file": "compass/strategy/routes/signals.py"
+    },
+    {
+      "name": "get_latest_run",
+      "category": "function",
+      "file": "compass/strategy/routes/signals.py"
+    },
+    {
+      "name": "query_signals",
+      "category": "function",
+      "file": "compass/strategy/routes/signals.py"
+    },
+    {
+      "name": "signal_stream",
+      "category": "function",
+      "file": "compass/strategy/routes/signals.py"
+    },
+    {
+      "name": "/strategy/<int:group_id>/scan",
+      "category": "route",
+      "file": "compass/strategy/routes/signals.py"
+    },
+    {
+      "name": "/strategy/<int:group_id>/runs/latest",
+      "category": "route",
+      "file": "compass/strategy/routes/signals.py"
+    },
+    {
+      "name": "/signals",
+      "category": "route",
+      "file": "compass/strategy/routes/signals.py"
+    },
+    {
+      "name": "/signals/stream",
+      "category": "route",
+      "file": "compass/strategy/routes/signals.py"
+    },
+    {
+      "name": "create_group",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "update_group",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "delete_group",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "toggle_status",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "list_groups",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "get_group",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "/groups",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "/groups/<int:group_id>",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "/groups/<int:group_id>",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "/groups/<int:group_id>/status",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "/groups",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "/groups/<int:group_id>",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_groups.py"
+    },
+    {
+      "name": "subscribe",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_subscription.py"
+    },
+    {
+      "name": "unsubscribe",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_subscription.py"
+    },
+    {
+      "name": "my_subscriptions",
+      "category": "function",
+      "file": "compass/strategy/routes/strategy_subscription.py"
+    },
+    {
+      "name": "/subscription",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_subscription.py"
+    },
+    {
+      "name": "/subscription/<int:group_id>",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_subscription.py"
+    },
+    {
+      "name": "/subscription/mine",
+      "category": "route",
+      "file": "compass/strategy/routes/strategy_subscription.py"
+    },
+    {
+      "name": "start_scheduler",
+      "category": "function",
+      "file": "compass/strategy/scheduler.py"
+    },
+    {
+      "name": "shutdown_scheduler",
+      "category": "function",
+      "file": "compass/strategy/scheduler.py"
+    },
+    {
+      "name": "reload_scheduler",
+      "category": "function",
+      "file": "compass/strategy/scheduler.py"
+    },
+    {
+      "name": "Aggregator",
+      "category": "class",
+      "file": "compass/strategy/services/aggregator.py"
+    },
+    {
+      "name": "get_sync_status",
+      "category": "function",
+      "file": "compass/strategy/services/industry_sync.py"
+    },
+    {
+      "name": "sync_industry_data",
+      "category": "function",
+      "file": "compass/strategy/services/industry_sync.py"
+    },
+    {
+      "name": "get_industry_stats",
+      "category": "function",
+      "file": "compass/strategy/services/industry_sync.py"
+    },
+    {
+      "name": "get_industry_status",
+      "category": "function",
+      "file": "compass/strategy/services/industry_sync.py"
+    },
+    {
+      "name": "LLMExtractor",
+      "category": "class",
+      "file": "compass/strategy/services/llm_extractor.py"
+    },
+    {
+      "name": "Scanner",
+      "category": "class",
+      "file": "compass/strategy/services/scanner.py"
+    },
+    {
+      "name": "TrendTracker",
+      "category": "class",
+      "file": "compass/strategy/services/trend_tracker.py"
+    },
+    {
+      "name": "DECAY_SCORE_THRESHOLD",
+      "category": "config",
+      "file": "compass/strategy/services/trend_tracker.py"
+    },
+    {
+      "name": "DECAY_CONSECUTIVE_DAYS",
+      "category": "config",
+      "file": "compass/strategy/services/trend_tracker.py"
+    },
+    {
+      "name": "sync_dic_stock",
+      "category": "function",
+      "file": "compass/sync/dic_stock_sync.py"
+    },
+    {
+      "name": "setup_logging",
+      "category": "function",
+      "file": "compass/utils/logger.py"
+    },
+    {
+      "name": "VOL",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "WMA",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "EMA",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "SMA",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "SUM",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "ABS",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "STD",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "CROSS",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "REF",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "MIN",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "MAX",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "EVERY",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "COUNT",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "HHV",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "LLV",
+      "category": "config",
+      "file": "funcat/api.py"
+    },
+    {
+      "name": "ExecutionContext",
+      "category": "class",
+      "file": "funcat/context.py"
+    },
+    {
+      "name": "set_data_backend",
+      "category": "function",
+      "file": "funcat/context.py"
+    },
+    {
+      "name": "set_current_security",
+      "category": "function",
+      "file": "funcat/context.py"
+    },
+    {
+      "name": "set_start_date",
+      "category": "function",
+      "file": "funcat/context.py"
+    },
+    {
+      "name": "set_current_date",
+      "category": "function",
+      "file": "funcat/context.py"
+    },
+    {
+      "name": "set_current_freq",
+      "category": "function",
+      "file": "funcat/context.py"
+    },
+    {
+      "name": "get_trading_dates",
+      "category": "function",
+      "file": "funcat/context.py"
+    },
+    {
+      "name": "symbol",
+      "category": "function",
+      "file": "funcat/context.py"
+    },
+    {
+      "name": "DataBackend",
+      "category": "class",
+      "file": "funcat/data/backend.py"
+    },
+    {
+      "name": "DBDataBackend",
+      "category": "class",
+      "file": "funcat/data/db_backend.py"
+    },
+    {
+      "name": "RQAlphaDataBackend",
+      "category": "class",
+      "file": "funcat/data/rqalpha_data_backend.py"
+    },
+    {
+      "name": "RQDataBackend",
+      "category": "class",
+      "file": "funcat/data/rqdata_data_backend.py"
+    },
+    {
+      "name": "TushareDataBackend",
+      "category": "class",
+      "file": "funcat/data/tushare_backend.py"
+    },
+    {
+      "name": "OneArgumentSeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "MovingAverageSeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "WeightedMovingAverageSeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "ExponentialMovingAverageSeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "StdSeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "TwoArgumentSeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "SMASeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "SumSeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "AbsSeries",
+      "category": "class",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "CrossOver",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "Ref",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "minimum",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "maximum",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "count",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "every",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "hhv",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "llv",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "iif",
+      "category": "function",
+      "file": "funcat/func.py"
+    },
+    {
+      "name": "suppress_numpy_warn",
+      "category": "function",
+      "file": "funcat/helper.py"
+    },
+    {
+      "name": "choose",
+      "category": "function",
+      "file": "funcat/helper.py"
+    },
+    {
+      "name": "select",
+      "category": "function",
+      "file": "funcat/helper.py"
+    },
+    {
+      "name": "KDJ",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "DMI",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "MACD",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "RSI",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "BOLL",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "WR",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "BIAS",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "ASI",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "VR",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "ARBR",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "DPO",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "TRIX",
+      "category": "function",
+      "file": "funcat/indicators.py"
+    },
+    {
+      "name": "TimeSeries",
+      "category": "class",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "NumericSeries",
+      "category": "class",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "DuplicateNumericSeries",
+      "category": "class",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "MarketDataSeries",
+      "category": "class",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "BoolSeries",
+      "category": "class",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "get_bars",
+      "category": "function",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "fit_series",
+      "category": "function",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "get_value",
+      "category": "function",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "get_series",
+      "category": "function",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "ensure_timeseries",
+      "category": "function",
+      "file": "funcat/time_series.py"
+    },
+    {
+      "name": "FormulaException",
+      "category": "class",
+      "file": "funcat/utils.py"
+    },
+    {
+      "name": "wrap_formula_exc",
+      "category": "function",
+      "file": "funcat/utils.py"
+    },
+    {
+      "name": "getsourcelines",
+      "category": "function",
+      "file": "funcat/utils.py"
+    },
+    {
+      "name": "get_int_date",
+      "category": "function",
+      "file": "funcat/utils.py"
+    },
+    {
+      "name": "get_str_date_from_int",
+      "category": "function",
+      "file": "funcat/utils.py"
+    },
+    {
+      "name": "get_date_from_int",
+      "category": "function",
+      "file": "funcat/utils.py"
+    },
+    {
+      "name": "rolling_window",
+      "category": "function",
+      "file": "funcat/utils.py"
+    },
+    {
+      "name": "handle_numpy_warning",
+      "category": "function",
+      "file": "funcat/utils.py"
+    },
+    {
+      "name": "PromptManager",
+      "category": "class",
+      "file": "prompt_loader.py"
+    },
+    {
+      "name": "get_prompt_manager",
+      "category": "function",
+      "file": "prompt_loader.py"
+    },
+    {
+      "name": "DEFAULT_PROMPTS_DIR",
+      "category": "config",
+      "file": "prompt_loader.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/create_daily_recommendation_table.py"
+    },
+    {
+      "name": "DDL",
+      "category": "config",
+      "file": "scripts/create_daily_recommendation_table.py"
+    },
+    {
+      "name": "get_db",
+      "category": "function",
+      "file": "scripts/fetch_financial.py"
+    },
+    {
+      "name": "get_market_prefix",
+      "category": "function",
+      "file": "scripts/fetch_financial.py"
+    },
+    {
+      "name": "store_profit",
+      "category": "function",
+      "file": "scripts/fetch_financial.py"
+    },
+    {
+      "name": "store_balance",
+      "category": "function",
+      "file": "scripts/fetch_financial.py"
+    },
+    {
+      "name": "fetch_one_stock",
+      "category": "function",
+      "file": "scripts/fetch_financial.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/fetch_financial.py"
+    },
+    {
+      "name": "get_db",
+      "category": "function",
+      "file": "scripts/fetch_valuation.py"
+    },
+    {
+      "name": "create_table",
+      "category": "function",
+      "file": "scripts/fetch_valuation.py"
+    },
+    {
+      "name": "fetch_market_pe",
+      "category": "function",
+      "file": "scripts/fetch_valuation.py"
+    },
+    {
+      "name": "fetch_market_pb",
+      "category": "function",
+      "file": "scripts/fetch_valuation.py"
+    },
+    {
+      "name": "fetch_individual_batch",
+      "category": "function",
+      "file": "scripts/fetch_valuation.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/fetch_valuation.py"
+    },
+    {
+      "name": "handle_signal",
+      "category": "function",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "get_db",
+      "category": "function",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "get_tdx_client",
+      "category": "function",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "parse_industry",
+      "category": "function",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "parse_concepts",
+      "category": "function",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "fetch_one",
+      "category": "function",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "DB_HOST",
+      "category": "config",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "DB_USER",
+      "category": "config",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "DB_PASS",
+      "category": "config",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "DB_NAME",
+      "category": "config",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "INTERVAL",
+      "category": "config",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "BATCH_COMMIT",
+      "category": "config",
+      "file": "scripts/fill_industry_concept.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/init_stocks.py"
+    },
+    {
+      "name": "DB_HOST",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "DB_PORT",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "DB_USER",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "DB_PASSWORD",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "DB_DATABASE",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "API_SINA",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "API_EASTMONEY",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "START_DATE",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "INIT_SLEEP",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "DAILY_SLEEP",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "MAX_RETRIES",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "RETRY_BASE_DELAY",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "LOG_FILE",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "LOG_LEVEL",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "LOG_FORMAT",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "MIN_INDICATOR_ROWS",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "DAILY_SCHEDULE_HOUR",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "DAILY_SCHEDULE_MINUTE",
+      "category": "config",
+      "file": "scripts/pipeline_config.py"
+    },
+    {
+      "name": "get_stock_list",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "get_stock_count",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "get_max_date",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "save_kline_data",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "calc_indicators",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "calc_and_save_indicators",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "analyze_and_save",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "get_table_stats",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "update_industry",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "count_empty_industry",
+      "category": "function",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "SCRIPT_DIR",
+      "category": "config",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "PROJECT_DIR",
+      "category": "config",
+      "file": "scripts/pipeline_db.py"
+    },
+    {
+      "name": "fetch_kline_daily",
+      "category": "function",
+      "file": "scripts/pipeline_fetcher.py"
+    },
+    {
+      "name": "fetch_stock_list",
+      "category": "function",
+      "file": "scripts/pipeline_fetcher.py"
+    },
+    {
+      "name": "fetch_industry_for_stock",
+      "category": "function",
+      "file": "scripts/pipeline_fetcher.py"
+    },
+    {
+      "name": "AnalysisTimeout",
+      "category": "class",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "setup_logging",
+      "category": "function",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "run_single",
+      "category": "function",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "run_init",
+      "category": "function",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "run_analysis_all",
+      "category": "function",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "run_daily",
+      "category": "function",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "run_daemon",
+      "category": "function",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "SCRIPT_DIR",
+      "category": "config",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "PROJECT_DIR",
+      "category": "config",
+      "file": "scripts/pipeline.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/run_strategy_engine.py"
+    },
+    {
+      "name": "ASIAnalysis",
+      "category": "class",
+      "file": "src/analysis/asi.py"
+    },
+    {
+      "name": "BIASAnalysis",
+      "category": "class",
+      "file": "src/analysis/bias.py"
+    },
+    {
+      "name": "BOLLAnalysis",
+      "category": "class",
+      "file": "src/analysis/boll.py"
+    },
+    {
+      "name": "Analysis",
+      "category": "class",
+      "file": "src/analysis/IndicatorAnalysis.py"
+    },
+    {
+      "name": "KDJAnalysis",
+      "category": "class",
+      "file": "src/analysis/kdj.py"
+    },
+    {
+      "name": "MACDAnalysis",
+      "category": "class",
+      "file": "src/analysis/macd.py"
+    },
+    {
+      "name": "MAAnalysis",
+      "category": "class",
+      "file": "src/analysis/ma.py"
+    },
+    {
+      "name": "RSIAnalysis",
+      "category": "class",
+      "file": "src/analysis/rsi.py"
+    },
+    {
+      "name": "StrategyAggregationDao",
+      "category": "class",
+      "file": "src/analysis/StrategyAggregation.py"
+    },
+    {
+      "name": "StrategyAggregation",
+      "category": "class",
+      "file": "src/analysis/StrategyAggregation.py"
+    },
+    {
+      "name": "TradeAnalysis",
+      "category": "class",
+      "file": "src/analysis/trade.py"
+    },
+    {
+      "name": "VOLUMEAnalysis",
+      "category": "class",
+      "file": "src/analysis/volume.py"
+    },
+    {
+      "name": "KeyWraper",
+      "category": "class",
+      "file": "src/index.py"
+    },
+    {
+      "name": "CustomViewBox",
+      "category": "class",
+      "file": "src/index.py"
+    },
+    {
+      "name": "MyStringAxis",
+      "category": "class",
+      "file": "src/index.py"
+    },
+    {
+      "name": "CandlestickItem",
+      "category": "class",
+      "file": "src/index.py"
+    },
+    {
+      "name": "KLineWidget",
+      "category": "class",
+      "file": "src/index.py"
+    },
+    {
+      "name": "Crosshair",
+      "category": "class",
+      "file": "src/index.py"
+    },
+    {
+      "name": "GetData",
+      "category": "class",
+      "file": "src/index.py"
+    },
+    {
+      "name": "calcIndicatorAndSaveToDB",
+      "category": "function",
+      "file": "stockdata/calc_indicator.py"
+    },
+    {
+      "name": "get_indicators",
+      "category": "function",
+      "file": "stockdata/calc_indicator.py"
+    },
+    {
+      "name": "DailyStockCheckTaskV2",
+      "category": "class",
+      "file": "stockdata/DailyStockCheckTaskV2.py"
+    },
+    {
+      "name": "LLM",
+      "category": "class",
+      "file": "stockdata/llm.py"
+    },
+    {
+      "name": "DoubaoLLM",
+      "category": "class",
+      "file": "stockdata/llm.py"
+    },
+    {
+      "name": "DeepSeekLLM",
+      "category": "class",
+      "file": "stockdata/llm.py"
+    },
+    {
+      "name": "test_000001",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "testAnalysis",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "testWin",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "rsi_trend",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "kdj_trend",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "ma_trend",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "macd_trend",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "volume_trend",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "rsi_determine_strength",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "kdj_determine_strength",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "macd_determine_strength",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "rsi_check_cross",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "kdj_check_cross",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "kdj_head_bottom",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "predict_trade",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "summery_trade",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "summery_trade_json",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "buy_advice_v2",
+      "category": "function",
+      "file": "stockdata/main_analysis.py"
+    },
+    {
+      "name": "before_request_func",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "login",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "login2",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "logout",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "register",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "add_favorite",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "delete_favorite",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "list_favorites",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "honeypot",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "security_status",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "security_dashboard",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "index",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "run_schedule",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "is_greater_than_seven",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "ab",
+      "category": "function",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/login",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/login2",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/logout",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/register",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/favorite/add",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/favorite/delete",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/favorite/list",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/admin",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/wp-admin",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/phpmyadmin",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/config.php",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/.env",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/backup",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/security/status",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/security/dashboard",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "/",
+      "category": "route",
+      "file": "stockdata/main.py"
+    },
+    {
+      "name": "simulation_list",
+      "category": "function",
+      "file": "stockdata/main_simulation.py"
+    },
+    {
+      "name": "simulation_gen",
+      "category": "function",
+      "file": "stockdata/main_simulation.py"
+    },
+    {
+      "name": "simulation_buy",
+      "category": "function",
+      "file": "stockdata/main_simulation.py"
+    },
+    {
+      "name": "simulation_sell",
+      "category": "function",
+      "file": "stockdata/main_simulation.py"
+    },
+    {
+      "name": "simulation_deal",
+      "category": "function",
+      "file": "stockdata/main_simulation.py"
+    },
+    {
+      "name": "test",
+      "category": "function",
+      "file": "stockdata/main_stock.py"
+    },
+    {
+      "name": "test1",
+      "category": "function",
+      "file": "stockdata/main_stock.py"
+    },
+    {
+      "name": "test2",
+      "category": "function",
+      "file": "stockdata/main_stock.py"
+    },
+    {
+      "name": "get_kline_daily",
+      "category": "function",
+      "file": "stockdata/main_stock.py"
+    },
+    {
+      "name": "recommended_stock2",
+      "category": "function",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "recommended_stocks",
+      "category": "function",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "industry_recommended_stocks",
+      "category": "function",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "concept_recommended_stocks",
+      "category": "function",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "stock_advice",
+      "category": "function",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "advice_detail",
+      "category": "function",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "llm_detail",
+      "category": "function",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "generate_plain_text",
+      "category": "function",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "/recommended2/<date>",
+      "category": "route",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "/recommended/<date>",
+      "category": "route",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "/industry/recommended/<industry>",
+      "category": "route",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "/concept/recommended/<concept>",
+      "category": "route",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "/stock/<code>",
+      "category": "route",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "/advice/<code>/<record_time>",
+      "category": "route",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "/llm/<code>/<record_time>",
+      "category": "route",
+      "file": "stockdata/page.py"
+    },
+    {
+      "name": "RecommendedCache",
+      "category": "class",
+      "file": "stockdata/RecommendedStockCache.py"
+    },
+    {
+      "name": "SECURITY_CONFIG",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "SCAN_PATTERNS",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "MALICIOUS_UA_PATTERNS",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "HONEYPOT_PATHS",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "WHITELIST_IPS",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "WHITELIST_PATHS",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "DANGEROUS_CHARS",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "SECURITY_HEADERS",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "ERROR_PAGES",
+      "category": "config",
+      "file": "stockdata/security_config.py"
+    },
+    {
+      "name": "SecurityMiddleware",
+      "category": "class",
+      "file": "stockdata/security_middleware.py"
+    },
+    {
+      "name": "require_valid_path",
+      "category": "function",
+      "file": "stockdata/security_middleware.py"
+    },
+    {
+      "name": "honeypot_trap",
+      "category": "function",
+      "file": "stockdata/security_middleware.py"
+    },
+    {
+      "name": "simulation_list_page",
+      "category": "function",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "simulation_deal_page",
+      "category": "function",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "tracking_list",
+      "category": "function",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "tracking_add",
+      "category": "function",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "tracking_update",
+      "category": "function",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "tracking_delete",
+      "category": "function",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "tracking_detail",
+      "category": "function",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "/simulation/list/<code>",
+      "category": "route",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "/simulation/deal/<code>",
+      "category": "route",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "/tracking/list",
+      "category": "route",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "/tracking/add",
+      "category": "route",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "/tracking/update/<int:tracking_id>",
+      "category": "route",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "/tracking/delete/<int:tracking_id>",
+      "category": "route",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "/tracking/detail/<int:tracking_id>",
+      "category": "route",
+      "file": "stockdata/simulation_page.py"
+    },
+    {
+      "name": "get_market_overview",
+      "category": "function",
+      "file": "stockdata/stats_api.py"
+    },
+    {
+      "name": "get_industry_analysis",
+      "category": "function",
+      "file": "stockdata/stats_api.py"
+    },
+    {
+      "name": "get_concept_analysis",
+      "category": "function",
+      "file": "stockdata/stats_api.py"
+    },
+    {
+      "name": "add_stats_routes",
+      "category": "function",
+      "file": "stockdata/stats_api.py"
+    },
+    {
+      "name": "/api/market/overview",
+      "category": "route",
+      "file": "stockdata/stats_api.py"
+    },
+    {
+      "name": "/api/industry/analysis",
+      "category": "route",
+      "file": "stockdata/stats_api.py"
+    },
+    {
+      "name": "/api/concept/analysis",
+      "category": "route",
+      "file": "stockdata/stats_api.py"
+    },
+    {
+      "name": "stock_cpbd_em",
+      "category": "function",
+      "file": "stockdata/stock_cpbd.py"
+    },
+    {
+      "name": "stock_zjlx_em",
+      "category": "function",
+      "file": "stockdata/stock_cpbd.py"
+    },
+    {
+      "name": "StockData",
+      "category": "class",
+      "file": "stockdata/stock.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "stockdata/stock.py"
+    },
+    {
+      "name": "StockTask",
+      "category": "class",
+      "file": "stockdata/stock_task.py"
+    },
+    {
+      "name": "generate_plain_text",
+      "category": "function",
+      "file": "stockdata/stock_task.py"
+    },
+    {
+      "name": "get_adjacent_trading_days",
+      "category": "function",
+      "file": "stockdata/utils.py"
+    },
+    {
+      "name": "ASIDaily",
+      "category": "class",
+      "file": "stockfetch/db_asi.py"
+    },
+    {
+      "name": "BIASDaily",
+      "category": "class",
+      "file": "stockfetch/db_bias.py"
+    },
+    {
+      "name": "BOLLDaily",
+      "category": "class",
+      "file": "stockfetch/db_boll.py"
+    },
+    {
+      "name": "KDJDaily",
+      "category": "class",
+      "file": "stockfetch/db_kdj.py"
+    },
+    {
+      "name": "MACDDaily",
+      "category": "class",
+      "file": "stockfetch/db_macd.py"
+    },
+    {
+      "name": "MADaily",
+      "category": "class",
+      "file": "stockfetch/db_ma.py"
+    },
+    {
+      "name": "RSIDaily",
+      "category": "class",
+      "file": "stockfetch/db_rsi.py"
+    },
+    {
+      "name": "VRDaily",
+      "category": "class",
+      "file": "stockfetch/db_vr.py"
+    },
+    {
+      "name": "WRDaily",
+      "category": "class",
+      "file": "stockfetch/db_wr.py"
+    },
+    {
+      "name": "fetchAll",
+      "category": "function",
+      "file": "stockfetch/main.py"
+    },
+    {
+      "name": "test",
+      "category": "function",
+      "file": "stockfetch/main.py"
+    },
+    {
+      "name": "StockTools",
+      "category": "class",
+      "file": "stockfetch/stocktools.py"
+    },
+    {
+      "name": "Test",
+      "category": "class",
+      "file": "test/classTest.py"
+    },
+    {
+      "name": "Test2",
+      "category": "class",
+      "file": "test/classTest.py"
+    },
+    {
+      "name": "Networkerror",
+      "category": "class",
+      "file": "test/exceptionTest.py"
+    },
+    {
+      "name": "f1",
+      "category": "function",
+      "file": "test/exceptionTest.py"
+    },
+    {
+      "name": "functionName",
+      "category": "function",
+      "file": "test/exceptionTest.py"
+    },
+    {
+      "name": "calculate_accident_responsibility",
+      "category": "function",
+      "file": "test/func2Test.py"
+    },
+    {
+      "name": "print_accident_analysis",
+      "category": "function",
+      "file": "test/func2Test.py"
+    },
+    {
+      "name": "generate_test_cases",
+      "category": "function",
+      "file": "test/func2Test.py"
+    },
+    {
+      "name": "analyze_algorithm_performance",
+      "category": "function",
+      "file": "test/func2Test.py"
+    },
+    {
+      "name": "export_to_excel",
+      "category": "function",
+      "file": "test/func2Test.py"
+    },
+    {
+      "name": "print_summary_analysis",
+      "category": "function",
+      "file": "test/func2Test.py"
+    },
+    {
+      "name": "func",
+      "category": "function",
+      "file": "test/funcTest.py"
+    },
+    {
+      "name": "func1",
+      "category": "function",
+      "file": "test/funcTest.py"
+    },
+    {
+      "name": "func2",
+      "category": "function",
+      "file": "test/funcTest.py"
+    },
+    {
+      "name": "printinfo",
+      "category": "function",
+      "file": "test/funcTest.py"
+    },
+    {
+      "name": "printinfo",
+      "category": "function",
+      "file": "test/funcTest.py"
+    },
+    {
+      "name": "printinfo",
+      "category": "function",
+      "file": "test/funcTest.py"
+    },
+    {
+      "name": "sum",
+      "category": "function",
+      "file": "test/funcTest.py"
+    },
+    {
+      "name": "PORT",
+      "category": "config",
+      "file": "test/httpserver.py"
+    },
+    {
+      "name": "funcname",
+      "category": "function",
+      "file": "test/ioTest.py"
+    },
+    {
+      "name": "func_a",
+      "category": "function",
+      "file": "test/ioTest.py"
+    },
+    {
+      "name": "func_b",
+      "category": "function",
+      "file": "test/ioTest.py"
+    },
+    {
+      "name": "prn",
+      "category": "function",
+      "file": "test/mathTest.py"
+    },
+    {
+      "name": "func100",
+      "category": "function",
+      "file": "test/normalTest2.py"
+    },
+    {
+      "name": "func",
+      "category": "function",
+      "file": "test/normalTest.py"
+    },
+    {
+      "name": "p1",
+      "category": "function",
+      "file": "test/package_runoob/p1.py"
+    },
+    {
+      "name": "p2",
+      "category": "function",
+      "file": "test/package_runoob/p2.py"
+    },
+    {
+      "name": "test_000001",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "flushKDJ",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "calcAndinsertASI",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "calcAndinsertBIAS",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "calcAndinsertRSI",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "calcAndinsertBOLL",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "calcAndinsertKDJ",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "calcAndinsertMA",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "testIndicators",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "testAnalysis",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "testAnalysisSingle",
+      "category": "function",
+      "file": "tests/test_api.py"
+    },
+    {
+      "name": "TestSearchNewsByKeywords",
+      "category": "class",
+      "file": "tests/test_data_gateway_keywords.py"
+    },
+    {
+      "name": "TestMapDataframe",
+      "category": "class",
+      "file": "tests/test_dic_stock_sync.py"
+    },
+    {
+      "name": "TestBuildUpsertSql",
+      "category": "class",
+      "file": "tests/test_dic_stock_sync.py"
+    },
+    {
+      "name": "TestSyncDicStock",
+      "category": "class",
+      "file": "tests/test_dic_stock_sync.py"
+    },
+    {
+      "name": "TestBatchUpsert",
+      "category": "class",
+      "file": "tests/test_dic_stock_sync.py"
+    },
+    {
+      "name": "TestExtractJson",
+      "category": "class",
+      "file": "tests/test_dual_llm_analysis.py"
+    },
+    {
+      "name": "TestDualLLMAnalysisService",
+      "category": "class",
+      "file": "tests/test_dual_llm_analysis.py"
+    },
+    {
+      "name": "TestDualLLMRoute",
+      "category": "class",
+      "file": "tests/test_dual_llm_analysis.py"
+    },
+    {
+      "name": "TestDoubaoLLMInit",
+      "category": "class",
+      "file": "tests/test_dual_llm_analysis.py"
+    },
+    {
+      "name": "TestAuditDocument",
+      "category": "class",
+      "file": "tests/test_llm_audit.py"
+    },
+    {
+      "name": "TestMigrationMarkers",
+      "category": "class",
+      "file": "tests/test_llm_audit.py"
+    },
+    {
+      "name": "TestLLMConfigIsolation",
+      "category": "class",
+      "file": "tests/test_llm_audit.py"
+    },
+    {
+      "name": "PROJECT_ROOT",
+      "category": "config",
+      "file": "tests/test_llm_audit.py"
+    },
+    {
+      "name": "AUDIT_DOC",
+      "category": "config",
+      "file": "tests/test_llm_audit.py"
+    },
+    {
+      "name": "TestLLMExtractor",
+      "category": "class",
+      "file": "tests/test_llm_extractor.py"
+    },
+    {
+      "name": "test_000001",
+      "category": "function",
+      "file": "tests/test.py"
+    },
+    {
+      "name": "TestGetDailyRecommendation",
+      "category": "class",
+      "file": "tests/test_recommendation_api.py"
+    },
+    {
+      "name": "TestGenerateRecommendation",
+      "category": "class",
+      "file": "tests/test_recommendation_api.py"
+    },
+    {
+      "name": "TestGetPerformance",
+      "category": "class",
+      "file": "tests/test_recommendation_api.py"
+    },
+    {
+      "name": "app",
+      "category": "function",
+      "file": "tests/test_recommendation_api.py"
+    },
+    {
+      "name": "client",
+      "category": "function",
+      "file": "tests/test_recommendation_api.py"
+    },
+    {
+      "name": "TestFilterEligible",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestCalcTechnicalScore",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestCalcTrendScore",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestCalcFundamentalScore",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestCalcVolumeScore",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestGenerateReason",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestGenerateRiskWarning",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestGenerateDaily",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestGetDaily",
+      "category": "class",
+      "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestSubscriptionAPI",
+      "category": "class",
+      "file": "tests/test_strategy_subscription.py"
+    },
+    {
+      "name": "TestEventDetailAPI",
+      "category": "class",
+      "file": "tests/test_strategy_subscription.py"
+    },
+    {
+      "name": "TestPageRoutes",
+      "category": "class",
+      "file": "tests/test_strategy_subscription.py"
+    },
+    {
+      "name": "app",
+      "category": "function",
+      "file": "tests/test_strategy_subscription.py"
+    },
+    {
+      "name": "client",
+      "category": "function",
+      "file": "tests/test_strategy_subscription.py"
+    },
+    {
+      "name": "auth_client",
+      "category": "function",
+      "file": "tests/test_strategy_subscription.py"
+    },
+    {
+      "name": "TestAsyncScanTrigger",
+      "category": "class",
+      "file": "tests/test_strategy/test_async_scan.py"
+    },
+    {
+      "name": "TestBackgroundScanExecution",
+      "category": "class",
+      "file": "tests/test_strategy/test_async_scan.py"
+    },
+    {
+      "name": "TestScannerParams",
+      "category": "class",
+      "file": "tests/test_strategy/test_async_scan.py"
+    },
+    {
+      "name": "TestAggregatorAsync",
+      "category": "class",
+      "file": "tests/test_strategy/test_async_scan.py"
+    },
+    {
+      "name": "TestRunStatusQuery",
+      "category": "class",
+      "file": "tests/test_strategy/test_async_scan.py"
+    },
+    {
+      "name": "TestStaleRunCleanup",
+      "category": "class",
+      "file": "tests/test_strategy/test_async_scan.py"
+    },
+    {
+      "name": "sample_group",
+      "category": "function",
+      "file": "tests/test_strategy/test_async_scan.py"
+    },
+    {
+      "name": "flask_client",
+      "category": "function",
+      "file": "tests/test_strategy/test_async_scan.py"
+    },
+    {
+      "name": "TestStrategyGroupCRUD",
+      "category": "class",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "TestPydanticModels",
+      "category": "class",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "TestScannerEngine",
+      "category": "class",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "TestAggregator",
+      "category": "class",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "TestIndustrySync",
+      "category": "class",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "TestEventRoutes",
+      "category": "class",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "TestSignalRoutes",
+      "category": "class",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "sample_group",
+      "category": "function",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "sample_scoring_group",
+      "category": "function",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "flask_client",
+      "category": "function",
+      "file": "tests/test_strategy/test_engine.py"
+    },
+    {
+      "name": "TestInitTablesResilience",
+      "category": "class",
+      "file": "tests/test_strategy/test_init_tables_resilience.py"
+    },
+    {
+      "name": "TestLLMTimeout",
+      "category": "class",
+      "file": "tests/test_strategy/test_init_tables_resilience.py"
+    },
+    {
+      "name": "TestRouteRegistration",
+      "category": "class",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "TestNoFastAPIResidual",
+      "category": "class",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "TestStrategyGroupRoutes",
+      "category": "class",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "TestSignalRoutes",
+      "category": "class",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "TestEventRoutes",
+      "category": "class",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "TestIndustrySyncRoutes",
+      "category": "class",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "TestPydanticModels",
+      "category": "class",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "sample_group",
+      "category": "function",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "flask_client",
+      "category": "function",
+      "file": "tests/test_strategy/test_migration.py"
+    },
+    {
+      "name": "TestIsAdminPassedToAllRoutes",
+      "category": "class",
+      "file": "tests/test_strategy/test_strategy_pages.py"
+    },
+    {
+      "name": "TestEventDetailContext",
+      "category": "class",
+      "file": "tests/test_strategy/test_strategy_pages.py"
+    },
+    {
+      "name": "TestAdminDetection",
+      "category": "class",
+      "file": "tests/test_strategy/test_strategy_pages.py"
+    },
+    {
+      "name": "sample_event",
+      "category": "function",
+      "file": "tests/test_strategy/test_strategy_pages.py"
+    },
+    {
+      "name": "sample_group",
+      "category": "function",
+      "file": "tests/test_strategy/test_strategy_pages.py"
+    },
+    {
+      "name": "TestTriggerSync",
+      "category": "class",
+      "file": "tests/test_sync_api.py"
+    },
+    {
+      "name": "TestSyncStatus",
+      "category": "class",
+      "file": "tests/test_sync_api.py"
+    },
+    {
+      "name": "app",
+      "category": "function",
+      "file": "tests/test_sync_api.py"
+    },
+    {
+      "name": "client",
+      "category": "function",
+      "file": "tests/test_sync_api.py"
+    },
+    {
+      "name": "TestTrendTracker",
+      "category": "class",
+      "file": "tests/test_trend_tracker.py"
+    },
+    {
+      "name": "TestTrendTrackerDecay",
+      "category": "class",
+      "file": "tests/test_trend_tracker.py"
+    },
+    {
+      "name": "get_stock_data",
+      "category": "function",
+      "file": "test/test1.py"
+    },
+    {
+      "name": "code_id_map_em",
+      "category": "function",
+      "file": "test/test1.py"
+    }
+  ]
+}

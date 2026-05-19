@@ -1,0 +1,63 @@
+{
+  "session_id": "refactor-sqlite-lifecycle-get-db-ctx-17f2954f",
+  "change_name": "refactor-sqlite-lifecycle-get-db-ctx",
+  "project": "factory",
+  "exported_at": "2026-05-19T13:45:06.404766",
+  "outcome": "success",
+  "started_at": "2026-05-19T13:38:27.842030",
+  "finished_at": "2026-05-19T13:45:06.329725",
+  "total_runtime_seconds": 366.3,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 78.3,
+      "fix_attempts": 0,
+      "llm_calls": 4,
+      "tool_calls": 3,
+      "prompt_tokens": 43145,
+      "completion_tokens": 2419
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 203.7,
+      "fix_attempts": 0,
+      "llm_calls": 16,
+      "tool_calls": 15,
+      "prompt_tokens": 596164,
+      "completion_tokens": 6007
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 72.6,
+      "fix_attempts": 0,
+      "llm_calls": 11,
+      "tool_calls": 10,
+      "prompt_tokens": 83144,
+      "completion_tokens": 869
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 11.7,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 31,
+    "total_tool_calls": 28,
+    "total_prompt_tokens": 722453,
+    "total_completion_tokens": 9295
+  }
+}

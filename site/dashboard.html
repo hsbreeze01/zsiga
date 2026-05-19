@@ -507,17 +507,17 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">90</div>
+    <div class="value">111</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">88.9%</div>
-    <div class="meta">80 hit / 10 miss</div>
+    <div class="value good">91.0%</div>
+    <div class="meta">101 hit / 10 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
-    <div class="value">6</div>
-    <div class="meta">compass, dataagent, factory, infopublisher, stockshark, zsiga</div>
+    <div class="value">7</div>
+    <div class="meta">compass, dataagent, factory, infopublisher, stockshark, testproj, zsiga</div>
   </div>
   <div class="card">
     <div class="label">📝 Lessons</div>
@@ -525,11 +525,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">74.3%</div>
+    <div class="value warn">74.2%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value bad">49.1%</div>
+    <div class="value warn">60.5%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -549,40 +549,40 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>38</td>
+  <td>55</td>
   <td class="good">100.0%</td>
-  <td>0.7</td>
-  <td>145.5s</td>
+  <td>0.5</td>
+  <td>129.8s</td>
   <td>0</td>
-  <td>276</td>
-  <td>403</td>
-  <td>6.88M</td>
+  <td>389</td>
+  <td>541</td>
+  <td>8.88M</td>
 </tr><tr>
   <td>implement</td>
-  <td>70</td>
-  <td class="good">88.6%</td>
-  <td>1.2</td>
-  <td>206.5s</td>
-  <td>86</td>
-  <td>887</td>
-  <td>1007</td>
-  <td>21.44M</td>
+  <td>89</td>
+  <td class="good">91.0%</td>
+  <td>1.0</td>
+  <td>188.8s</td>
+  <td>91</td>
+  <td>1122</td>
+  <td>1255</td>
+  <td>26.59M</td>
 </tr><tr>
   <td>verify</td>
-  <td>57</td>
-  <td class="bad">49.1%</td>
-  <td>0.2</td>
-  <td>74.8s</td>
+  <td>76</td>
+  <td class="warn">60.5%</td>
+  <td>0.1</td>
+  <td>67.9s</td>
   <td>7</td>
-  <td>359</td>
-  <td>427</td>
-  <td>3.99M</td>
+  <td>452</td>
+  <td>532</td>
+  <td>4.94M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>57</td>
+  <td>76</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>10.8s</td>
+  <td>11.2s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -595,27 +595,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">32.31M</div>
-      <div class="meta">31.89M prompt + 426.6K completion</div>
+      <div class="value">40.40M</div>
+      <div class="meta">39.86M prompt + 544.3K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">359.0K</div>
+      <div class="value">364.0K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">1,522</div>
-      <div class="meta">avg 16.9 per change</div>
+      <div class="value">1,963</div>
+      <div class="meta">avg 17.7 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">1,837</div>
-      <div class="meta">avg 20.4 per change</div>
+      <div class="value">2,328</div>
+      <div class="meta">avg 21.0 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">6.9h</div>
-      <div class="meta">24,865s total</div>
+      <div class="value">8.3h</div>
+      <div class="meta">29,955s total</div>
     </div>
   </div>
 </div>
@@ -810,15 +810,15 @@ td { border-top: 1px solid #334155; }
   <h3 style="color:#ec4899">🔮 Level 6: Autonomous Sense — 🚧 Leveling Up</h3>
   <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 不再需要人类指令——自主感知环境、判断价值、生成 proposal、自己执行。Sense→Judge→Propose 层在 pipeline 之前，信号检测纯规则驱动，只有 Proposer 用 LLM</div>
   <div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
-  <div class="progress"><div class="fill" style="width:80.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">80/100</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">101/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">88.9/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">91.0/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1096,14 +1096,14 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>build-phase-timing-comparator-utility-add-a-cli-tool-that-co</li>
-<li>implement-config-diff-viewer-add-a-function-that-compares-tw</li>
-<li>implement-proposal-deduplication-checker-add-a-function-that</li>
-<li>implement-change-duration-predictor-add-a-function-that-uses</li>
-<li>implement-session-timeline-renderer-add-a-function-that-take</li>
+    <li>migrate-last-3-monitor-get-db</li>
+<li>migrate-remaining-get-db-to-ctx</li>
+<li>cleanup-dbclient-comments</li>
+<li>cleanup-dbclient-dead-code</li>
+<li>refactor-db-asi-kdj-base</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-19T00:25:49.627122</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-19T19:08:08.202735</div>
 </body>
 </html>

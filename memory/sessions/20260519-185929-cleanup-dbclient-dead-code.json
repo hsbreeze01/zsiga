@@ -1,0 +1,63 @@
+{
+  "session_id": "cleanup-dbclient-dead-code-376611f4",
+  "change_name": "cleanup-dbclient-dead-code",
+  "project": "compass",
+  "exported_at": "2026-05-19T18:59:29.364339",
+  "outcome": "success",
+  "started_at": "2026-05-19T18:56:22.272884",
+  "finished_at": "2026-05-19T18:59:29.353847",
+  "total_runtime_seconds": 158.2,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 73.8,
+      "fix_attempts": 0,
+      "llm_calls": 7,
+      "tool_calls": 6,
+      "prompt_tokens": 79034,
+      "completion_tokens": 1885
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 37.8,
+      "fix_attempts": 0,
+      "llm_calls": 8,
+      "tool_calls": 7,
+      "prompt_tokens": 93709,
+      "completion_tokens": 748
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 35.4,
+      "fix_attempts": 0,
+      "llm_calls": 4,
+      "tool_calls": 5,
+      "prompt_tokens": 18752,
+      "completion_tokens": 922
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 11.2,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 19,
+    "total_tool_calls": 18,
+    "total_prompt_tokens": 191495,
+    "total_completion_tokens": 3555
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "session_id": "refactor-db-bias-use-base-4058a524",
+  "change_name": "refactor-db-bias-use-base",
+  "project": "compass",
+  "exported_at": "2026-05-19T12:54:24.056828",
+  "outcome": "success",
+  "started_at": "2026-05-19T12:45:06.793045",
+  "finished_at": "2026-05-19T12:54:24.019798",
+  "total_runtime_seconds": 477.5,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 209.3,
+      "fix_attempts": 0,
+      "llm_calls": 13,
+      "tool_calls": 20,
+      "prompt_tokens": 418494,
+      "completion_tokens": 4376
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 203.1,
+      "fix_attempts": 1,
+      "llm_calls": 21,
+      "tool_calls": 22,
+      "prompt_tokens": 480064,
+      "completion_tokens": 5876
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 54.1,
+      "fix_attempts": 0,
+      "llm_calls": 4,
+      "tool_calls": 4,
+      "prompt_tokens": 50268,
+      "completion_tokens": 1520
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 11.0,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 38,
+    "total_tool_calls": 46,
+    "total_prompt_tokens": 948826,
+    "total_completion_tokens": 11772
+  }
+}

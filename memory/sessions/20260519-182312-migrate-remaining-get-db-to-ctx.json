@@ -1,0 +1,52 @@
+{
+  "session_id": "migrate-remaining-get-db-to-ctx-104b0f1c",
+  "change_name": "migrate-remaining-get-db-to-ctx",
+  "project": "factory",
+  "exported_at": "2026-05-19T18:23:12.066493",
+  "outcome": "success",
+  "started_at": "2026-05-19T18:21:12.315759",
+  "finished_at": "2026-05-19T18:23:12.057845",
+  "total_runtime_seconds": 105.9,
+  "phases": [
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 48.9,
+      "fix_attempts": 0,
+      "llm_calls": 7,
+      "tool_calls": 7,
+      "prompt_tokens": 200294,
+      "completion_tokens": 1049
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 46.2,
+      "fix_attempts": 0,
+      "llm_calls": 6,
+      "tool_calls": 10,
+      "prompt_tokens": 35385,
+      "completion_tokens": 1059
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 10.8,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 13,
+    "total_tool_calls": 17,
+    "total_prompt_tokens": 235679,
+    "total_completion_tokens": 2108
+  }
+}

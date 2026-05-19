@@ -11,6 +11,7 @@ from .pipeline.orchestrator import ZsigaOrchestrator  # noqa: E402
 from .metrics.dashboard import generate_dashboard  # noqa: E402
 from .metrics.collector import load_all_changes  # noqa: E402
 from .transport import create_transport  # noqa: E402
+from .daemon import daemon_loop  # noqa: E402
 
 
 def _slugify(text: str) -> str:
@@ -269,6 +270,18 @@ def cmd_dashboard(args: list[str]):
             print("\nStopped.")
 
 
+def cmd_daemon(args: list[str]):
+    dashboard_port = 58175
+    for a in args:
+        if a.startswith("--port="):
+            dashboard_port = int(a.split("=")[1])
+        elif a == "--no-dashboard":
+            dashboard_port = None
+
+    config = load_config()
+    daemon_loop(config, dashboard_port=dashboard_port)
+
+
 def main():
     if len(sys.argv) < 2:
         cmd_run()
@@ -289,6 +302,8 @@ def main():
         cmd_log(rest)
     elif subcmd == "dashboard":
         cmd_dashboard(rest)
+    elif subcmd == "daemon":
+        cmd_daemon(rest)
     else:
         print(f"Unknown command: {subcmd}")
         print("Usage:")
@@ -299,6 +314,7 @@ def main():
         print("  python3.11 -m zsiga status                         # pending changes + history")
         print("  python3.11 -m zsiga log [project] [-n20]           # change history")
         print("  python3.11 -m zsiga dashboard [--serve] [--port=N] # metrics dashboard")
+        print("  python3 -m zsiga daemon [--port=N] [--no-dashboard]  # run as daemon")
         sys.exit(1)
 
 

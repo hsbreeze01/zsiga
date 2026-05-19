@@ -1,0 +1,63 @@
+{
+  "session_id": "remove-deprecated-get-db-definition-ddc90480",
+  "change_name": "remove-deprecated-get-db-definition",
+  "project": "factory",
+  "exported_at": "2026-05-19T16:02:14.030808",
+  "outcome": "success",
+  "started_at": "2026-05-19T15:53:53.933093",
+  "finished_at": "2026-05-19T16:02:13.971104",
+  "total_runtime_seconds": 454.9,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 31.5,
+      "fix_attempts": 0,
+      "llm_calls": 2,
+      "tool_calls": 3,
+      "prompt_tokens": 18908,
+      "completion_tokens": 687
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 336.9,
+      "fix_attempts": 0,
+      "llm_calls": 20,
+      "tool_calls": 22,
+      "prompt_tokens": 618733,
+      "completion_tokens": 10948
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 72.7,
+      "fix_attempts": 0,
+      "llm_calls": 6,
+      "tool_calls": 8,
+      "prompt_tokens": 35363,
+      "completion_tokens": 1234
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 13.8,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 28,
+    "total_tool_calls": 33,
+    "total_prompt_tokens": 673004,
+    "total_completion_tokens": 12869
+  }
+}

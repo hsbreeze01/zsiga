@@ -1,0 +1,63 @@
+{
+  "session_id": "optimize-dbbase-read-only-skip-commit-89984195",
+  "change_name": "optimize-dbbase-read-only-skip-commit",
+  "project": "compass",
+  "exported_at": "2026-05-19T15:22:10.804962",
+  "outcome": "success",
+  "started_at": "2026-05-19T15:17:47.492547",
+  "finished_at": "2026-05-19T15:22:10.738636",
+  "total_runtime_seconds": 218.6,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 53.5,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 4,
+      "prompt_tokens": 33363,
+      "completion_tokens": 1257
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 120.5,
+      "fix_attempts": 0,
+      "llm_calls": 16,
+      "tool_calls": 15,
+      "prompt_tokens": 238068,
+      "completion_tokens": 1939
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 32.2,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 2,
+      "prompt_tokens": 21267,
+      "completion_tokens": 626
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 12.4,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 22,
+    "total_tool_calls": 21,
+    "total_prompt_tokens": 292698,
+    "total_completion_tokens": 3822
+  }
+}

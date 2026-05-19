@@ -1,0 +1,63 @@
+{
+  "session_id": "migrate-last-3-monitor-get-db-v2-f29e024b",
+  "change_name": "migrate-last-3-monitor-get-db-v2",
+  "project": "factory",
+  "exported_at": "2026-05-19T15:39:52.613844",
+  "outcome": "success",
+  "started_at": "2026-05-19T15:32:58.150393",
+  "finished_at": "2026-05-19T15:39:52.565784",
+  "total_runtime_seconds": 366.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 78.0,
+      "fix_attempts": 0,
+      "llm_calls": 6,
+      "tool_calls": 5,
+      "prompt_tokens": 158602,
+      "completion_tokens": 1594
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 204.8,
+      "fix_attempts": 0,
+      "llm_calls": 17,
+      "tool_calls": 16,
+      "prompt_tokens": 618002,
+      "completion_tokens": 5155
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 66.1,
+      "fix_attempts": 0,
+      "llm_calls": 9,
+      "tool_calls": 11,
+      "prompt_tokens": 57163,
+      "completion_tokens": 1032
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 17.2,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 32,
+    "total_tool_calls": 32,
+    "total_prompt_tokens": 833767,
+    "total_completion_tokens": 7781
+  }
+}
