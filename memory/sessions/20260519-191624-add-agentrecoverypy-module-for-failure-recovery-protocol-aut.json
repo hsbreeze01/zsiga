@@ -1,0 +1,52 @@
+{
+  "session_id": "add-agentrecoverypy-module-for-failure-recovery-protocol-aut-ee1f5b07",
+  "change_name": "add-agentrecoverypy-module-for-failure-recovery-protocol-aut",
+  "project": "zsiga",
+  "exported_at": "2026-05-19T19:16:24.620467",
+  "outcome": "success",
+  "started_at": "2026-05-19T19:08:37.941517",
+  "finished_at": "2026-05-19T19:16:24.597743",
+  "total_runtime_seconds": 264.3,
+  "phases": [
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 189.1,
+      "fix_attempts": 1,
+      "llm_calls": 17,
+      "tool_calls": 21,
+      "prompt_tokens": 508660,
+      "completion_tokens": 5338
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 69.3,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 21,
+      "prompt_tokens": 159289,
+      "completion_tokens": 1134
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 5.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 29,
+    "total_tool_calls": 42,
+    "total_prompt_tokens": 667949,
+    "total_completion_tokens": 6472
+  }
+}

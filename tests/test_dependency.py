@@ -6,7 +6,11 @@ import tempfile
 from zsiga.pipeline.dependency import (
     ChangeConflictDetector,
     ChangeInfo,
+    ConflictEdge,
+    DependencyGraph,
     _extract_target_files,
+    _parse_depends_on,
+    build_dependency_graph,
 )
 
 
@@ -250,3 +254,249 @@ class TestSuggestOrder:
         detector = ChangeConflictDetector()
         result = detector.suggest_order(changes)
         assert result == ["only-one"]
+
+
+# ---------------------------------------------------------------------------
+# Dependency Graph: parse depends-on
+# ---------------------------------------------------------------------------
+
+class TestParseDependsOn:
+    """Parse ``<!-- depends-on: ... -->`` from tasks.md content."""
+
+    def test_single_dependency(self):
+        content = "<!-- depends-on: add-user-auth -->\n# Tasks\n"
+        result = _parse_depends_on(content)
+        assert result == ["add-user-auth"]
+
+    def test_multiple_dependencies(self):
+        content = "<!-- depends-on: add-user-auth, refactor-database -->\n# Tasks\n"
+        result = _parse_depends_on(content)
+        assert result == ["add-user-auth", "refactor-database"]
+
+    def test_no_depends_on_returns_empty(self):
+        content = "# Tasks\n- [ ] Task 1\n"
+        result = _parse_depends_on(content)
+        assert result == []
+
+    def test_multiple_depends_on_blocks(self):
+        content = (
+            "<!-- depends-on: alpha -->\n"
+            "Some text\n"
+            "<!-- depends-on: beta, gamma -->\n"
+        )
+        result = _parse_depends_on(content)
+        assert result == ["alpha", "beta", "gamma"]
+
+
+# ---------------------------------------------------------------------------
+# Dependency Graph: build graph
+# ---------------------------------------------------------------------------
+
+class TestBuildDependencyGraph:
+    """Graph construction scenarios."""
+
+    def test_file_overlap_creates_edge(self):
+        changes = [
+            ChangeInfo(
+                id="change-A",
+                target_files={"zsiga/pipeline/utils.py", "zsiga/pipeline/diagnoser.py"},
+                change_dir="/tmp/a",
+            ),
+            ChangeInfo(
+                id="change-B",
+                target_files={"zsiga/pipeline/utils.py", "tests/test_foo.py"},
+                change_dir="/tmp/b",
+            ),
+        ]
+        graph = build_dependency_graph(changes)
+        assert len(graph.nodes) == 2
+        overlap_edges = [e for e in graph.edges if e.conflict_type == "file_overlap"]
+        assert len(overlap_edges) == 1
+        edge = overlap_edges[0]
+        assert edge.severity == "HIGH"
+        assert "zsiga/pipeline/utils.py" in edge.shared_files
+
+    def test_no_overlaps_yields_isolated_nodes(self):
+        changes = [
+            ChangeInfo(id="A", target_files={"a.py"}, change_dir="/tmp/a"),
+            ChangeInfo(id="B", target_files={"b.py"}, change_dir="/tmp/b"),
+            ChangeInfo(id="C", target_files={"c.py"}, change_dir="/tmp/c"),
+        ]
+        graph = build_dependency_graph(changes)
+        assert len(graph.nodes) == 3
+        assert len(graph.edges) == 0
+
+    def test_cycle_detected_raises_value_error(self):
+        # Build a graph manually with a cycle
+        graph = DependencyGraph(
+            nodes={
+                "A": ChangeInfo(id="A", target_files=set(), change_dir="/tmp/a"),
+                "B": ChangeInfo(id="B", target_files=set(), change_dir="/tmp/b"),
+            },
+            adjacency={"A": {"B"}, "B": {"A"}},
+            edges=[],
+        )
+        raised = False
+        try:
+            graph.detect_cycles()
+        except ValueError as exc:
+            raised = True
+            assert "Circular dependency" in str(exc)
+        assert raised
+
+
+# ---------------------------------------------------------------------------
+# Dependency Graph: conflict severity
+# ---------------------------------------------------------------------------
+
+class TestConflictSeverity:
+    """Severity classification based on file extension."""
+
+    def test_py_overlap_is_high(self):
+        changes = [
+            ChangeInfo(id="A", target_files={"zsiga/pipeline/utils.py"}, change_dir="/tmp/a"),
+            ChangeInfo(id="B", target_files={"zsiga/pipeline/utils.py"}, change_dir="/tmp/b"),
+        ]
+        graph = build_dependency_graph(changes)
+        assert len(graph.edges) == 1
+        assert graph.edges[0].severity == "HIGH"
+
+    def test_md_overlap_is_low(self):
+        changes = [
+            ChangeInfo(id="A", target_files={"README.md"}, change_dir="/tmp/a"),
+            ChangeInfo(id="B", target_files={"README.md"}, change_dir="/tmp/b"),
+        ]
+        graph = build_dependency_graph(changes)
+        assert len(graph.edges) == 1
+        assert graph.edges[0].severity == "LOW"
+
+    def test_no_shared_files_no_conflict(self):
+        changes = [
+            ChangeInfo(id="A", target_files={"a.py"}, change_dir="/tmp/a"),
+            ChangeInfo(id="B", target_files={"b.py"}, change_dir="/tmp/b"),
+        ]
+        graph = build_dependency_graph(changes)
+        assert len(graph.edges) == 0
+
+
+# ---------------------------------------------------------------------------
+# Dependency Graph: topological order
+# ---------------------------------------------------------------------------
+
+class TestTopologicalOrder:
+    """Topological sort and tiebreak scenarios."""
+
+    def test_explicit_deps_respected(self):
+        # B -> A (A depends on B)
+        graph = DependencyGraph(
+            nodes={
+                "change-A": ChangeInfo(id="change-A", target_files=set(), change_dir="/tmp/a"),
+                "change-B": ChangeInfo(id="change-B", target_files=set(), change_dir="/tmp/b"),
+            },
+            adjacency={"change-B": {"change-A"}, "change-A": set()},
+            edges=[ConflictEdge(
+                from_id="change-B", to_id="change-A",
+                conflict_type="explicit_dep", severity="NONE", shared_files=[],
+            )],
+        )
+        order = graph.topological_order()
+        assert order.index("change-B") < order.index("change-A")
+
+    def test_fewer_target_files_first_on_overlap(self):
+        changes = [
+            ChangeInfo(id="change-A", target_files={"f1.py", "f2.py", "f3.py"}, change_dir="/tmp/a"),
+            ChangeInfo(id="change-B", target_files={"f1.py"}, change_dir="/tmp/b"),
+        ]
+        graph = build_dependency_graph(changes)
+        order = graph.topological_order()
+        # change-B (1 file) should come before change-A (3 files)
+        assert order.index("change-B") < order.index("change-A")
+
+    def test_independent_changes_deterministic_order(self):
+        changes = [
+            ChangeInfo(id="gamma", target_files={"g.py"}, change_dir="/tmp/g"),
+            ChangeInfo(id="alpha", target_files={"a.py"}, change_dir="/tmp/a"),
+            ChangeInfo(id="beta", target_files={"b.py"}, change_dir="/tmp/b"),
+        ]
+        graph = build_dependency_graph(changes)
+        order = graph.topological_order()
+        # Same file count (1 each), so lexicographic
+        assert order == ["alpha", "beta", "gamma"]
+
+
+# ---------------------------------------------------------------------------
+# Dependency Graph: conflict report
+# ---------------------------------------------------------------------------
+
+class TestConflictReport:
+    """Human-readable conflict report scenarios."""
+
+    def test_report_lists_conflicts_with_severity(self):
+        changes = [
+            ChangeInfo(id="A", target_files={"utils.py"}, change_dir="/tmp/a"),
+            ChangeInfo(id="B", target_files={"utils.py"}, change_dir="/tmp/b"),
+            ChangeInfo(id="C", target_files={"README.md"}, change_dir="/tmp/c"),
+            ChangeInfo(id="D", target_files={"README.md"}, change_dir="/tmp/d"),
+        ]
+        graph = build_dependency_graph(changes)
+        report = graph.conflict_report()
+        assert "HIGH" in report
+        assert "LOW" in report
+        assert "utils.py" in report
+        assert "README.md" in report
+        assert "Suggested execution order" in report
+
+    def test_no_conflicts_clean_report(self):
+        changes = [
+            ChangeInfo(id="A", target_files={"a.py"}, change_dir="/tmp/a"),
+            ChangeInfo(id="B", target_files={"b.py"}, change_dir="/tmp/b"),
+        ]
+        graph = build_dependency_graph(changes)
+        report = graph.conflict_report()
+        assert "No conflicts detected" in report
+        assert "Suggested execution order" in report
+
+
+# ---------------------------------------------------------------------------
+# Dependency Graph: integration via ChangeConflictDetector.build_graph()
+# ---------------------------------------------------------------------------
+
+class TestBuildGraphIntegration:
+    """End-to-end via ``ChangeConflictDetector.build_graph()``."""
+
+    def test_build_graph_with_filesystem(self):
+        tmpdir = _make_changes_dir({
+            "change-a": {
+                "design.md": "Files: `zsiga/pipeline/utils.py`, `zsiga/pipeline/a.py`",
+                "tasks.md": "# Tasks\n- [ ] Task 1\n",
+            },
+            "change-b": {
+                "design.md": "Files: `zsiga/pipeline/utils.py`",
+                "tasks.md": "<!-- depends-on: change-a -->\n# Tasks\n",
+            },
+        })
+        detector = ChangeConflictDetector()
+        graph = detector.build_graph(tmpdir)
+        assert "change-a" in graph.nodes
+        assert "change-b" in graph.nodes
+        # Should have both file-overlap and explicit-dep edges
+        types = {e.conflict_type for e in graph.edges}
+        assert "file_overlap" in types
+        assert "explicit_dep" in types
+
+    def test_build_graph_no_conflicts(self):
+        tmpdir = _make_changes_dir({
+            "change-x": {
+                "design.md": "Files: `a.py`",
+                "tasks.md": "# Tasks\n",
+            },
+            "change-y": {
+                "design.md": "Files: `b.py`",
+                "tasks.md": "# Tasks\n",
+            },
+        })
+        detector = ChangeConflictDetector()
+        graph = detector.build_graph(tmpdir)
+        assert len(graph.edges) == 0
+        report = graph.conflict_report()
+        assert "No conflicts detected" in report
