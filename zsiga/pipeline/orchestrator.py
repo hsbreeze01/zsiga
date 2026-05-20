@@ -508,6 +508,13 @@ class ZsigaOrchestrator:
         impl_tokens = _extract_tokens(impl_result)
         print(f"  Phase 2 done in {impl_seconds:.1f}s")
 
+        # Checkpoint after IMPLEMENT: commit working tree so REVIEW/VERIFY can diff
+        if git_ops.has_uncommitted_changes(target_path, transport=transport):
+            git_ops.add_all(target_path, transport=transport)
+            git_ops.commit(target_path, f"zsiga: implement {change_name}",
+                          transport=transport)
+            print("  Post-impl checkpoint committed")
+
         # Mechanical verification (only check changed files)
         print("\n  Mechanical verification...")
         fix_attempts = 0
