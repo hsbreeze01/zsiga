@@ -24,6 +24,7 @@ from .verifier import verify, read_verdict
 from .diagnoser import Diagnoser
 from .phase_wal import PhaseWAL
 from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python
+from .github_issue import create_issue, extract_github_repo
 from .project_context import build_project_context, prefetch_mechanical
 
 
@@ -543,10 +544,23 @@ class ZsigaOrchestrator:
         print(f"  Phase 4/4: DELIVER {change_name}")
         print(f"  {'='*50}")
         t0 = time.monotonic()
+
+        # GitHub Issue creation (REQ-GH-001)
+        issue_number = None
+        if (
+            self.config.github
+            and self.config.github.issue_integration
+        ):
+            issue_number = self._try_create_issue(
+                target_path, transport, change_name, proposal_text,
+            )
+
         if git_ops.has_uncommitted_changes(target_path, transport=transport):
             git_ops.add_all(target_path, transport=transport)
-            git_ops.commit(target_path, f"feat({project_name}): {change_name}",
-                          transport=transport)
+            msg = f"feat({project_name}): {change_name}"
+            if issue_number:
+                msg += f" (closes #{issue_number})"
+            git_ops.commit(target_path, msg, transport=transport)
         git_ops.tag(target_path, f"zsiga-{change_name}", transport=transport)
         git_ops.push(target_path, dry_run=self.config.safety.dry_run,
                     transport=transport)
@@ -873,6 +887,18 @@ class ZsigaOrchestrator:
             return answer in ("y", "yes")
         except (EOFError, KeyboardInterrupt):
             return False
+
+    def _try_create_issue(
+        self, target_path: str, transport: Transport,
+        change_name: str, proposal_text: str,
+    ) -> int | None:
+        """Attempt to create a GitHub Issue; returns number or None."""
+        owner_repo = extract_github_repo(target_path, transport)
+        if not owner_repo:
+            print("  [github] Could not extract owner/repo, skipping Issue")
+            return None
+        token = self.config.github.token
+        return create_issue(owner_repo, change_name, proposal_text, token)
 
     async def _dispatch_explore(self, prop, change_dir, target_path, transport) -> bool:
         """Dispatch explore-role sub-agent for research/investigation intents."""

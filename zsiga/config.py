@@ -179,11 +179,20 @@ class SafetyConfig:
         self.dry_run = dry_run
 
 
+class GithubConfig:
+    def __init__(self, token: str = "", owner: str = "",
+                 issue_integration: bool = False):
+        self.token = token
+        self.owner = owner
+        self.issue_integration = issue_integration
+
+
 class ZsigaConfig:
     def __init__(self, llm: LLMConfig, targets: dict[str, TargetConfig],
                  pipeline: PipelineConfig, intake: IntakeConfig,
                  safety: SafetyConfig, logging_config: 'LoggingConfig' = None,
-                 llm_fast: 'LLMFastConfig' = None):
+                 llm_fast: 'LLMFastConfig' = None,
+                 github: GithubConfig = None):
         self.llm = llm
         self.targets = targets
         self.pipeline = pipeline
@@ -191,6 +200,7 @@ class ZsigaConfig:
         self.safety = safety
         self.logging_config = logging_config
         self.llm_fast = llm_fast
+        self.github = github
 
 
 class LoggingConfig:
@@ -364,8 +374,16 @@ def load_config(path: str = None) -> ZsigaConfig:
         file=logging_raw.get("file"),
     )
 
+    github_raw = raw.get("github", {})
+    github = GithubConfig(
+        token=github_raw.get("token", ""),
+        owner=github_raw.get("owner", ""),
+        issue_integration=github_raw.get("issue_integration", False),
+    )
+
     config = ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline, intake=intake, safety=safety,
-                         logging_config=logging_config, llm_fast=llm_fast)
+                         logging_config=logging_config, llm_fast=llm_fast,
+                         github=github)
 
     result = validate_config(config)
     for w in result.warnings:

@@ -97,3 +97,7 @@ safety:
     - "*/settings/prod*"
     - "*/.env"
   max_files_per_task: 3
+
+github:
+  token: ${GITHUB_TOKEN}
+  issue_integration: false
