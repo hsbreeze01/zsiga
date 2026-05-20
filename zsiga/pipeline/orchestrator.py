@@ -488,6 +488,15 @@ class ZsigaOrchestrator:
         # Feature branch isolation: ensure on zsiga/<change_name>
         deploy_branch = project_config.deploy_branch
         feature_branch = f"zsiga/{change_name}"
+        # Pre-checkout cleanup (P2 fix): if working tree is dirty (e.g. zsiga.db /
+        # learnings.jsonl modified by CLARIFY/ENRICH), commit it BEFORE switching
+        # branches, otherwise `git checkout` aborts and the proposal fails.
+        if git_ops.has_uncommitted_changes(target_path, transport=transport):
+            print("  Pre-checkout cleanup: committing dirty working tree", flush=True)
+            git_ops.add_all(target_path, transport=transport)
+            git_ops.commit(target_path,
+                          f"zsiga: pre-checkout cleanup for {change_name}",
+                          transport=transport)
         if git_ops.branch_exists(target_path, feature_branch, transport=transport):
             git_ops.checkout(target_path, feature_branch, transport=transport)
             print(f"  Checked out existing feature branch: {feature_branch}")
@@ -495,7 +504,8 @@ class ZsigaOrchestrator:
             git_ops.create_branch(target_path, feature_branch, transport=transport)
             print(f"  Created feature branch: {feature_branch}")
 
-        # Pre-flight checkpoint: commit dirty tree before IMPLEMENT (REQ-CHK-01)
+        # Pre-flight checkpoint: commit dirty tree on the feature branch
+        # (covers the case where checkout itself surfaced new untracked files).
         if git_ops.has_uncommitted_changes(target_path, transport=transport):
             git_ops.add_all(target_path, transport=transport)
             git_ops.commit(target_path, f"zsiga: checkpoint before {change_name}",
@@ -581,17 +591,63 @@ class ZsigaOrchestrator:
 
         # Phase 3/6: REVIEW (self-review loop)
         if self.config.pipeline.review_max_rounds > 0:
-            print(f"\n  {'='*50}")
-            print(f"  Phase 3/6: REVIEW {change_name}")
-            print(f"  {'='*50}")
+            print(f"\n  {'='*50}", flush=True)
+            print(f"  Phase 3/6: REVIEW {change_name}", flush=True)
+            print(f"  {'='*50}", flush=True)
             t_review = time.monotonic()
-            review_result = await run_review_loop(
-                self.agent, change_dir, target_path, pre_sha, transport,
-                max_rounds=self.config.pipeline.review_max_rounds,
-                review_max_turns=self.config.pipeline.review_max_turns,
-                review_timeout=self.config.pipeline.review_timeout,
-                fix_max_turns=self.config.pipeline.review_fix_max_turns,
+            # Hard ceiling around the entire review loop so the daemon can never
+            # hang forever even if an inner timeout misbehaves.
+            review_loop_ceiling = max(
+                900,
+                int(getattr(self.config.pipeline, "review_timeout", 180))
+                * max(1, getattr(self.config.pipeline, "review_max_rounds", 1))
+                * 3,
             )
+            print(f"  [ORCH] review_loop_ceiling={review_loop_ceiling}s", flush=True)
+            try:
+                import asyncio as _asyncio
+                review_result = await _asyncio.wait_for(
+                    run_review_loop(
+                        self.agent, change_dir, target_path, pre_sha, transport,
+                        max_rounds=self.config.pipeline.review_max_rounds,
+                        review_max_turns=self.config.pipeline.review_max_turns,
+                        review_timeout=self.config.pipeline.review_timeout,
+                        fix_max_turns=self.config.pipeline.review_fix_max_turns,
+                    ),
+                    timeout=review_loop_ceiling,
+                )
+            except _asyncio.TimeoutError:
+                review_seconds = time.monotonic() - t_review
+                print(
+                    f"  [ORCH] ⏱️ REVIEW HARD-CEILING after {review_seconds:.1f}s "
+                    f"(ceiling={review_loop_ceiling}s) — recording UNKNOWN and moving on",
+                    flush=True,
+                )
+                from ..agent.reviewer import ReviewLoopResult as _RLR
+                review_result = _RLR(
+                    final_verdict="UNKNOWN",
+                    rounds_executed=0,
+                    fix_attempts=0,
+                    elapsed_seconds=review_seconds,
+                    last_issues=[],
+                    had_critical=False,
+                )
+            except Exception as _exc:  # pragma: no cover - defensive
+                review_seconds = time.monotonic() - t_review
+                print(
+                    f"  [ORCH] ❌ REVIEW raised {_exc.__class__.__name__}: {_exc} "
+                    f"after {review_seconds:.1f}s — recording UNKNOWN",
+                    flush=True,
+                )
+                from ..agent.reviewer import ReviewLoopResult as _RLR
+                review_result = _RLR(
+                    final_verdict="UNKNOWN",
+                    rounds_executed=0,
+                    fix_attempts=0,
+                    elapsed_seconds=review_seconds,
+                    last_issues=[],
+                    had_critical=False,
+                )
             review_seconds = time.monotonic() - t_review
             review_outcome = (
                 Outcome.SUCCESS

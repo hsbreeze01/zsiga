@@ -143,8 +143,9 @@ class AgentLoop:
             _llm_timeout = 300  # 5 min hard timeout per LLM call
             try:
                 import asyncio
+                _running_loop = asyncio.get_running_loop()
                 resp = await asyncio.wait_for(
-                    asyncio.get_event_loop().run_in_executor(
+                    _running_loop.run_in_executor(
                         None,
                         lambda: self.client.chat.completions.create(
                             model=self.model,

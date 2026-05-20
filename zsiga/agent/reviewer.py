@@ -47,10 +47,17 @@ async def run_review(
     """
     transport = transport or LocalTransport()
 
+    print("[REVIEW] run_review: reading specs", flush=True)
     specs = _read_all_specs(change_dir, transport)
+    print(f"[REVIEW] run_review: specs len={len(specs)}", flush=True)
     design = read_file(f"{change_dir}/design.md", transport) or ""
     tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
+    print(
+        f"[REVIEW] run_review: design len={len(design)} tasks len={len(tasks)} — running git diff",
+        flush=True,
+    )
     diff = git_ops.diff(target_path, pre_impl_sha, transport=transport)
+    print(f"[REVIEW] run_review: diff len={len(diff)} — building review agent", flush=True)
 
     review_md_path = f"{change_dir}/review.md"
 
@@ -100,8 +107,11 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
         proxy=None,
     )
 
-    import sys
-    print(f"[DEBUG] run_review: timeout_seconds={timeout_seconds}, max_turns={max_turns}", flush=True)
+    print(
+        f"[REVIEW] run_review: calling run_sub_agent "
+        f"timeout={timeout_seconds}s max_turns={max_turns}",
+        flush=True,
+    )
     result = await run_sub_agent(
         review_agent,
         target_path,
@@ -246,7 +256,14 @@ async def run_review_loop(
     total_prompt_tokens = 0
     total_completion_tokens = 0
 
+    print(
+        f"[REVIEW] ENTER run_review_loop change_dir={change_dir} "
+        f"max_rounds={max_rounds} review_timeout={review_timeout}",
+        flush=True,
+    )
+
     for round_num in range(1, max_rounds + 1):
+        print(f"[REVIEW] round {round_num}/{max_rounds} start", flush=True)
         # --- run review sub-agent ---
         sub_result = await run_review(
             agent, change_dir, target_path, pre_impl_sha, transport,

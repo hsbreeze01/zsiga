@@ -9,9 +9,10 @@ PYTHON="$REPO/venv/bin/python"
 PIDFILE="$REPO/data/lock.pid"
 LOGFILE="$REPO/data/daemon.log"
 ERRLOG="$REPO/data/daemon-err.log"
-DAEMON_CMD="$PYTHON -m zsiga daemon --port=58175"
+DAEMON_CMD="$PYTHON -u -m zsiga daemon --port=58175"
 export PYTHONPATH="$REPO"
 export ZSIGA_HOME="$REPO"
+export PYTHONUNBUFFERED=1  # ensure daemon log shows print output in real time
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
