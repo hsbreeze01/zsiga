@@ -335,3 +335,93 @@ zsiga cycle: found 2 active changes
   ✅ created branch zsiga/dashboard-proposal-queue-mobile
   Created feature branch: zsiga/dashboard-proposal-queue-mobile
   git add -A ...
+⚡ zsiga daemon started (PID 1162344)
+   Cycle interval: 8h
+   Idle poll: 5min
+   Lock: /home/zsiga/repo/data/lock.pid
+
+============================================================
+zsiga daemon — cycle #1 @ 2026-05-21 00:40:29
+============================================================
+  📝 Loaded memory context (2910 chars)
+
+============================================================
+zsiga cycle: found 2 active changes
+============================================================
+
+--- dashboard-proposal-queue-mobile (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  📊 Dashboard: http://0.0.0.0:58175
+  Project context ready (18368 chars, 0.2s)
+
+  ==================================================
+  Phase 0/6: CLARIFY dashboard-proposal-queue-mobile
+  ==================================================
+  Phase 0 done in 38.2s
+
+  ==================================================
+  Phase 1/6: ENRICH dashboard-proposal-queue-mobile
+  ==================================================
+  Phase 1 done in 82.7s
+
+  ==================================================
+  Phase 2/6: IMPLEMENT dashboard-proposal-queue-mobile
+  ==================================================
+  git checkout zsiga/dashboard-proposal-queue-mobile ...
+  ❌ git checkout failed: error: Your local changes to the following files would be overwritten by checkout:
+	data/zsiga.db
+	memory/learnings.jsonl
+Please commit your changes or stash them before you switch branches.
+Aborting
+❌ Proposal dashboard-proposal-queue-mobile failed: error: Your local changes to the following files would be overwritten by checkout:
+	data/zsiga.db
+	memory/learnings.jsonl
+Please commit your changes or stash them before you switch branches.
+Aborting
+Traceback (most recent call last):
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 160, in run_cycle
+    if await self._process_change(prop):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 299, in _process_change
+    return await self._run_phases(prop, rec, change_dir, target_path,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 479, in _run_phases
+    git_ops.checkout(target_path, feature_branch, transport=transport)
+  File "/home/zsiga/repo/zsiga/git_ops.py", line 92, in checkout
+    _check_result(r, "git checkout")
+  File "/home/zsiga/repo/zsiga/git_ops.py", line 9, in _check_result
+    raise RuntimeError(stderr)
+RuntimeError: error: Your local changes to the following files would be overwritten by checkout:
+	data/zsiga.db
+	memory/learnings.jsonl
+Please commit your changes or stash them before you switch branches.
+Aborting
+
+
+--- validate-pipeline-fixes-20260520 (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  Project context ready (21325 chars, 0.1s)
+
+  ==================================================
+  Phase 0/6: CLARIFY validate-pipeline-fixes-20260520
+  ==================================================
+  Phase 0 done in 32.1s
+
+  ==================================================
+  Phase 1/6: ENRICH validate-pipeline-fixes-20260520
+  ==================================================
+  Phase 1 done in 86.6s
+
+  ==================================================
+  Phase 2/6: IMPLEMENT validate-pipeline-fixes-20260520
+  ==================================================
+  git checkout zsiga/validate-pipeline-fixes-20260520 ...
+  ✅ checked out zsiga/validate-pipeline-fixes-20260520
+  Checked out existing feature branch: zsiga/validate-pipeline-fixes-20260520
+  git add -A ...

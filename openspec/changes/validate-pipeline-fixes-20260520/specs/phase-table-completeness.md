@@ -20,6 +20,14 @@ The `_phase_table` function in `zsiga/metrics/dashboard.py` SHALL emit one table
 - **When** `_phase_table` is called
 - **Then** the rendered table SHALL contain a row for `CLARIFY` with `count=0` and `mean=0` (or equivalent zero-sentinel)
 
+#### Scenario: Completely empty metrics dict
+
+- **Given** the Phase enumeration contains all eight values
+- **And** the timing records dict is empty `{}`
+- **When** `_phase_table` is called
+- **Then** the rendered table SHALL contain one row per Phase value, each showing `count=0`
+- **And** no `KeyError` or other exception SHALL be raised
+
 #### Scenario: New phases added to enumeration later
 
 - **Given** a future change adds a new value to the Phase enumeration
