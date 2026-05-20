@@ -9,6 +9,111 @@ from ..memory.journal import load_journal
 _DASHBOARD_PATH = Path(__file__).resolve().parent.parent.parent / "site" / "dashboard.html"
 _MASCOT_SRC = Path(__file__).resolve().parent.parent.parent / "site" / "mascot.png"
 
+_QUEUE_EMPTY_HTML = (
+    '<div class="section">\n'
+    '  <h2>📋 Proposal Queue</h2>\n'
+    '  <div class="meta">Queue empty — idle polling</div>\n'
+    '</div>\n'
+)
+
+
+def _render_proposal_queue() -> str:
+    """Scan proposals from all targets and render queue panel."""
+    from ..config import load_config
+    from ..intake.scanner import DirectoryScanner
+    from ..transport import create_transport
+
+    try:
+        config = load_config()
+    except Exception:
+        return _QUEUE_EMPTY_HTML
+
+    targets = config.targets
+    if not targets:
+        return _QUEUE_EMPTY_HTML
+
+    # Build transports for each target
+    transports = {}
+    for name, tc in targets.items():
+        transports[name] = create_transport(tc)
+
+    # Scan proposals via DirectoryScanner
+    scanner = DirectoryScanner(targets)
+    proposals = scanner.scan(transports)
+
+    if not proposals:
+        return _QUEUE_EMPTY_HTML
+
+    # Read first heading from each proposal.md (only first few lines)
+    for prop in proposals:
+        transport = transports.get(prop["project"])
+        summary = "—"
+        if transport:
+            proposal_file = (
+                f"{prop['change_dir']}/{prop['proposal_filename']}"
+            )
+            r = transport.run_shell(f"head -5 '{proposal_file}'", timeout=5)
+            if r["exit_code"] == 0:
+                for line in r["stdout"].splitlines():
+                    line = line.strip()
+                    if line.startswith("# "):
+                        summary = line[2:].strip()
+                        break
+        prop["summary"] = summary
+
+    # Load daemon state for current-change highlight
+    base = Path(__file__).resolve().parent.parent.parent
+    state_path = base / "data" / "daemon_state.json"
+    current_change = None
+    current_phase = None
+    try:
+        raw = state_path.read_text(encoding="utf-8")
+        ds = json.loads(raw)
+        current_change = ds.get("current_change")
+        current_phase = ds.get("current_phase")
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        pass
+
+    # Render table rows
+    rows = ""
+    for prop in proposals:
+        name = prop["id"]
+        project = prop["project"]
+        summary = prop.get("summary", "—")
+
+        is_active = current_change is not None and name == current_change
+        if is_active:
+            highlight = ' style="border-left:3px solid #f59e0b"'
+            phase_badge = (
+                ' <span style="font-size:0.75rem;'
+                "background:#f59e0b20;color:#f59e0b;"
+                'padding:0.1rem 0.4rem;border-radius:4px"'
+                f">{current_phase}</span>"
+            )
+        else:
+            highlight = ""
+            phase_badge = ""
+
+        rows += (
+            f"<tr{highlight}>"
+            f"<td>{name}</td>"
+            f"<td>{project}</td>"
+            f"<td>{summary}{phase_badge}</td>"
+            f"</tr>\n"
+        )
+
+    return (
+        '<div class="section">\n'
+        "  <h2>📋 Proposal Queue</h2>\n"
+        "  <table>\n"
+        "  <thead><tr>"
+        "<th>Proposal</th><th>Project</th><th>Summary</th>"
+        "</tr></thead>\n"
+        f"  <tbody>\n{rows}  </tbody>\n"
+        "  </table>\n"
+        "</div>\n"
+    )
+
 
 def _detect_state(stats: dict) -> str:
     ts = stats.get("last_updated", "")
@@ -266,6 +371,10 @@ def _render(stats: dict, milestones: list[dict], state: str = "resting") -> str:
     except Exception:
         daemon_section = ""
     try:
+        proposal_queue_section = _render_proposal_queue()
+    except Exception:
+        proposal_queue_section = ""
+    try:
         failure_section = _render_failure_diagnosis()
     except Exception:
         failure_section = ""
@@ -405,6 +514,8 @@ td {{ border-top: 1px solid #334155; }}
     {sparkline_card}
   </div>
 </div>
+
+{proposal_queue_section}
 
 <div class="section">
     <h2>⚡ Phase Performance</h2>
