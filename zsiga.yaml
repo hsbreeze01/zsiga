@@ -17,6 +17,7 @@ targets:
     path: /home/ecs-assist-user/d8q-intelligentengine-datafactory
     test_cmd: "venv/bin/python -m pytest -x --tb=short"
     lint_cmd: "venv/bin/python -m ruff check ."
+    deploy_branch: premium
     transport: ssh
     ssh:
       host: 47.99.57.152
@@ -27,6 +28,7 @@ targets:
     path: /home/ecs-assist-user/d8q-intelligentengine-stockcompass
     test_cmd: "venv/bin/python -m pytest -x --tb=short"
     lint_cmd: "venv/bin/python -m ruff check ."
+    deploy_branch: main
     transport: ssh
     ssh:
       host: 47.99.57.152
@@ -37,6 +39,7 @@ targets:
     path: /home/ecs-assist-user/d8q-data-agent
     test_cmd: "venv/bin/python -m pytest -x --tb=short"
     lint_cmd: "venv/bin/python -m ruff check ."
+    deploy_branch: premium
     transport: ssh
     ssh:
       host: 47.99.57.152
@@ -47,6 +50,7 @@ targets:
     path: /home/ecs-assist-user/d8q-intelligentengine-stockshark
     test_cmd: "venv/bin/python -m pytest -x --tb=short"
     lint_cmd: "venv/bin/python -m ruff check ."
+    deploy_branch: premium
     transport: ssh
     ssh:
       host: 47.99.57.152
@@ -57,6 +61,7 @@ targets:
     path: /home/ecs-assist-user/d8q-intelligentengine-infopublisher
     test_cmd: "venv/bin/python -m pytest -x --tb=short"
     lint_cmd: "venv/bin/python -m ruff check ."
+    deploy_branch: premium
     transport: ssh
     ssh:
       host: 47.99.57.152
@@ -67,6 +72,7 @@ targets:
     path: /home/zsiga/repo
     test_cmd: "venv/bin/python -m pytest -x --tb=short"
     lint_cmd: "venv/bin/python -m ruff check ."
+    deploy_branch: zsiga-l5-autonomous-engineer
     transport: local
 
 intake:

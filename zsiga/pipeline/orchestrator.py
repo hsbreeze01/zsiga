@@ -334,6 +334,16 @@ class ZsigaOrchestrator:
         print(f"  {'='*50}")
         self.agent.set_phase("impl")
 
+        # Feature branch isolation: ensure on zsiga/<change_name>
+        deploy_branch = project_config.deploy_branch
+        feature_branch = f"zsiga/{change_name}"
+        if git_ops.branch_exists(target_path, feature_branch, transport=transport):
+            git_ops.checkout(target_path, feature_branch, transport=transport)
+            print(f"  Checked out existing feature branch: {feature_branch}")
+        else:
+            git_ops.create_branch(target_path, feature_branch, transport=transport)
+            print(f"  Created feature branch: {feature_branch}")
+
         # Pre-flight checkpoint: commit dirty tree before IMPLEMENT (REQ-CHK-01)
         if git_ops.has_uncommitted_changes(target_path, transport=transport):
             git_ops.add_all(target_path, transport=transport)
@@ -562,8 +572,18 @@ class ZsigaOrchestrator:
                 msg += f" (closes #{issue_number})"
             git_ops.commit(target_path, msg, transport=transport)
         git_ops.tag(target_path, f"zsiga-{change_name}", transport=transport)
-        git_ops.push(target_path, dry_run=self.config.safety.dry_run,
-                    transport=transport)
+
+        # Push feature branch, then merge into deploy branch
+        if not self.config.safety.dry_run:
+            git_ops.push(target_path, branch=feature_branch, transport=transport)
+            git_ops.checkout(target_path, deploy_branch, transport=transport)
+            git_ops.pull(target_path, branch=deploy_branch, transport=transport)
+            git_ops.merge_branch(target_path, feature_branch, transport=transport)
+            git_ops.push(target_path, branch=deploy_branch, transport=transport)
+            git_ops.delete_branch(target_path, feature_branch, transport=transport)
+            print(f"  Merged {feature_branch} into {deploy_branch} and pushed")
+        else:
+            print(f"  [DRY RUN] Would merge {feature_branch} into {deploy_branch}")
 
         archive_change(target_path, change_name, transport=transport)
         deliver_seconds = time.monotonic() - t0

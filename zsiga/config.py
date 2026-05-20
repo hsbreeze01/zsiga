@@ -56,7 +56,8 @@ class SSHConfig:
 class TargetConfig:
     def __init__(self, name: str, path: str, test_cmd: str = "pytest -x --tb=short",
                  lint_cmd: str = "ruff check .", transport: str = "local",
-                 ssh: SSHConfig = None, venv_path: str = None):
+                 ssh: SSHConfig = None, venv_path: str = None,
+                 deploy_branch: str = "main"):
         self.name = name
         self.path = path
         self.test_cmd = test_cmd
@@ -64,6 +65,7 @@ class TargetConfig:
         self.transport = transport
         self.ssh = ssh
         self.venv_path = venv_path
+        self.deploy_branch = deploy_branch
 
 
 class LLMConfig:
@@ -309,6 +311,7 @@ def load_config(path: str = None) -> ZsigaConfig:
             transport=tc.get("transport", "ssh" if ssh else "local"),
             ssh=ssh,
             venv_path=tc.get("venv_path"),
+            deploy_branch=tc.get("deploy_branch", "main"),
         )
 
     pipeline_raw = raw.get("pipeline", {})

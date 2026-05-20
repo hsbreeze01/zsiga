@@ -58,3 +58,35 @@ def create_branch(target_path: str, branch_name: str, transport: Transport = Non
 def checkout(target_path: str, ref: str, transport: Transport = None):
     transport = transport or LocalTransport()
     transport.run_shell(f"git checkout {ref}", cwd=target_path)
+
+
+def branch_exists(target_path: str, branch_name: str, transport: Transport = None) -> bool:
+    transport = transport or LocalTransport()
+    r = transport.run_shell(
+        f"git rev-parse --verify {branch_name}", cwd=target_path
+    )
+    return r["exit_code"] == 0
+
+
+def current_branch(target_path: str, transport: Transport = None) -> str:
+    transport = transport or LocalTransport()
+    r = transport.run_shell(
+        "git rev-parse --abbrev-ref HEAD", cwd=target_path
+    )
+    return r["stdout"].strip()
+
+
+def merge_branch(target_path: str, source: str, transport: Transport = None):
+    transport = transport or LocalTransport()
+    transport.run_shell(f"git merge {source}", cwd=target_path)
+
+
+def delete_branch(target_path: str, branch_name: str, transport: Transport = None):
+    transport = transport or LocalTransport()
+    transport.run_shell(f"git branch -D {branch_name}", cwd=target_path)
+
+
+def pull(target_path: str, remote: str = "origin", branch: str = "main",
+         transport: Transport = None):
+    transport = transport or LocalTransport()
+    transport.run_shell(f"git pull {remote} {branch}", cwd=target_path)
