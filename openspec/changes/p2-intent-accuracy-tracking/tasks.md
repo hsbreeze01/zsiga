@@ -14,7 +14,7 @@
 
 ## Group 3: Stats Integration
 
-- [ ] 3.1 Add intent accuracy to `zsiga/metrics/collector.py` — import `compute_intent_accuracy` from `intent_tracker`; in `compute_stats()`, call it and merge result into stats dict under `intent_accuracy` key; add default `intent_accuracy` section to `_empty_stats()`
+- [x] 3.1 Add intent accuracy to `zsiga/metrics/collector.py` — import `compute_intent_accuracy` from `intent_tracker`; in `compute_stats()`, call it and merge result into stats dict under `intent_accuracy` key; add default `intent_accuracy` section to `_empty_stats()`
 
 ## Group 4: Tests
 

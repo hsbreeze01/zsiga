@@ -7,6 +7,7 @@ from .db import load_all_changes as _db_load_changes
 from .db import count_lessons as _db_count_lessons
 from .db import save_stats_snapshot, save_level_snapshot
 from .types import ChangeRecord
+from .intent_tracker import compute_intent_accuracy
 
 _METRICS_DIR = Path(__file__).resolve().parent.parent.parent / "metrics"
 _MEMORY_DIR = Path(__file__).resolve().parent.parent.parent / "memory"
@@ -182,6 +183,7 @@ def compute_stats(changes: list[dict] = None) -> dict:
         "total_sub_agent_count": total_sub_agent_count,
         "recent_changes": [c["change_name"] for c in changes[-5:]],
         "last_updated": datetime.now().isoformat(),
+        "intent_accuracy": compute_intent_accuracy(),
     }
 
     save_stats_snapshot(stats)
@@ -303,4 +305,12 @@ def _empty_stats(lessons_count: int = 0) -> dict:
         "total_sub_agent_count": 0,
         "recent_changes": [],
         "last_updated": datetime.now().isoformat(),
+        "intent_accuracy": {
+            "total_classified": 0,
+            "total_resolved": 0,
+            "correct_count": 0,
+            "accuracy_pct": 0.0,
+            "by_intent": {},
+            "low_confidence_count": 0,
+        },
     }

@@ -1,0 +1,8 @@
+Verdict: PASS
+Completeness: ✓ All three spec files (intent-recording, confidence-gate, accuracy-stats) are implemented across both orchestrators and collector.py; Group 4 tests are deferred but not blocking.
+Correctness: ✓ Orchestrator code correctly calls record_intent_decision after classify(), update_intent_outcome in all dispatch paths (ask_user, explore, diagnoser, review, non-pipeline skip) and in the finally block for pipeline paths; confidence gate logic correctly guards on <0.6 and !=OPEN_ENDED with explore-then-reclassify fallback.
+Coherence: ✓ Both orchestrators have identical changes; collector.py already integrates compute_intent_accuracy() into compute_stats() and _empty_stats(); design doc ADRs are followed.
+Issues:
+  1. [WARNING] update_intent_outcome() in intent_tracker.py (pre-existing, not modified) forces is_correct=True for classification_source="openspec_override", which means reverted changes will be recorded as correct (is_correct=1) despite the orchestrator passing is_correct=False. This contradicts spec requirement "Pipeline reverts — intent marked incorrect" but is a pre-existing design choice in a file explicitly excluded from modification (ADR-4).
+  2. [WARNING] classification_source is hardcoded to "openspec_override" rather than conditionally derived from the classify() source parameter. This is correct for current usage but not future-proof per the spec's conditional mapping ("openspec_override" / "keyword" / "llm").
+  3. [INFO] Task 4.1 (integration tests for orchestrator intent recording) remains unchecked; not blocking since pre-run tests pass, but test coverage for the new orchestrator paths would strengthen confidence.
