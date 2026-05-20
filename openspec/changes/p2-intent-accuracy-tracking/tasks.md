@@ -8,9 +8,9 @@
 
 ## Group 2: Confidence Gate
 
-- [ ] 2.1 Add confidence gate logic in `zsiga/pipeline/orchestrator.py` — after recording intent decision, check if `confidence < 0.6` and `intent_type != OPEN_ENDED`; if so, dispatch explore sub-agent to gather context, re-classify with enriched proposal text, call `update_intent_reclassification()`, and use the new intent for routing; handle explore failure gracefully (fall back to original classification)
+- [x] 2.1 Add confidence gate logic in `zsiga/pipeline/orchestrator.py` — after recording intent decision, check if `confidence < 0.6` and `intent_type != OPEN_ENDED`; if so, dispatch explore sub-agent to gather context, re-classify with enriched proposal text, call `update_intent_reclassification()`, and use the new intent for routing; handle explore failure gracefully (fall back to original classification)
 
-- [ ] 2.2 Add confidence gate logic in `zsiga/agent/orchestrator.py` — same pattern as 2.1
+- [x] 2.2 Add confidence gate logic in `zsiga/agent/orchestrator.py` — same pattern as 2.1
 
 ## Group 3: Stats Integration
 

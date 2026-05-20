@@ -16,7 +16,7 @@ from ..memory.context import load_active_context, update_active_context, load_re
 from ..memory.learn import record_outcome, record_lesson
 from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
 from ..metrics.collector import record_change
-from ..metrics.intent_tracker import record_intent_decision, update_intent_outcome
+from ..metrics.intent_tracker import record_intent_decision, update_intent_outcome, update_intent_reclassification
 from ..memory.journal import export_session
 from ..transport import Transport, create_transport
 from .enricher import enrich, derive_explore_tasks
@@ -195,7 +195,7 @@ class ZsigaOrchestrator:
         )
 
         # Record intent decision for accuracy tracking
-        record_intent_decision(
+        intent_row_id = record_intent_decision(
             change_name=change_name,
             project=project_name,
             predicted_intent=intent.intent_type.value,
@@ -204,6 +204,40 @@ class ZsigaOrchestrator:
             verbalization=intent.verbalization,
             reasoning=intent.reasoning,
         )
+
+        # Confidence gate: low-confidence non-OPEN_ENDED triggers explore-then-reclassify
+        if intent.confidence < 0.6 and intent.intent_type != IntentType.OPEN_ENDED:
+            print(f"  Confidence gate: {intent.confidence:.2f} < 0.6, dispatching explore for context")
+            try:
+                from ..agent.sub_agent import create_with_role as _create_role
+                from ..agent.sub_agent import run_sub_agent as _run_sub
+                explore_agent = _create_role(
+                    "explore",
+                    api_key=self.agent.client.api_key,
+                    model=self.agent.model,
+                    base_url=getattr(self.agent.client, "base_url", None),
+                )
+                explore_result = await _run_sub(
+                    explore_agent, target_path, transport, proposal_text,
+                    max_turns=10, timeout_seconds=120,
+                )
+                if explore_result.success and explore_result.content.strip():
+                    enriched_text = proposal_text + "\n\n## Supplementary Context\n" + explore_result.content
+                    new_intent = classify(enriched_text, source="openspec")
+                    if new_intent.intent_type != intent.intent_type or new_intent.confidence > intent.confidence:
+                        print(
+                            f"  Reclassified: {intent.intent_type.value} → {new_intent.intent_type.value} "
+                            f"(confidence {intent.confidence:.2f} → {new_intent.confidence:.2f})"
+                        )
+                        update_intent_reclassification(
+                            row_id=intent_row_id,
+                            reclassified_from=intent.intent_type.value,
+                            reclassified_to=new_intent.intent_type.value,
+                        )
+                        intent = new_intent
+                        route_path = route(intent)
+            except Exception as gate_err:
+                print(f"  Confidence gate explore failed: {gate_err}, using original classification")
 
         if route_path == "ask_user":
             print(f"  Intent unclear, asking user for clarification: {intent.verbalization}")
