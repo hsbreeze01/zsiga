@@ -1,0 +1,74 @@
+{
+  "session_id": "dashboard-proposal-queue-panel-28e23829",
+  "change_name": "dashboard-proposal-queue-panel",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T19:14:26.529594",
+  "outcome": "success",
+  "started_at": "2026-05-20T19:04:18.470057",
+  "finished_at": "2026-05-20T19:14:26.516302",
+  "total_runtime_seconds": 606.5,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 129.6,
+      "fix_attempts": 0,
+      "llm_calls": 17,
+      "tool_calls": 27,
+      "prompt_tokens": 445990,
+      "completion_tokens": 3022
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 277.5,
+      "fix_attempts": 0,
+      "llm_calls": 22,
+      "tool_calls": 24,
+      "prompt_tokens": 790395,
+      "completion_tokens": 11192
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 122.2,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 72.3,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 5,
+      "prompt_tokens": 145470,
+      "completion_tokens": 2016
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 44,
+    "total_tool_calls": 56,
+    "total_prompt_tokens": 1381855,
+    "total_completion_tokens": 16230
+  }
+}
