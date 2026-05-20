@@ -65,6 +65,7 @@ class DirectoryScanner:
 
                 design_filename = _find_file_ci(dir_listing, "design.md")
                 tasks_filename = _find_file_ci(dir_listing, "tasks.md")
+                clarify_filename = _find_file_ci(dir_listing, "clarify.md")
 
                 r_specs = transport.run_shell(
                     f"test -d '{change_dir}/specs' && echo YES", timeout=5
@@ -79,13 +80,19 @@ class DirectoryScanner:
                     "has_specs": "YES" in r_specs.get("stdout", ""),
                     "has_design": design_filename is not None,
                     "has_tasks": tasks_filename is not None,
+                    "has_clarify": clarify_filename is not None,
                     "proposal_filename": proposal_filename,
                     "design_filename": design_filename,
                     "tasks_filename": tasks_filename,
+                    "clarify_filename": clarify_filename,
                 })
         return proposals
 
     def is_enriched(self, proposal: dict) -> bool:
+        # New format: specs/ + clarify.md
+        if proposal["has_specs"] and proposal.get("has_clarify"):
+            return True
+        # Legacy format: specs/ + design.md + tasks.md
         return proposal["has_specs"] and proposal["has_design"] and proposal["has_tasks"]
 
     def is_fully_implemented(self, proposal: dict, transport: Transport = None) -> bool:

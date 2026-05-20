@@ -327,7 +327,7 @@ class ZsigaOrchestrator:
             enrich_calls = _extract_calls(enrich_result)
             enrich_tokens = _extract_tokens(enrich_result)
             rec.phases.append(PhaseRecord(
-                phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
+                phase=Phase.CLARIFY, outcome=Outcome.SUCCESS,
                 seconds_used=time.monotonic() - t0,
                 llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
                 prompt_tokens=enrich_tokens[0], completion_tokens=enrich_tokens[1],

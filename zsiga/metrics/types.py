@@ -3,7 +3,7 @@ from enum import Enum
 
 
 class Phase(str, Enum):
-    ENRICH = "enrich"
+    CLARIFY = "clarify"
     IMPLEMENT = "implement"
     REVIEW = "review"
     VERIFY = "verify"

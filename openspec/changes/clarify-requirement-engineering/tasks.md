@@ -2,14 +2,14 @@
 
 ## 1. Core Type & Enum Change
 
-- [ ] **1.1** Rename `Phase.ENRICH` to `Phase.CLARIFY` in `zsiga/metrics/types.py`
+- [x] **1.1** Rename `Phase.ENRICH` to `Phase.CLARIFY` in `zsiga/metrics/types.py`
   - Change `ENRICH = "enrich"` to `CLARIFY = "clarify"`
   - Update all references across the codebase (orchestrator, phase_wal, metrics)
   - Files: `zsiga/metrics/types.py`
 
 ## 2. Enricher → Clarifier (Core Logic)
 
-- [ ] **2.1** Rewrite enricher system prompt and output logic for four-dimension clarify.md
+- [x] **2.1** Rewrite enricher system prompt and output logic for four-dimension clarify.md
   - Replace `ENRICHER_SYSTEM` prompt to instruct LLM to output `clarify.md` with four sections (需求拆解, 边界, 目标, 约束) instead of `design.md` + `tasks.md`
   - Change `enrich()` function: after agent run, validate `clarify.md` exists (not design.md/tasks.md)
   - Add `_validate_clarify()` that checks for all four `##` headings
@@ -17,7 +17,7 @@
   - Remove retry logic for missing `design.md`/`tasks.md`; add retry for missing `clarify.md` sections
   - Files: `zsiga/pipeline/enricher.py`
 
-- [ ] **2.2** Add historical token estimation function `estimate_token_budget()`
+- [x] **2.2** Add historical token estimation function `estimate_token_budget()`
   - Query `zsiga.db` metrics for recent IMPLEMENT phase records (prompt_tokens, completion_tokens)
   - Return average token usage as estimate dict, or `{"source": "none"}` if no history
   - Inject estimate into enricher user prompt so LLM can populate `## 约束 > 预估 token 消耗`
@@ -25,7 +25,7 @@
 
 ## 3. Scanner Integration
 
-- [ ] **3.1** Update `DirectoryScanner` to detect `clarify.md` and support dual format
+- [x] **3.1** Update `DirectoryScanner` to detect `clarify.md` and support dual format
   - Add `has_clarify` field detection (case-insensitive lookup like existing design.md/tasks.md)
   - Update `is_enriched()`: return True if `(has_specs and has_clarify)` OR `(has_specs and has_design and has_tasks)`
   - Files: `zsiga/intake/scanner.py`

@@ -1,6 +1,6 @@
 # zsiga ⚡
 
-**Level 3 · Self-Evolution** — 超电磁开发智能体。读取目标项目中的需求提案，自动补全规格、实现代码、验证质量，完成 git 提交。
+**Level 2 · Code Architect** (L3 🔧 IN PROGRESS) — 超电磁开发智能体。读取目标项目中的需求提案，自动补全规格、实现代码、验证质量，完成 git 提交。
 
 > 名字源自 **Zsigmondy**（齐格蒙迪，诺贝尔化学奖得主）—— 在混沌的代码中建立秩序。
 > 形象灵感来自 **御坂美琴**（某科学的超电磁炮）—— 用最朴素的硬币，打出最精准的命中。
@@ -9,7 +9,7 @@
 
 ```
 ┌─────────────────────────────────────────────┐
-│  ⚡ zsiga · Level 3 Self-Evolution             │
+│  ⚡ zsiga · Level 2 Code Architect (L3 WIP)   │
 │  超电磁开发智能体                             │
 │                                             │
 │  🪙 硬币 · 电弧 · 精准打击                    │
@@ -42,8 +42,8 @@
 | Level | 代号 | 核心能力 | 关键任务 | 状态 |
 |-------|------|----------|----------|------|
 | Level 1 | Shell Artisan | shell 工具 + OpenSpec 流程纪律 | — | ✅ ACHIEVED |
-| Level 2 | Code Architect | AST 透视 + 消息压缩 + 分身并行 | — | ✅ ACHIEVED |
-| **Level 3** | **🔧 Self-Evolution** | **LSP 集成 + 自我修改 + 专业子代理 + 模式挖掘** | LSP 集成, Self-Modify 门控, 专业子代理分化, 跨会话模式挖掘, L3 验证 | **✅ CURRENT** |
+| **Level 2** | **Code Architect** | **AST 透视 + 消息压缩 + 分身并行** | — | **✅ CURRENT (STABLE)** |
+| Level 3 | 🔧 Self-Evolution | LSP 集成 + 自我修改 + 专业子代理 + 模式挖掘 | 验证通过率≥80%, 经验≥50, 行为测试通过 | 🔧 IN PROGRESS (verify 51.3%, lessons 29/50) |
 | Level 4 | 🌐 Multi-Project Orchestrator | 意图路由 + 跨项目分解 + Todo 编排 + 升级协议 | Intent Router, 跨项目任务分解, Todo 驱动编排, 升级路径, L4 验证 | 🔒 LOCKED |
 | Level 5 | 🚀 Autonomous Engineer | 意图门控 + 并行代理 + Skill 演化 + 自我审查 + 失败恢复 | Phase 0 Intent Gate, 并行后台代理, Skill 演化, 自我审查循环, 失败恢复协议, L5 验证 | 🔒 LOCKED |
 
