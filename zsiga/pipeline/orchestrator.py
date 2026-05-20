@@ -15,6 +15,7 @@ from .. import git_ops
 from ..memory.context import load_active_context, update_active_context, load_recent_lessons
 from ..memory.learn import record_outcome, record_lesson
 from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
+from ..metrics.db import record_self_assessment, query_recent_ratings
 from ..metrics.collector import record_change
 from ..metrics.intent_tracker import record_intent_decision, update_intent_outcome, update_intent_reclassification
 from ..memory.journal import export_session
@@ -282,7 +283,8 @@ class ZsigaOrchestrator:
             skip_enrich = intent.intent_type == IntentType.FIX
             return await self._run_phases(prop, rec, change_dir, target_path,
                                           project_name, project_config, change_name,
-                                          transport, skip_enrich=skip_enrich)
+                                          transport, skip_enrich=skip_enrich,
+                                          intent=intent)
         finally:
             record_change(rec)
             export_session(change_name)
@@ -297,7 +299,8 @@ class ZsigaOrchestrator:
     async def _run_phases(self, prop, rec, change_dir, target_path,
                           project_name, project_config, change_name,
                           transport: Transport,
-                          skip_enrich: bool = False) -> bool:
+                          skip_enrich: bool = False,
+                          intent: object = None) -> bool:
         cycle_start = time.monotonic()
 
         # Phase WAL for crash recovery
@@ -610,6 +613,21 @@ class ZsigaOrchestrator:
             prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
         ))
 
+        # Phase 3.5: REFLECT (self-assessment)
+        task_type = "refactor"  # default
+        if intent is not None:
+            task_type = self._INTENT_TO_TASK_TYPE.get(
+                getattr(intent, "intent_type", None), "refactor"
+            )
+        print(f"\n  {'='*50}")
+        print(f"  Phase 3.5: REFLECT {change_name}")
+        print(f"  {'='*50}")
+        reflect_seconds = self.phase_reflect(
+            rec, change_name, project_name, task_type,
+            change_dir, transport,
+        )
+        print(f"  Self-rating: {self._get_last_rating(rec)} ({reflect_seconds:.1f}s)")
+
         # Phase 4: DELIVER
         print(f"\n  {'='*50}")
         print(f"  Phase 4/4: DELIVER {change_name}")
@@ -660,6 +678,168 @@ class ZsigaOrchestrator:
         print(f"  {'='*50}")
         record_outcome(change_name, project_name, True, "deliver")
         return True
+
+    # ── INTENT → task_type mapping for REFLECT ──────────────
+
+    _INTENT_TO_TASK_TYPE = {
+        IntentType.IMPLEMENTATION: "impl",
+        IntentType.FIX: "fix",
+    }
+
+    @staticmethod
+    def _get_last_rating(rec: ChangeRecord) -> str:
+        """Extract the self_rating detail from the most recent reflect PhaseRecord."""
+        for p in reversed(rec.phases):
+            if p.phase == Phase.REFLECT:
+                return p.detail or "computed"
+        return "n/a"
+
+    def phase_reflect(self, rec: ChangeRecord, change_name: str,
+                      project_name: str, task_type: str,
+                      change_dir: str, transport: Transport) -> float:
+        """REFLECT phase: compute self-assessment metrics and write reflect.md.
+
+        Returns elapsed time in seconds.
+        """
+        t0 = time.monotonic()
+
+        # Compute metrics from phase records
+        total_fix = sum(p.fix_attempts for p in rec.phases)
+        actual_tokens = sum(p.prompt_tokens + p.completion_tokens for p in rec.phases)
+        actual_steps = sum(p.llm_calls + p.tool_calls for p in rec.phases)
+        outcome = "success" if rec.outcome == Outcome.SUCCESS else "reverted"
+
+        # Self-rating algorithm
+        if outcome == "reverted" or total_fix > 5:
+            rating = "poor"
+        elif total_fix == 0:
+            rating = "excellent"
+        elif total_fix <= 2:
+            rating = "good"
+        else:
+            rating = "average"
+
+        # Build strengths (rule-based)
+        strengths = []
+        impl_phase = next(
+            (p for p in rec.phases if p.phase == Phase.IMPLEMENT), None
+        )
+        verify_phase = next(
+            (p for p in rec.phases if p.phase == Phase.VERIFY), None
+        )
+        review_phase = next(
+            (p for p in rec.phases if p.phase == Phase.REVIEW), None
+        )
+
+        if impl_phase and impl_phase.fix_attempts == 0:
+            strengths.append("Clean implementation (no mechanical errors)")
+        if verify_phase and verify_phase.fix_attempts == 0:
+            strengths.append("First-pass verification")
+        if impl_phase and impl_phase.fix_attempts == 0:
+            strengths.append("Strong code generation accuracy")
+        if review_phase and review_phase.outcome == Outcome.SUCCESS:
+            strengths.append("Clean review (no critical issues)")
+
+        # Build weaknesses (rule-based)
+        weaknesses = []
+        if impl_phase and impl_phase.fix_attempts > 0:
+            weaknesses.append("Required mechanical error fixes")
+        if verify_phase and verify_phase.fix_attempts > 0:
+            weaknesses.append("Failed initial verification")
+        if outcome == "reverted":
+            weaknesses.append("Task exceeded recovery capacity")
+        if review_phase and review_phase.outcome == Outcome.FAIL:
+            weaknesses.append("Review found critical issues")
+
+        # Build lessons
+        lessons = []
+        if rating == "excellent":
+            lessons.append("First-pass success — maintain current approach")
+        if impl_phase and impl_phase.fix_attempts > 0:
+            lessons.append(
+                f"Implementation required {impl_phase.fix_attempts} fix attempt(s)"
+            )
+        if verify_phase and verify_phase.fix_attempts > 0:
+            lessons.append(
+                f"Verification required {verify_phase.fix_attempts} fix attempt(s)"
+            )
+        if outcome == "reverted":
+            lessons.append("Change reverted — review failure pattern")
+
+        # Persist to DB
+        record_self_assessment({
+            "change_name": change_name,
+            "task_type": task_type,
+            "predicted_tokens": 0,
+            "actual_tokens": actual_tokens,
+            "predicted_steps": 0,
+            "actual_steps": actual_steps,
+            "fix_attempts": total_fix,
+            "outcome": outcome,
+            "self_rating": rating,
+            "strengths": strengths,
+            "weaknesses": weaknesses,
+            "lessons": lessons,
+        })
+
+        # Capability boundary detection (REQ-SA-04)
+        recent = query_recent_ratings(task_type, limit=3)
+        if len(recent) == 3 and all(r == "poor" for r in recent):
+            record_lesson(
+                title=f"Capability boundary: {task_type}",
+                context=f"3 consecutive poor ratings for task_type={task_type}",
+                takeaway=f"Recommend human intervention for {task_type} tasks",
+                pattern_key=f"capability.boundary.{task_type}",
+            )
+
+        # Generate reflect.md
+        reflect_lines = [
+            f"# Self-Assessment: {change_name}",
+            "",
+            "## Task Review",
+            "- predicted_tokens: 0",
+            f"- actual_tokens: {actual_tokens}",
+            "- predicted_steps: 0",
+            f"- actual_steps: {actual_steps}",
+            f"- fix_attempts: {total_fix}",
+            "",
+            "## Self-Rating",
+            f"**{rating}**",
+            "",
+            "## Strengths",
+        ]
+        for s in strengths:
+            reflect_lines.append(f"- {s}")
+        reflect_lines.append("")
+        reflect_lines.append("## Weaknesses")
+        for w in weaknesses:
+            reflect_lines.append(f"- {w}")
+        reflect_lines.append("")
+        reflect_lines.append("## Lessons Learned")
+        for lesson in lessons:
+            reflect_lines.append(f"- {lesson}")
+        reflect_lines.append("")
+        reflect_lines.append("## Next Time Suggestions")
+        reflect_lines.append(
+            f"- Estimated tokens for similar tasks: {actual_tokens}"
+        )
+        reflect_md = "\n".join(reflect_lines)
+
+        # Write reflect.md to change_dir via transport
+        reflect_path = f"{change_dir}/reflect.md"
+        escaped = reflect_md.replace("'", "'\\''")
+        transport.run_shell(
+            f"echo '{escaped}' > '{reflect_path}'",
+            timeout=10,
+        )
+
+        # Append PhaseRecord
+        elapsed = time.monotonic() - t0
+        rec.phases.append(
+            PhaseRecord(phase=Phase.REFLECT, outcome=Outcome.SUCCESS,
+                        seconds_used=elapsed, detail=rating)
+        )
+        return elapsed
 
     async def _fix_loop(self, target_path, project_config, errors,
                         pre_sha: str, transport: Transport,

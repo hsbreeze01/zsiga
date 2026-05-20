@@ -408,3 +408,84 @@ class TestPhaseReflectIntegration:
             p for p in rec.phases if p.phase == Phase.REFLECT
         ]
         assert len(reflect_phases) == 0
+
+
+class TestPhaseReflectWithTransport:
+    """Test phase_reflect with a mock transport to verify reflect.md is written."""
+
+    def test_reflect_md_written_to_change_dir(self, db_path, tmp_path):
+        from zsiga.pipeline.orchestrator import ZsigaOrchestrator
+        from unittest.mock import MagicMock, patch
+
+        # Build rec with phases
+        rec = ChangeRecord(
+            change_name="add-feature-y",
+            project="proj",
+            outcome=Outcome.SUCCESS,
+            phases=[
+                PhaseRecord(
+                    phase=Phase.IMPLEMENT, outcome=Outcome.SUCCESS,
+                    fix_attempts=0, prompt_tokens=100, completion_tokens=200,
+                    llm_calls=2, tool_calls=1,
+                ),
+                PhaseRecord(
+                    phase=Phase.VERIFY, outcome=Outcome.SUCCESS,
+                    fix_attempts=0, prompt_tokens=50, completion_tokens=50,
+                    llm_calls=1, tool_calls=0,
+                ),
+            ],
+        )
+
+        # Mock transport that captures shell commands
+        written_files = {}
+        transport = MagicMock()
+        def capture_shell(cmd, **kwargs):
+            if ">" in cmd and "reflect.md" in cmd:
+                # Extract content between echo '...' > 'path'
+                parts = cmd.split(">", 1)
+                path = parts[1].strip().strip("'")
+                content = parts[0].strip()
+                if content.startswith("echo '") and content.endswith("'"):
+                    content = content[6:-1]
+                written_files[path] = content
+            return {"exit_code": 0, "stdout": ""}
+        transport.run_shell.side_effect = capture_shell
+
+        # Patch _get_conn to use our tmp db
+        with patch("zsiga.metrics.db._DB_PATH", db_path):
+            # Create an orchestrator instance isn't needed for the static method
+            # but we can call phase_reflect directly if we instantiate
+            # Instead, create a minimal mock config
+            config = MagicMock()
+            config.llm.api_key = "test"
+            config.llm.model = "test"
+            config.llm.base_url = None
+            config.llm.proxy = None
+            config.pipeline.compaction.enabled = False
+            config.pipeline.compaction.threshold_chars = 10000
+            config.pipeline.compaction.keep_recent = 5
+
+            with patch.object(ZsigaOrchestrator, "__init__", lambda self, cfg: None):
+                orch = ZsigaOrchestrator.__new__(ZsigaOrchestrator)
+
+            elapsed = orch.phase_reflect(
+                rec, "add-feature-y", "proj", "impl",
+                "/tmp/test-change", transport,
+            )
+
+        # Verify PhaseRecord appended
+        assert rec.phases[-1].phase == Phase.REFLECT
+        assert rec.phases[-1].outcome == Outcome.SUCCESS
+        assert rec.phases[-1].detail == "excellent"
+        assert elapsed >= 0
+
+        # Verify reflect.md was written
+        assert len(written_files) == 1
+        content = list(written_files.values())[0]
+        assert "## Task Review" in content
+        assert "## Self-Rating" in content
+        assert "**excellent**" in content
+        assert "## Strengths" in content
+        assert "## Weaknesses" in content
+        assert "## Lessons Learned" in content
+        assert "## Next Time Suggestions" in content

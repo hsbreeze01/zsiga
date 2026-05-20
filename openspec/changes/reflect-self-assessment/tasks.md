@@ -13,7 +13,7 @@
 
 ## Group 2: Orchestrator Integration
 
-- [ ] **2.1** Implement `phase_reflect()` method in `pipeline/orchestrator.py`
+- [x] **2.1** Implement `phase_reflect()` method in `pipeline/orchestrator.py`
   - Accept parameters: `rec` (ChangeRecord), `change_name`, `project_name`, `task_type` (str), `change_dir`, `transport`
   - Compute `total_fix_attempts` from rec.phases (sum of fix_attempts in IMPLEMENT + VERIFY)
   - Compute `actual_tokens` = sum of (prompt_tokens + completion_tokens) across all phases
@@ -27,7 +27,7 @@
   - Append `PhaseRecord(phase=Phase.REFLECT, outcome=Outcome.SUCCESS)` to `rec.phases`
   - Return elapsed time for logging
 
-- [ ] **2.2** Wire REFLECT phase into `_run_phases()` in `pipeline/orchestrator.py`
+- [x] **2.2** Wire REFLECT phase into `_run_phases()` in `pipeline/orchestrator.py`
   - Pass `intent` through to `_run_phases()` (currently not passed — add parameter)
   - Derive `task_type` from `intent.intent_type` using INTENT_TO_TASK_TYPE mapping
   - After VERIFY success (before DELIVER), call `self.phase_reflect(...)`
@@ -36,7 +36,7 @@
 
 ## Group 3: Tests
 
-- [ ] **3.1** Create `tests/test_self_assessment.py` with comprehensive test coverage
+- [x] **3.1** Create `tests/test_self_assessment.py` with comprehensive test coverage
   - Test `record_self_assessment` and `query_self_assessment_stats` DB functions (using tmp_path db)
   - Test `query_recent_ratings` returns correct rating list and handles empty case
   - Test self-rating algorithm: excellent (0 fix, success), good (≤2 fix, success), average (≤5 fix, success), poor (reverted or >5 fix)
