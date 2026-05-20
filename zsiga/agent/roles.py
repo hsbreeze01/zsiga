@@ -93,7 +93,7 @@ _ROLES: dict[Role, RoleConfig] = {
         name="review",
         max_turns=8,
         read_only=True,
-        allowed_tools=["bash", "read_file", "search", "list_files", "ast_search", "goto_definition", "find_references", "diagnostics"],
+        allowed_tools=["bash", "read_file", "search", "list_files", "ast_search", "goto_definition", "find_references", "diagnostics", "write_file"],
         system_prompt=_REVIEW_PROMPT,
     ),
     Role.DIAGNOSER: RoleConfig(

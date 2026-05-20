@@ -36,7 +36,8 @@ def test_review_role_read_only():
     config = get_role_config(Role.REVIEW)
     assert config.max_turns == 8
     assert config.read_only is True
-    assert "write_file" not in config.allowed_tools
+    assert "write_file" in config.allowed_tools
+    assert "edit_file" not in config.allowed_tools
 
 
 def test_system_prompts_are_chinese():
