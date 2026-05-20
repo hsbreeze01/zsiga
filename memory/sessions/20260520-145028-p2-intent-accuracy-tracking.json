@@ -1,0 +1,74 @@
+{
+  "session_id": "p2-intent-accuracy-tracking-a36b3c9c",
+  "change_name": "p2-intent-accuracy-tracking",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T14:50:28.409662",
+  "outcome": "success",
+  "started_at": "2026-05-20T14:41:30.747816",
+  "finished_at": "2026-05-20T14:50:28.397787",
+  "total_runtime_seconds": 532.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 184.1,
+      "fix_attempts": 0,
+      "llm_calls": 9,
+      "tool_calls": 15,
+      "prompt_tokens": 378524,
+      "completion_tokens": 4698
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 169.5,
+      "fix_attempts": 0,
+      "llm_calls": 13,
+      "tool_calls": 16,
+      "prompt_tokens": 596567,
+      "completion_tokens": 4874
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 85.6,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 86.0,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 92306,
+      "completion_tokens": 459
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 6.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 34,
+    "total_tool_calls": 43,
+    "total_prompt_tokens": 1067397,
+    "total_completion_tokens": 10031
+  }
+}

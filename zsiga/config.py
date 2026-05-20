@@ -101,6 +101,14 @@ class CompactionConfig:
         self.compaction_ratio = compaction_ratio
 
 
+DEFAULT_BUDGET_PROFILES: dict[str, int] = {
+    "fix": 300000,
+    "implementation": 600000,
+    "cross_project": 200000,
+    "self_modify": 800000,
+}
+
+
 class PipelineConfig:
     def __init__(self, max_changes_per_cycle: int = 3, impl_timeout_minutes: int = 20,
                  fix_attempts: int = 10, eval_fix_attempts: int = 3,
@@ -120,7 +128,8 @@ class PipelineConfig:
                  review_fix_max_turns: int = 6,
                  idle_poll_minutes: int = 5,
                  max_continuous_cycles: int = 20,
-                 cooldown_minutes: int = 30):
+                 cooldown_minutes: int = 30,
+                 budget_profiles: dict[str, int] = None):
         self.max_changes_per_cycle = max_changes_per_cycle
         self.impl_timeout_minutes = impl_timeout_minutes
         self.fix_attempts = fix_attempts
@@ -145,6 +154,9 @@ class PipelineConfig:
         self.idle_poll_minutes = idle_poll_minutes
         self.max_continuous_cycles = max_continuous_cycles
         self.cooldown_minutes = cooldown_minutes
+        self.budget_profiles = dict(DEFAULT_BUDGET_PROFILES)
+        if budget_profiles:
+            self.budget_profiles.update(budget_profiles)
 
 
 class IntakeConfig:
@@ -325,6 +337,7 @@ def load_config(path: str = None) -> ZsigaConfig:
         idle_poll_minutes=pipeline_raw.get("idle_poll_minutes", 5),
         max_continuous_cycles=pipeline_raw.get("max_continuous_cycles", 20),
         cooldown_minutes=pipeline_raw.get("cooldown_minutes", 30),
+        budget_profiles=pipeline_raw.get("budget_profiles"),
     )
 
     intake_raw = raw.get("intake", {})
