@@ -101,7 +101,7 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
     )
 
     import sys
-    print(f"[DEBUG] run_review: timeout_seconds={timeout_seconds}, max_turns={max_turns}", file=sys.stderr, flush=True)
+    print(f"[DEBUG] run_review: timeout_seconds={timeout_seconds}, max_turns={max_turns}", flush=True)
     result = await run_sub_agent(
         review_agent,
         target_path,
