@@ -1,0 +1,74 @@
+{
+  "session_id": "p1-value-based-budget-5e4c2640",
+  "change_name": "p1-value-based-budget",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T14:41:30.743318",
+  "outcome": "success",
+  "started_at": "2026-05-20T14:33:14.378557",
+  "finished_at": "2026-05-20T14:41:30.732703",
+  "total_runtime_seconds": 495.9,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 175.3,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 16,
+      "prompt_tokens": 384628,
+      "completion_tokens": 4325
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 214.5,
+      "fix_attempts": 0,
+      "llm_calls": 17,
+      "tool_calls": 23,
+      "prompt_tokens": 599353,
+      "completion_tokens": 5327
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 46.1,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 55.0,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 84000,
+      "completion_tokens": 505
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 5.0,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 41,
+    "total_tool_calls": 51,
+    "total_prompt_tokens": 1067981,
+    "total_completion_tokens": 10157
+  }
+}

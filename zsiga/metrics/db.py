@@ -72,6 +72,28 @@ CREATE INDEX IF NOT EXISTS idx_changes_name ON changes(change_name);
 CREATE INDEX IF NOT EXISTS idx_changes_project ON changes(project);
 CREATE INDEX IF NOT EXISTS idx_journal_ts ON journal(ts);
 CREATE INDEX IF NOT EXISTS idx_lessons_pattern ON lessons(pattern_key);
+
+CREATE TABLE IF NOT EXISTS intent_accuracy (
+    id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+    change_name           TEXT NOT NULL,
+    project               TEXT NOT NULL,
+    predicted_intent      TEXT NOT NULL,
+    confidence            REAL NOT NULL,
+    classification_source TEXT NOT NULL DEFAULT 'keyword',
+    verbalization         TEXT DEFAULT '',
+    reasoning             TEXT DEFAULT '',
+    actual_outcome        TEXT DEFAULT '',
+    actual_intent         TEXT DEFAULT '',
+    is_correct            INTEGER DEFAULT NULL,
+    reclassified_from     TEXT DEFAULT '',
+    reclassified_to       TEXT DEFAULT '',
+    created_at            TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now')),
+    updated_at            TEXT DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_intent_change ON intent_accuracy(change_name);
+CREATE INDEX IF NOT EXISTS idx_intent_predicted ON intent_accuracy(predicted_intent);
+CREATE INDEX IF NOT EXISTS idx_intent_source ON intent_accuracy(classification_source);
 """
 
 
