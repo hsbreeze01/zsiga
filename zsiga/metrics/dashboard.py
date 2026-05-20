@@ -261,11 +261,26 @@ def _render(stats: dict, milestones: list[dict], state: str = "resting") -> str:
 
     current_level = _current_level(milestones)
 
+    try:
+        daemon_section = _render_daemon_status()
+    except Exception:
+        daemon_section = ""
+    try:
+        failure_section = _render_failure_diagnosis()
+    except Exception:
+        failure_section = ""
+    try:
+        _rates = compute_rolling_rates()
+        sparkline_card = _sparkline_html(_rates)
+    except Exception:
+        sparkline_card = '<div class="meta">Insufficient data</div>'
+
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="60">
 <title>zsiga dashboard</title>
 <style>
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -331,6 +346,8 @@ td {{ border-top: 1px solid #334155; }}
 </head>
 <body>
 
+<div style="text-align:right;font-size:0.75rem;color:#64748b;margin-bottom:0.5rem">Auto-refresh: 60s</div>
+
 <div class="hero">
   <div class="hero-mascot">
     {mascot}
@@ -340,6 +357,8 @@ td {{ border-top: 1px solid #334155; }}
     <span class="state-badge {state}">{state_label}</span>
   </div>
 </div>
+
+{daemon_section}
 
 <div class="grid">
   <div class="card">
@@ -380,10 +399,19 @@ td {{ border-top: 1px solid #334155; }}
   </div>
 </div>
 
+<div class="grid" style="margin-bottom:2rem">
+  <div class="card">
+    <div class="label">📈 Success Rate Trend</div>
+    {sparkline_card}
+  </div>
+</div>
+
 <div class="section">
     <h2>⚡ Phase Performance</h2>
   {phase_rows}
 </div>
+
+{failure_section}
 
 {usage_section}
 

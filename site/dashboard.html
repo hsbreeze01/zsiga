@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="60">
 <title>zsiga dashboard</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -67,6 +68,8 @@ td { border-top: 1px solid #334155; }
 </style>
 </head>
 <body>
+
+<div style="text-align:right;font-size:0.75rem;color:#64748b;margin-bottom:0.5rem">Auto-refresh: 60s</div>
 
 <div class="hero">
   <div class="hero-mascot">
@@ -504,15 +507,18 @@ td { border-top: 1px solid #334155; }
   </div>
 </div>
 
+<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">869232</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-20 08:24:21</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">29</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-20 10:50:58</div></div></div>
+
+
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">132</div>
+    <div class="value">133</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">90.9%</div>
-    <div class="meta">120 hit / 12 miss</div>
+    <div class="value good">91.0%</div>
+    <div class="meta">121 hit / 12 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -525,11 +531,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">76.4%</div>
+    <div class="value warn">76.6%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value warn">54.6%</div>
+    <div class="value warn">54.1%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -543,56 +549,63 @@ td { border-top: 1px solid #334155; }
   </div>
 </div>
 
+<div class="grid" style="margin-bottom:2rem">
+  <div class="card">
+    <div class="label">📈 Success Rate Trend</div>
+    <div class="meta">Insufficient data</div>
+  </div>
+</div>
+
 <div class="section">
     <h2>⚡ Phase Performance</h2>
   <table>
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>68</td>
+  <td>69</td>
   <td class="good">100.0%</td>
   <td>0.4</td>
-  <td>128.4s</td>
+  <td>127.6s</td>
   <td>0</td>
-  <td>519</td>
-  <td>705</td>
-  <td>11.65M</td>
+  <td>523</td>
+  <td>708</td>
+  <td>11.69M</td>
 </tr><tr>
   <td>implement</td>
-  <td>110</td>
-  <td class="good">92.7%</td>
+  <td>111</td>
+  <td class="good">92.8%</td>
   <td>0.8</td>
-  <td>181.4s</td>
+  <td>182.8s</td>
   <td>95</td>
-  <td>1471</td>
-  <td>1673</td>
-  <td>36.58M</td>
+  <td>1491</td>
+  <td>1704</td>
+  <td>37.23M</td>
 </tr><tr>
   <td>review</td>
-  <td>6</td>
+  <td>7</td>
   <td class="bad">0.0%</td>
   <td>0.0</td>
-  <td>67.1s</td>
+  <td>68.1s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
 </tr><tr>
   <td>verify</td>
-  <td>97</td>
-  <td class="warn">54.6%</td>
+  <td>98</td>
+  <td class="warn">54.1%</td>
   <td>0.1</td>
-  <td>65.1s</td>
+  <td>64.9s</td>
   <td>13</td>
-  <td>665</td>
-  <td>778</td>
-  <td>7.54M</td>
+  <td>677</td>
+  <td>790</td>
+  <td>7.62M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>95</td>
+  <td>96</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>10.1s</td>
+  <td>10.0s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -601,31 +614,62 @@ td { border-top: 1px solid #334155; }
 </div>
 
 <div class="section">
+  <h2>🔍 Failure Diagnosis</h2>
+  <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-scanner-case-insensitive</strong> · zsiga · verify · 15.8min · 2026-05-20 08:07</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-infopublisher-disk-full</strong> · zsiga · verify · 15.2min · 2026-05-20 00:30</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at verify: review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>build-phase-timing-comparator-utility-add-a-cli-tool-that-co</strong> · zsiga · implement · 4.7min · 2026-05-18 18:16</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at implement: review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>implement-real-sub-agent-dispatch-in-orchestratorpy-replace-</strong> · zsiga · implement · 4.0min · 2026-05-18 17:43</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Check test output for specific assertion errors; verify test expectations match implementation API</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>frontend-templates-complete</strong> · compass · verify · 10.1min · 2026-05-14 18:27</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at verify: review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>system-monitoring-tab</strong> · dataagent · implement · 58.7min · 2026-05-09 10:49</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at implement: tests:
+============================= test session starts ==============================
+platform linux -- Python 3.12.0, pytest-9.0.2, pluggy-1.6.0
+rootdir: /home/ecs-assist-user/</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>crawler-domain-strategy</strong> · dataagent · implement · 53.3min · 2026-05-09 09:55</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at implement: lint:
+E701 Multiple statements on one line (colon)
+   --&gt; src/intelligent_data_agent/tasks/multi_source_crawl.py:201:35
+    |
+199 |             matched = _match_keywords(it.title,</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>crawler-domain-strategy</strong> · dataagent · implement · 37.4min · 2026-05-09 00:15</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at implement: lint:
+E701 Multiple statements on one line (colon)
+   --&gt; src/intelligent_data_agent/tasks/multi_source_crawl.py:201:35
+    |
+199 |             matched = _match_keywords(it.title,</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>stock-technical-analysis</strong> · factory · verify · 6.4min · 2026-05-08 18:27</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at verify</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>crawler-domain-strategy</strong> · dataagent · implement · 40.8min · 2026-05-08 02:21</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at implement: lint:
+E701 Multiple statements on one line (colon)
+   --&gt; src/intelligent_data_agent/tasks/multi_source_crawl.py:201:35
+    |
+199 |             matched = _match_keywords(it.title,</div></details>
+
+</div>
+
+
+<div class="section">
     <h2>⚡ Resource Usage</h2>
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">55.77M</div>
-      <div class="meta">55.04M prompt + 728.9K completion</div>
+      <div class="value">56.54M</div>
+      <div class="meta">55.80M prompt + 744.9K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">422.5K</div>
+      <div class="value">425.1K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">2,655</div>
-      <div class="meta">avg 20.1 per change</div>
+      <div class="value">2,691</div>
+      <div class="meta">avg 20.2 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">3,156</div>
-      <div class="meta">avg 23.9 per change</div>
+      <div class="value">3,202</div>
+      <div class="meta">avg 24.1 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">10.1h</div>
-      <div class="meta">36,352s total</div>
+      <div class="value">10.2h</div>
+      <div class="meta">36,888s total</div>
     </div>
   </div>
 </div>
@@ -823,12 +867,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">120/100</span>
+  <span style="color:#94a3b8;font-size:0.8rem">121/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">90.9/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">91.0/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1106,14 +1150,14 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>database-resource-management</li>
-<li>evolve-learning-system-closed-loop</li>
+    <li>evolve-learning-system-closed-loop</li>
 <li>daemon-smart-scheduling</li>
 <li>fix-scanner-case-insensitive</li>
 <li>fix-scanner-case-insensitive</li>
+<li>fix-dashboard-realtime-monitoring</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T08:59:15.091074</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T10:54:12.320548</div>
 </body>
 </html>
