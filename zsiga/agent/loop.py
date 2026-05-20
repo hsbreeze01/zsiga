@@ -111,6 +111,7 @@ class AgentLoop:
 
         for turn in range(max_turns):
             elapsed = time.monotonic() - start
+            print(f"[DEBUG] turn={turn}, elapsed={elapsed:.1f}s, timeout={timeout_seconds}", flush=True)
             if timeout_seconds and elapsed > timeout_seconds:
                 log.warning("⏱️ TIMEOUT after %d turns, %.1fs, %d LLM calls, %d tool calls",
                             turn, elapsed, llm_calls_total, tool_calls_total,
@@ -137,6 +138,7 @@ class AgentLoop:
                               len(messages), new_tokens,
                               extra={"phase": phase})
 
+            print(f"[DEBUG] LLM call turn={turn}, elapsed={time.monotonic()-start:.1f}s", flush=True)
             # Wrap LLM call with hard timeout to prevent API hangs
             _llm_timeout = 300  # 5 min hard timeout per LLM call
             try:
