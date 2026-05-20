@@ -288,8 +288,8 @@ class TestShouldProposeDedup:
 
 
 class TestShouldProposeRateLimit:
-    def test_rate_limit_at_3_per_24h(self, reflector, base):
-        """3 entries in past 24h → rate limit reached."""
+    def test_rate_limit_disabled_allows_at_3_per_24h(self, reflector, base):
+        """3 entries in past 24h but rate limit is disabled → proposal allowed."""
         now = datetime.now().isoformat()
         _write_history(base, [
             {"timestamp": now, "signal_type": "recurring_failure", "pattern_key": "a"},
@@ -297,7 +297,7 @@ class TestShouldProposeRateLimit:
             {"timestamp": now, "signal_type": "recurring_root_cause", "pattern_key": "c"},
         ])
         signal = Signal(type="recurring_failure", priority="high", pattern_key="new", title="t")
-        assert reflector.should_propose(signal, base) is False
+        assert reflector.should_propose(signal, base) is True
 
     def test_under_rate_limit_allows(self, reflector, base):
         """1 entry in past 24h → under rate limit, allowed."""

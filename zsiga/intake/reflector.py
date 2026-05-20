@@ -242,14 +242,12 @@ class Reflector:
         return False
 
     def _rate_limit_reached(self, base: Path) -> bool:
-        """Check if 3 proposals already generated in past 24 hours."""
-        history = self._load_history(base)
-        cutoff = datetime.now() - timedelta(hours=24)
-        recent = [
-            e for e in history
-            if self._parse_ts(e.get("timestamp", "")) > cutoff
-        ]
-        return len(recent) >= 3
+        """Check if 3 proposals already generated in past 24 hours.
+
+        Currently disabled (returns False) during early growth phase.
+        Retained so it can be re-enabled by restoring the original logic.
+        """
+        return False
 
     def _is_duplicate(self, base: Path, signal: Signal) -> bool:
         """Check if same signal_type + pattern_key proposed within 24h."""
