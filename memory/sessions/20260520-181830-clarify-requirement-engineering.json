@@ -1,0 +1,74 @@
+{
+  "session_id": "clarify-requirement-engineering-b342c418",
+  "change_name": "clarify-requirement-engineering",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T18:18:30.845797",
+  "outcome": "success",
+  "started_at": "2026-05-20T18:05:51.986966",
+  "finished_at": "2026-05-20T18:18:30.833916",
+  "total_runtime_seconds": 758.3,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 320.1,
+      "fix_attempts": 0,
+      "llm_calls": 16,
+      "tool_calls": 25,
+      "prompt_tokens": 682556,
+      "completion_tokens": 10899
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 363.0,
+      "fix_attempts": 0,
+      "llm_calls": 34,
+      "tool_calls": 37,
+      "prompt_tokens": 1850210,
+      "completion_tokens": 10079
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 35.0,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 34.3,
+      "fix_attempts": 0,
+      "llm_calls": 7,
+      "tool_calls": 7,
+      "prompt_tokens": 74833,
+      "completion_tokens": 298
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 5.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 57,
+    "total_tool_calls": 69,
+    "total_prompt_tokens": 2607599,
+    "total_completion_tokens": 21276
+  }
+}
