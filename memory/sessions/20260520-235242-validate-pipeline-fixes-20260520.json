@@ -1,0 +1,23 @@
+{
+  "session_id": "validate-pipeline-fixes-20260520-492a4042",
+  "change_name": "validate-pipeline-fixes-20260520",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T23:52:42.099748",
+  "outcome": "success",
+  "started_at": "2026-05-20T23:47:25.677682",
+  "finished_at": "2026-05-20T23:47:26.137625",
+  "total_runtime_seconds": 0,
+  "phases": [],
+  "lessons": [
+    {
+      "pattern_key": "daemon.cycle_error",
+      "takeaway": "TypeError: clarify() got an unexpected keyword argument 'supplementary_context'"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 0,
+    "total_tool_calls": 0,
+    "total_prompt_tokens": 0,
+    "total_completion_tokens": 0
+  }
+}

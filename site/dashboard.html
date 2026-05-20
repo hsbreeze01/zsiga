@@ -506,18 +506,18 @@ td { border-top: 1px solid #334155; }
   </div>
 </div>
 
-<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">1136227</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-20 23:24:22</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">3</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-20 23:34:54</div></div></div>
+<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">1143970</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-20 23:41:57</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">6</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-21 00:08:21</div></div></div>
 
 
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">166</div>
+    <div class="value">173</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">91.6%</div>
-    <div class="meta">152 hit / 14 miss</div>
+    <div class="value good">91.9%</div>
+    <div class="meta">159 hit / 14 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -557,7 +557,13 @@ td { border-top: 1px solid #334155; }
 
 <div class="section">
   <h2>📋 Proposal Queue</h2>
-  <div class="meta">Queue empty — idle polling</div>
+  <table>
+  <thead><tr><th>Proposal</th><th>Project</th><th>Summary</th></tr></thead>
+  <tbody>
+<tr><td>dashboard-proposal-queue-mobile</td><td>zsiga</td><td>Proposal: dashboard-proposal-queue-mobile</td></tr>
+<tr><td>validate-pipeline-fixes-20260520</td><td>zsiga</td><td>Proposal: validate-pipeline-fixes-20260520</td></tr>
+  </tbody>
+  </table>
 </div>
 
 
@@ -657,17 +663,17 @@ E701 Multiple statements on one line (colon)
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">516.3K</div>
+      <div class="value">495.4K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
       <div class="value">3,693</div>
-      <div class="meta">avg 22.2 per change</div>
+      <div class="meta">avg 21.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
       <div class="value">4,513</div>
-      <div class="meta">avg 27.2 per change</div>
+      <div class="meta">avg 26.1 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
@@ -870,12 +876,12 @@ E701 Multiple statements on one line (colon)
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">152/100</span>
+  <span style="color:#94a3b8;font-size:0.8rem">159/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">91.6/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">91.9/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1153,15 +1159,15 @@ E701 Multiple statements on one line (colon)
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>auto-recurring_failure-daemon-cycle_error-20260520</li>
-<li>fix-review-subagent-not-calling-write-file</li>
-<li>dashboard-auto-refresh-queue-status</li>
-<li>fix-git-push-branch-aware</li>
-<li>implement-clarify-phase-independent</li>
+    <li>validate-pipeline-fixes-20260520</li>
+<li>dashboard-proposal-queue-mobile</li>
+<li>validate-pipeline-fixes-20260520</li>
+<li>dashboard-proposal-queue-mobile</li>
+<li>validate-pipeline-fixes-20260520</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T23:35:01.891698</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-21T00:08:31.361686</div>
 <script>
 (function() {
   var REFRESH_INTERVAL = 600; // seconds

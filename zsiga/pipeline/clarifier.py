@@ -77,6 +77,7 @@ async def clarify(
     target_path: str,
     transport: Transport = None,
     project_context: str = "",
+    supplementary_context: str = "",
     max_turns: int = 3,
     timeout_seconds: int = 120,
 ) -> RunResult:
@@ -95,9 +96,15 @@ async def clarify(
             f"{project_context}\n"
         )
 
+    supp_section = ""
+    if supplementary_context:
+        supp_section = (
+            f"\n## 并行探索结果\n{supplementary_context}\n"
+        )
+
     user_prompt = f"""## Change 目录: {change_dir}
 ## 目标项目: {target_path}
-{ctx_section}
+{ctx_section}{supp_section}
 ## proposal.md:
 {proposal}
 

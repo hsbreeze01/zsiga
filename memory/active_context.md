@@ -9,7 +9,7 @@ zsiga is an independent autonomous agent. It operates on external projects throu
 - Revert on failure, never leave code broken
 - Follow existing project patterns
 
-## Session History: 57 lessons recorded
+## Session History: 64 lessons recorded
 ## Pattern Warnings (auto-mined)
 
 🟢 **pipeline.pass.deliver** — 出现 17 次 (严重度: low)
@@ -19,6 +19,10 @@ zsiga is an independent autonomous agent. It operates on external projects throu
 🟡 **pipeline.cross_project** — 出现 16 次 (严重度: medium)
    - Results: 1/4 passed
    - Results: 0/4 passed
+
+🔴 **daemon.cycle_error** — 出现 13 次 (严重度: high)
+   - TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+   - TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
 
 🔴 **pipeline.fail.implement** — 出现 6 次 (严重度: high)
    - Failed at implement: lint:
@@ -34,23 +38,12 @@ E701 Multiple statements on one line (colon)
 199 |             matched = _match_keywords(it.title, keywords)
 200 |     
 
-🔴 **daemon.cycle_error** — 出现 6 次 (严重度: high)
-   - Unhandled exception in daemon cycle
-   - Unhandled exception in daemon cycle
-
 🟡 **code.unknown** — 出现 3 次 (严重度: medium)
    - review error and adjust approach
    - review error and adjust approach
 
 
 ## Recent Lessons
-- [pipeline.cross_project] Results: 1/6 passed
-- [pipeline.cross_project] Results: 1/2 passed
-- [pipeline.cross_project] Results: 0/4 passed
-- [pipeline.cross_project] Results: 1/6 passed
-- [pipeline.cross_project] Results: 1/3 passed
-- [pipeline.cross_project] Results: 1/4 passed
-- [pipeline.cross_project] Results: 0/4 passed
 - [pipeline.cross_project] Results: 1/4 passed
 - [pipeline.cross_project] Results: 0/4 passed
 - [pipeline.cross_project] Results: 0/2 passed
@@ -64,3 +57,10 @@ E701 Multiple statements on one line (colon)
 - [daemon.cycle_error] Unhandled exception in daemon cycle
 - [daemon.cycle_error] Unhandled exception in daemon cycle
 - [daemon.cycle_error] Unhandled exception in daemon cycle
+- [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+- [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+- [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+- [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+- [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+- [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+- [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'

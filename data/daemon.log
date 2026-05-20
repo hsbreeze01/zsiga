@@ -1,10 +1,10 @@
-⚡ zsiga daemon started (PID 1136227)
+⚡ zsiga daemon started (PID 1142263)
    Cycle interval: 8h
    Idle poll: 5min
    Lock: /home/zsiga/repo/data/lock.pid
 
 ============================================================
-zsiga daemon — cycle #1 @ 2026-05-20 23:24:22
+zsiga daemon — cycle #1 @ 2026-05-20 23:38:44
 ============================================================
   📝 Loaded memory context (2429 chars)
 
@@ -19,34 +19,17 @@ Cycle complete: 0 changes processed
   📊 Dashboard: http://0.0.0.0:58175
 
   💤 No changes — next poll in 5 minutes...
-----------------------------------------
-Exception occurred during processing of request from ('220.196.192.128', 55399)
-Traceback (most recent call last):
-  File "/usr/lib/python3.12/socketserver.py", line 318, in _handle_request_noblock
-    self.process_request(request, client_address)
-  File "/usr/lib/python3.12/socketserver.py", line 349, in process_request
-    self.finish_request(request, client_address)
-  File "/usr/lib/python3.12/socketserver.py", line 362, in finish_request
-    self.RequestHandlerClass(request, client_address, self)
-  File "/home/zsiga/repo/zsiga/daemon.py", line 193, in __init__
-    super().__init__(*args, directory=serve_dir, **kwargs)
-  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
-    super().__init__(*args, **kwargs)
-  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
-    self.handle()
-  File "/usr/lib/python3.12/http/server.py", line 436, in handle
-    self.handle_one_request()
-  File "/usr/lib/python3.12/http/server.py", line 404, in handle_one_request
-    self.raw_requestline = self.rfile.readline(65537)
-                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/socket.py", line 707, in readinto
-    return self._sock.recv_into(b)
-           ^^^^^^^^^^^^^^^^^^^^^^^
-ConnectionResetError: [Errno 104] Connection reset by peer
-----------------------------------------
+
+🛑 SHUTDOWN requested — will exit after current cycle
+
+⚡ zsiga daemon stopped (ran 1 cycles)
+⚡ zsiga daemon started (PID 1143970)
+   Cycle interval: 8h
+   Idle poll: 5min
+   Lock: /home/zsiga/repo/data/lock.pid
 
 ============================================================
-zsiga daemon — cycle #2 @ 2026-05-20 23:29:38
+zsiga daemon — cycle #1 @ 2026-05-20 23:41:57
 ============================================================
   📝 Loaded memory context (2429 chars)
 
@@ -58,17 +41,250 @@ zsiga cycle: found 0 active changes
 ============================================================
 Cycle complete: 0 changes processed
 ============================================================
+  📊 Dashboard: http://0.0.0.0:58175
 
   💤 No changes — next poll in 5 minutes...
 
 ============================================================
-zsiga daemon — cycle #3 @ 2026-05-20 23:34:54
+zsiga daemon — cycle #2 @ 2026-05-20 23:47:17
 ============================================================
   📝 Loaded memory context (2429 chars)
 
 ============================================================
-zsiga cycle: found 0 active changes
+zsiga cycle: found 1 active changes
 ============================================================
+
+--- validate-pipeline-fixes-20260520 (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  Project context ready (21325 chars, 0.5s)
+
+  ==================================================
+  Phase 0/6: CLARIFY validate-pipeline-fixes-20260520
+  ==================================================
+❌ Proposal validate-pipeline-fixes-20260520 failed: clarify() got an unexpected keyword argument 'supplementary_context'
+Traceback (most recent call last):
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 160, in run_cycle
+    if await self._process_change(prop):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 299, in _process_change
+    return await self._run_phases(prop, rec, change_dir, target_path,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 383, in _run_phases
+    clarify_result = await clarify(
+                           ^^^^^^^^
+TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+
+  📝 Memory updated with 20 recent lessons
+
+============================================================
+Cycle complete: 0 changes processed
+============================================================
+
+  💤 No changes — next poll in 5 minutes...
+
+============================================================
+zsiga daemon — cycle #3 @ 2026-05-20 23:52:33
+============================================================
+  📝 Loaded memory context (2485 chars)
+
+============================================================
+zsiga cycle: found 1 active changes
+============================================================
+
+--- validate-pipeline-fixes-20260520 (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  Project context ready (21325 chars, 0.2s)
+
+  ==================================================
+  Phase 0/6: CLARIFY validate-pipeline-fixes-20260520
+  ==================================================
+❌ Proposal validate-pipeline-fixes-20260520 failed: clarify() got an unexpected keyword argument 'supplementary_context'
+Traceback (most recent call last):
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 160, in run_cycle
+    if await self._process_change(prop):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 299, in _process_change
+    return await self._run_phases(prop, rec, change_dir, target_path,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 383, in _run_phases
+    clarify_result = await clarify(
+                           ^^^^^^^^
+TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+
+  📝 Memory updated with 20 recent lessons
+
+============================================================
+Cycle complete: 0 changes processed
+============================================================
+
+  💤 No changes — next poll in 5 minutes...
+
+============================================================
+zsiga daemon — cycle #4 @ 2026-05-20 23:57:49
+============================================================
+  📝 Loaded memory context (2585 chars)
+
+============================================================
+zsiga cycle: found 1 active changes
+============================================================
+
+--- validate-pipeline-fixes-20260520 (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  Project context ready (21325 chars, 0.2s)
+
+  ==================================================
+  Phase 0/6: CLARIFY validate-pipeline-fixes-20260520
+  ==================================================
+❌ Proposal validate-pipeline-fixes-20260520 failed: clarify() got an unexpected keyword argument 'supplementary_context'
+Traceback (most recent call last):
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 160, in run_cycle
+    if await self._process_change(prop):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 299, in _process_change
+    return await self._run_phases(prop, rec, change_dir, target_path,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 383, in _run_phases
+    clarify_result = await clarify(
+                           ^^^^^^^^
+TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+
+  📝 Memory updated with 20 recent lessons
+
+============================================================
+Cycle complete: 0 changes processed
+============================================================
+
+  💤 No changes — next poll in 5 minutes...
+
+============================================================
+zsiga daemon — cycle #5 @ 2026-05-21 00:03:05
+============================================================
+  📝 Loaded memory context (2685 chars)
+
+============================================================
+zsiga cycle: found 2 active changes
+============================================================
+
+--- dashboard-proposal-queue-mobile (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  Project context ready (18368 chars, 0.2s)
+
+  ==================================================
+  Phase 0/6: CLARIFY dashboard-proposal-queue-mobile
+  ==================================================
+❌ Proposal dashboard-proposal-queue-mobile failed: clarify() got an unexpected keyword argument 'supplementary_context'
+Traceback (most recent call last):
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 160, in run_cycle
+    if await self._process_change(prop):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 299, in _process_change
+    return await self._run_phases(prop, rec, change_dir, target_path,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 383, in _run_phases
+    clarify_result = await clarify(
+                           ^^^^^^^^
+TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+
+
+--- validate-pipeline-fixes-20260520 (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  Project context ready (21325 chars, 0.2s)
+
+  ==================================================
+  Phase 0/6: CLARIFY validate-pipeline-fixes-20260520
+  ==================================================
+❌ Proposal validate-pipeline-fixes-20260520 failed: clarify() got an unexpected keyword argument 'supplementary_context'
+Traceback (most recent call last):
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 160, in run_cycle
+    if await self._process_change(prop):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 299, in _process_change
+    return await self._run_phases(prop, rec, change_dir, target_path,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 383, in _run_phases
+    clarify_result = await clarify(
+                           ^^^^^^^^
+TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+
+  📝 Memory updated with 20 recent lessons
+
+============================================================
+Cycle complete: 0 changes processed
+============================================================
+
+  💤 No changes — next poll in 5 minutes...
+
+============================================================
+zsiga daemon — cycle #6 @ 2026-05-21 00:08:21
+============================================================
+  📝 Loaded memory context (2798 chars)
+
+============================================================
+zsiga cycle: found 2 active changes
+============================================================
+
+--- dashboard-proposal-queue-mobile (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  Project context ready (18368 chars, 0.1s)
+
+  ==================================================
+  Phase 0/6: CLARIFY dashboard-proposal-queue-mobile
+  ==================================================
+❌ Proposal dashboard-proposal-queue-mobile failed: clarify() got an unexpected keyword argument 'supplementary_context'
+Traceback (most recent call last):
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 160, in run_cycle
+    if await self._process_change(prop):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 299, in _process_change
+    return await self._run_phases(prop, rec, change_dir, target_path,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 383, in _run_phases
+    clarify_result = await clarify(
+                           ^^^^^^^^
+TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+
+
+--- validate-pipeline-fixes-20260520 (zsiga) ---
+  Intent: implementation (confidence=0.95, route=pipeline)
+  Verbalization: OpenSpec proposal — implementation intent
+  venv python: /home/zsiga/repo/venv/bin/python
+  Prefetching project context...
+  Project context ready (21325 chars, 0.2s)
+
+  ==================================================
+  Phase 0/6: CLARIFY validate-pipeline-fixes-20260520
+  ==================================================
+❌ Proposal validate-pipeline-fixes-20260520 failed: clarify() got an unexpected keyword argument 'supplementary_context'
+Traceback (most recent call last):
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 160, in run_cycle
+    if await self._process_change(prop):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 299, in _process_change
+    return await self._run_phases(prop, rec, change_dir, target_path,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zsiga/repo/zsiga/pipeline/orchestrator.py", line 383, in _run_phases
+    clarify_result = await clarify(
+                           ^^^^^^^^
+TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
+
   📝 Memory updated with 20 recent lessons
 
 ============================================================

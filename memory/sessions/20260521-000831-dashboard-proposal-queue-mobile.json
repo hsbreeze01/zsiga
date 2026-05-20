@@ -1,0 +1,23 @@
+{
+  "session_id": "dashboard-proposal-queue-mobile-d3bc628c",
+  "change_name": "dashboard-proposal-queue-mobile",
+  "project": "zsiga",
+  "exported_at": "2026-05-21T00:08:31.060498",
+  "outcome": "success",
+  "started_at": "2026-05-21T00:03:13.749760",
+  "finished_at": "2026-05-21T00:03:13.908374",
+  "total_runtime_seconds": 0,
+  "phases": [],
+  "lessons": [
+    {
+      "pattern_key": "daemon.cycle_error",
+      "takeaway": "TypeError: clarify() got an unexpected keyword argument 'supplementary_context'"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 0,
+    "total_tool_calls": 0,
+    "total_prompt_tokens": 0,
+    "total_completion_tokens": 0
+  }
+}
