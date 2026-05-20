@@ -1,0 +1,74 @@
+{
+  "session_id": "fix-review-subagent-not-calling-write-file-6c17c74a",
+  "change_name": "fix-review-subagent-not-calling-write-file",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T20:39:32.457906",
+  "outcome": "success",
+  "started_at": "2026-05-20T20:35:09.164624",
+  "finished_at": "2026-05-20T20:39:32.442391",
+  "total_runtime_seconds": 261.5,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 59.7,
+      "fix_attempts": 0,
+      "llm_calls": 4,
+      "tool_calls": 3,
+      "prompt_tokens": 39759,
+      "completion_tokens": 1962
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 57.6,
+      "fix_attempts": 0,
+      "llm_calls": 10,
+      "tool_calls": 10,
+      "prompt_tokens": 153382,
+      "completion_tokens": 1651
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 102.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 36.7,
+      "fix_attempts": 0,
+      "llm_calls": 3,
+      "tool_calls": 2,
+      "prompt_tokens": 20811,
+      "completion_tokens": 1040
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.6,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 17,
+    "total_tool_calls": 15,
+    "total_prompt_tokens": 213952,
+    "total_completion_tokens": 4653
+  }
+}
