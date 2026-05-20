@@ -5,6 +5,7 @@ import time
 from zai import ZaiClient
 from zsiga.agent.compaction import compact_messages, estimate_tokens
 from zsiga.agent.token_budget import TokenBudget
+from zsiga.agent.value_signal import ValueTracker, classify_turn
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +37,9 @@ class AgentLoop:
                  compaction_keep_recent: int = 3,
                  total_budget: int = 600000,
                  per_turn_limit: int = 8192,
-                 compaction_ratio: float = 0.8):
+                 compaction_ratio: float = 0.8,
+                 stale_limit: int = 5,
+                 budget_extend_factor: float = 1.5):
         kwargs = {"api_key": api_key}
         if base_url:
             kwargs["base_url"] = base_url
@@ -60,11 +63,17 @@ class AgentLoop:
             per_turn_limit=per_turn_limit,
             compaction_threshold=compaction_threshold,
             compaction_ratio=compaction_ratio,
+            stale_limit=stale_limit,
+            budget_extend_factor=budget_extend_factor,
         )
+        self.value_tracker = ValueTracker(stale_limit=stale_limit)
 
     def set_phase(self, label: str):
         self._phase_label = label
         self.budget._used = 0
+        self.budget._extended = False
+        self.budget._consecutive_stale = 0
+        self.value_tracker.reset()
 
     def register_tool(self, name, description, parameters, func):
         self.tools.append({
@@ -146,16 +155,19 @@ class AgentLoop:
                     getattr(resp.usage, "completion_tokens", 0) or 0,
                 )
                 if budget_status["session_exceeded"] or budget_status["turn_exceeded"]:
-                    elapsed = time.monotonic() - start
-                    log.warning(
-                        "🚫 BUDGET_EXCEEDED after turn %d | used=%d remaining=%d",
-                        turn + 1, budget_status["used"], budget_status["remaining"],
-                        extra={"phase": phase, "turn": turn + 1, **budget_status},
-                    )
-                    return RunResult(
-                        "BUDGET_EXCEEDED", llm_calls_total, tool_calls_total, elapsed,
-                        prompt_tokens_total, completion_tokens_total,
-                    )
+                    # Soft budget extension: if last turn was productive, try extending
+                    extended = self.budget.try_extend("productive")
+                    if not extended:
+                        elapsed = time.monotonic() - start
+                        log.warning(
+                            "🚫 BUDGET_EXCEEDED after turn %d | used=%d remaining=%d",
+                            turn + 1, budget_status["used"], budget_status["remaining"],
+                            extra={"phase": phase, "turn": turn + 1, **budget_status},
+                        )
+                        return RunResult(
+                            "BUDGET_EXCEEDED", llm_calls_total, tool_calls_total, elapsed,
+                            prompt_tokens_total, completion_tokens_total,
+                        )
             msg = resp.choices[0].message
             messages.append(msg.model_dump())
 
@@ -171,6 +183,10 @@ class AgentLoop:
 
             turn_tools = len(msg.tool_calls)
             tool_calls_total += turn_tools
+
+            # Collect tool names and results for value-signal classification
+            turn_tool_names: list[str] = []
+            turn_tool_results: list[dict] = []
 
             for tc in msg.tool_calls:
                 name = tc.function.name
@@ -188,7 +204,11 @@ class AgentLoop:
                     result_str = json.dumps(result, ensure_ascii=False, default=str)
                 except Exception as e:
                     result_str = json.dumps({"error": str(e)})
+                    result = {"error": str(e)}
                 tool_ms = (time.monotonic() - t_tool) * 1000
+
+                turn_tool_names.append(name)
+                turn_tool_results.append(result if isinstance(result, dict) else {})
 
                 result_len = len(result_str)
                 log.debug("    → %.0fms, %d chars", tool_ms, result_len,
@@ -200,6 +220,30 @@ class AgentLoop:
                     "content": result_str,
                     "tool_call_id": tc.id,
                 })
+
+            # Value-signal classification after tool calls complete
+            turn_signal = classify_turn(turn_tool_names, turn_tool_results)
+            tracker_status = self.value_tracker.record_turn(turn_signal)
+
+            # Re-record budget with value_signal for stale tracking
+            if resp.usage:
+                budget_status = self.budget.record(
+                    0, 0,
+                    value_signal=turn_signal,
+                )
+
+            # Stale-limit check (primary stop)
+            if tracker_status["limit_reached"]:
+                elapsed = time.monotonic() - start
+                log.warning(
+                    "🛑 STALE_LIMIT after turn %d | stale_count=%d",
+                    turn + 1, tracker_status["stale_count"],
+                    extra={"phase": phase, "turn": turn + 1, **tracker_status},
+                )
+                return RunResult(
+                    "STALE_LIMIT", llm_calls_total, tool_calls_total, elapsed,
+                    prompt_tokens_total, completion_tokens_total,
+                )
 
         elapsed = time.monotonic() - start
         log.warning("⚠️ MAX_TURNS (%d) reached after %.1fs, %d tool calls",
