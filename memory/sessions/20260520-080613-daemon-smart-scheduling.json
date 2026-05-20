@@ -1,0 +1,74 @@
+{
+  "session_id": "daemon-smart-scheduling-8fd53fe9",
+  "change_name": "daemon-smart-scheduling",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T08:06:13.636996",
+  "outcome": "success",
+  "started_at": "2026-05-20T07:56:26.320732",
+  "finished_at": "2026-05-20T08:06:13.620645",
+  "total_runtime_seconds": 477.1,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 68.6,
+      "fix_attempts": 0,
+      "llm_calls": 4,
+      "tool_calls": 3,
+      "prompt_tokens": 40664,
+      "completion_tokens": 2853
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 232.2,
+      "fix_attempts": 2,
+      "llm_calls": 21,
+      "tool_calls": 23,
+      "prompt_tokens": 615386,
+      "completion_tokens": 10893
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 130.4,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 41.3,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 15,
+      "prompt_tokens": 200522,
+      "completion_tokens": 739
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.6,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 37,
+    "total_tool_calls": 41,
+    "total_prompt_tokens": 856572,
+    "total_completion_tokens": 14485
+  }
+}
