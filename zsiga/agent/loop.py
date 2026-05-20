@@ -137,12 +137,27 @@ class AgentLoop:
                               len(messages), new_tokens,
                               extra={"phase": phase})
 
-            resp = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                tools=self.tools or None,
-                tool_choice="auto",
-            )
+            # Wrap LLM call with hard timeout to prevent API hangs
+            _llm_timeout = 300  # 5 min hard timeout per LLM call
+            try:
+                import asyncio
+                resp = await asyncio.wait_for(
+                    asyncio.get_event_loop().run_in_executor(
+                        None,
+                        lambda: self.client.chat.completions.create(
+                            model=self.model,
+                            messages=messages,
+                            tools=self.tools or None,
+                            tool_choice="auto",
+                        )
+                    ),
+                    timeout=_llm_timeout,
+                )
+            except asyncio.TimeoutError:
+                elapsed = time.monotonic() - start
+                log.warning("LLM API timeout after %ds, aborting run", _llm_timeout)
+                return RunResult("TIMEOUT", llm_calls_total, tool_calls_total, elapsed,
+                                 prompt_tokens_total, completion_tokens_total)
             llm_calls_total += 1
             if resp.usage:
                 prompt_tokens_total += getattr(resp.usage, "prompt_tokens", 0) or 0
