@@ -1,4 +1,9 @@
-Verdict: FAIL
+# 诊断报告: validate-pipeline-fixes-20260520
+总尝试次数: 1
+需要人工介入: 否
+
+## 失败记录
+- 第1次 (verify): Verdict: FAIL
 Completeness: ✗ No diff content was provided — there is no evidence that any implementation changes were made for either task 1.1 (phase table completeness) or task 1.2 (pipeline flow indicator).
 Correctness: ✗ Cannot be verified; the git diff section is empty, so no code changes exist to evaluate against the spec requirements.
 Coherence: ✗ Without visible changes, coherence with existing codebase patterns and the no-regression constraint cannot be confirmed.
@@ -8,3 +13,10 @@ Issues:
   3. [CRITICAL] Spec `dashboard-pipeline-flow-label.md` requires exactly one pipeline flow text element in the DOM — no change detected.
   4. [CRITICAL] Specs `phase-table-all-phases.md` and `phase-table-completeness.md` require `_phase_table` to iterate all Phase enum members — no change detected in `zsiga/metrics/dashboard.py`.
   5. [CRITICAL] Spec `validation-constraints.md` requires all existing tests to pass and no lint violations — untestable without implementation changes.
+ [策略: same]
+
+## 根因假设
+所有失败发生在同一阶段 (verify)，可能是该阶段的系统性问题
+
+## 建议操作
+尝试不同策略
