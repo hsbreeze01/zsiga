@@ -9,7 +9,7 @@ zsiga is an independent autonomous agent. It operates on external projects throu
 - Revert on failure, never leave code broken
 - Follow existing project patterns
 
-## Session History: 51 lessons recorded
+## Session History: 57 lessons recorded
 ## Pattern Warnings (auto-mined)
 
 🟢 **pipeline.pass.deliver** — 出现 17 次 (严重度: low)
@@ -34,18 +34,16 @@ E701 Multiple statements on one line (colon)
 199 |             matched = _match_keywords(it.title, keywords)
 200 |     
 
+🔴 **daemon.cycle_error** — 出现 6 次 (严重度: high)
+   - Unhandled exception in daemon cycle
+   - Unhandled exception in daemon cycle
+
 🟡 **code.unknown** — 出现 3 次 (严重度: medium)
    - review error and adjust approach
    - review error and adjust approach
 
 
 ## Recent Lessons
-- [pipeline.cross_project] Results: 1/6 passed
-- [pipeline.cross_project] Results: 1/2 passed
-- [pipeline.cross_project] Results: 1/6 passed
-- [pipeline.cross_project] Results: 1/2 passed
-- [pipeline.cross_project] Results: 0/4 passed
-- [pipeline.cross_project] Results: 1/6 passed
 - [pipeline.cross_project] Results: 1/6 passed
 - [pipeline.cross_project] Results: 1/2 passed
 - [pipeline.cross_project] Results: 0/4 passed
@@ -60,3 +58,9 @@ E701 Multiple statements on one line (colon)
 - [code.unknown] review error and adjust approach
 - [code.unknown] review error and adjust approach
 - [code.unknown] review error and adjust approach
+- [daemon.cycle_error] Unhandled exception in daemon cycle
+- [daemon.cycle_error] Unhandled exception in daemon cycle
+- [daemon.cycle_error] Unhandled exception in daemon cycle
+- [daemon.cycle_error] Unhandled exception in daemon cycle
+- [daemon.cycle_error] Unhandled exception in daemon cycle
+- [daemon.cycle_error] Unhandled exception in daemon cycle
