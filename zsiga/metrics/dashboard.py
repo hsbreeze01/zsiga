@@ -389,7 +389,6 @@ def _render(stats: dict, milestones: list[dict], state: str = "resting") -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="60">
 <title>zsiga dashboard</title>
 <style>
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -455,7 +454,7 @@ td {{ border-top: 1px solid #334155; }}
 </head>
 <body>
 
-<div style="text-align:right;font-size:0.75rem;color:#64748b;margin-bottom:0.5rem">Auto-refresh: 60s</div>
+<div style="text-align:right;font-size:0.75rem;color:#64748b;margin-bottom:0.5rem"><span id="refresh-info"></span></div>
 
 <div class="hero">
   <div class="hero-mascot">
@@ -517,6 +516,8 @@ td {{ border-top: 1px solid #334155; }}
 
 {proposal_queue_section}
 
+<div id="queue-section" class="section"></div>
+
 <div class="section">
     <h2>⚡ Phase Performance</h2>
   {phase_rows}
@@ -543,6 +544,97 @@ td {{ border-top: 1px solid #334155; }}
 </div>
 
 <div class="meta" style="margin-top:2rem">Updated: {stats['last_updated']}</div>
+<script>
+(function() {{
+  var REFRESH_INTERVAL = 600; // seconds
+  var countdown = REFRESH_INTERVAL;
+  var lastRefreshed = null;
+
+  function pad2(n) {{ return n < 10 ? '0' + n : '' + n; }}
+  function formatTime(d) {{
+    return pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }}
+
+  function updateRefreshInfo() {{
+    var el = document.getElementById('refresh-info');
+    if (!el) return;
+    var parts = [];
+    if (lastRefreshed) parts.push('Last refreshed: ' + formatTime(lastRefreshed));
+    var mins = Math.ceil(countdown / 60);
+    if (mins > 0) parts.push('Next in ' + mins + ' min');
+    el.textContent = parts.join(' · ');
+  }}
+
+  function updateDaemonSection(daemon) {{
+    // Update daemon cards if they exist
+    var cards = document.querySelectorAll('.card .label');
+    cards.forEach(function(label) {{
+      if (label && label.textContent.includes('Processing')) {{
+        var parent = label.parentElement;
+        var meta = parent.querySelector('.meta');
+        if (meta) {{
+          if (daemon.current_change) {{
+            meta.textContent = daemon.current_change + ' (' + (daemon.current_phase || '—') + ')';
+          }} else {{
+            meta.textContent = 'Idle';
+          }}
+        }}
+      }}
+    }});
+  }}
+
+  function updateQueueSection(queue, daemon) {{
+    var section = document.getElementById('queue-section');
+    if (!section) return;
+    if (!queue || queue.length === 0) {{
+      section.innerHTML = '<h2>📋 Proposal Queue</h2><div class="meta">Queue empty — idle polling</div>';
+      return;
+    }}
+    var currentChange = daemon ? daemon.current_change : null;
+    var currentPhase = daemon ? daemon.current_phase : null;
+    var html = '<h2>📋 Proposal Queue</h2><table><thead><tr><th>#</th><th>Proposal</th><th>Project</th><th>Summary</th></tr></thead><tbody>';
+    for (var i = 0; i < queue.length; i++) {{
+      var q = queue[i];
+      var isActive = currentChange && q.name === currentChange;
+      var highlight = isActive ? ' style="border-left:3px solid #f59e0b"' : '';
+      var badge = isActive ? ' <span style="font-size:0.75rem;background:#f59e0b20;color:#f59e0b;padding:0.1rem 0.4rem;border-radius:4px">' + (currentPhase || '') + '</span>' : '';
+      html += '<tr' + highlight + '><td>' + (i+1) + '</td><td>' + q.name + '</td><td>' + q.project + '</td><td>' + (q.summary || '—') + badge + '</td></tr>';
+    }}
+    html += '</tbody></table>';
+    section.innerHTML = html;
+  }}
+
+  function fetchData() {{
+    fetch('/api/status.json')
+      .then(function(r) {{ return r.json(); }})
+      .then(function(data) {{
+        lastRefreshed = new Date();
+        countdown = REFRESH_INTERVAL;
+        if (data.daemon) updateDaemonSection(data.daemon);
+        if (data.queue) updateQueueSection(data.queue, data.daemon);
+        updateRefreshInfo();
+      }})
+      .catch(function() {{
+        // On failure, keep existing static content visible
+        var el = document.getElementById('refresh-info');
+        if (el && lastRefreshed) {{
+          el.textContent = 'Last refreshed: ' + formatTime(lastRefreshed) + ' · Fetch failed';
+        }}
+      }});
+  }}
+
+  // Initial fetch after 2 seconds
+  setTimeout(fetchData, 2000);
+  // Polling every 10 minutes
+  setInterval(fetchData, REFRESH_INTERVAL * 1000);
+  // Countdown timer every second
+  setInterval(function() {{
+    countdown--;
+    if (countdown < 0) countdown = 0;
+    updateRefreshInfo();
+  }}, 1000);
+}})();
+</script>
 </body>
 </html>"""
 

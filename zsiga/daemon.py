@@ -117,6 +117,70 @@ def release_lock(fd):
         pass
 
 
+def _scan_proposal_queue(changes_dir: Path | None = None) -> list[dict]:
+    """Walk openspec/changes/ and return a list of proposal entries.
+
+    Each entry: ``{name, project, summary}``. Summary is the first ``# ...``
+    heading line extracted from ``proposal.md``.
+    """
+    if changes_dir is None:
+        home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+        changes_dir = Path(home) / "openspec" / "changes"
+    if not changes_dir.is_dir():
+        return []
+    queue: list[dict] = []
+    for entry in sorted(changes_dir.iterdir()):
+        if not entry.is_dir():
+            continue
+        proposal_md = entry / "proposal.md"
+        if not proposal_md.exists():
+            continue
+        summary = ""
+        try:
+            for line in proposal_md.read_text(encoding="utf-8").splitlines():
+                stripped = line.strip()
+                if stripped.startswith("# "):
+                    summary = stripped[2:].strip()
+                    break
+        except OSError:
+            pass
+        name = entry.name
+        # Derive project from directory structure or config; fallback to name
+        project = ""
+        try:
+            from .config import load_config
+
+            cfg = load_config()
+            for tgt_name, tc in cfg.targets.items():
+                tgt_path = getattr(tc, "path", "")
+                if tgt_path and str(changes_dir).startswith(str(tgt_path)):
+                    project = tgt_name
+                    break
+        except Exception:
+            pass
+        if not project:
+            project = name
+        queue.append({"name": name, "project": project, "summary": summary or "—"})
+    return queue
+
+
+def _build_status_json() -> str:
+    """Build the /api/status.json response payload."""
+    # Daemon state with safe defaults
+    ds = _read_daemon_state()
+    daemon = {
+        "pid": ds.get("pid"),
+        "state": ds.get("state", "unknown"),
+        "cycle": ds.get("cycle"),
+        "current_change": ds.get("current_change"),
+        "current_phase": ds.get("current_phase"),
+        "current_project": ds.get("current_project"),
+        "heartbeat": ds.get("last_heartbeat"),
+    }
+    queue = _scan_proposal_queue()
+    return json.dumps({"daemon": daemon, "queue": queue}, ensure_ascii=False)
+
+
 def _serve_dashboard(port: int):
     """Start HTTP server for dashboard in a daemon thread."""
     from .metrics.dashboard import generate_dashboard
@@ -127,6 +191,19 @@ def _serve_dashboard(port: int):
     class Handler(SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=serve_dir, **kwargs)
+
+        def do_GET(self):
+            if self.path == "/api/status.json":
+                payload = _build_status_json()
+                body = payload.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            else:
+                super().do_GET()
+
         def log_message(self, fmt, *args):
             pass
 
