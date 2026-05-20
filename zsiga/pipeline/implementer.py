@@ -1,5 +1,6 @@
 
 from ..agent.loop import AgentLoop
+from ..memory.pattern_miner import mine_patterns
 from ..transport import Transport, LocalTransport
 from .utils import read_file, dir_exists, list_files_recursive
 
@@ -51,7 +52,77 @@ IMPLEMENTER_SYSTEM = """你是 zsiga 的实现引擎。
 2. **文件限制**：每个 task 最多编辑 2 个文件。如果确实需要编辑 3 个文件（如 model + service + route），必须在代码注释中说明原因，且每编辑 2 个文件就运行一次 lint
 3. **增量验证**：每个 task 完成后立即对修改的文件运行 `ruff check`（只检查改动的文件），然后运行相关测试文件（不要全项目 pytest）
 4. **逐步推进**：check-mark 当前 task 为 `- [x]` 后，再取下一个 task。不要并行处理多个 task
-5. **禁止批量修改**：不要尝试一次性修改 3 个以上文件然后统一测试。每个 task 独立验证，失败立即修复"""
+5. **禁止批量修改**：不要尝试一次性修改 3 个以上文件然后统一测试。每个 task 独立验证，失败立即修复
+
+## Lint Prevention Rules
+
+以下 lint 违规模式 MUST 在代码生成时主动避免，不要依赖事后检查：
+
+### E701 — 单行多语句（冒号后不能跟语句体）
+
+❌ 错误：
+```python
+if not x: x = {}
+if flag: return result
+```
+
+✅ 正确：
+```python
+if not x:
+    x = {}
+if flag:
+    return result
+```
+
+### E702 — 分号分隔多语句
+
+❌ 错误：
+```python
+from dotenv import load_dotenv; load_dotenv()
+x = 1; y = 2
+```
+
+✅ 正确：
+```python
+from dotenv import load_dotenv
+load_dotenv()
+x = 1
+y = 2
+```
+
+### E401 — 单行多 import
+
+❌ 错误：
+```python
+import json, requests, datetime
+```
+
+✅ 正确：
+```python
+import json
+import requests
+import datetime
+```
+
+### E741 — 歧义单字母变量名
+
+❌ 错误：
+```python
+l = [1, 2, 3]
+O = MyClass()
+I = 42
+```
+
+✅ 正确：
+```python
+items = [1, 2, 3]
+obj = MyClass()
+idx = 42
+```
+
+### 通用规则
+- 每个文件末尾必须有换行符
+- 不要有行尾空格"""
 
 
 async def implement(agent: AgentLoop, change_dir: str, target_path: str,
@@ -70,6 +141,8 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str,
     if project_context:
         ctx_section = f"\n## 项目代码上下文（已预读）\n{project_context}\n"
 
+    pattern_warnings = _build_pattern_warnings()
+
     user_prompt = f"""## Change: {change_dir}
 ## 目标项目: {target_path}
 {ctx_section}
@@ -82,10 +155,28 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str,
 ### tasks.md:
 {tasks}
 
-specs/design/tasks 已在上方提供。从第一个 - [ ] 开始实现，不需要再读取这些文件。"""
+specs/design/tasks 已在上方提供。从第一个 - [ ] 开始实现，不需要再读取这些文件。{pattern_warnings}"""
 
     return await agent.run(system_prompt, user_prompt,
                           **kwargs)
+
+
+def _build_pattern_warnings() -> str:
+    """Build a markdown warning section from high-severity pipeline.fail.* patterns."""
+    patterns = mine_patterns()
+    high_fail = [
+        p for p in patterns
+        if p.severity == "high" and p.key.startswith("pipeline.fail.")
+    ]
+    if not high_fail:
+        return ""
+    top = high_fail[:3]
+    lines = ["\n\n## Known Failure Patterns (AVOID)", ""]
+    for p in top:
+        lines.append(f"- **{p.key}** (occurred {p.count} times)")
+        for tw in p.recent_takeaways[:2]:
+            lines.append(f"  - {tw}")
+    return "\n".join(lines)
 
 
 def _venv_prompt_section(venv_python: str) -> str:
