@@ -1,0 +1,68 @@
+{
+  "session_id": "p0-crash-recovery-d0608092",
+  "change_name": "p0-crash-recovery",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T14:01:33.536215",
+  "outcome": "reverted",
+  "started_at": "2026-05-20T13:38:40.923518",
+  "finished_at": "2026-05-20T14:01:33.517844",
+  "total_runtime_seconds": 440.8,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 177.2,
+      "fix_attempts": 0,
+      "llm_calls": 15,
+      "tool_calls": 21,
+      "prompt_tokens": 472104,
+      "completion_tokens": 4349
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 150.1,
+      "fix_attempts": 0,
+      "llm_calls": 20,
+      "tool_calls": 22,
+      "prompt_tokens": 619017,
+      "completion_tokens": 3990
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 7.6,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 105.9,
+      "fix_attempts": 3,
+      "llm_calls": 11,
+      "tool_calls": 23,
+      "prompt_tokens": 171043,
+      "completion_tokens": 3026
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "code.unknown",
+      "takeaway": "review error and adjust approach"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 46,
+    "total_tool_calls": 66,
+    "total_prompt_tokens": 1262164,
+    "total_completion_tokens": 11365
+  }
+}

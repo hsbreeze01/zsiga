@@ -507,12 +507,12 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">135</div>
+    <div class="value">136</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">90.4%</div>
-    <div class="meta">122 hit / 13 miss</div>
+    <div class="value good">89.7%</div>
+    <div class="meta">122 hit / 14 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -525,11 +525,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">77.0%</div>
+    <div class="value warn">77.2%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value warn">54.0%</div>
+    <div class="value warn">53.5%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -549,44 +549,44 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>71</td>
+  <td>72</td>
   <td class="good">100.0%</td>
-  <td>0.4</td>
-  <td>126.0s</td>
+  <td>0.3</td>
+  <td>126.7s</td>
   <td>0</td>
-  <td>532</td>
-  <td>715</td>
-  <td>11.78M</td>
+  <td>547</td>
+  <td>736</td>
+  <td>12.25M</td>
 </tr><tr>
   <td>implement</td>
-  <td>113</td>
-  <td class="good">92.9%</td>
+  <td>114</td>
+  <td class="good">93.0%</td>
   <td>0.8</td>
-  <td>183.1s</td>
+  <td>182.8s</td>
   <td>95</td>
-  <td>1514</td>
-  <td>1726</td>
-  <td>37.76M</td>
+  <td>1534</td>
+  <td>1748</td>
+  <td>38.38M</td>
 </tr><tr>
   <td>review</td>
-  <td>9</td>
+  <td>10</td>
   <td class="bad">0.0%</td>
   <td>0.0</td>
-  <td>62.6s</td>
+  <td>57.1s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
 </tr><tr>
   <td>verify</td>
-  <td>100</td>
-  <td class="warn">54.0%</td>
+  <td>101</td>
+  <td class="warn">53.5%</td>
   <td>0.1</td>
-  <td>64.8s</td>
-  <td>16</td>
-  <td>690</td>
-  <td>801</td>
-  <td>7.75M</td>
+  <td>65.2s</td>
+  <td>19</td>
+  <td>701</td>
+  <td>824</td>
+  <td>7.93M</td>
 </tr><tr>
   <td>deliver</td>
   <td>97</td>
@@ -605,27 +605,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">57.29M</div>
-      <div class="meta">56.53M prompt + 755.9K completion</div>
+      <div class="value">58.56M</div>
+      <div class="meta">57.79M prompt + 767.3K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">424.3K</div>
+      <div class="value">430.6K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">2,736</div>
-      <div class="meta">avg 20.3 per change</div>
+      <div class="value">2,782</div>
+      <div class="meta">avg 20.5 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">3,242</div>
-      <div class="meta">avg 24.0 per change</div>
+      <div class="value">3,308</div>
+      <div class="meta">avg 24.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">10.5h</div>
-      <div class="meta">37,643s total</div>
+      <div class="value">10.6h</div>
+      <div class="meta">38,084s total</div>
     </div>
   </div>
 </div>
@@ -828,7 +828,7 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">90.4/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">89.7/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1107,13 +1107,13 @@ td { border-top: 1px solid #334155; }
   <h2>Recent Changes</h2>
   <ul class="recent">
     <li>fix-scanner-case-insensitive</li>
-<li>fix-scanner-case-insensitive</li>
 <li>fix-dashboard-realtime-monitoring</li>
 <li>wire-dashboard-render-functions</li>
 <li>fix-compass-kline-table</li>
+<li>p0-crash-recovery</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T12:12:01.618628</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T14:01:33.574996</div>
 </body>
 </html>
