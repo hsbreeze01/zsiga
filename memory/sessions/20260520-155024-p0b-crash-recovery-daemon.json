@@ -1,0 +1,74 @@
+{
+  "session_id": "p0b-crash-recovery-daemon-e321e89a",
+  "change_name": "p0b-crash-recovery-daemon",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T15:50:24.268439",
+  "outcome": "success",
+  "started_at": "2026-05-20T15:48:11.359117",
+  "finished_at": "2026-05-20T15:50:24.259217",
+  "total_runtime_seconds": 132.7,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 58.4,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 2,
+      "prompt_tokens": 8106,
+      "completion_tokens": 299
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 27.7,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 8,
+      "prompt_tokens": 42231,
+      "completion_tokens": 334
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 4.9,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 37.4,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 10,
+      "prompt_tokens": 21363,
+      "completion_tokens": 624
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.3,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 11,
+    "total_tool_calls": 20,
+    "total_prompt_tokens": 71700,
+    "total_completion_tokens": 1257
+  }
+}
