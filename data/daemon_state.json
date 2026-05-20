@@ -1,15 +1,15 @@
 {
   "pid": 995086,
   "started_at": "2026-05-20T15:32:40.782243",
-  "cycle": 36,
+  "cycle": 58,
   "state": "running",
   "current_change": null,
   "current_phase": null,
   "current_project": null,
-  "last_heartbeat": "2026-05-20T21:12:49.818996",
-  "total_cycles": 100,
-  "total_changes_processed": 28,
-  "idle_cycles": 0,
-  "continuous_busy_cycles": 1,
-  "last_change_at": "2026-05-20T21:12:49.768780"
+  "last_heartbeat": "2026-05-20T23:02:29.519081",
+  "total_cycles": 122,
+  "total_changes_processed": 29,
+  "idle_cycles": 22,
+  "continuous_busy_cycles": 0,
+  "last_change_at": "2026-05-20T21:14:18.475135"
 }
