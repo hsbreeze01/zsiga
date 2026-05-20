@@ -22,6 +22,8 @@ from ..metrics.intent_tracker import record_intent_decision, update_intent_outco
 from ..memory.journal import export_session
 from ..transport import Transport, create_transport
 from .enricher import enrich, derive_explore_tasks
+from .clarifier import clarify
+from .optimizer import optimize as run_optimize
 from .implementer import implement
 from .verifier import verify, read_verdict
 from .diagnoser import Diagnoser
@@ -336,10 +338,69 @@ class ZsigaOrchestrator:
                                                  proposal=proposal_text)
         print(f"  Project context ready ({len(project_context)} chars, {time.monotonic() - t_pf:.1f}s)")
 
+        # Phase 0: CLARIFY (requirement engineering — skipped for FIX intent)
+        if not skip_enrich:
+            print(f"\n  {'='*50}")
+            print(f"  Phase 0/6: CLARIFY {change_name}")
+            print(f"  {'='*50}")
+            self.agent.set_phase("clarify")
+            register_tools(self.agent, target_path, transport=transport)
+            t0 = time.monotonic()
+
+            # Optional parallel explore pool for CLARIFY
+            supplementary_context = ""
+            if self.config.pipeline.enrich_parallel_explore:
+                from ..agent.sub_agent import dispatch_many, collect_all
+                explore_tasks = derive_explore_tasks(proposal_text)
+                pool_cfg = self.config.pipeline
+                handle = dispatch_many(
+                    tasks=explore_tasks,
+                    api_key=self.config.llm.api_key,
+                    model=self.config.llm.model,
+                    base_url=self.config.llm.base_url,
+                    proxy=self.config.llm.proxy,
+                    target_path=target_path,
+                    transport=transport,
+                    max_concurrency=pool_cfg.explore_pool_max_concurrency,
+                    max_turns_per_task=pool_cfg.explore_pool_max_turns,
+                    timeout_per_task=pool_cfg.explore_pool_timeout,
+                )
+                explore_results = await collect_all(handle)
+                parts = []
+                for idx, r in enumerate(explore_results):
+                    if r.success:
+                        parts.append(
+                            f"### Explore Agent #{idx + 1}\n{r.content}"
+                        )
+                    else:
+                        print(
+                            f"  ⚠️ explore-agent #{idx + 1} failed: "
+                            f"{r.content[:100]}"
+                        )
+                if parts:
+                    supplementary_context = "\n\n".join(parts)
+
+            clarify_result = await clarify(
+                self.agent, change_dir, target_path,
+                transport=transport,
+                project_context=project_context,
+                supplementary_context=supplementary_context,
+                max_turns=3, timeout_seconds=120,
+            )
+            clarify_calls = _extract_calls(clarify_result)
+            clarify_tokens = _extract_tokens(clarify_result)
+            rec.phases.append(PhaseRecord(
+                phase=Phase.CLARIFY, outcome=Outcome.SUCCESS,
+                seconds_used=time.monotonic() - t0,
+                llm_calls=clarify_calls[0], tool_calls=clarify_calls[1],
+                prompt_tokens=clarify_tokens[0], completion_tokens=clarify_tokens[1],
+            ))
+            print(f"  Phase 0 done in {time.monotonic() - t0:.1f}s")
+
         # Phase 1: ENRICH (skipped for pipeline_fix — FIX intent)
         if not skip_enrich and not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
             print(f"\n  {'='*50}")
-            print(f"  Phase 1/4: ENRICH {change_name}")
+            print(f"  Phase 1/6: ENRICH {change_name}")
             print(f"  {'='*50}")
             self.agent.set_phase("enrich")
             register_tools(self.agent, target_path, transport=transport)
@@ -387,7 +448,7 @@ class ZsigaOrchestrator:
             enrich_calls = _extract_calls(enrich_result)
             enrich_tokens = _extract_tokens(enrich_result)
             rec.phases.append(PhaseRecord(
-                phase=Phase.CLARIFY, outcome=Outcome.SUCCESS,
+                phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
                 seconds_used=time.monotonic() - t0,
                 llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
                 prompt_tokens=enrich_tokens[0], completion_tokens=enrich_tokens[1],
@@ -407,7 +468,7 @@ class ZsigaOrchestrator:
 
         # Phase 2: IMPLEMENT
         print(f"\n  {'='*50}")
-        print(f"  Phase 2/4: IMPLEMENT {change_name}")
+        print(f"  Phase 2/6: IMPLEMENT {change_name}")
         print(f"  {'='*50}")
         self.agent.set_phase("impl")
 
@@ -498,10 +559,10 @@ class ZsigaOrchestrator:
             prompt_tokens=impl_tokens[0], completion_tokens=impl_tokens[1],
         ))
 
-        # Phase 2.5: REVIEW (self-review loop)
+        # Phase 3/6: REVIEW (self-review loop)
         if self.config.pipeline.review_max_rounds > 0:
             print(f"\n  {'='*50}")
-            print(f"  Phase 2.5: REVIEW {change_name}")
+            print(f"  Phase 3/6: REVIEW {change_name}")
             print(f"  {'='*50}")
             t_review = time.monotonic()
             review_result = await run_review_loop(
@@ -552,7 +613,7 @@ class ZsigaOrchestrator:
 
         # Phase 3: VERIFY
         print(f"\n  {'='*50}")
-        print(f"  Phase 3/4: VERIFY {change_name}")
+        print(f"  Phase 4/6: VERIFY {change_name}")
         print(f"  {'='*50}")
         self.agent.set_phase("verify")
         register_tools(self.agent, target_path, transport=transport)
@@ -630,14 +691,42 @@ class ZsigaOrchestrator:
             prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
         ))
 
-        # Phase 3.5: REFLECT (self-assessment)
+        # Phase 4.5/6: OPTIMIZE (optional norm alignment)
+        if getattr(self.config.pipeline, "optimize_enabled", True):
+            sep = "=" * 50
+            print(f"\n  {sep}")
+            print(f"  Phase 4.5/6: OPTIMIZE {change_name}")
+            print(f"  {sep}")
+            self.agent.set_phase("optimize")
+            register_tools(self.agent, target_path, transport=transport)
+            t_opt = time.monotonic()
+            opt_result = await run_optimize(
+                self.agent, change_dir, target_path, pre_sha,
+                transport=transport,
+                max_turns=5, timeout_seconds=180,
+            )
+            opt_seconds = time.monotonic() - t_opt
+            opt_calls = _extract_calls(opt_result)
+            opt_tokens = _extract_tokens(opt_result)
+            is_noop = "NO_OPTIMIZATION_NEEDED" in (opt_result.content if hasattr(opt_result, "content") else "")
+            opt_detail = "noop" if is_noop else "optimized"
+            print(f"  OPTIMIZE: {opt_detail} ({opt_seconds:.1f}s)")
+            rec.phases.append(PhaseRecord(
+                phase=Phase.OPTIMIZE, outcome=Outcome.SUCCESS,
+                seconds_used=opt_seconds,
+                detail=opt_detail,
+                llm_calls=opt_calls[0], tool_calls=opt_calls[1],
+                prompt_tokens=opt_tokens[0], completion_tokens=opt_tokens[1],
+            ))
+
+        # Phase 5/6: REFLECT (self-assessment)
         task_type = "refactor"  # default
         if intent is not None:
             task_type = self._INTENT_TO_TASK_TYPE.get(
                 getattr(intent, "intent_type", None), "refactor"
             )
         print(f"\n  {'='*50}")
-        print(f"  Phase 3.5: REFLECT {change_name}")
+        print(f"  Phase 5/6: REFLECT {change_name}")
         print(f"  {'='*50}")
         reflect_seconds = self.phase_reflect(
             rec, change_name, project_name, task_type,
@@ -647,7 +736,7 @@ class ZsigaOrchestrator:
 
         # Phase 4: DELIVER
         print(f"\n  {'='*50}")
-        print(f"  Phase 4/4: DELIVER {change_name}")
+        print(f"  Phase 6/6: DELIVER {change_name}")
         print(f"  {'='*50}")
         t0 = time.monotonic()
 

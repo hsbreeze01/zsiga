@@ -1,0 +1,78 @@
+⚡ zsiga daemon started (PID 1136227)
+   Cycle interval: 8h
+   Idle poll: 5min
+   Lock: /home/zsiga/repo/data/lock.pid
+
+============================================================
+zsiga daemon — cycle #1 @ 2026-05-20 23:24:22
+============================================================
+  📝 Loaded memory context (2429 chars)
+
+============================================================
+zsiga cycle: found 0 active changes
+============================================================
+  📝 Memory updated with 20 recent lessons
+
+============================================================
+Cycle complete: 0 changes processed
+============================================================
+  📊 Dashboard: http://0.0.0.0:58175
+
+  💤 No changes — next poll in 5 minutes...
+----------------------------------------
+Exception occurred during processing of request from ('220.196.192.128', 55399)
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/socketserver.py", line 318, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/usr/lib/python3.12/socketserver.py", line 349, in process_request
+    self.finish_request(request, client_address)
+  File "/usr/lib/python3.12/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/home/zsiga/repo/zsiga/daemon.py", line 193, in __init__
+    super().__init__(*args, directory=serve_dir, **kwargs)
+  File "/usr/lib/python3.12/http/server.py", line 672, in __init__
+    super().__init__(*args, **kwargs)
+  File "/usr/lib/python3.12/socketserver.py", line 761, in __init__
+    self.handle()
+  File "/usr/lib/python3.12/http/server.py", line 436, in handle
+    self.handle_one_request()
+  File "/usr/lib/python3.12/http/server.py", line 404, in handle_one_request
+    self.raw_requestline = self.rfile.readline(65537)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socket.py", line 707, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [Errno 104] Connection reset by peer
+----------------------------------------
+
+============================================================
+zsiga daemon — cycle #2 @ 2026-05-20 23:29:38
+============================================================
+  📝 Loaded memory context (2429 chars)
+
+============================================================
+zsiga cycle: found 0 active changes
+============================================================
+  📝 Memory updated with 20 recent lessons
+
+============================================================
+Cycle complete: 0 changes processed
+============================================================
+
+  💤 No changes — next poll in 5 minutes...
+
+============================================================
+zsiga daemon — cycle #3 @ 2026-05-20 23:34:54
+============================================================
+  📝 Loaded memory context (2429 chars)
+
+============================================================
+zsiga cycle: found 0 active changes
+============================================================
+  📝 Memory updated with 20 recent lessons
+
+============================================================
+Cycle complete: 0 changes processed
+============================================================
+
+  💤 No changes — next poll in 5 minutes...

@@ -87,6 +87,7 @@ pipeline:
   impl_max_turns: 60
   impl_timeout_minutes: 40
   fix_attempts: 10
+  optimize_enabled: true
   eval_fix_attempts: 3
   cycle_interval_hours: 8
   compaction:
