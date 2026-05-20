@@ -4,7 +4,7 @@ import re
 import time
 from dataclasses import dataclass, field
 
-from ..agent.loop import AgentLoop
+from ..agent.loop import AgentLoop, RunResult
 from ..agent.sub_agent import SubAgentResult, create_with_role, run_sub_agent
 from ..pipeline.implementer import _read_all_specs
 from ..pipeline.utils import read_file, _get_changed_files
