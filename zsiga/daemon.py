@@ -244,6 +244,20 @@ def daemon_loop(config, dashboard_port=None):
                 idle_cycles += 1
                 continuous_busy_cycles = 0
 
+            # Self-reflection: generate proposals from internal signals
+            # when daemon has been idle for sustained periods
+            if idle_cycles >= 3 and processed_count == 0:
+                try:
+                    from .intake.reflector import Reflector
+                    reflector = Reflector()
+                    home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+                    proposals = reflector.run(home)
+                    if proposals:
+                        print(f"  🔄 Reflector generated {len(proposals)} proposal(s)")
+                        continue
+                except Exception as e:
+                    print(f"  ⚠️ Reflector error: {e}")
+
             try:
                 from .metrics.dashboard import generate_dashboard
                 generate_dashboard()

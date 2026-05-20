@@ -1,0 +1,68 @@
+{
+  "session_id": "fix-compass-kline-table-65ea4ad3",
+  "change_name": "fix-compass-kline-table",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T12:12:01.578791",
+  "outcome": "reverted",
+  "started_at": "2026-05-20T11:53:44.070414",
+  "finished_at": "2026-05-20T12:12:01.557874",
+  "total_runtime_seconds": 225.6,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 60.2,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 4,
+      "prompt_tokens": 44557,
+      "completion_tokens": 1698
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 56.2,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 5,
+      "prompt_tokens": 55615,
+      "completion_tokens": 1387
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 74.3,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 34.9,
+      "fix_attempts": 3,
+      "llm_calls": 3,
+      "tool_calls": 2,
+      "prompt_tokens": 26433,
+      "completion_tokens": 955
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "code.unknown",
+      "takeaway": "review error and adjust approach"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 13,
+    "total_tool_calls": 11,
+    "total_prompt_tokens": 126605,
+    "total_completion_tokens": 4040
+  }
+}
