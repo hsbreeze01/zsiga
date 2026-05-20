@@ -1,5 +1,7 @@
 """Post-implementation code review: dispatch review-role sub-agent and parse verdict."""
 
+import logging
+import os
 import re
 import time
 from dataclasses import dataclass, field
@@ -50,7 +52,11 @@ async def run_review(
     tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
     diff = git_ops.diff(target_path, pre_impl_sha, transport=transport)
 
+    review_md_path = f"{change_dir}/review.md"
+
     user_prompt = f"""## Change: {change_dir}
+
+**IMPORTANT: You MUST call the write_file tool to write the review result to {review_md_path}. Do NOT output the review content only in your reply text. The review is only considered complete when {review_md_path} exists on disk.**
 
 ### specs:
 {specs}
@@ -67,7 +73,7 @@ async def run_review(
 基于以上信息：
 1. 逐条检查每条 spec 要求是否在 diff 中被实现
 2. 检查代码质量（死代码、错误处理、命名）
-3. 将结果写入 {change_dir}/review.md
+3. You MUST call write_file tool to write the results to {review_md_path}
 
 review.md 格式：
 Verdict: CLEAN 或 ISSUES_FOUND
@@ -93,6 +99,17 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
         max_turns=max_turns,
         timeout_seconds=timeout_seconds,
     )
+
+    # Defensive fallback: if sub-agent did not write review.md, write it ourselves
+    review_path = os.path.join(change_dir, "review.md")
+    if not os.path.isfile(review_path):
+        if re.search(r"^Verdict:", result.content, re.MULTILINE):
+            logging.getLogger(__name__).warning(
+                "Review sub-agent did not call write_file; writing review.md as fallback"
+            )
+            os.makedirs(os.path.dirname(review_path), exist_ok=True)
+            with open(review_path, "w", encoding="utf-8") as f:
+                f.write(result.content)
 
     return result
 
