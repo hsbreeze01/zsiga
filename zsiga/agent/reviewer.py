@@ -22,6 +22,10 @@ class ReviewLoopResult:
     elapsed_seconds: float
     last_issues: list[dict] = field(default_factory=list)
     had_critical: bool = False
+    llm_calls: int = 0
+    tool_calls: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
 
 
@@ -186,13 +190,23 @@ async def run_review_loop(
     t_start = time.monotonic()
     fix_attempts = 0
     had_critical = False
+    total_llm_calls = 0
+    total_tool_calls = 0
+    total_prompt_tokens = 0
+    total_completion_tokens = 0
 
     for round_num in range(1, max_rounds + 1):
         # --- run review sub-agent ---
-        await run_review(
+        sub_result = await run_review(
             agent, change_dir, target_path, pre_impl_sha, transport,
             max_turns=review_max_turns, timeout_seconds=review_timeout,
         )
+        # Accumulate sub-agent metrics
+        total_llm_calls += getattr(sub_result, "llm_calls", 0)
+        total_tool_calls += getattr(sub_result, "tool_calls", 0)
+        total_prompt_tokens += getattr(sub_result, "prompt_tokens", 0)
+        total_completion_tokens += getattr(sub_result, "completion_tokens", 0)
+
         verdict, issues = parse_review_verdict(change_dir, transport)
 
         # CLEAN or unknown -> done
@@ -204,6 +218,10 @@ async def run_review_loop(
                 elapsed_seconds=time.monotonic() - t_start,
                 last_issues=[],
                 had_critical=had_critical,
+                llm_calls=total_llm_calls,
+                tool_calls=total_tool_calls,
+                prompt_tokens=total_prompt_tokens,
+                completion_tokens=total_completion_tokens,
             )
 
         if verdict == "UNKNOWN":
@@ -214,6 +232,10 @@ async def run_review_loop(
                 elapsed_seconds=time.monotonic() - t_start,
                 last_issues=[],
                 had_critical=had_critical,
+                llm_calls=total_llm_calls,
+                tool_calls=total_tool_calls,
+                prompt_tokens=total_prompt_tokens,
+                completion_tokens=total_completion_tokens,
             )
 
         # verdict == ISSUES_FOUND — check for CRITICAL
@@ -226,6 +248,10 @@ async def run_review_loop(
                 elapsed_seconds=time.monotonic() - t_start,
                 last_issues=issues,
                 had_critical=had_critical,
+                llm_calls=total_llm_calls,
+                tool_calls=total_tool_calls,
+                prompt_tokens=total_prompt_tokens,
+                completion_tokens=total_completion_tokens,
             )
 
         had_critical = True
@@ -235,7 +261,13 @@ async def run_review_loop(
         system_prompt, user_prompt = _build_fix_prompt(
             issues, changed_files, target_path,
         )
-        await agent.run(system_prompt, user_prompt, max_turns=fix_max_turns)
+        fix_result = await agent.run(system_prompt, user_prompt, max_turns=fix_max_turns)
+        # Accumulate fix RunResult metrics
+        if isinstance(fix_result, RunResult):
+            total_llm_calls += fix_result.llm_calls
+            total_tool_calls += fix_result.tool_calls
+            total_prompt_tokens += fix_result.prompt_tokens
+            total_completion_tokens += fix_result.completion_tokens
         fix_attempts += 1
 
         # Loop continues to next round for re-review
@@ -248,4 +280,8 @@ async def run_review_loop(
         elapsed_seconds=time.monotonic() - t_start,
         last_issues=issues,
         had_critical=had_critical,
+        llm_calls=total_llm_calls,
+        tool_calls=total_tool_calls,
+        prompt_tokens=total_prompt_tokens,
+        completion_tokens=total_completion_tokens,
     )

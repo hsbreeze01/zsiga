@@ -168,6 +168,10 @@ class TestReviewLoopResult:
         assert result.elapsed_seconds == 5.0
         assert result.last_issues == []
         assert result.had_critical is False
+        assert result.llm_calls == 0
+        assert result.tool_calls == 0
+        assert result.prompt_tokens == 0
+        assert result.completion_tokens == 0
 
     def test_with_issues(self):
         issues = [
@@ -184,3 +188,20 @@ class TestReviewLoopResult:
         assert result.final_verdict == "ISSUES_FOUND"
         assert result.had_critical is True
         assert len(result.last_issues) == 1
+
+    def test_metrics_set_explicitly(self):
+        """Metrics fields can be set with explicit values."""
+        result = ReviewLoopResult(
+            final_verdict="CLEAN",
+            rounds_executed=2,
+            fix_attempts=1,
+            elapsed_seconds=10.0,
+            llm_calls=12,
+            tool_calls=24,
+            prompt_tokens=13000,
+            completion_tokens=3500,
+        )
+        assert result.llm_calls == 12
+        assert result.tool_calls == 24
+        assert result.prompt_tokens == 13000
+        assert result.completion_tokens == 3500

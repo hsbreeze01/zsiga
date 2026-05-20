@@ -514,6 +514,10 @@ class ZsigaOrchestrator:
                 seconds_used=review_seconds,
                 fix_attempts=review_result.fix_attempts,
                 detail=_summarize_issues(review_result.last_issues),
+                llm_calls=review_result.llm_calls,
+                tool_calls=review_result.tool_calls,
+                prompt_tokens=review_result.prompt_tokens,
+                completion_tokens=review_result.completion_tokens,
             ))
 
             # Record lesson for critical review issues (REQ-RL-01)
