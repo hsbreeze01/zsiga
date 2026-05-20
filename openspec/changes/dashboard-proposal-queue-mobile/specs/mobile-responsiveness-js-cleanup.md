@@ -1,59 +1,42 @@
-# Delta Spec: Mobile Responsiveness & JS Cleanup
+# Spec: Mobile Responsiveness
 
 ## ADDED Requirements
 
-### REQ-MOBILE-001: Mobile Viewport Adaptation
+### Requirement: Responsive Layout at Narrow Viewports
 
-The dashboard page SHALL include CSS `@media` rules that adapt layout for viewports ≤768px wide.
+The dashboard SHALL include a `@media (max-width: 768px)` CSS block that adapts the page layout for mobile devices. All critical content SHALL remain readable and usable without horizontal overflow at viewport widths down to 320px.
 
-#### Scenario: Dashboard viewed on mobile device (≤768px)
-- **Given** the dashboard HTML is loaded in a browser
-- **When** the viewport width is 768px or less
-- **Then** the following layout changes SHALL apply:
-  - `body` padding reduces to `1rem`
-  - `.grid` cards display in a single column (`grid-template-columns: 1fr`)
-  - `h1` heading font-size reduces to `1.2rem`
-  - `.hero` container switches to vertical stacking (`flex-direction: column`) with `gap: 1rem`
-  - `table` font-size reduces to `0.75rem`
-  - `th, td` padding reduces to `0.4rem 0.6rem`
-  - `.card .value` font-size reduces to `1.4rem`
-  - `.phase-progress` container enables horizontal scrolling (`overflow-x: auto`)
+#### Scenario: Viewing dashboard on a mobile phone (375px wide)
 
-#### Scenario: Dashboard viewed on desktop (>768px)
-- **Given** the dashboard HTML is loaded in a browser
-- **When** the viewport width is greater than 768px
-- **Then** the existing desktop layout SHALL remain unchanged
-
----
-
-### REQ-MOBILE-002: Phase Progress Bar Horizontal Scroll on Mobile
-
-The eight-stage phase progress bar SHALL be horizontally scrollable on narrow viewports to prevent overflow or truncation.
-
-#### Scenario: Phase progress bar overflows on narrow screen
-- **Given** the Current sub-section is rendered with a phase progress bar
-- **When** the viewport width is ≤768px and the progress bar exceeds the container width
-- **Then** the `.phase-progress` container SHALL allow horizontal scrolling
-- **And** all eight phase labels SHALL remain readable without truncation
-
----
-
-## REMOVED Requirements
-
-### REQ-LEGACY-001: JavaScript Dynamic Queue Rendering
-
-The dashboard SHALL NOT include client-side JavaScript that fetches from `/api/status.json` or dynamically renders queue content.
-
-#### Scenario: No stale JS fetch logic remains
 - **Given** the generated dashboard HTML
-- **When** inspecting the `<script>` block
-- **Then** there SHALL be no `fetch('/api/status.json')` call
-- **And** there SHALL be no `updateQueueSection` function definition
-- **And** there SHALL be no `updateDaemonSection` function definition
-- **And** there SHALL be no `<div id="queue-section">` element in the HTML
+- **When** the page is rendered in a viewport 375px wide
+- **Then** the body padding SHALL be reduced to 1rem
+- **And** the `.grid` card layout SHALL switch to a single column (`grid-template-columns: 1fr`)
+- **And** the `h1` heading font size SHALL be reduced to at most 1.2rem
+- **And** the `.hero` section SHALL stack vertically (`flex-direction: column`)
+- **And** table cells (`th`, `td`) SHALL have reduced padding (≤0.6rem)
+- **And** `.card .value` font size SHALL be reduced for mobile readability
 
-#### Scenario: Non-queue JavaScript is preserved
+#### Scenario: Media query present in generated CSS
+
+- **Given** any dashboard generation invocation
+- **When** the output HTML `<style>` block is inspected
+- **Then** the string `@media (max-width: 768px)` SHALL appear exactly once
+- **And** the media block SHALL contain rules for at least: `body`, `.grid`, `h1`, `.hero`, `table`, `th`/`td`
+
+#### Scenario: Desktop layout unchanged
+
 - **Given** the generated dashboard HTML
-- **When** inspecting the `<script>` block
-- **Then** the auto-refresh countdown timer and `updateRefreshInfo` logic SHALL still function
-- **And** the page SHALL still update the refresh-info display in the top-right corner
+- **When** the page is rendered in a viewport wider than 768px
+- **Then** all layout rules SHALL behave as before the mobile adaptation
+- **And** the `@media` block SHALL NOT affect desktop rendering
+
+### Requirement: No Desktop Regression
+
+The mobile adaptation SHALL NOT alter the visual appearance or behavior of the dashboard at viewport widths above 768px.
+
+#### Scenario: Desktop viewport after mobile styles added
+
+- **Given** the generated dashboard HTML with the new `@media` block
+- **When** rendered at 1440px width
+- **Then** the layout, fonts, spacing, and colors SHALL match the pre-change desktop appearance exactly

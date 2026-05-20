@@ -1,46 +1,40 @@
-# Delta Spec: Phase Progress Bar Visual Component
+# Spec: Phase Progress Bar
 
 ## ADDED Requirements
 
-### REQ-PHASE-001: Eight-Stage Phase Progress Bar
+### Requirement: Eight-Phase Progress Bar
 
-The dashboard SHALL render a visual phase progress bar showing the eight OpenSpec pipeline stages with distinct visual states.
+The dashboard SHALL render a horizontal progress bar showing the eight daemon phases in order: CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER. Each phase step SHALL visually indicate its status: completed (green), current (highlighted), or future (grey).
 
-#### Scenario: Progress bar renders with correct stage labels
-- **Given** the dashboard renders the Current sub-section
-- **When** the phase progress bar is generated
-- **Then** it SHALL display eight stages in order: CLARIFY, ENRICH, IMPLEMENT, REVIEW, VERIFY, OPTIMIZE, REFLECT, DELIVER
-- **And** each stage SHALL be a discrete visual element with a text label
+#### Scenario: Daemon is mid-pipeline (e.g., in REVIEW phase)
 
-#### Scenario: Completed phases are visually distinct
-- **Given** the daemon's `current_phase` is `VERIFY` (index 4, 0-based)
+- **Given** `daemon_state.json` contains `current_phase` set to `"REVIEW"`
+- **When** the dashboard HTML is generated
+- **Then** the progress bar SHALL render 8 phase steps
+- **And** phases CLARIFY, ENRICH, IMPLEMENT, REVIEW SHALL appear with completed/highlighted styling
+- **And** phases VERIFY, OPTIMIZE, REFLECT, DELIVER SHALL appear with future (grey) styling
+- **And** the REVIEW phase step SHALL be visually distinct as the current phase (highlighted)
+
+#### Scenario: Daemon is idle (no current phase)
+
+- **Given** `daemon_state.json` does not exist or `current_phase` is empty/null
+- **When** the dashboard HTML is generated
+- **Then** the progress bar SHALL render all 8 phase steps with future (grey) styling
+- **And** no phase step SHALL be marked as current or completed
+
+#### Scenario: All 8 phase names present in HTML
+
+- **Given** any dashboard generation invocation
+- **When** the output HTML is inspected
+- **Then** each of the 8 phase names (CLARIFY, ENRICH, IMPLEMENT, REVIEW, VERIFY, OPTIMIZE, REFLECT, DELIVER) SHALL appear as text content within the progress bar HTML structure
+
+### Requirement: Progress Bar Mobile Scrollability
+
+The phase progress bar SHALL be horizontally scrollable on narrow viewports so that all 8 phase names remain accessible without layout breakage.
+
+#### Scenario: Progress bar on narrow viewport
+
+- **Given** a viewport width of 375px (typical mobile)
 - **When** the progress bar is rendered
-- **Then** stages CLARIFY, ENRICH, IMPLEMENT, REVIEW (indices 0–3) SHALL be styled as "completed" (green)
-- **And** stage VERIFY (index 4) SHALL be styled as "current" (highlighted)
-- **And** stages OPTIMIZE, REFLECT, DELIVER (indices 5–7) SHALL be styled as "pending" (grey)
-
-#### Scenario: Phase value is unrecognized or missing
-- **Given** the daemon's `current_phase` value does not match any known stage name (case-insensitive)
-- **When** the progress bar is rendered
-- **Then** all stages SHALL be rendered in pending (grey) state
-- **And** no error SHALL be raised
-
-#### Scenario: Phase value is DELIVER (final stage)
-- **Given** the daemon's `current_phase` is `DELIVER` (index 7)
-- **When** the progress bar is rendered
-- **Then** stages CLARIFY through OPTIMIZE (indices 0–6) SHALL be styled as "completed"
-- **And** stage DELIVER (index 7) SHALL be styled as "current"
-
----
-
-### REQ-PHASE-002: Phase Progress Bar CSS Styles
-
-The dashboard `<style>` block SHALL include CSS classes for phase progress bar states.
-
-#### Scenario: CSS defines three visual states
-- **Given** the dashboard HTML output
-- **When** inspecting the `<style>` block
-- **Then** there SHALL be a CSS class for "completed" phase state (green color)
-- **And** there SHALL be a CSS class for "current" phase state (highlighted/distinct color)
-- **And** there SHALL be a CSS class for "pending" phase state (grey color)
-- **And** a `.phase-progress` class SHALL exist for the container element
+- **Then** the progress bar container SHALL allow horizontal scrolling (`overflow-x: auto`)
+- **And** all 8 phase steps SHALL remain readable without clipping

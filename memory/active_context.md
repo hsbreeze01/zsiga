@@ -9,20 +9,18 @@ zsiga is an independent autonomous agent. It operates on external projects throu
 - Revert on failure, never leave code broken
 - Follow existing project patterns
 
-## Session History: 79 lessons recorded
+## Session History: 80 lessons recorded
 ## Pattern Warnings (auto-mined)
 
-🔴 **daemon.cycle_error** — 出现 22 次 (严重度: high)
+🔴 **daemon.cycle_error** — 出现 23 次 (严重度: high)
    - RuntimeError: error: Your local changes to the following files would be overwritten by checkout:
-	data/daemon_state.json
 	data/zsiga.db
-	memory/active_context.md
 	memory/learnings.jsonl
-	openspec/changes/dashboard-proposal-queue-mobile/.phase_state
-	openspec/changes/dashboard-proposal-queue-mobile/clarify.md
-	openspec/changes/dashboard-proposal-queue-mobile/specs/mobile-responsiveness-js-cleanup.md
-	openspec/changes/dashboard-proposal-queue-mobile/specs/proposal-queue-panel.md
-	site/dashboard.html
+	openspec/changes/validate-pipeline-fixes-20260520/.phase_state
+	openspec/changes/validate-pipeline-fixes-20260520/clarify.md
+	openspec/changes/validate-pipeline-fixes-20260520/specs/dashboard-pipeline-flow-indicator.md
+	openspec/changes/validate-pipeline-fixes-20260520/specs/phase-table-completeness.md
+	openspec/changes/validate-pipeline-fixes-20260520/specs/validation-constraints.md
 Please commit your changes or stash them before you switch branches.
 Aborting
    - RuntimeError: error: Your local changes to the following files would be overwritten by checkout:
@@ -72,7 +70,6 @@ E701 Multiple statements on one line (colon)
 - [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
 - [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
 - [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
-- [daemon.cycle_error] TypeError: clarify() got an unexpected keyword argument 'supplementary_context'
 - [code.unknown] review error and adjust approach
 - [pipeline.review.critical] Review found critical issues: No implementation changes exist for any spec requirement. The repository contain
 - [daemon.cycle_error] RuntimeError: error: Your local changes to the following files would be overwritten by checkout:
@@ -155,6 +152,16 @@ Aborting
 	openspec/changes/dashboard-proposal-queue-mobile/specs/mobile-responsiveness-js-cleanup.md
 	openspec/changes/dashboard-proposal-queue-mobile/specs/proposal-queue-panel.md
 	site/dashboard.html
+Please commit your changes or stash them before you switch branches.
+Aborting
+- [daemon.cycle_error] RuntimeError: error: Your local changes to the following files would be overwritten by checkout:
+	data/zsiga.db
+	memory/learnings.jsonl
+	openspec/changes/validate-pipeline-fixes-20260520/.phase_state
+	openspec/changes/validate-pipeline-fixes-20260520/clarify.md
+	openspec/changes/validate-pipeline-fixes-20260520/specs/dashboard-pipeline-flow-indicator.md
+	openspec/changes/validate-pipeline-fixes-20260520/specs/phase-table-completeness.md
+	openspec/changes/validate-pipeline-fixes-20260520/specs/validation-constraints.md
 Please commit your changes or stash them before you switch branches.
 Aborting
 - [daemon.cycle_error] RuntimeError: error: Your local changes to the following files would be overwritten by checkout:
