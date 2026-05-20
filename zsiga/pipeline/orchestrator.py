@@ -671,12 +671,25 @@ class ZsigaOrchestrator:
 
         # Push feature branch, then merge into deploy branch
         if not self.config.safety.dry_run:
-            git_ops.push(target_path, branch=feature_branch, transport=transport)
-            git_ops.checkout(target_path, deploy_branch, transport=transport)
-            git_ops.pull(target_path, branch=deploy_branch, transport=transport)
-            git_ops.merge_branch(target_path, feature_branch, transport=transport)
-            git_ops.push(target_path, branch=deploy_branch, transport=transport)
-            git_ops.delete_branch(target_path, feature_branch, transport=transport)
+            try:
+                git_ops.push(target_path, branch=feature_branch, transport=transport)
+                git_ops.checkout(target_path, deploy_branch, transport=transport)
+                git_ops.pull(target_path, branch=deploy_branch, transport=transport)
+                git_ops.merge_branch(target_path, feature_branch, transport=transport)
+                git_ops.push(target_path, branch=deploy_branch, transport=transport)
+            except RuntimeError as e:
+                print(f"  ❌ DELIVER failed: {e}")
+                rec.outcome = Outcome.FAIL
+                rec.phases.append(PhaseRecord(
+                    phase=Phase.DELIVER, outcome=Outcome.FAIL,
+                    detail=str(e)[:200],
+                ))
+                return False
+            # Best-effort branch cleanup — don't abort on failure
+            try:
+                git_ops.delete_branch(target_path, feature_branch, transport=transport)
+            except RuntimeError:
+                print(f"  ⚠ Could not delete feature branch {feature_branch}")
             print(f"  Merged {feature_branch} into {deploy_branch} and pushed")
         else:
             print(f"  [DRY RUN] Would merge {feature_branch} into {deploy_branch}")
