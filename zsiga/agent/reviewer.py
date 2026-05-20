@@ -75,7 +75,14 @@ async def run_review(
 2. 检查代码质量（死代码、错误处理、命名）
 3. You MUST call write_file tool to write the results to {review_md_path}
 
-review.md 格式：
+关键规则：
+- write_file 的 content 参数只能包含 review.md 的正文内容
+- 不要把 tool_call、tool_response 或对话历史写入文件
+- 不要 cd 到其他目录，项目根目录是 {target_path}
+- 所有信息（specs、diff）已在 prompt 中提供，不需要用 bash 查找项目文件
+- 直接调用 write_file，不要先输出内容再调用
+
+review.md 格式（content 参数必须严格遵循）：
 Verdict: CLEAN 或 ISSUES_FOUND
 
 Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
@@ -101,16 +108,32 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
     )
 
     # Defensive fallback: if sub-agent did not write review.md, write it ourselves.
-    # Always write content regardless of format — let parse_review_verdict handle parsing.
     review_path = os.path.join(change_dir, "review.md")
+    logger = logging.getLogger(__name__)
+
     if not os.path.isfile(review_path):
-        logger = logging.getLogger(__name__)
         logger.warning(
             "Review sub-agent did not call write_file; writing review.md as fallback"
         )
         os.makedirs(os.path.dirname(review_path), exist_ok=True)
         with open(review_path, "w", encoding="utf-8") as f:
             f.write(result.content)
+    else:
+        # Fix: if review.md contains tool_call artifacts, extract clean Verdict content
+        with open(review_path, "r", encoding="utf-8") as f:
+            written = f.read()
+        if "<tool_call:" in written[:200] or written.strip().startswith("<tool_call"):
+            logger.warning("review.md contains tool_call artifacts, extracting clean content")
+            import re as _re
+            # Extract content from the embedded write_file JSON
+            m = _re.search(r'"content":\s*"((?:Verdict|##).*?)"\s*}', written, _re.DOTALL)
+            if m:
+                clean = m.group(1)
+                clean = clean.replace("\\n", "
+").replace('\\"', '"')
+                with open(review_path, "w", encoding="utf-8") as f:
+                    f.write(clean)
+                logger.info("Cleaned review.md from tool_call artifacts")
 
     return result
 
