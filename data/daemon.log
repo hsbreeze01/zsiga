@@ -425,3 +425,7 @@ Aborting
   ✅ checked out zsiga/validate-pipeline-fixes-20260520
   Checked out existing feature branch: zsiga/validate-pipeline-fixes-20260520
   git add -A ...
+  ✅ added all
+  git commit -m 'zsiga: checkpoint before validate-pipeline-fixes-20260520' ...
+  ✅ committed
+  Pre-impl SHA: ea6012a82a6c1459d00db3f3bbb03996773fbc57

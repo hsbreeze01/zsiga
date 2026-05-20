@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from .collector import compute_stats, check_milestone, compute_rolling_rates
 from .db import load_all_changes
-from .types import ALL_MILESTONES
+from .types import ALL_MILESTONES, Phase
 from ..memory.journal import load_journal
 
 _DASHBOARD_PATH = Path(__file__).resolve().parent.parent.parent / "site" / "dashboard.html"
@@ -462,6 +462,7 @@ td {{ border-top: 1px solid #334155; }}
   </div>
   <div class="hero-info">
     <h1>zsiga <span>{current_level}</span></h1>
+    <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.5rem">CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER</div>
     <span class="state-badge {state}">{state_label}</span>
   </div>
 </div>
@@ -1027,24 +1028,28 @@ def _rate_class(pct: float) -> str:
 
 
 def _phase_table(phase_stats: dict) -> str:
-    if not phase_stats:
-        return '<div class="meta">No phase data yet</div>'
     rows = ""
-    for phase, s in phase_stats.items():
-        if s.get("count", 0) == 0:
-            continue
+    for phase_enum in Phase:
+        phase = phase_enum.value
+        s = phase_stats.get(phase, {})
+        count = s.get("count", 0)
         pr = s.get("pass_rate", 0)
+        avg_turns = s.get("avg_turns", "—")
+        avg_seconds = s.get("avg_seconds", "—")
+        total_fixes = s.get("total_fixes", 0)
+        total_llm = s.get("total_llm_calls", 0)
+        total_tool = s.get("total_tool_calls", 0)
         pt = s.get("total_prompt_tokens", 0)
         ct = s.get("total_completion_tokens", 0)
         rows += f"""<tr>
   <td>{phase}</td>
-  <td>{s['count']}</td>
+  <td>{count}</td>
   <td class="{_rate_class(pr)}">{pr}%</td>
-  <td>{s.get('avg_turns', '—')}</td>
-  <td>{s.get('avg_seconds', '—')}s</td>
-  <td>{s.get('total_fixes', 0)}</td>
-  <td>{s.get('total_llm_calls', 0)}</td>
-  <td>{s.get('total_tool_calls', 0)}</td>
+  <td>{avg_turns}</td>
+  <td>{avg_seconds}s</td>
+  <td>{total_fixes}</td>
+  <td>{total_llm}</td>
+  <td>{total_tool}</td>
   <td>{_fmt_tokens(pt + ct)}</td>
 </tr>"""
     return f"""<table>
