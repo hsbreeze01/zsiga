@@ -1,4 +1,5 @@
 import time
+import traceback
 from datetime import datetime
 
 from ..agent.loop import AgentLoop, RunResult
@@ -75,86 +76,98 @@ class ZsigaOrchestrator:
 
             print(f"\n--- {prop['id']} ({prop['project']}) ---")
 
-            # Cross-project decomposition (REQ-TD-01)
-            available_projects = list(self.config.targets.keys())
-            proposal_text = read_file(
-                f"{prop['change_dir']}/{prop.get('proposal_filename', 'proposal.md')}",
-                self._get_transport(prop['project']),
-            ) or ""
-            decomp = decompose(proposal_text, available_projects,
-                               originating_project=prop['project'])
+            try:
+                # Cross-project decomposition (REQ-TD-01)
+                available_projects = list(self.config.targets.keys())
+                proposal_text = read_file(
+                    f"{prop['change_dir']}/{prop.get('proposal_filename', 'proposal.md')}",
+                    self._get_transport(prop['project']),
+                ) or ""
+                decomp = decompose(proposal_text, available_projects,
+                                   originating_project=prop['project'])
 
-            if len(decomp.subtasks) > 1:
-                print(f"  Cross-project: {len(decomp.subtasks)} subtasks detected")
+                if len(decomp.subtasks) > 1:
+                    print(f"  Cross-project: {len(decomp.subtasks)} subtasks detected")
 
-                # Decompose post-validation: verify change_dir exists on each subtask's transport
-                invalid_subtasks = []
-                for subtask in decomp.subtasks:
-                    target_cfg = self.config.targets.get(subtask.project)
-                    if not target_cfg:
-                        invalid_subtasks.append(subtask)
-                        continue
-                    sub_transport = self._get_transport(subtask.project)
-                    r = sub_transport.run_shell(
-                        f"test -d '{prop['change_dir']}'",
-                        timeout=10,
-                    )
-                    if r["exit_code"] != 0:
-                        invalid_subtasks.append(subtask)
-
-                if invalid_subtasks:
-                    # Record lesson and downgrade to originating project only
-                    record_outcome(
-                        prop["id"], prop["project"], False, "decompose",
-                        detail="decompose returned false positive: change_dir missing on remote",
-                        error_domain="pipeline",
-                        root_cause="decompose.false_positive",
-                        prevention="Validate cross-project change_dir existence before decomposing",
-                    )
-                    print(
-                        f"  ⚠ Decompose downgrade: {len(invalid_subtasks)} invalid subtask(s), "
-                        f"falling back to single-project"
-                    )
-                    # Fall through to single-project processing below
-                else:
-                    # All subtasks validated — proceed with cross-project decomposition
-                    results = {}
+                    # Decompose post-validation: verify change_dir exists on each subtask's transport
+                    invalid_subtasks = []
                     for subtask in decomp.subtasks:
                         target_cfg = self.config.targets.get(subtask.project)
                         if not target_cfg:
-                            results[subtask.project] = {
-                                "status": "fail",
-                                "detail": "project not configured",
-                            }
+                            invalid_subtasks.append(subtask)
                             continue
-                        sub_prop = dict(prop)
-                        sub_prop["project"] = subtask.project
-                        sub_prop["target_path"] = target_cfg.path
-                        self._get_transport(subtask.project)
-                        success = await self._process_change(sub_prop)
-                        results[subtask.project] = {
-                            "status": "pass" if success else "fail",
-                        }
+                        sub_transport = self._get_transport(subtask.project)
+                        r = sub_transport.run_shell(
+                            f"test -d '{prop['change_dir']}'",
+                            timeout=10,
+                        )
+                        if r["exit_code"] != 0:
+                            invalid_subtasks.append(subtask)
 
-                    summary = aggregate_results(results)
-                    print(
-                        f"  Decomposition summary: "
-                        f"{summary['passed']}/{summary['total']} passed"
-                    )
-                    record_lesson(
-                        title=f"Cross-project: {prop['id']}",
-                        context=f"subtasks={len(decomp.subtasks)}",
-                        takeaway=f"Results: {summary['passed']}/{summary['total']} passed",
-                        pattern_key="pipeline.cross_project",
-                        source="decomposer",
-                    )
-                    processed += 1
-                    continue  # skip single-project processing below
+                    if invalid_subtasks:
+                        # Record lesson and downgrade to originating project only
+                        record_outcome(
+                            prop["id"], prop["project"], False, "decompose",
+                            detail="decompose returned false positive: change_dir missing on remote",
+                            error_domain="pipeline",
+                            root_cause="decompose.false_positive",
+                            prevention="Validate cross-project change_dir existence before decomposing",
+                        )
+                        print(
+                            f"  ⚠ Decompose downgrade: {len(invalid_subtasks)} invalid subtask(s), "
+                            f"falling back to single-project"
+                        )
+                        # Fall through to single-project processing below
+                    else:
+                        # All subtasks validated — proceed with cross-project decomposition
+                        results = {}
+                        for subtask in decomp.subtasks:
+                            target_cfg = self.config.targets.get(subtask.project)
+                            if not target_cfg:
+                                results[subtask.project] = {
+                                    "status": "fail",
+                                    "detail": "project not configured",
+                                }
+                                continue
+                            sub_prop = dict(prop)
+                            sub_prop["project"] = subtask.project
+                            sub_prop["target_path"] = target_cfg.path
+                            self._get_transport(subtask.project)
+                            success = await self._process_change(sub_prop)
+                            results[subtask.project] = {
+                                "status": "pass" if success else "fail",
+                            }
 
-                # Downgraded: fall through to single-project processing
-            else:
-                if await self._process_change(prop):
-                    processed += 1
+                        summary = aggregate_results(results)
+                        print(
+                            f"  Decomposition summary: "
+                            f"{summary['passed']}/{summary['total']} passed"
+                        )
+                        record_lesson(
+                            title=f"Cross-project: {prop['id']}",
+                            context=f"subtasks={len(decomp.subtasks)}",
+                            takeaway=f"Results: {summary['passed']}/{summary['total']} passed",
+                            pattern_key="pipeline.cross_project",
+                            source="decomposer",
+                        )
+                        processed += 1
+                        continue  # skip single-project processing below
+
+                    # Downgraded: fall through to single-project processing
+                else:
+                    if await self._process_change(prop):
+                        processed += 1
+            except Exception as exc:
+                tb = traceback.format_exc()
+                print(f"❌ Proposal {prop['id']} failed: {exc}\n{tb}")
+                record_lesson(
+                    title=f"Proposal error: {prop['id']}",
+                    context=f"type={type(exc).__name__}, tb={tb[:500]}",
+                    takeaway=f"{type(exc).__name__}: {exc}",
+                    pattern_key="daemon.cycle_error",
+                    source="orchestrator",
+                )
+                continue
 
         self._update_memory()
 

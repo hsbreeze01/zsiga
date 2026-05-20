@@ -214,25 +214,32 @@ def daemon_loop(config, dashboard_port=None):
                 last_change_at=last_change_at,
             )
 
-            orchestrator = ZsigaOrchestrator(config)
+            orchestrator = None
             processed_count = 0
             try:
+                orchestrator = ZsigaOrchestrator(config)
                 processed_count = asyncio.run(orchestrator.run_cycle())
             except Exception as e:
                 print(f"❌ Cycle error: {e}")
                 try:
                     from .memory.learn import record_lesson
+                    import traceback as _tb
+                    tb_excerpt = _tb.format_exc()[:500]
+                    exc_type = type(e).__name__
+                    transient_types = (ConnectionError, TimeoutError, OSError)
+                    tag = "[transient]" if isinstance(e, transient_types) else "[permanent]"
                     record_lesson(
                         title=f"daemon cycle #{cycle_count} failed",
-                        context=str(e),
-                        takeaway="Unhandled exception in daemon cycle",
+                        context=f"type={exc_type}, tb={tb_excerpt}, cycle={cycle_count}",
+                        takeaway=f"{tag} {exc_type}: {e}",
                         pattern_key="daemon.cycle_error",
                         source="daemon",
                     )
                 except Exception:
                     pass
             finally:
-                orchestrator.close()
+                if orchestrator is not None:
+                    orchestrator.close()
 
             # Update scheduling statistics
             total_changes_processed += processed_count
