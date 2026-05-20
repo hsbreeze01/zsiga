@@ -1,0 +1,74 @@
+{
+  "session_id": "fix-git-push-branch-aware-a550523a",
+  "change_name": "fix-git-push-branch-aware",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T21:12:49.746811",
+  "outcome": "success",
+  "started_at": "2026-05-20T21:02:58.849402",
+  "finished_at": "2026-05-20T21:12:49.731942",
+  "total_runtime_seconds": 589.8,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 130.3,
+      "fix_attempts": 0,
+      "llm_calls": 9,
+      "tool_calls": 15,
+      "prompt_tokens": 202858,
+      "completion_tokens": 4018
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 257.2,
+      "fix_attempts": 0,
+      "llm_calls": 27,
+      "tool_calls": 28,
+      "prompt_tokens": 1105647,
+      "completion_tokens": 6466
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 138.8,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 58.4,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 6,
+      "prompt_tokens": 75309,
+      "completion_tokens": 1633
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 5.1,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 41,
+    "total_tool_calls": 49,
+    "total_prompt_tokens": 1383814,
+    "total_completion_tokens": 12117
+  }
+}

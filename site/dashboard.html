@@ -507,18 +507,18 @@ td { border-top: 1px solid #334155; }
   </div>
 </div>
 
-<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">995086</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-20 15:32:40</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">34</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-20 20:49:58</div></div></div>
+<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">995086</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-20 15:32:40</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">35</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-20 20:54:58</div></div></div>
 
 
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">163</div>
+    <div class="value">165</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">91.4%</div>
-    <div class="meta">149 hit / 14 miss</div>
+    <div class="value good">91.5%</div>
+    <div class="meta">151 hit / 14 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -531,11 +531,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">78.0%</div>
+    <div class="value warn">78.3%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value warn">51.6%</div>
+    <div class="value warn">50.8%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -557,67 +557,55 @@ td { border-top: 1px solid #334155; }
 </div>
 
 <div class="section">
-  <h2>📋 Proposal Queue</h2>
-  <table>
-  <thead><tr><th>Proposal</th><th>Project</th><th>Summary</th></tr></thead>
-  <tbody>
-<tr><td>dashboard-auto-refresh-queue-status</td><td>zsiga</td><td>Proposal: Dashboard Auto-Refresh + Queue/Stage Real-Time Display</td></tr>
-<tr><td>fix-git-push-branch-aware</td><td>zsiga</td><td>Proposal: Fix Git Push — Branch-Aware + Error Handling</td></tr>
-  </tbody>
-  </table>
-</div>
-
-
-<div class="section">
     <h2>⚡ Phase Performance</h2>
   <table>
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>92</td>
+  <td>94</td>
   <td class="good">100.0%</td>
   <td>0.3</td>
-  <td>132.9s</td>
+  <td>132.6s</td>
   <td>0</td>
-  <td>748</td>
-  <td>1051</td>
-  <td>18.79M</td>
+  <td>761</td>
+  <td>1069</td>
+  <td>19.04M</td>
 </tr><tr>
   <td>implement</td>
-  <td>141</td>
-  <td class="good">94.3%</td>
+  <td>143</td>
+  <td class="good">94.4%</td>
   <td>0.6</td>
-  <td>185.0s</td>
+  <td>185.6s</td>
   <td>100</td>
-  <td>2015</td>
-  <td>2335</td>
-  <td>55.12M</td>
+  <td>2065</td>
+  <td>2389</td>
+  <td>57.10M</td>
 </tr><tr>
   <td>review</td>
-  <td>37</td>
+  <td>39</td>
   <td class="bad">0.0%</td>
   <td>0.0</td>
-  <td>90.1s</td>
+  <td>92.4s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
 </tr><tr>
   <td>verify</td>
-  <td>122</td>
-  <td class="warn">51.6%</td>
+  <td>124</td>
+  <td class="warn">50.8%</td>
   <td>0.1</td>
-  <td>63.9s</td>
+  <td>63.6s</td>
   <td>19</td>
-  <td>846</td>
-  <td>1029</td>
-  <td>9.40M</td>
+  <td>856</td>
+  <td>1040</td>
+  <td>9.51M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>118</td>
+  <td>120</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>9.2s</td>
+  <td>9.1s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -657,27 +645,27 @@ E701 Multiple statements on one line (colon)
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">83.31M</div>
-      <div class="meta">82.31M prompt + 998.7K completion</div>
+      <div class="value">85.65M</div>
+      <div class="meta">84.63M prompt + 1.02M completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">511.1K</div>
+      <div class="value">519.1K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">3,609</div>
-      <div class="meta">avg 22.1 per change</div>
+      <div class="value">3,682</div>
+      <div class="meta">avg 22.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">4,415</div>
-      <div class="meta">avg 27.1 per change</div>
+      <div class="value">4,498</div>
+      <div class="meta">avg 27.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">14.0h</div>
-      <div class="meta">50,525s total</div>
+      <div class="value">14.3h</div>
+      <div class="meta">51,586s total</div>
     </div>
   </div>
 </div>
@@ -875,12 +863,12 @@ E701 Multiple statements on one line (colon)
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">149/100</span>
+  <span style="color:#94a3b8;font-size:0.8rem">151/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">91.4/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">91.5/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1158,14 +1146,14 @@ E701 Multiple statements on one line (colon)
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>fix-review-phase-zero-llm-calls</li>
-<li>fix-review-role-write-permission</li>
-<li>dashboard-proposal-queue-panel</li>
+    <li>dashboard-proposal-queue-panel</li>
 <li>auto-recurring_failure-daemon-cycle_error-20260520</li>
 <li>fix-review-subagent-not-calling-write-file</li>
+<li>dashboard-auto-refresh-queue-status</li>
+<li>fix-git-push-branch-aware</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T20:53:18.186093</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T21:12:49.774191</div>
 </body>
 </html>
