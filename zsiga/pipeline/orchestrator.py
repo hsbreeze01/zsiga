@@ -158,6 +158,8 @@ class ZsigaOrchestrator:
         print(f"Cycle complete: {processed} changes processed")
         print(f"{'='*60}")
 
+        return processed
+
     def _update_memory(self):
         lessons = load_recent_lessons(n=20)
         if lessons:

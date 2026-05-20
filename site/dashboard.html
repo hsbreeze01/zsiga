@@ -507,12 +507,12 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">126</div>
+    <div class="value">129</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">91.3%</div>
-    <div class="meta">115 hit / 11 miss</div>
+    <div class="value good">91.5%</div>
+    <div class="meta">118 hit / 11 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -525,11 +525,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">76.0%</div>
+    <div class="value warn">76.6%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value warn">58.2%</div>
+    <div class="value warn">56.4%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -549,40 +549,50 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>64</td>
+  <td>66</td>
   <td class="good">100.0%</td>
   <td>0.4</td>
-  <td>129.4s</td>
+  <td>130.5s</td>
   <td>0</td>
-  <td>485</td>
-  <td>671</td>
-  <td>10.94M</td>
+  <td>510</td>
+  <td>698</td>
+  <td>11.56M</td>
 </tr><tr>
   <td>implement</td>
-  <td>104</td>
-  <td class="good">92.3%</td>
+  <td>107</td>
+  <td class="good">92.5%</td>
   <td>0.8</td>
-  <td>182.5s</td>
+  <td>181.3s</td>
   <td>93</td>
-  <td>1355</td>
-  <td>1534</td>
-  <td>32.84M</td>
+  <td>1411</td>
+  <td>1601</td>
+  <td>34.70M</td>
+</tr><tr>
+  <td>review</td>
+  <td>3</td>
+  <td class="bad">0.0%</td>
+  <td>0.0</td>
+  <td>59.9s</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
 </tr><tr>
   <td>verify</td>
-  <td>91</td>
-  <td class="warn">58.2%</td>
+  <td>94</td>
+  <td class="warn">56.4%</td>
   <td>0.1</td>
-  <td>66.6s</td>
+  <td>65.9s</td>
   <td>10</td>
-  <td>593</td>
-  <td>703</td>
-  <td>6.77M</td>
+  <td>629</td>
+  <td>739</td>
+  <td>7.22M</td>
 </tr><tr>
   <td>deliver</td>
-  <td>90</td>
+  <td>93</td>
   <td class="good">100.0%</td>
   <td>0.0</td>
-  <td>10.3s</td>
+  <td>10.2s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -595,27 +605,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">50.55M</div>
-      <div class="meta">49.88M prompt + 670.6K completion</div>
+      <div class="value">53.47M</div>
+      <div class="meta">52.78M prompt + 698.5K completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">401.2K</div>
+      <div class="value">414.5K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">2,433</div>
-      <div class="meta">avg 19.3 per change</div>
+      <div class="value">2,550</div>
+      <div class="meta">avg 19.8 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">2,908</div>
-      <div class="meta">avg 23.1 per change</div>
+      <div class="value">3,038</div>
+      <div class="meta">avg 23.6 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">9.5h</div>
-      <div class="meta">34,241s total</div>
+      <div class="value">9.8h</div>
+      <div class="meta">35,342s total</div>
     </div>
   </div>
 </div>
@@ -813,12 +823,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">115/100</span>
+  <span style="color:#94a3b8;font-size:0.8rem">118/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">91.3/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">91.5/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1096,14 +1106,14 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>enhance-dashboard-realtime-monitoring</li>
-<li>fix-infopublisher-disk-full</li>
-<li>fix-intent-router-openspec-awareness</li>
-<li>l5-self-review-实现自我审查循环模块每次实现完成后自动触发-review-子代理-发现问题-修复-再审最多</li>
+    <li>l5-self-review-实现自我审查循环模块每次实现完成后自动触发-review-子代理-发现问题-修复-再审最多</li>
 <li>实现自我审查循环模块-agentreviewerpy每次-implement-完成后自动触发-review-子代理审查代</li>
+<li>database-resource-management</li>
+<li>database-resource-management</li>
+<li>evolve-learning-system-closed-loop</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T07:32:15.087411</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-20T08:06:05.085322</div>
 </body>
 </html>

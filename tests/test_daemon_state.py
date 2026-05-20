@@ -105,3 +105,137 @@ class TestWriteDaemonState:
 
         assert data2["last_heartbeat"] > data1["last_heartbeat"]
         assert data2["cycle"] == 2
+
+
+class TestDaemonStateStats:
+    """Test scheduling statistics fields in daemon_state.json."""
+
+    def test_new_stats_fields_present(self, tmp_path, monkeypatch):
+        """New scheduling stats fields are written to daemon_state.json."""
+        state_file = tmp_path / "data" / "daemon_state.json"
+        monkeypatch.setattr("zsiga.daemon._daemon_state_path", lambda: state_file)
+
+        _write_daemon_state(
+            started_at="2025-01-01T00:00:00",
+            cycle=1,
+            total_cycles=10,
+            total_changes_processed=7,
+            idle_cycles=3,
+            continuous_busy_cycles=2,
+            last_change_at="2025-01-01T07:30:00",
+        )
+
+        data = json.loads(state_file.read_text(encoding="utf-8"))
+        assert data["total_cycles"] == 10
+        assert data["total_changes_processed"] == 7
+        assert data["idle_cycles"] == 3
+        assert data["continuous_busy_cycles"] == 2
+        assert data["last_change_at"] == "2025-01-01T07:30:00"
+
+    def test_stats_default_to_zero_when_not_provided(self, tmp_path, monkeypatch):
+        """When no stats provided, defaults to 0 (or None for last_change_at)."""
+        state_file = tmp_path / "data" / "daemon_state.json"
+        monkeypatch.setattr("zsiga.daemon._daemon_state_path", lambda: state_file)
+
+        _write_daemon_state(started_at="2025-01-01T00:00:00", cycle=1)
+
+        data = json.loads(state_file.read_text(encoding="utf-8"))
+        assert data["total_cycles"] == 0
+        assert data["total_changes_processed"] == 0
+        assert data["idle_cycles"] == 0
+        assert data["continuous_busy_cycles"] == 0
+        assert data["last_change_at"] is None
+
+    def test_stats_persist_across_writes(self, tmp_path, monkeypatch):
+        """Stats from a previous write are preserved when not explicitly passed."""
+        state_file = tmp_path / "data" / "daemon_state.json"
+        monkeypatch.setattr("zsiga.daemon._daemon_state_path", lambda: state_file)
+
+        # First write with stats
+        _write_daemon_state(
+            started_at="2025-01-01T00:00:00",
+            cycle=5,
+            total_cycles=5,
+            total_changes_processed=3,
+            idle_cycles=0,
+            continuous_busy_cycles=5,
+            last_change_at="2025-01-01T05:00:00",
+        )
+
+        # Second write without stats — should preserve from previous
+        _write_daemon_state(
+            started_at="2025-01-01T00:00:00",
+            cycle=6,
+        )
+
+        data = json.loads(state_file.read_text(encoding="utf-8"))
+        assert data["cycle"] == 6
+        assert data["total_cycles"] == 5
+        assert data["total_changes_processed"] == 3
+        assert data["continuous_busy_cycles"] == 5
+        assert data["last_change_at"] == "2025-01-01T05:00:00"
+
+    def test_stats_increment_busy_cycle(self, tmp_path, monkeypatch):
+        """Simulate a busy cycle: stats update correctly."""
+        state_file = tmp_path / "data" / "daemon_state.json"
+        monkeypatch.setattr("zsiga.daemon._daemon_state_path", lambda: state_file)
+
+        # Initial state
+        _write_daemon_state(
+            started_at="2025-01-01T00:00:00",
+            cycle=5,
+            total_cycles=5,
+            total_changes_processed=3,
+            idle_cycles=0,
+            continuous_busy_cycles=0,
+            last_change_at="2025-01-01T05:00:00",
+        )
+
+        # After busy cycle processing 2 changes
+        _write_daemon_state(
+            started_at="2025-01-01T00:00:00",
+            cycle=6,
+            total_cycles=6,
+            total_changes_processed=5,
+            idle_cycles=0,
+            continuous_busy_cycles=1,
+            last_change_at="2025-01-01T06:00:00",
+        )
+
+        data = json.loads(state_file.read_text(encoding="utf-8"))
+        assert data["total_cycles"] == 6
+        assert data["total_changes_processed"] == 5
+        assert data["continuous_busy_cycles"] == 1
+        assert data["idle_cycles"] == 0
+
+    def test_stats_reset_on_idle_cycle(self, tmp_path, monkeypatch):
+        """Simulate an idle cycle: continuous_busy resets, idle increments."""
+        state_file = tmp_path / "data" / "daemon_state.json"
+        monkeypatch.setattr("zsiga.daemon._daemon_state_path", lambda: state_file)
+
+        # Busy state
+        _write_daemon_state(
+            started_at="2025-01-01T00:00:00",
+            cycle=5,
+            total_cycles=5,
+            total_changes_processed=3,
+            idle_cycles=0,
+            continuous_busy_cycles=3,
+            last_change_at="2025-01-01T05:00:00",
+        )
+
+        # After idle cycle
+        _write_daemon_state(
+            started_at="2025-01-01T00:00:00",
+            cycle=6,
+            total_cycles=6,
+            total_changes_processed=3,
+            idle_cycles=1,
+            continuous_busy_cycles=0,
+            last_change_at="2025-01-01T05:00:00",  # unchanged
+        )
+
+        data = json.loads(state_file.read_text(encoding="utf-8"))
+        assert data["idle_cycles"] == 1
+        assert data["continuous_busy_cycles"] == 0
+        assert data["last_change_at"] == "2025-01-01T05:00:00"

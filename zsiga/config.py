@@ -117,7 +117,10 @@ class PipelineConfig:
                  review_max_turns: int = 10,
                  review_timeout: int = 180,
                  review_max_rounds: int = 2,
-                 review_fix_max_turns: int = 6):
+                 review_fix_max_turns: int = 6,
+                 idle_poll_minutes: int = 5,
+                 max_continuous_cycles: int = 20,
+                 cooldown_minutes: int = 30):
         self.max_changes_per_cycle = max_changes_per_cycle
         self.impl_timeout_minutes = impl_timeout_minutes
         self.fix_attempts = fix_attempts
@@ -139,6 +142,9 @@ class PipelineConfig:
         self.review_timeout = review_timeout
         self.review_max_rounds = review_max_rounds
         self.review_fix_max_turns = review_fix_max_turns
+        self.idle_poll_minutes = idle_poll_minutes
+        self.max_continuous_cycles = max_continuous_cycles
+        self.cooldown_minutes = cooldown_minutes
 
 
 class IntakeConfig:
@@ -316,6 +322,9 @@ def load_config(path: str = None) -> ZsigaConfig:
         review_timeout=pipeline_raw.get("review_timeout", 180),
         review_max_rounds=pipeline_raw.get("review_max_rounds", 2),
         review_fix_max_turns=pipeline_raw.get("review_fix_max_turns", 6),
+        idle_poll_minutes=pipeline_raw.get("idle_poll_minutes", 5),
+        max_continuous_cycles=pipeline_raw.get("max_continuous_cycles", 20),
+        cooldown_minutes=pipeline_raw.get("cooldown_minutes", 30),
     )
 
     intake_raw = raw.get("intake", {})

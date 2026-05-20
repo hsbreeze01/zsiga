@@ -1,0 +1,72 @@
+{
+  "session_id": "evolve-learning-system-closed-loop-dff9bbf8",
+  "change_name": "evolve-learning-system-closed-loop",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T07:51:40.754723",
+  "outcome": "success",
+  "started_at": "2026-05-20T07:47:31.307774",
+  "finished_at": "2026-05-20T07:51:40.745180",
+  "total_runtime_seconds": 248.9,
+  "phases": [
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 134.2,
+      "fix_attempts": 0,
+      "llm_calls": 18,
+      "tool_calls": 22,
+      "prompt_tokens": 603114,
+      "completion_tokens": 4891
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 56.7,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 54.3,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 189844,
+      "completion_tokens": 1559
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 3.7,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 1/4 passed"
+    },
+    {
+      "pattern_key": "pipeline.cross_project",
+      "takeaway": "Results: 1/4 passed"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 30,
+    "total_tool_calls": 34,
+    "total_prompt_tokens": 792958,
+    "total_completion_tokens": 6450
+  }
+}

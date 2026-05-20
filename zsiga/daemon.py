@@ -43,6 +43,17 @@ def _daemon_state_path() -> Path:
     return Path(home) / "data" / "daemon_state.json"
 
 
+def _read_daemon_state():
+    """Read existing daemon_state.json or return empty dict."""
+    path = _daemon_state_path()
+    if path.exists():
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            pass
+    return {}
+
+
 def _write_daemon_state(
     started_at: str,
     cycle: int,
@@ -50,8 +61,14 @@ def _write_daemon_state(
     current_change: str | None = None,
     current_phase: str | None = None,
     current_project: str | None = None,
+    total_cycles: int | None = None,
+    total_changes_processed: int | None = None,
+    idle_cycles: int | None = None,
+    continuous_busy_cycles: int | None = None,
+    last_change_at: str | None = None,
 ):
-    """Write daemon_state.json with current daemon status."""
+    """Write daemon_state.json with current daemon status and scheduling stats."""
+    existing = _read_daemon_state()
     data = {
         "pid": os.getpid(),
         "started_at": started_at,
@@ -61,6 +78,11 @@ def _write_daemon_state(
         "current_phase": current_phase,
         "current_project": current_project,
         "last_heartbeat": datetime.now().isoformat(),
+        "total_cycles": total_cycles if total_cycles is not None else existing.get("total_cycles", 0),
+        "total_changes_processed": total_changes_processed if total_changes_processed is not None else existing.get("total_changes_processed", 0),
+        "idle_cycles": idle_cycles if idle_cycles is not None else existing.get("idle_cycles", 0),
+        "continuous_busy_cycles": continuous_busy_cycles if continuous_busy_cycles is not None else existing.get("continuous_busy_cycles", 0),
+        "last_change_at": last_change_at if last_change_at is not None else existing.get("last_change_at"),
     }
     path = _daemon_state_path()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -148,6 +170,7 @@ def daemon_loop(config, dashboard_port=None):
 
     print(f"⚡ zsiga daemon started (PID {os.getpid()})")
     print(f"   Cycle interval: {config.pipeline.cycle_interval_hours}h")
+    print(f"   Idle poll: {config.pipeline.idle_poll_minutes}min")
     print(f"   Lock: {_lock_path()}")
 
     if dashboard_port:
@@ -157,6 +180,15 @@ def daemon_loop(config, dashboard_port=None):
     try:
         cycle_count = 0
         started_at = datetime.now().isoformat()
+
+        # Initialize scheduling state from existing daemon_state or defaults
+        prev_state = _read_daemon_state()
+        total_cycles = prev_state.get("total_cycles", 0)
+        total_changes_processed = prev_state.get("total_changes_processed", 0)
+        idle_cycles = prev_state.get("idle_cycles", 0)
+        continuous_busy_cycles = prev_state.get("continuous_busy_cycles", 0)
+        last_change_at = prev_state.get("last_change_at")
+
         while not state.shutdown:
             if state.paused:
                 print("  ⏸  Paused — waiting for SIGUSR2 to resume...")
@@ -166,6 +198,7 @@ def daemon_loop(config, dashboard_port=None):
                     break
 
             cycle_count += 1
+            total_cycles += 1
             print(f"\n{'='*60}")
             print(f"zsiga daemon — cycle #{cycle_count} @ {time.strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"{'='*60}")
@@ -174,11 +207,17 @@ def daemon_loop(config, dashboard_port=None):
                 started_at=started_at,
                 cycle=cycle_count,
                 state="paused" if state.paused else "running",
+                total_cycles=total_cycles,
+                total_changes_processed=total_changes_processed,
+                idle_cycles=idle_cycles,
+                continuous_busy_cycles=continuous_busy_cycles,
+                last_change_at=last_change_at,
             )
 
             orchestrator = ZsigaOrchestrator(config)
+            processed_count = 0
             try:
-                asyncio.run(orchestrator.run_cycle())
+                processed_count = asyncio.run(orchestrator.run_cycle())
             except Exception as e:
                 print(f"❌ Cycle error: {e}")
                 try:
@@ -195,6 +234,16 @@ def daemon_loop(config, dashboard_port=None):
             finally:
                 orchestrator.close()
 
+            # Update scheduling statistics
+            total_changes_processed += processed_count
+            if processed_count > 0:
+                continuous_busy_cycles += 1
+                idle_cycles = 0
+                last_change_at = datetime.now().isoformat()
+            else:
+                idle_cycles += 1
+                continuous_busy_cycles = 0
+
             try:
                 from .metrics.dashboard import generate_dashboard
                 generate_dashboard()
@@ -204,7 +253,7 @@ def daemon_loop(config, dashboard_port=None):
             if state.shutdown:
                 break
 
-            # Idle state between cycles
+            # Write idle state between cycles
             _write_daemon_state(
                 started_at=started_at,
                 cycle=cycle_count,
@@ -212,10 +261,36 @@ def daemon_loop(config, dashboard_port=None):
                 current_change=None,
                 current_phase=None,
                 current_project=None,
+                total_cycles=total_cycles,
+                total_changes_processed=total_changes_processed,
+                idle_cycles=idle_cycles,
+                continuous_busy_cycles=continuous_busy_cycles,
+                last_change_at=last_change_at,
             )
 
-            interval = config.pipeline.cycle_interval_hours * 3600
-            print(f"\n  💤 Next cycle in {config.pipeline.cycle_interval_hours}h...")
+            # Smart scheduling: decide sleep duration
+            max_cc = config.pipeline.max_continuous_cycles
+            cooldown_mins = config.pipeline.cooldown_minutes
+            idle_mins = config.pipeline.idle_poll_minutes
+
+            if continuous_busy_cycles >= max_cc:
+                # Safety valve: forced cooldown
+                print(f"\n  ⚠️ Safety valve: {continuous_busy_cycles} consecutive busy cycles, "
+                      f"cooling down for {cooldown_mins} minutes")
+                interval = cooldown_mins * 60
+                continuous_busy_cycles = 0
+            elif processed_count > 0:
+                # Immediate re-cycle
+                print(f"\n  ⚡ Processed {processed_count} changes — immediate next cycle")
+                continue
+            elif idle_mins:
+                # Idle poll
+                interval = idle_mins * 60
+                print(f"\n  💤 No changes — next poll in {idle_mins} minutes...")
+            else:
+                # Fallback to legacy cycle_interval_hours
+                interval = config.pipeline.cycle_interval_hours * 3600
+                print(f"\n  💤 Next cycle in {config.pipeline.cycle_interval_hours}h...")
 
             slept = 0
             while slept < interval and not state.shutdown:
