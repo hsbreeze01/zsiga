@@ -49,4 +49,11 @@ The dashboard SHALL NOT include client-side JavaScript that fetches from `/api/s
 - **When** inspecting the `<script>` block
 - **Then** there SHALL be no `fetch('/api/status.json')` call
 - **And** there SHALL be no `updateQueueSection` function definition
+- **And** there SHALL be no `updateDaemonSection` function definition
 - **And** there SHALL be no `<div id="queue-section">` element in the HTML
+
+#### Scenario: Non-queue JavaScript is preserved
+- **Given** the generated dashboard HTML
+- **When** inspecting the `<script>` block
+- **Then** the auto-refresh countdown timer and `updateRefreshInfo` logic SHALL still function
+- **And** the page SHALL still update the refresh-info display in the top-right corner

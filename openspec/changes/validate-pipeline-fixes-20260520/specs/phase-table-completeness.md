@@ -1,24 +1,30 @@
 # Delta Spec: Phase Table Completeness
 
+## Context
+The dashboard's Phase Performance table (`_phase_table` in `zsiga/metrics/dashboard.py`) currently only renders rows for phases that have recorded data. Recently-added phases (CLARIFY, ENRICH, OPTIMIZE) are invisible until they accumulate data, making it impossible to verify the pipeline covers all stages.
+
 ## MODIFIED Requirements
 
 ### Requirement: Phase Performance Table Shows All Enum Values
 
-The `_phase_table` function in `zsiga/metrics/dashboard.py` SHALL emit one table row for every value defined in the Phase enumeration, regardless of whether historical timing data exists for that phase. Phases with no recorded data MUST display zero / empty-sentinel values for all numeric columns.
+`_phase_table` SHALL iterate over every member of the Phase enum and produce one table row for each, regardless of whether any metrics data exists for that phase.
 
-#### Scenario: Phase with recorded history
+#### Scenario: Phase with recorded data
 
-- **Given** the Phase enumeration contains values `CLARIFY`, `ENRICH`, `IMPLEMENT`, `REVIEW`, `VERIFY`, `OPTIMIZE`, `REFLECT`, `DELIVER`
-- **And** timing records exist for `IMPLEMENT` with `count=5`, `mean=12.3`
-- **When** `_phase_table` is called with those timing records
-- **Then** the rendered table SHALL contain a row for `IMPLEMENT` showing `count=5` and `mean=12.3`
-- **And** the table SHALL also contain rows for every other Phase value
-
-#### Scenario: Phase with no recorded history
-
-- **Given** the Phase enumeration contains `CLARIFY` and no timing records exist for `CLARIFY`
+- **Given** the Phase enum contains the value `IMPLEMENT`
+- **And** there are 3 completed IMPLEMENT phase records in the database
 - **When** `_phase_table` is called
-- **Then** the rendered table SHALL contain a row for `CLARIFY` with `count=0` and `mean=0` (or equivalent zero-sentinel)
+- **Then** the output row for `IMPLEMENT` SHALL display the correct count (3)
+- **And** average-duration and other numeric fields SHALL reflect actual recorded values
+
+#### Scenario: Phase with no recorded data
+
+- **Given** the Phase enum contains the value `CLARIFY`
+- **And** there are 0 completed CLARIFY phase records in the database
+- **When** `_phase_table` is called
+- **Then** the output row for `CLARIFY` SHALL appear with `count=0`
+- **And** all other numeric fields (duration, average, etc.) SHALL display `0` or equivalent zero-sentinel
+- **And** no `KeyError` or other exception SHALL be raised
 
 #### Scenario: Completely empty metrics dict
 
@@ -26,11 +32,25 @@ The `_phase_table` function in `zsiga/metrics/dashboard.py` SHALL emit one table
 - **And** the timing records dict is empty `{}`
 - **When** `_phase_table` is called
 - **Then** the rendered table SHALL contain one row per Phase value, each showing `count=0`
-- **And** no `KeyError` or other exception SHALL be raised
+- **And** no exception SHALL be raised
 
-#### Scenario: New phases added to enumeration later
+#### Scenario: Enum-driven ordering
+
+- **Given** the Phase enum defines values in a specific order
+- **When** `_phase_table` is called
+- **Then** rows SHALL appear in the same order as the Phase enum definition
+
+#### Scenario: Future extensibility
 
 - **Given** a future change adds a new value to the Phase enumeration
 - **When** `_phase_table` is called
 - **Then** the new phase SHALL appear in the rendered table without any code change to `_phase_table` itself
 - **Note** This is a SHOULD constraint — the function SHOULD iterate the enum dynamically rather than hard-code phase names
+
+## ADDED Requirements
+
+_(None)_
+
+## REMOVED Requirements
+
+_(None)_
