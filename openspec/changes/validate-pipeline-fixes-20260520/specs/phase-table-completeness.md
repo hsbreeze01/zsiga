@@ -1,39 +1,40 @@
-# Spec: phase-table-completeness
+# Spec: Phase Table Completeness
 
-## MODIFIED Requirements
+## ADDED Requirements
 
-### Requirement: Phase Performance table SHALL enumerate all Phase enum members
+### Requirement: All Phase enum members SHALL appear in phase table output
 
-The `_phase_table` function in `zsiga/metrics/dashboard.py` (or equivalent metrics module) SHALL iterate over every member of the `Phase` enumeration and produce one table row per member, regardless of whether historical metric data exists for that phase.
+The `_phase_table` function in `zsiga/metrics/dashboard.py` SHALL iterate over every member of the Phase enum when constructing the phase performance table, rather than only emitting rows for phases that have recorded data.
 
-#### Scenario: Phase with no recorded metrics appears as zero-count row
+#### Scenario: Table includes phases with no recorded data
 
-- **Given** the `Phase` enumeration includes at least the members `CLARIFY`, `ENRICH`, `IMPLEMENT`, `REVIEW`, `VERIFY`, `OPTIMIZE`, `REFLECT`, `DELIVER`
-- **And** the metrics database contains zero records for the `CLARIFY` phase
-- **When** `_phase_table` is invoked
-- **Then** the returned table structure SHALL contain a row for `CLARIFY` with count/duration values of `0`
-- **And** no `Phase` enum member SHALL be omitted from the output
+- **Given** the Phase enum defines members including at minimum CLARIFY, ENRICH, IMPLEMENT, REVIEW, VERIFY, OPTIMIZE, REFLECT, and DELIVER
+- **And** some enum members have zero recorded executions in the metrics data
+- **When** `_phase_table` is called
+- **Then** the output SHALL contain one row for every Phase enum member
+- **And** rows for phases with no data SHALL display numeric count fields as `0`
+- **And** rows for phases with no data SHALL display duration/elapsed fields as `-`
 
-#### Scenario: Phase with recorded metrics appears with correct data
+#### Scenario: Table preserves existing data rows unchanged
 
-- **Given** the metrics database contains 3 records for the `IMPLEMENT` phase
-- **When** `_phase_table` is invoked
-- **Then** the row for `IMPLEMENT` SHALL display count `3`
-- **And** all other phases SHALL still appear (with `0` if no data)
+- **Given** a phase has recorded executions in the metrics data
+- **When** `_phase_table` is called
+- **Then** that phase's row SHALL display the same count and duration values as before this change
+- **And** no existing data SHALL be lost or modified
 
-#### Scenario: Output ordering matches Phase enum definition order
+#### Scenario: Table row order matches Phase enum definition order
 
-- **Given** the `Phase` enumeration defines members in a specific order
-- **When** `_phase_table` is invoked
-- **Then** the rows in the returned table SHALL appear in the same order as the `Phase` enum definition
-- **And** this ordering MUST be stable across multiple invocations
+- **Given** the Phase enum defines members in a specific order
+- **When** `_phase_table` is called
+- **Then** the rows in the output table SHALL appear in the same order as the Phase enum members are defined
 
-### Requirement: Zero-data phase rows MUST NOT be suppressed
+### Requirement: Phase table MUST NOT depend on data presence for row generation
 
-The function MUST NOT skip or filter out any phase that has no corresponding metric records. Every member of the `Phase` enum SHALL produce exactly one row.
+The `_phase_table` function MUST generate its row list from the Phase enum directly, not from the set of keys present in the aggregated metrics data.
 
-#### Scenario: Newly added phase enum member is automatically included
+#### Scenario: Empty metrics data produces full table
 
-- **Given** a new member is added to the `Phase` enumeration in the future
-- **When** `_phase_table` is invoked
-- **Then** the new member SHALL appear in the output without any code changes to `_phase_table` beyond the enum iteration logic
+- **Given** there are no recorded metrics for any phase
+- **When** `_phase_table` is called
+- **Then** the output SHALL still contain one row per Phase enum member
+- **And** every row SHALL show count `0` and duration `-`

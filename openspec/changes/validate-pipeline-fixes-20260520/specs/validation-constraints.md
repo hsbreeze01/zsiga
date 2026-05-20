@@ -1,31 +1,32 @@
-# Spec: validation-constraints
+# Spec: Validation Constraints
 
-## ADDED Requirements
+## MODIFIED Requirements
 
-### Requirement: All changes SHALL pass lint and test checks
+### Requirement: Change scope MUST be limited to two files
 
-Every modified file MUST pass `ruff check` without errors and all existing tests in the project MUST continue to pass.
+This change SHALL modify exactly two files:
+1. `zsiga/metrics/dashboard.py` — only the `_phase_table` function
+2. `site/dashboard.html` — only the title/hero area
 
-#### Scenario: Ruff lint passes on modified Python files
+#### Scenario: No modifications outside declared scope
 
-- **Given** `zsiga/metrics/dashboard.py` (or the file containing `_phase_table`) has been modified
-- **When** `ruff check` is executed on the modified file
-- **Then** no errors or warnings SHALL be reported
+- **Given** the diff produced by this change
+- **When** listing all changed files
+- **Then** the set of changed files SHALL be a subset of `{zsiga/metrics/dashboard.py, site/dashboard.html}`
+- **And** no files under `zsiga/pipeline/`, `zsiga/daemon/`, `tests/`, `requirements.txt`, or `pyproject.toml` SHALL be modified
 
-#### Scenario: Existing test suite passes after changes
+### Requirement: All existing tests and lint checks SHALL pass
 
-- **Given** all modifications to `_phase_table` and `dashboard.html` have been applied
-- **When** `pytest` is executed on the full test suite
-- **Then** all previously passing tests SHALL continue to pass
-- **And** no new test failures SHALL be introduced
+After implementing the change, the full test suite and lint checker MUST pass without errors.
 
-### Requirement: Only permitted files SHALL be modified
+#### Scenario: Pytest passes
 
-The implementation MUST NOT modify any file outside the explicitly allowed set.
+- **Given** the implementation changes are applied
+- **When** `pytest` is run
+- **Then** all tests SHALL pass with exit code 0
 
-#### Scenario: No unauthorized files are changed
+#### Scenario: Ruff check passes
 
-- **Given** the allowed modification targets are `zsiga/metrics/dashboard.py` (or the metrics module containing `_phase_table`) and `site/dashboard.html`
-- **When** the implementation diff is reviewed
-- **Then** no file outside the allowed set SHALL appear in the diff
-- **And** files under `venv2/`, `pyproject.toml`, `requirements.txt`, pipeline role modules (daemon, reviewer, verifier, implementer), and the `Phase` enum definition file SHALL NOT be modified
+- **Given** the implementation changes are applied
+- **When** `ruff check` is run
+- **Then** there SHALL be no lint errors
