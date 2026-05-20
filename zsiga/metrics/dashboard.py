@@ -21,6 +21,217 @@ def _detect_state(stats: dict) -> str:
         return "resting"
 
 
+def _render_daemon_status() -> str:
+    """Read data/daemon_state.json and return HTML card row for daemon status."""
+    base = Path(__file__).resolve().parent.parent.parent
+    state_path = base / "data" / "daemon_state.json"
+    try:
+        raw = state_path.read_text(encoding="utf-8")
+        ds = json.loads(raw)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return (
+            '<div class="grid" style="margin-bottom:1rem">'
+            '<div class="card">'
+            '<div class="label"> Daemon</div>'
+            '<div class="value meta">Daemon offline</div>'
+            "</div></div>\n"
+        )
+
+    pid = ds.get("pid", "—")
+    started_at = ds.get("started_at", "—")
+    cycle = ds.get("cycle", "—")
+    daemon_state = ds.get("state", "unknown")
+    current_change = ds.get("current_change")
+    current_phase = ds.get("current_phase")
+    last_heartbeat = ds.get("last_heartbeat", "—")
+
+    if started_at and started_at != "—":
+        started_at = started_at[:19].replace("T", " ")
+    if last_heartbeat and last_heartbeat != "—":
+        last_heartbeat = last_heartbeat[:19].replace("T", " ")
+
+    state_cls = "working" if daemon_state == "running" else "resting"
+    state_label = daemon_state.capitalize()
+
+    processing = (
+        f"{current_change} ({current_phase or '—'})"
+        if current_change
+        else "Idle"
+    )
+
+    return (
+        f'<div class="grid" style="margin-bottom:1rem">'
+        f'<div class="card"><div class="label"> Daemon</div>'
+        f'<div class="value" style="font-size:1.2rem">{pid}</div></div>'
+        f'<div class="card"><div class="label"> Started At</div>'
+        f'<div class="value" style="font-size:1rem">{started_at}</div></div>'
+        f'<div class="card"><div class="label"> Cycle</div>'
+        f'<div class="value" style="font-size:1.2rem">{cycle}</div></div>'
+        f'<div class="card"><div class="label"> State</div>'
+        f'<span class="state-badge {state_cls}">{state_label}</span></div>'
+        f'<div class="card"><div class="label"> Processing</div>'
+        f'<div class="meta" style="font-size:0.85rem;margin-top:0.3rem">'
+        f"{processing}</div></div>"
+        f'<div class="card"><div class="label"> Heartbeat</div>'
+        f'<div class="meta" style="font-size:0.85rem;margin-top:0.3rem">'
+        f"{last_heartbeat}</div></div>"
+        f"</div>\n"
+    )
+
+
+def _render_failure_diagnosis() -> str:
+    """Scan for failed changes and render diagnosis panel."""
+    changes = load_all_changes()
+    failed = [c for c in changes if c.get("outcome") == "reverted"]
+
+    if not failed:
+        return (
+            '<div class="section"><h2>🔍 Failure Diagnosis</h2>'
+            '<div class="meta">No failures recorded</div></div>\n'
+        )
+
+    # Load learnings
+    base_dir = Path(__file__).resolve().parent.parent.parent
+    learnings_path = base_dir / "memory" / "learnings.jsonl"
+    lessons: list[dict] = []
+    if learnings_path.exists():
+        for line in learnings_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                lessons.append(json.loads(line))
+            except (json.JSONDecodeError, ValueError):
+                continue
+
+    entries_html = ""
+    for c in reversed(failed[-10:]):
+        name = c.get("change_name", "—")
+        project = c.get("project", "—")
+
+        # Find the failed phase (last non-success phase)
+        failed_phase = "—"
+        for p in c.get("phases", []):
+            if p.get("outcome") != "success":
+                failed_phase = p.get("phase", "—")
+
+        # Find matching lesson
+        takeaway = ""
+        for lesson in reversed(lessons):
+            pk = lesson.get("pattern_key", "")
+            title = lesson.get("title", "")
+            if pk.startswith("pipeline.fail") or pk.startswith("code."):
+                if name in title:
+                    takeaway = lesson.get("takeaway", "")[:200]
+                    break
+
+        # Duration
+        started = c.get("started_at", "")
+        finished = c.get("finished_at", "")
+        duration = "—"
+        if started and finished:
+            try:
+                s_dt = datetime.fromisoformat(started)
+                f_dt = datetime.fromisoformat(finished)
+                duration = _fmt_seconds((f_dt - s_dt).total_seconds())
+            except (ValueError, TypeError):
+                pass
+
+        ts = started[:16].replace("T", " ") if started else "—"
+
+        # Diagnosis content from file
+        diagnosis_html = ""
+        for dpath in [
+            base_dir / "openspec" / "changes" / name / "diagnosis.md",
+            base_dir / "openspec" / "changes" / "archive" / name / "diagnosis.md",
+        ]:
+            if dpath.exists():
+                diag_text = dpath.read_text(encoding="utf-8").strip()
+                if diag_text:
+                    escaped = (
+                        diag_text.replace("&", "&amp;")
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;")
+                        .replace("\n", "<br>")
+                    )
+                    diagnosis_html = (
+                        '<div style="font-size:0.8rem;color:#94a3b8;'
+                        "margin-top:0.5rem;padding:0.5rem;"
+                        'background:#0f172a;border-radius:4px">'
+                        f"{escaped}</div>"
+                    )
+                break
+
+        takeaway_html = ""
+        if takeaway:
+            esc_tw = (
+                takeaway.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+            )
+            takeaway_html = (
+                '<div style="font-size:0.8rem;color:#f59e0b;'
+                f'margin-top:0.3rem">{esc_tw}</div>'
+            )
+
+        entries_html += (
+            "<details><summary "
+            'style="cursor:pointer;padding:0.4rem 0.8rem;'
+            'background:#1e293b;border-radius:4px;font-size:0.85rem">'
+            f"<strong>{name}</strong> · {project} · "
+            f"{failed_phase} · {duration} · {ts}"
+            f"</summary>{takeaway_html}{diagnosis_html}"
+            f"</details>\n"
+        )
+
+    return (
+        '<div class="section">\n  <h2>🔍 Failure Diagnosis</h2>\n'
+        f"  {entries_html}\n</div>\n"
+    )
+
+
+def _duration_bars_html(changes: list[dict]) -> str:
+    """Render pure-CSS bar chart of recent change durations."""
+    completed = [
+        c for c in changes if c.get("outcome") in ("success", "reverted")
+    ]
+    if len(completed) < 2:
+        return '<div class="meta">Insufficient data</div>'
+
+    recent = completed[-20:]
+    bars = []
+    for c in recent:
+        started = c.get("started_at", "")
+        finished = c.get("finished_at", "")
+        dur = 0.0
+        if started and finished:
+            try:
+                s_dt = datetime.fromisoformat(started)
+                f_dt = datetime.fromisoformat(finished)
+                dur = (f_dt - s_dt).total_seconds()
+            except (ValueError, TypeError):
+                pass
+        bars.append({"duration": dur, "outcome": c.get("outcome", "")})
+
+    max_dur = max(b["duration"] for b in bars) if bars else 1
+    if max_dur == 0:
+        max_dur = 1
+
+    html = '<div style="display:flex;align-items:flex-end;gap:2px;height:40px">'
+    for b in bars:
+        height_pct = (
+            int(b["duration"] / max_dur * 100) if max_dur > 0 else 0
+        )
+        color = "#22c55e" if b["outcome"] == "success" else "#ef4444"
+        html += (
+            f'<div style="width:8px;height:{height_pct}%;'
+            f"background:{color};border-radius:1px\" "
+            f'title="{b["duration"]:.0f}s"></div>'
+        )
+    html += "</div>"
+    return html
+
+
 def generate_dashboard(output_path: str = None) -> str:
     stats = compute_stats()
     milestones = []
