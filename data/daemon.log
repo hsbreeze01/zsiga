@@ -431,3 +431,14 @@ Aborting
   Pre-impl SHA: ea6012a82a6c1459d00db3f3bbb03996773fbc57
   Phase 2 done in 136.7s
   git add -A ...
+  ✅ added all
+  git commit -m 'zsiga: implement validate-pipeline-fixes-20260520' ...
+  ✅ committed
+  Post-impl checkpoint committed
+
+  Mechanical verification...
+  Mechanical verification PASSED (0.1s)
+
+  ==================================================
+  Phase 3/6: REVIEW validate-pipeline-fixes-20260520
+  ==================================================
