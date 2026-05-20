@@ -1,6 +1,6 @@
 {
   "project": "d8q-intelligentengine-stockcompass",
-  "extracted_at": "2026-05-19T12:36:40.788576",
+  "extracted_at": "2026-05-20T14:15:02.755443",
   "entries": [
     {
       "name": "get_price_day_tx",
@@ -3288,6 +3288,11 @@
       "file": "stockfetch/db_asi.py"
     },
     {
+      "name": "StockDBBase",
+      "category": "class",
+      "file": "stockfetch/db_base.py"
+    },
+    {
       "name": "BIASDaily",
       "category": "class",
       "file": "stockfetch/db_bias.py"
@@ -3538,6 +3543,106 @@
       "file": "tests/test_data_gateway_keywords.py"
     },
     {
+      "name": "TestConstruction",
+      "category": "class",
+      "file": "tests/test_db_asi.py"
+    },
+    {
+      "name": "TestDbGetMaxdate",
+      "category": "class",
+      "file": "tests/test_db_asi.py"
+    },
+    {
+      "name": "TestGetData",
+      "category": "class",
+      "file": "tests/test_db_asi.py"
+    },
+    {
+      "name": "TestInsert",
+      "category": "class",
+      "file": "tests/test_db_asi.py"
+    },
+    {
+      "name": "TestNoRawConnection",
+      "category": "class",
+      "file": "tests/test_db_asi.py"
+    },
+    {
+      "name": "TestConstruction",
+      "category": "class",
+      "file": "tests/test_db_bias.py"
+    },
+    {
+      "name": "TestDbGetMaxdate",
+      "category": "class",
+      "file": "tests/test_db_bias.py"
+    },
+    {
+      "name": "TestGetData",
+      "category": "class",
+      "file": "tests/test_db_bias.py"
+    },
+    {
+      "name": "TestInsert",
+      "category": "class",
+      "file": "tests/test_db_bias.py"
+    },
+    {
+      "name": "TestNoRawConnection",
+      "category": "class",
+      "file": "tests/test_db_bias.py"
+    },
+    {
+      "name": "TestDBClientPoolNaming",
+      "category": "class",
+      "file": "tests/test_dbclient_pool.py"
+    },
+    {
+      "name": "TestDBClientPingHealthCheck",
+      "category": "class",
+      "file": "tests/test_dbclient_pool.py"
+    },
+    {
+      "name": "TestDBClientGetPoolStatus",
+      "category": "class",
+      "file": "tests/test_dbclient_pool.py"
+    },
+    {
+      "name": "TestDBClientExistingInterface",
+      "category": "class",
+      "file": "tests/test_dbclient_pool.py"
+    },
+    {
+      "name": "TestConstruction",
+      "category": "class",
+      "file": "tests/test_db_kdj.py"
+    },
+    {
+      "name": "TestTableName",
+      "category": "class",
+      "file": "tests/test_db_kdj.py"
+    },
+    {
+      "name": "TestDbGetMaxdate",
+      "category": "class",
+      "file": "tests/test_db_kdj.py"
+    },
+    {
+      "name": "TestGetData",
+      "category": "class",
+      "file": "tests/test_db_kdj.py"
+    },
+    {
+      "name": "TestInsert",
+      "category": "class",
+      "file": "tests/test_db_kdj.py"
+    },
+    {
+      "name": "TestNoRawConnection",
+      "category": "class",
+      "file": "tests/test_db_kdj.py"
+    },
+    {
       "name": "TestMapDataframe",
       "category": "class",
       "file": "tests/test_dic_stock_sync.py"
@@ -3681,6 +3786,36 @@
       "name": "TestGetDaily",
       "category": "class",
       "file": "tests/test_recommendation_service.py"
+    },
+    {
+      "name": "TestPoolInit",
+      "category": "class",
+      "file": "tests/test_stockdb_base.py"
+    },
+    {
+      "name": "TestContextManager",
+      "category": "class",
+      "file": "tests/test_stockdb_base.py"
+    },
+    {
+      "name": "TestExplicitLifecycle",
+      "category": "class",
+      "file": "tests/test_stockdb_base.py"
+    },
+    {
+      "name": "TestQueryMethods",
+      "category": "class",
+      "file": "tests/test_stockdb_base.py"
+    },
+    {
+      "name": "TestTransactionControl",
+      "category": "class",
+      "file": "tests/test_stockdb_base.py"
+    },
+    {
+      "name": "TestImport",
+      "category": "class",
+      "file": "tests/test_stockdb_base.py"
     },
     {
       "name": "TestSubscriptionAPI",
@@ -3856,71 +3991,6 @@
       "name": "flask_client",
       "category": "function",
       "file": "tests/test_strategy/test_migration.py"
-    },
-    {
-      "name": "TestIsAdminPassedToAllRoutes",
-      "category": "class",
-      "file": "tests/test_strategy/test_strategy_pages.py"
-    },
-    {
-      "name": "TestEventDetailContext",
-      "category": "class",
-      "file": "tests/test_strategy/test_strategy_pages.py"
-    },
-    {
-      "name": "TestAdminDetection",
-      "category": "class",
-      "file": "tests/test_strategy/test_strategy_pages.py"
-    },
-    {
-      "name": "sample_event",
-      "category": "function",
-      "file": "tests/test_strategy/test_strategy_pages.py"
-    },
-    {
-      "name": "sample_group",
-      "category": "function",
-      "file": "tests/test_strategy/test_strategy_pages.py"
-    },
-    {
-      "name": "TestTriggerSync",
-      "category": "class",
-      "file": "tests/test_sync_api.py"
-    },
-    {
-      "name": "TestSyncStatus",
-      "category": "class",
-      "file": "tests/test_sync_api.py"
-    },
-    {
-      "name": "app",
-      "category": "function",
-      "file": "tests/test_sync_api.py"
-    },
-    {
-      "name": "client",
-      "category": "function",
-      "file": "tests/test_sync_api.py"
-    },
-    {
-      "name": "TestTrendTracker",
-      "category": "class",
-      "file": "tests/test_trend_tracker.py"
-    },
-    {
-      "name": "TestTrendTrackerDecay",
-      "category": "class",
-      "file": "tests/test_trend_tracker.py"
-    },
-    {
-      "name": "get_stock_data",
-      "category": "function",
-      "file": "test/test1.py"
-    },
-    {
-      "name": "code_id_map_em",
-      "category": "function",
-      "file": "test/test1.py"
     }
   ]
 }

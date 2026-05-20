@@ -22,6 +22,7 @@ from .enricher import enrich, derive_explore_tasks
 from .implementer import implement
 from .verifier import verify, read_verdict
 from .diagnoser import Diagnoser
+from .phase_wal import PhaseWAL
 from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python
 from .project_context import build_project_context, prefetch_mechanical
 
@@ -237,6 +238,9 @@ class ZsigaOrchestrator:
                           skip_enrich: bool = False) -> bool:
         cycle_start = time.monotonic()
 
+        # Phase WAL for crash recovery
+        wal = PhaseWAL(change_dir, transport)
+
         # Escalation manager (REQ-ES-01)
         escalation = EscalationManager(change_name, persist_dir=change_dir)
 
@@ -312,6 +316,9 @@ class ZsigaOrchestrator:
             ))
             print(f"  Phase 1 done in {time.monotonic() - t0:.1f}s")
 
+            # WAL: record ENRICH boundary
+            wal.write(phase="enrich", target_path=target_path, project=project_name)
+
         # Approval gate
         if self.config.safety.require_approval:
             approved = self._ask_approval(change_name)
@@ -325,6 +332,12 @@ class ZsigaOrchestrator:
         print(f"  Phase 2/4: IMPLEMENT {change_name}")
         print(f"  {'='*50}")
         self.agent.set_phase("impl")
+
+        # Pre-flight checkpoint: commit dirty tree before IMPLEMENT (REQ-CHK-01)
+        if git_ops.has_uncommitted_changes(target_path, transport=transport):
+            git_ops.add_all(target_path, transport=transport)
+            git_ops.commit(target_path, f"zsiga: checkpoint before {change_name}",
+                          transport=transport)
         pre_sha = git_ops.rev_parse(target_path, transport=transport)
         print(f"  Pre-impl SHA: {pre_sha}")
 
