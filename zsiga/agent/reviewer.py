@@ -100,16 +100,17 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
         timeout_seconds=timeout_seconds,
     )
 
-    # Defensive fallback: if sub-agent did not write review.md, write it ourselves
+    # Defensive fallback: if sub-agent did not write review.md, write it ourselves.
+    # Always write content regardless of format — let parse_review_verdict handle parsing.
     review_path = os.path.join(change_dir, "review.md")
     if not os.path.isfile(review_path):
-        if re.search(r"^Verdict:", result.content, re.MULTILINE):
-            logging.getLogger(__name__).warning(
-                "Review sub-agent did not call write_file; writing review.md as fallback"
-            )
-            os.makedirs(os.path.dirname(review_path), exist_ok=True)
-            with open(review_path, "w", encoding="utf-8") as f:
-                f.write(result.content)
+        logger = logging.getLogger(__name__)
+        logger.warning(
+            "Review sub-agent did not call write_file; writing review.md as fallback"
+        )
+        os.makedirs(os.path.dirname(review_path), exist_ok=True)
+        with open(review_path, "w", encoding="utf-8") as f:
+            f.write(result.content)
 
     return result
 

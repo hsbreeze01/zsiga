@@ -38,7 +38,7 @@ class AgentLoop:
                  total_budget: int = 1200000,
                  per_turn_limit: int = 8192,
                  compaction_ratio: float = 0.8,
-                 stale_limit: int = 5,
+                 stale_limit: int = 10,
                  budget_extend_factor: float = 1.5):
         kwargs = {"api_key": api_key}
         if base_url:
@@ -67,6 +67,7 @@ class AgentLoop:
             budget_extend_factor=budget_extend_factor,
         )
         self.value_tracker = ValueTracker(stale_limit=stale_limit)
+        self._default_stale_limit = stale_limit
 
     def set_phase(self, label: str):
         self._phase_label = label
