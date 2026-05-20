@@ -1,10 +1,15 @@
 {
-  "pid": 857703,
-  "started_at": "2026-05-20T07:56:18.511569",
+  "pid": 869232,
+  "started_at": "2026-05-20T08:24:21.393360",
   "cycle": 1,
   "state": "running",
   "current_change": null,
   "current_phase": null,
   "current_project": null,
-  "last_heartbeat": "2026-05-20T07:56:18.511905"
+  "last_heartbeat": "2026-05-20T08:24:21.394045",
+  "total_cycles": 1,
+  "total_changes_processed": 0,
+  "idle_cycles": 0,
+  "continuous_busy_cycles": 0,
+  "last_change_at": null
 }

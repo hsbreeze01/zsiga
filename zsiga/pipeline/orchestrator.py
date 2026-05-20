@@ -74,7 +74,7 @@ class ZsigaOrchestrator:
             # Cross-project decomposition (REQ-TD-01)
             available_projects = list(self.config.targets.keys())
             proposal_text = read_file(
-                f"{prop['change_dir']}/proposal.md",
+                f"{prop['change_dir']}/{prop.get('proposal_filename', 'proposal.md')}",
                 self._get_transport(prop['project']),
             ) or ""
             decomp = decompose(proposal_text, available_projects,
@@ -175,7 +175,8 @@ class ZsigaOrchestrator:
         transport = self._get_transport(project_name)
 
         # Intent classification (REQ-IG-01 / REQ-IG-02 / REQ-IG-05)
-        proposal_text = read_file(f"{change_dir}/proposal.md", transport) or ""
+        proposal_name = prop.get("proposal_filename", "proposal.md")
+        proposal_text = read_file(f"{change_dir}/{proposal_name}", transport) or ""
         if not proposal_text.strip():
             print(f"  ⚠ Empty proposal for {change_name} on {project_name} — skipping")
             return False
@@ -247,7 +248,8 @@ class ZsigaOrchestrator:
         # Prefetch project context once (shared by enrich + implement)
         print("  Prefetching project context...")
         t_pf = time.monotonic()
-        proposal_text = read_file(f"{change_dir}/proposal.md", transport) or ""
+        proposal_name = prop.get("proposal_filename", "proposal.md")
+        proposal_text = read_file(f"{change_dir}/{proposal_name}", transport) or ""
         project_context = build_project_context(target_path, transport,
                                                  proposal=proposal_text)
         print(f"  Project context ready ({len(project_context)} chars, {time.monotonic() - t_pf:.1f}s)")
@@ -861,7 +863,8 @@ class ZsigaOrchestrator:
 
     async def _dispatch_explore(self, prop, change_dir, target_path, transport) -> bool:
         """Dispatch explore-role sub-agent for research/investigation intents."""
-        proposal_text = read_file(f"{change_dir}/proposal.md", transport) or prop.get("id", "")
+        proposal_name = prop.get("proposal_filename", "proposal.md")
+        proposal_text = read_file(f"{change_dir}/{proposal_name}", transport) or prop.get("id", "")
         agent = create_with_role(
             "explore",
             api_key=self.agent.client.api_key,
@@ -878,7 +881,8 @@ class ZsigaOrchestrator:
 
     async def _dispatch_diagnoser(self, prop, change_dir, target_path, transport) -> bool:
         """Dispatch diagnoser for investigation intents."""
-        proposal_text = read_file(f"{change_dir}/proposal.md", transport) or prop.get("id", "")
+        proposal_name = prop.get("proposal_filename", "proposal.md")
+        proposal_text = read_file(f"{change_dir}/{proposal_name}", transport) or prop.get("id", "")
         agent = create_with_role(
             "diagnoser",
             api_key=self.agent.client.api_key,

@@ -1,0 +1,68 @@
+{
+  "session_id": "fix-scanner-case-insensitive-920493e7",
+  "change_name": "fix-scanner-case-insensitive",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T08:23:31.169178",
+  "outcome": "reverted",
+  "started_at": "2026-05-20T08:07:42.265763",
+  "finished_at": "2026-05-20T08:23:31.150435",
+  "total_runtime_seconds": 307.4,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 44.7,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 4,
+      "prompt_tokens": 46378,
+      "completion_tokens": 1880
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 167.2,
+      "fix_attempts": 0,
+      "llm_calls": 15,
+      "tool_calls": 19,
+      "prompt_tokens": 633737,
+      "completion_tokens": 7227
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 58.5,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 37.0,
+      "fix_attempts": 3,
+      "llm_calls": 12,
+      "tool_calls": 12,
+      "prompt_tokens": 51418,
+      "completion_tokens": 508
+    }
+  ],
+  "lessons": [
+    {
+      "pattern_key": "code.unknown",
+      "takeaway": "review error and adjust approach"
+    }
+  ],
+  "metrics": {
+    "total_llm_calls": 32,
+    "total_tool_calls": 35,
+    "total_prompt_tokens": 731533,
+    "total_completion_tokens": 9615
+  }
+}

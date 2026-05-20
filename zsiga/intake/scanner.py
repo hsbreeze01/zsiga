@@ -1,4 +1,25 @@
+import logging
+
 from ..transport import Transport, LocalTransport
+
+logger = logging.getLogger(__name__)
+
+
+def _find_file_ci(directory_listing: list[str], target_name: str) -> str | None:
+    """Case-insensitive file lookup within a directory listing.
+
+    Args:
+        directory_listing: List of filenames (not paths) from ``os.listdir`` or similar.
+        target_name: The canonical lowercase name, e.g. ``"proposal.md"``.
+
+    Returns:
+        The actual filename with its original casing, or ``None`` if not found.
+    """
+    target_lower = target_name.lower()
+    for name in directory_listing:
+        if name.lower() == target_lower:
+            return name
+    return None
 
 
 class DirectoryScanner:
@@ -31,20 +52,22 @@ class DirectoryScanner:
                 if "DIR" not in r.get("stdout", ""):
                     continue
 
-                r = transport.run_shell(
-                    f"test -f '{change_dir}/proposal.md' && echo YES", timeout=5
-                )
-                if "YES" not in r.get("stdout", ""):
+                # List directory contents for case-insensitive file detection
+                r = transport.run_shell(f"ls -1 '{change_dir}'", timeout=5)
+                dir_listing = r["stdout"].strip().split("\n") if r["exit_code"] == 0 else []
+
+                proposal_filename = _find_file_ci(dir_listing, "proposal.md")
+                if proposal_filename is None:
+                    logger.warning(
+                        f"⚠ Scanner: directory {change_dir} exists but no proposal.md found (case-insensitive search)"
+                    )
                     continue
+
+                design_filename = _find_file_ci(dir_listing, "design.md")
+                tasks_filename = _find_file_ci(dir_listing, "tasks.md")
 
                 r_specs = transport.run_shell(
                     f"test -d '{change_dir}/specs' && echo YES", timeout=5
-                )
-                r_design = transport.run_shell(
-                    f"test -f '{change_dir}/design.md' && echo YES", timeout=5
-                )
-                r_tasks = transport.run_shell(
-                    f"test -f '{change_dir}/tasks.md' && echo YES", timeout=5
                 )
 
                 proposals.append({
@@ -54,8 +77,11 @@ class DirectoryScanner:
                     "change_dir": change_dir,
                     "has_proposal": True,
                     "has_specs": "YES" in r_specs.get("stdout", ""),
-                    "has_design": "YES" in r_design.get("stdout", ""),
-                    "has_tasks": "YES" in r_tasks.get("stdout", ""),
+                    "has_design": design_filename is not None,
+                    "has_tasks": tasks_filename is not None,
+                    "proposal_filename": proposal_filename,
+                    "design_filename": design_filename,
+                    "tasks_filename": tasks_filename,
                 })
         return proposals
 
@@ -64,7 +90,8 @@ class DirectoryScanner:
 
     def is_fully_implemented(self, proposal: dict, transport: Transport = None) -> bool:
         transport = transport or LocalTransport()
-        tasks_file = f"{proposal['change_dir']}/tasks.md"
+        tasks_name = proposal.get("tasks_filename") or "tasks.md"
+        tasks_file = f"{proposal['change_dir']}/{tasks_name}"
         r = transport.run_shell(f"cat '{tasks_file}'", timeout=10)
         if r["exit_code"] != 0:
             return False
