@@ -1,0 +1,52 @@
+{
+  "session_id": "news-backfill-and-cleanup-ea4b85f0",
+  "change_name": "news-backfill-and-cleanup",
+  "project": "dataagent",
+  "exported_at": "2026-05-20T18:05:51.982124",
+  "outcome": "success",
+  "started_at": "2026-05-20T16:11:40.358505",
+  "finished_at": "2026-05-20T16:39:37.634133",
+  "total_runtime_seconds": 882.9,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 135.5,
+      "fix_attempts": 0,
+      "llm_calls": 6,
+      "tool_calls": 5,
+      "prompt_tokens": 70438,
+      "completion_tokens": 3801
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 127.0,
+      "fix_attempts": 1,
+      "llm_calls": 10,
+      "tool_calls": 17,
+      "prompt_tokens": 222615,
+      "completion_tokens": 2791
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 620.4,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 16,
+    "total_tool_calls": 22,
+    "total_prompt_tokens": 293053,
+    "total_completion_tokens": 6592
+  }
+}

@@ -1,0 +1,1906 @@
+{
+  "project": "d8q-data-agent",
+  "extracted_at": "2026-05-20T16:14:45.228058",
+  "entries": [
+    {
+      "name": "CailianSheDetailAnalyzer",
+      "category": "class",
+      "file": "analyze_cailianshe_detail_2248000.py"
+    },
+    {
+      "name": "analyze_crawl_results",
+      "category": "function",
+      "file": "analyze_crawl_results.py"
+    },
+    {
+      "name": "analyze_nbd_data_directory",
+      "category": "function",
+      "file": "analyze_data_storage_differences.py"
+    },
+    {
+      "name": "analyze_raw_nbd_directory",
+      "category": "function",
+      "file": "analyze_data_storage_differences.py"
+    },
+    {
+      "name": "compare_storage_formats",
+      "category": "function",
+      "file": "analyze_data_storage_differences.py"
+    },
+    {
+      "name": "generate_unified_storage_recommendation",
+      "category": "function",
+      "file": "analyze_data_storage_differences.py"
+    },
+    {
+      "name": "create_migration_script",
+      "category": "function",
+      "file": "analyze_data_storage_differences.py"
+    },
+    {
+      "name": "migrate_nbd_data",
+      "category": "function",
+      "file": "analyze_data_storage_differences.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "analyze_data_storage_differences.py"
+    },
+    {
+      "name": "analyze_existing_raw_data",
+      "category": "function",
+      "file": "analyze_title_truncation.py"
+    },
+    {
+      "name": "demonstrate_title_truncation_fix",
+      "category": "function",
+      "file": "analyze_title_truncation.py"
+    },
+    {
+      "name": "SimpleProgressDisplay",
+      "category": "class",
+      "file": "cailianshe_ai_search_scraper.py"
+    },
+    {
+      "name": "CailiansheAISearchScraper",
+      "category": "class",
+      "file": "cailianshe_ai_search_scraper.py"
+    },
+    {
+      "name": "CailianSheAPIAdapter",
+      "category": "class",
+      "file": "cailianshe_api_adapter.py"
+    },
+    {
+      "name": "CLSRealDataExtractor",
+      "category": "class",
+      "file": "cailianshe_api_adapter.py"
+    },
+    {
+      "name": "ArticleInfo",
+      "category": "class",
+      "file": "cailianshe_api_client.py"
+    },
+    {
+      "name": "SearchResult",
+      "category": "class",
+      "file": "cailianshe_api_client.py"
+    },
+    {
+      "name": "CailianSheAPIClient",
+      "category": "class",
+      "file": "cailianshe_api_client.py"
+    },
+    {
+      "name": "APIEndpoint",
+      "category": "class",
+      "file": "cailianshe_api_discovery.py"
+    },
+    {
+      "name": "APIDiscoveryResult",
+      "category": "class",
+      "file": "cailianshe_api_discovery.py"
+    },
+    {
+      "name": "CailianSheAPIDiscovery",
+      "category": "class",
+      "file": "cailianshe_api_discovery.py"
+    },
+    {
+      "name": "print_discovery_summary",
+      "category": "function",
+      "file": "cailianshe_api_discovery.py"
+    },
+    {
+      "name": "PerformanceMetrics",
+      "category": "class",
+      "file": "cailianshe_api_replacement.py"
+    },
+    {
+      "name": "ComparisonResult",
+      "category": "class",
+      "file": "cailianshe_api_replacement.py"
+    },
+    {
+      "name": "CailianSheAPIReplacement",
+      "category": "class",
+      "file": "cailianshe_api_replacement.py"
+    },
+    {
+      "name": "CleanedContent",
+      "category": "class",
+      "file": "cailianshe_content_cleaner.py"
+    },
+    {
+      "name": "CailianSheContentCleaner",
+      "category": "class",
+      "file": "cailianshe_content_cleaner.py"
+    },
+    {
+      "name": "test_content_cleaner",
+      "category": "function",
+      "file": "cailianshe_content_cleaner.py"
+    },
+    {
+      "name": "OptimizedCailianSheArticle",
+      "category": "class",
+      "file": "cailianshe_optimized_api_client.py"
+    },
+    {
+      "name": "CailianSheOptimizedAPIClient",
+      "category": "class",
+      "file": "cailianshe_optimized_api_client.py"
+    },
+    {
+      "name": "CailianSheRawDataManager",
+      "category": "class",
+      "file": "cailianshe_raw_data_manager.py"
+    },
+    {
+      "name": "test_raw_data_manager",
+      "category": "function",
+      "file": "cailianshe_raw_data_manager.py"
+    },
+    {
+      "name": "CailianSheArticle",
+      "category": "class",
+      "file": "cailianshe_real_api_client.py"
+    },
+    {
+      "name": "CailianSheRealAPIClient",
+      "category": "class",
+      "file": "cailianshe_real_api_client.py"
+    },
+    {
+      "name": "CailianSheSmartCLIIntegration",
+      "category": "class",
+      "file": "cailianshe_smart_cli_integration.py"
+    },
+    {
+      "name": "check_db_structure",
+      "category": "function",
+      "file": "check_db_structure.py"
+    },
+    {
+      "name": "check_latest_nbd_data",
+      "category": "function",
+      "file": "check_latest_nbd_data.py"
+    },
+    {
+      "name": "check_nbd_tesla_data",
+      "category": "function",
+      "file": "check_nbd_tesla_data.py"
+    },
+    {
+      "name": "clean_database_content",
+      "category": "function",
+      "file": "clean_database_content.py"
+    },
+    {
+      "name": "RawDataFileCleaner",
+      "category": "class",
+      "file": "clean_raw_data_files.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "clean_raw_data_files.py"
+    },
+    {
+      "name": "find_database_files",
+      "category": "function",
+      "file": "cleanup_test_data.py"
+    },
+    {
+      "name": "backup_database",
+      "category": "function",
+      "file": "cleanup_test_data.py"
+    },
+    {
+      "name": "get_table_info",
+      "category": "function",
+      "file": "cleanup_test_data.py"
+    },
+    {
+      "name": "identify_test_data",
+      "category": "function",
+      "file": "cleanup_test_data.py"
+    },
+    {
+      "name": "clean_test_data",
+      "category": "function",
+      "file": "cleanup_test_data.py"
+    },
+    {
+      "name": "clean_test_files",
+      "category": "function",
+      "file": "cleanup_test_data.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "cleanup_test_data.py"
+    },
+    {
+      "name": "results_to_data_items",
+      "category": "function",
+      "file": "collect_materials.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "collect_materials.py"
+    },
+    {
+      "name": "SOURCE_MAP",
+      "category": "config",
+      "file": "collect_materials.py"
+    },
+    {
+      "name": "DataDirectoryAnalyzer",
+      "category": "class",
+      "file": "comprehensive_data_cleanup.py"
+    },
+    {
+      "name": "TestDataIdentifier",
+      "category": "class",
+      "file": "comprehensive_data_cleanup.py"
+    },
+    {
+      "name": "DataCleaner",
+      "category": "class",
+      "file": "comprehensive_data_cleanup.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "comprehensive_data_cleanup.py"
+    },
+    {
+      "name": "configure_weibo_cookie",
+      "category": "function",
+      "file": "configure_weibo_cookie.py"
+    },
+    {
+      "name": "test_weibo_access",
+      "category": "function",
+      "file": "configure_weibo_cookie.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "configure_weibo_cookie.py"
+    },
+    {
+      "name": "AutoOptimizationSystem",
+      "category": "class",
+      "file": "debug/unclassified/auto_optimization_system.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/auto_optimization_system.py"
+    },
+    {
+      "name": "LLMEnhancedCailiansheParser",
+      "category": "class",
+      "file": "debug/unclassified/cailianshe_parser.py"
+    },
+    {
+      "name": "EnhancedCailiansheIntegration",
+      "category": "class",
+      "file": "debug/unclassified/cailianshe_url_fix_integration.py"
+    },
+    {
+      "name": "clean_test_data",
+      "category": "function",
+      "file": "debug/unclassified/clean_test_data.py"
+    },
+    {
+      "name": "show_remaining_data",
+      "category": "function",
+      "file": "debug/unclassified/clean_test_data.py"
+    },
+    {
+      "name": "run_command",
+      "category": "function",
+      "file": "debug/unclassified/comprehensive_test.py"
+    },
+    {
+      "name": "check_data_quality",
+      "category": "function",
+      "file": "debug/unclassified/comprehensive_test.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/comprehensive_test.py"
+    },
+    {
+      "name": "run_command",
+      "category": "function",
+      "file": "debug/unclassified/demo_batch_execution.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/demo_batch_execution.py"
+    },
+    {
+      "name": "print_section",
+      "category": "function",
+      "file": "debug/unclassified/demo_cailianshe_waf_solution.py"
+    },
+    {
+      "name": "print_subsection",
+      "category": "function",
+      "file": "debug/unclassified/demo_cailianshe_waf_solution.py"
+    },
+    {
+      "name": "demo_performance_metrics",
+      "category": "function",
+      "file": "debug/unclassified/demo_cailianshe_waf_solution.py"
+    },
+    {
+      "name": "URLMappingSystemDemo",
+      "category": "class",
+      "file": "debug/unclassified/demo_complete_url_mapping_system.py"
+    },
+    {
+      "name": "demo_full_format_display",
+      "category": "function",
+      "file": "debug/unclassified/demo_full_format_display.py"
+    },
+    {
+      "name": "demo_cli_usage",
+      "category": "function",
+      "file": "debug/unclassified/demo_full_format_display.py"
+    },
+    {
+      "name": "demo_use_cases",
+      "category": "function",
+      "file": "debug/unclassified/demo_full_format_display.py"
+    },
+    {
+      "name": "display_crawled_data",
+      "category": "function",
+      "file": "debug/unclassified/display_crawled_data.py"
+    },
+    {
+      "name": "load_cailianshe_rules",
+      "category": "function",
+      "file": "debug/unclassified/evaluate_cailianshe_compliance.py"
+    },
+    {
+      "name": "evaluate_title_extraction",
+      "category": "function",
+      "file": "debug/unclassified/evaluate_cailianshe_compliance.py"
+    },
+    {
+      "name": "evaluate_content_extraction",
+      "category": "function",
+      "file": "debug/unclassified/evaluate_cailianshe_compliance.py"
+    },
+    {
+      "name": "evaluate_url_format",
+      "category": "function",
+      "file": "debug/unclassified/evaluate_cailianshe_compliance.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/evaluate_cailianshe_compliance.py"
+    },
+    {
+      "name": "get_project_root",
+      "category": "function",
+      "file": "debug/unclassified/execute_project_migration.py"
+    },
+    {
+      "name": "get_exclude_patterns",
+      "category": "function",
+      "file": "debug/unclassified/execute_project_migration.py"
+    },
+    {
+      "name": "confirm_migration",
+      "category": "function",
+      "file": "debug/unclassified/execute_project_migration.py"
+    },
+    {
+      "name": "show_detailed_plan",
+      "category": "function",
+      "file": "debug/unclassified/execute_project_migration.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/execute_project_migration.py"
+    },
+    {
+      "name": "extract_real_news_from_html",
+      "category": "function",
+      "file": "debug/unclassified/extract_real_embodied_ai_news.py"
+    },
+    {
+      "name": "store_real_news_to_database",
+      "category": "function",
+      "file": "debug/unclassified/extract_real_embodied_ai_news.py"
+    },
+    {
+      "name": "show_final_results",
+      "category": "function",
+      "file": "debug/unclassified/extract_real_embodied_ai_news.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/extract_real_embodied_ai_news.py"
+    },
+    {
+      "name": "FullArticleFetcher",
+      "category": "class",
+      "file": "debug/unclassified/fetch_full_article.py"
+    },
+    {
+      "name": "FileCategory",
+      "category": "class",
+      "file": "debug/unclassified/file_classifier_1.py"
+    },
+    {
+      "name": "FileInfo",
+      "category": "class",
+      "file": "debug/unclassified/file_classifier_1.py"
+    },
+    {
+      "name": "FileClassifier",
+      "category": "class",
+      "file": "debug/unclassified/file_classifier_1.py"
+    },
+    {
+      "name": "FileType",
+      "category": "class",
+      "file": "debug/unclassified/file_classifier.py"
+    },
+    {
+      "name": "FileClassification",
+      "category": "class",
+      "file": "debug/unclassified/file_classifier.py"
+    },
+    {
+      "name": "FileTypeClassifier",
+      "category": "class",
+      "file": "debug/unclassified/file_classifier.py"
+    },
+    {
+      "name": "MoveOperation",
+      "category": "class",
+      "file": "debug/unclassified/file_mover.py"
+    },
+    {
+      "name": "ConflictResolution",
+      "category": "class",
+      "file": "debug/unclassified/file_mover.py"
+    },
+    {
+      "name": "FileMoveEngine",
+      "category": "class",
+      "file": "debug/unclassified/file_mover.py"
+    },
+    {
+      "name": "print_header",
+      "category": "function",
+      "file": "debug/unclassified/final_llm_decision_demo.py"
+    },
+    {
+      "name": "print_section",
+      "category": "function",
+      "file": "debug/unclassified/final_llm_decision_demo.py"
+    },
+    {
+      "name": "demonstrate_llm_decision_process",
+      "category": "function",
+      "file": "debug/unclassified/final_llm_decision_demo.py"
+    },
+    {
+      "name": "show_results",
+      "category": "function",
+      "file": "debug/unclassified/final_results.py"
+    },
+    {
+      "name": "Enhanced36krNewsflashCrawler",
+      "category": "class",
+      "file": "debug/unclassified/fix_36kr_newsflash_crawler_enhanced.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/fix_36kr_newsflash_crawler_enhanced.py"
+    },
+    {
+      "name": "FixedCailiansheParser",
+      "category": "class",
+      "file": "debug/unclassified/fix_cailianshe_title_content_mismatch.py"
+    },
+    {
+      "name": "FixedCailiansheDataCrawler",
+      "category": "class",
+      "file": "debug/unclassified/fix_cailianshe_title_content_mismatch.py"
+    },
+    {
+      "name": "DatabaseIntegrationFixer",
+      "category": "class",
+      "file": "debug/unclassified/fix_database_integration.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/fix_database_integration.py"
+    },
+    {
+      "name": "fix_cailianshe_data_storage",
+      "category": "function",
+      "file": "debug/unclassified/fix_data_storage.py"
+    },
+    {
+      "name": "create_embodied_intelligence_data",
+      "category": "function",
+      "file": "debug/unclassified/fix_data_storage.py"
+    },
+    {
+      "name": "show_final_results",
+      "category": "function",
+      "file": "debug/unclassified/fix_data_storage.py"
+    },
+    {
+      "name": "fix_real_crawler_title_content",
+      "category": "function",
+      "file": "debug/unclassified/fix_real_cailianshe_title_content.py"
+    },
+    {
+      "name": "ImportType",
+      "category": "class",
+      "file": "debug/unclassified/import_updater_1.py"
+    },
+    {
+      "name": "ImportStatement",
+      "category": "class",
+      "file": "debug/unclassified/import_updater_1.py"
+    },
+    {
+      "name": "ImportAnalysis",
+      "category": "class",
+      "file": "debug/unclassified/import_updater_1.py"
+    },
+    {
+      "name": "PathMapping",
+      "category": "class",
+      "file": "debug/unclassified/import_updater_1.py"
+    },
+    {
+      "name": "ImportPathUpdater",
+      "category": "class",
+      "file": "debug/unclassified/import_updater_1.py"
+    },
+    {
+      "name": "test_function",
+      "category": "function",
+      "file": "debug/unclassified/import_updater_1.py"
+    },
+    {
+      "name": "ImportType",
+      "category": "class",
+      "file": "debug/unclassified/import_updater.py"
+    },
+    {
+      "name": "ImportStatement",
+      "category": "class",
+      "file": "debug/unclassified/import_updater.py"
+    },
+    {
+      "name": "ImportUpdate",
+      "category": "class",
+      "file": "debug/unclassified/import_updater.py"
+    },
+    {
+      "name": "ImportStatementParser",
+      "category": "class",
+      "file": "debug/unclassified/import_updater.py"
+    },
+    {
+      "name": "PathMappingSystem",
+      "category": "class",
+      "file": "debug/unclassified/import_updater.py"
+    },
+    {
+      "name": "ImportPathUpdater",
+      "category": "class",
+      "file": "debug/unclassified/import_updater.py"
+    },
+    {
+      "name": "create_enhanced_kr36_crawler",
+      "category": "function",
+      "file": "debug/unclassified/integrate_36kr_newsflash_fix.py"
+    },
+    {
+      "name": "backup_and_update_kr36_crawler",
+      "category": "function",
+      "file": "debug/unclassified/integrate_36kr_newsflash_fix.py"
+    },
+    {
+      "name": "CailiansheFixIntegrator",
+      "category": "class",
+      "file": "debug/unclassified/integrate_cailianshe_fix.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/integrate_cailianshe_fix.py"
+    },
+    {
+      "name": "CailiansheURLMappingIntegration",
+      "category": "class",
+      "file": "debug/unclassified/integrate_cailianshe_url_mapping.py"
+    },
+    {
+      "name": "ContentCompletenessChecker",
+      "category": "class",
+      "file": "debug/unclassified/llm_content_completeness_checker.py"
+    },
+    {
+      "name": "LLMEnhancedTitleCompletion",
+      "category": "class",
+      "file": "debug/unclassified/llm_enhanced_title_completion.py"
+    },
+    {
+      "name": "LLMEnhancedWorkflowDemo",
+      "category": "class",
+      "file": "debug/unclassified/llm_enhanced_workflow_demo.py"
+    },
+    {
+      "name": "RuleType",
+      "category": "class",
+      "file": "debug/unclassified/mapping_engine.py"
+    },
+    {
+      "name": "MappingRule",
+      "category": "class",
+      "file": "debug/unclassified/mapping_engine.py"
+    },
+    {
+      "name": "MappingResult",
+      "category": "class",
+      "file": "debug/unclassified/mapping_engine.py"
+    },
+    {
+      "name": "MappingEngine",
+      "category": "class",
+      "file": "debug/unclassified/mapping_engine.py"
+    },
+    {
+      "name": "test_mcp_create_note",
+      "category": "function",
+      "file": "debug/unclassified/mcp_direct_test_script.py"
+    },
+    {
+      "name": "test_mcp_search_feeds",
+      "category": "function",
+      "file": "debug/unclassified/mcp_direct_test_script.py"
+    },
+    {
+      "name": "ImportStatement",
+      "category": "class",
+      "file": "debug/unclassified/metadata_analyzer.py"
+    },
+    {
+      "name": "FileMetadata",
+      "category": "class",
+      "file": "debug/unclassified/metadata_analyzer.py"
+    },
+    {
+      "name": "MetadataAnalyzer",
+      "category": "class",
+      "file": "debug/unclassified/metadata_analyzer.py"
+    },
+    {
+      "name": "OperationType",
+      "category": "class",
+      "file": "debug/unclassified/migration_executor.py"
+    },
+    {
+      "name": "OperationStatus",
+      "category": "class",
+      "file": "debug/unclassified/migration_executor.py"
+    },
+    {
+      "name": "Operation",
+      "category": "class",
+      "file": "debug/unclassified/migration_executor.py"
+    },
+    {
+      "name": "BackupInfo",
+      "category": "class",
+      "file": "debug/unclassified/migration_executor.py"
+    },
+    {
+      "name": "ExecutionResult",
+      "category": "class",
+      "file": "debug/unclassified/migration_executor.py"
+    },
+    {
+      "name": "SafeMigrationExecutor",
+      "category": "class",
+      "file": "debug/unclassified/migration_executor.py"
+    },
+    {
+      "name": "ConflictType",
+      "category": "class",
+      "file": "debug/unclassified/migration_planner.py"
+    },
+    {
+      "name": "Conflict",
+      "category": "class",
+      "file": "debug/unclassified/migration_planner.py"
+    },
+    {
+      "name": "MigrationItem",
+      "category": "class",
+      "file": "debug/unclassified/migration_planner.py"
+    },
+    {
+      "name": "MigrationPlan",
+      "category": "class",
+      "file": "debug/unclassified/migration_planner.py"
+    },
+    {
+      "name": "ImpactAnalysis",
+      "category": "class",
+      "file": "debug/unclassified/migration_planner.py"
+    },
+    {
+      "name": "MigrationPlanner",
+      "category": "class",
+      "file": "debug/unclassified/migration_planner.py"
+    },
+    {
+      "name": "find_latest_cailianshe_ai_file",
+      "category": "function",
+      "file": "debug/unclassified/print_core_records.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/print_core_records.py"
+    },
+    {
+      "name": "find_latest_cailianshe_ai_file",
+      "category": "function",
+      "file": "debug/unclassified/print_database_records.py"
+    },
+    {
+      "name": "print_database_records",
+      "category": "function",
+      "file": "debug/unclassified/print_database_records.py"
+    },
+    {
+      "name": "print_simple_records",
+      "category": "function",
+      "file": "debug/unclassified/print_database_records.py"
+    },
+    {
+      "name": "print_detailed_data",
+      "category": "function",
+      "file": "debug/unclassified/print_detailed_data.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/print_detailed_data.py"
+    },
+    {
+      "name": "find_latest_xhs_files",
+      "category": "function",
+      "file": "debug/unclassified/print_latest_data.py"
+    },
+    {
+      "name": "print_data_file",
+      "category": "function",
+      "file": "debug/unclassified/print_latest_data.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/print_latest_data.py"
+    },
+    {
+      "name": "print_separator",
+      "category": "function",
+      "file": "debug/unclassified/print_llm_decision_summary.py"
+    },
+    {
+      "name": "analyze_llm_decisions",
+      "category": "function",
+      "file": "debug/unclassified/print_llm_decision_summary.py"
+    },
+    {
+      "name": "print_separator",
+      "category": "function",
+      "file": "debug/unclassified/print_llm_enhanced_results.py"
+    },
+    {
+      "name": "print_llm_metadata",
+      "category": "function",
+      "file": "debug/unclassified/print_llm_enhanced_results.py"
+    },
+    {
+      "name": "print_data_item",
+      "category": "function",
+      "file": "debug/unclassified/print_llm_enhanced_results.py"
+    },
+    {
+      "name": "find_latest_cailianshe_file",
+      "category": "function",
+      "file": "debug/unclassified/print_llm_enhanced_results.py"
+    },
+    {
+      "name": "load_and_print_results",
+      "category": "function",
+      "file": "debug/unclassified/print_llm_enhanced_results.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/print_llm_enhanced_results.py"
+    },
+    {
+      "name": "find_latest_cailianshe_file",
+      "category": "function",
+      "file": "debug/unclassified/print_title_content.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/print_title_content.py"
+    },
+    {
+      "name": "query_latest_36kr_data",
+      "category": "function",
+      "file": "debug/unclassified/query_36kr_data.py"
+    },
+    {
+      "name": "DatabaseQueryTool",
+      "category": "class",
+      "file": "debug/unclassified/query_database_results.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/query_database_results.py"
+    },
+    {
+      "name": "query_latest_nbd_data",
+      "category": "function",
+      "file": "debug/unclassified/query_latest_nbd_data.py"
+    },
+    {
+      "name": "query_specific_subject_data",
+      "category": "function",
+      "file": "debug/unclassified/query_latest_nbd_data.py"
+    },
+    {
+      "name": "query_latest_stored_data",
+      "category": "function",
+      "file": "debug/unclassified/query_latest_stored_data.py"
+    },
+    {
+      "name": "query_database",
+      "category": "function",
+      "file": "debug/unclassified/query_latest_stored_data.py"
+    },
+    {
+      "name": "query_database_results",
+      "category": "function",
+      "file": "debug/unclassified/query_smart_cli_results.py"
+    },
+    {
+      "name": "query_file_results",
+      "category": "function",
+      "file": "debug/unclassified/query_smart_cli_results.py"
+    },
+    {
+      "name": "query_storage_reports",
+      "category": "function",
+      "file": "debug/unclassified/query_smart_cli_results.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/query_smart_cli_results.py"
+    },
+    {
+      "name": "run_test_case",
+      "category": "function",
+      "file": "debug/unclassified/quick_test_cases.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/quick_test_cases.py"
+    },
+    {
+      "name": "show_json_results",
+      "category": "function",
+      "file": "debug/unclassified/show_crawl_results.py"
+    },
+    {
+      "name": "show_database_results",
+      "category": "function",
+      "file": "debug/unclassified/show_crawl_results.py"
+    },
+    {
+      "name": "check_url_uniqueness",
+      "category": "function",
+      "file": "debug/unclassified/show_crawl_results.py"
+    },
+    {
+      "name": "show_crawl_summary",
+      "category": "function",
+      "file": "debug/unclassified/show_crawl_summary.py"
+    },
+    {
+      "name": "show_crawl_results",
+      "category": "function",
+      "file": "debug/unclassified/show_final_crawl_results.py"
+    },
+    {
+      "name": "show_all_cailianshe_data",
+      "category": "function",
+      "file": "debug/unclassified/show_final_real_results.py"
+    },
+    {
+      "name": "verify_urls",
+      "category": "function",
+      "file": "debug/unclassified/show_final_real_results.py"
+    },
+    {
+      "name": "show_latest_36kr_crawl_details",
+      "category": "function",
+      "file": "debug/unclassified/show_latest_36kr_crawl_details.py"
+    },
+    {
+      "name": "show_latest_cailianshe_data",
+      "category": "function",
+      "file": "debug/unclassified/show_latest_cailianshe_data.py"
+    },
+    {
+      "name": "check_url_uniqueness",
+      "category": "function",
+      "file": "debug/unclassified/show_latest_cailianshe_data.py"
+    },
+    {
+      "name": "find_latest_weibo_files",
+      "category": "function",
+      "file": "debug/unclassified/show_latest_weibo_data.py"
+    },
+    {
+      "name": "print_data_file",
+      "category": "function",
+      "file": "debug/unclassified/show_latest_weibo_data.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/show_latest_weibo_data.py"
+    },
+    {
+      "name": "UserTestingSimulator",
+      "category": "class",
+      "file": "debug/unclassified/simulate_user_testing.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/simulate_user_testing.py"
+    },
+    {
+      "name": "setup_session_cleanup",
+      "category": "function",
+      "file": "debug/unclassified/smart_cli_backup.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/smart_cli_backup.py"
+    },
+    {
+      "name": "setup_session_cleanup",
+      "category": "function",
+      "file": "debug/unclassified/smart_cli_fixed.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/smart_cli_fixed.py"
+    },
+    {
+      "name": "FullArticleProcessor",
+      "category": "class",
+      "file": "debug/unclassified/store_full_articles_to_db.py"
+    },
+    {
+      "name": "store_data_to_database",
+      "category": "function",
+      "file": "debug/unclassified/store_latest_data_to_db.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/store_latest_data_to_db.py"
+    },
+    {
+      "name": "EnhancedWeibooCookieUpdater",
+      "category": "class",
+      "file": "debug/unclassified/update_weibo_cookie_enhanced.py"
+    },
+    {
+      "name": "SINAGLOBAL",
+      "category": "config",
+      "file": "debug/unclassified/update_weibo_cookie_enhanced.py"
+    },
+    {
+      "name": "setup_weibo_cookie",
+      "category": "function",
+      "file": "debug/unclassified/update_weibo_cookie.py"
+    },
+    {
+      "name": "validate_cookie",
+      "category": "function",
+      "file": "debug/unclassified/update_weibo_cookie.py"
+    },
+    {
+      "name": "test_weibo_access",
+      "category": "function",
+      "file": "debug/unclassified/update_weibo_cookie.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/update_weibo_cookie.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/update_xhs_cookie.py"
+    },
+    {
+      "name": "WeiboCookieGeneratorV2",
+      "category": "class",
+      "file": "debug/unclassified/weibo_cookie_generator_v2.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/weibo_cookie_generator_v2.py"
+    },
+    {
+      "name": "XiaohongshuCookieManager",
+      "category": "class",
+      "file": "debug/unclassified/xhs_tools.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "debug/unclassified/xhs_tools.py"
+    },
+    {
+      "name": "demonstrate_raw_data_management",
+      "category": "function",
+      "file": "demo_title_truncation_solution.py"
+    },
+    {
+      "name": "run_command",
+      "category": "function",
+      "file": "examples/advanced-features/demo_complete_workflow.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "examples/advanced-features/demo_complete_workflow.py"
+    },
+    {
+      "name": "OptimizedCailiansheWorkflow",
+      "category": "class",
+      "file": "examples/advanced-features/demo_optimized_cailianshe_workflow.py"
+    },
+    {
+      "name": "create_sample_html",
+      "category": "function",
+      "file": "examples/data-processing/demo_36kr_content_extraction.py"
+    },
+    {
+      "name": "create_sample_data",
+      "category": "function",
+      "file": "examples/llm-enhanced/demo_intelligent_analysis_engine.py"
+    },
+    {
+      "name": "LLMEnhancedDecisionCrawler",
+      "category": "class",
+      "file": "examples/llm-enhanced/demo_llm_enhanced_decision_crawling.py"
+    },
+    {
+      "name": "CailianSheContentFixer",
+      "category": "class",
+      "file": "fix_cailianshe_content_issues.py"
+    },
+    {
+      "name": "CailianSheOptimizedSmartCLIIntegration",
+      "category": "class",
+      "file": "fix_cailianshe_content_issues.py"
+    },
+    {
+      "name": "get_ai_news",
+      "category": "function",
+      "file": "get_ai_news_simple.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "get_ai_news_simple.py"
+    },
+    {
+      "name": "migrate_nbd_data",
+      "category": "function",
+      "file": "migrate_nbd_data_storage.py"
+    },
+    {
+      "name": "NBDKuaixunCrawler",
+      "category": "class",
+      "file": "nbd_kuaixun_crawler.py"
+    },
+    {
+      "name": "NBDKuaixunPlaywrightAnalyzer",
+      "category": "class",
+      "file": "nbd_kuaixun_playwright_analysis.py"
+    },
+    {
+      "name": "NBDMobileCrawler",
+      "category": "class",
+      "file": "nbd_mobile_crawler_analysis.py"
+    },
+    {
+      "name": "test_nbd_mobile_crawler",
+      "category": "function",
+      "file": "nbd_mobile_crawler_analysis.py"
+    },
+    {
+      "name": "print_cailianshe_results",
+      "category": "function",
+      "file": "print_cailianshe_results.py"
+    },
+    {
+      "name": "find_database_files",
+      "category": "function",
+      "file": "query_ai_news.py"
+    },
+    {
+      "name": "get_table_info",
+      "category": "function",
+      "file": "query_ai_news.py"
+    },
+    {
+      "name": "query_ai_news_from_db",
+      "category": "function",
+      "file": "query_ai_news.py"
+    },
+    {
+      "name": "format_record",
+      "category": "function",
+      "file": "query_ai_news.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "query_ai_news.py"
+    },
+    {
+      "name": "CailianSheQueryTool",
+      "category": "class",
+      "file": "query_cailianshe_embodied_intelligence.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "query_cailianshe_embodied_intelligence.py"
+    },
+    {
+      "name": "classify_news",
+      "category": "function",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "summarize_news",
+      "category": "function",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "process_single",
+      "category": "function",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "backfill",
+      "category": "function",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "extract_entities",
+      "category": "function",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "backfill_entities",
+      "category": "function",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "DB_PATH",
+      "category": "config",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "API_KEY",
+      "category": "config",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "BASE_URL",
+      "category": "config",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "CLASSIFY_PROMPT",
+      "category": "config",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "SUMMARY_PROMPT",
+      "category": "config",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "NER_PROMPT",
+      "category": "config",
+      "file": "scripts/ai_pipeline.py"
+    },
+    {
+      "name": "print_help",
+      "category": "function",
+      "file": "scripts/cli/ida_cli.py"
+    },
+    {
+      "name": "parse_args",
+      "category": "function",
+      "file": "scripts/cli/ida_cli.py"
+    },
+    {
+      "name": "parse_natural_language",
+      "category": "function",
+      "file": "scripts/cli/ida_cli.py"
+    },
+    {
+      "name": "handle_summary_command",
+      "category": "function",
+      "file": "scripts/cli/ida_cli.py"
+    },
+    {
+      "name": "handle_stats_command",
+      "category": "function",
+      "file": "scripts/cli/ida_cli.py"
+    },
+    {
+      "name": "setup_api_key",
+      "category": "function",
+      "file": "scripts/cli/llm_config_cli.py"
+    },
+    {
+      "name": "show_config_status",
+      "category": "function",
+      "file": "scripts/cli/llm_config_cli.py"
+    },
+    {
+      "name": "test_llm_connection",
+      "category": "function",
+      "file": "scripts/cli/llm_config_cli.py"
+    },
+    {
+      "name": "show_health_check",
+      "category": "function",
+      "file": "scripts/cli/llm_config_cli.py"
+    },
+    {
+      "name": "setup_environment",
+      "category": "function",
+      "file": "scripts/cli/llm_config_cli.py"
+    },
+    {
+      "name": "reset_fallback_strategy",
+      "category": "function",
+      "file": "scripts/cli/llm_config_cli.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/cli/llm_config_cli.py"
+    },
+    {
+      "name": "LLMManagementCLI",
+      "category": "class",
+      "file": "scripts/cli/llm_management_cli.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/cli/llm_management_cli.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/cli/run_cli.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/cli/run_standard_cli.py"
+    },
+    {
+      "name": "UltimateCLI",
+      "category": "class",
+      "file": "scripts/cli/run_ultimate_cli.py"
+    },
+    {
+      "name": "run_command",
+      "category": "function",
+      "file": "scripts/cli/setup_standard_cli.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/cli/setup_standard_cli.py"
+    },
+    {
+      "name": "SimpleCLI",
+      "category": "class",
+      "file": "scripts/cli/simple_cli.py"
+    },
+    {
+      "name": "SmartCLI",
+      "category": "class",
+      "file": "scripts/cli/smart_cli.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/cli/smart_cli.py"
+    },
+    {
+      "name": "test_command",
+      "category": "function",
+      "file": "scripts/cli/verify_standard_cli.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/cli/verify_standard_cli.py"
+    },
+    {
+      "name": "XHSCookieAutoCLI",
+      "category": "class",
+      "file": "scripts/cli/xhs_cookie_auto_cli.py"
+    },
+    {
+      "name": "CLSSearchConfig",
+      "category": "class",
+      "file": "scripts/data-processing/cailianshe_crawler.py"
+    },
+    {
+      "name": "CLSDataExtractor",
+      "category": "class",
+      "file": "scripts/data-processing/cailianshe_crawler.py"
+    },
+    {
+      "name": "Enhanced36KrNetworkAnalyzer",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_36kr_network_supplement.py"
+    },
+    {
+      "name": "NetworkMonitor",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_36kr_network_supplement.py"
+    },
+    {
+      "name": "Enhanced36KrNewsflashCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_36kr_newsflash_crawler.py"
+    },
+    {
+      "name": "Enhanced36KrNewsflashExtractor",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_36kr_newsflashes_extractor.py"
+    },
+    {
+      "name": "CailiansheExtractionResult",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_cailianshe_completeness_assessor.py"
+    },
+    {
+      "name": "EnhancedCompletenessResult",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_cailianshe_completeness_assessor.py"
+    },
+    {
+      "name": "EnhancedCailiansheCompletenessAssessor",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_cailianshe_completeness_assessor.py"
+    },
+    {
+      "name": "EnhancedCailiansheLatestCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_cailianshe_latest_crawler.py"
+    },
+    {
+      "name": "URLMappingResult",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_cailianshe_url_mapper.py"
+    },
+    {
+      "name": "CailiansheURLMapper",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_cailianshe_url_mapper.py"
+    },
+    {
+      "name": "EnhancedRealNBDCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_real_nbd_crawler.py"
+    },
+    {
+      "name": "create_enhanced_nbd_crawler",
+      "category": "function",
+      "file": "scripts/data-processing/enhanced_real_nbd_crawler.py"
+    },
+    {
+      "name": "DEFAULT_ENHANCEMENT_CONFIG",
+      "category": "config",
+      "file": "scripts/data-processing/enhanced_real_nbd_crawler.py"
+    },
+    {
+      "name": "CONSERVATIVE_ENHANCEMENT_CONFIG",
+      "category": "config",
+      "file": "scripts/data-processing/enhanced_real_nbd_crawler.py"
+    },
+    {
+      "name": "AGGRESSIVE_ENHANCEMENT_CONFIG",
+      "category": "config",
+      "file": "scripts/data-processing/enhanced_real_nbd_crawler.py"
+    },
+    {
+      "name": "EnhancedWeiboRealCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_weibo_real_crawler.py"
+    },
+    {
+      "name": "EnhancedXHSRealDataBreakthrough",
+      "category": "class",
+      "file": "scripts/data-processing/enhanced_xhs_real_data_breakthrough.py"
+    },
+    {
+      "name": "Enhanced36KrNewsflashCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/fix_36kr_newsflash_crawler.py"
+    },
+    {
+      "name": "NBDRateLimiter",
+      "category": "class",
+      "file": "scripts/data-processing/nbd_article_followup_crawler.py"
+    },
+    {
+      "name": "URLContentCache",
+      "category": "class",
+      "file": "scripts/data-processing/nbd_article_followup_crawler.py"
+    },
+    {
+      "name": "NBDArticleFollowupCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/nbd_article_followup_crawler.py"
+    },
+    {
+      "name": "NBDCompletenessIntegrator",
+      "category": "class",
+      "file": "scripts/data-processing/nbd_completeness_integrator.py"
+    },
+    {
+      "name": "NBDContentCleaner",
+      "category": "class",
+      "file": "scripts/data-processing/nbd_content_cleaner.py"
+    },
+    {
+      "name": "clean_nbd_content",
+      "category": "function",
+      "file": "scripts/data-processing/nbd_content_cleaner.py"
+    },
+    {
+      "name": "NBDContentEnhancer",
+      "category": "class",
+      "file": "scripts/data-processing/nbd_content_enhancer.py"
+    },
+    {
+      "name": "build_optimized_cailianshe_extraction_prompt",
+      "category": "function",
+      "file": "scripts/data-processing/optimized_cailianshe_extraction_prompt.py"
+    },
+    {
+      "name": "build_completeness_assessment_prompt_v2",
+      "category": "function",
+      "file": "scripts/data-processing/optimized_cailianshe_extraction_prompt.py"
+    },
+    {
+      "name": "build_cailianshe_content_validator_prompt",
+      "category": "function",
+      "file": "scripts/data-processing/optimized_cailianshe_extraction_prompt.py"
+    },
+    {
+      "name": "OptimizedDeepSeekPrompts",
+      "category": "class",
+      "file": "scripts/data-processing/optimized_deepseek_prompts.py"
+    },
+    {
+      "name": "DeepSeekPromptBuilder",
+      "category": "class",
+      "file": "scripts/data-processing/optimized_deepseek_prompts.py"
+    },
+    {
+      "name": "OptimizedNBDCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/optimized_nbd_crawler.py"
+    },
+    {
+      "name": "parse_relative_time",
+      "category": "function",
+      "file": "scripts/data-processing/precise_36kr_newsflash_extractor.py"
+    },
+    {
+      "name": "PreciseNBDCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/precise_nbd_crawler.py"
+    },
+    {
+      "name": "Real36KrDataCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/real_36kr_crawler.py"
+    },
+    {
+      "name": "RealCailiansheDataCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/real_cailianshe_crawler_1.py"
+    },
+    {
+      "name": "RealCailiansheDataCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/real_cailianshe_crawler.py"
+    },
+    {
+      "name": "RealDataBreakthroughEngine",
+      "category": "class",
+      "file": "scripts/data-processing/real_data_breakthrough_implementation.py"
+    },
+    {
+      "name": "RealEmbodiedAICrawler",
+      "category": "class",
+      "file": "scripts/data-processing/real_embodied_ai_crawler.py"
+    },
+    {
+      "name": "RealNBDDataCrawler",
+      "category": "class",
+      "file": "scripts/data-processing/real_nbd_crawler.py"
+    },
+    {
+      "name": "UltimateBreakthroughBase",
+      "category": "class",
+      "file": "scripts/data-processing/ultimate_breakthrough_base.py"
+    },
+    {
+      "name": "UltimateWeiboBreakthrough",
+      "category": "class",
+      "file": "scripts/data-processing/ultimate_weibo_breakthrough.py"
+    },
+    {
+      "name": "UltimateXHSBreakthrough",
+      "category": "class",
+      "file": "scripts/data-processing/ultimate_xhs_breakthrough.py"
+    },
+    {
+      "name": "compute_heat",
+      "category": "function",
+      "file": "scripts/heat_aggregator.py"
+    },
+    {
+      "name": "aggregate_day",
+      "category": "function",
+      "file": "scripts/heat_aggregator.py"
+    },
+    {
+      "name": "aggregate_today",
+      "category": "function",
+      "file": "scripts/heat_aggregator.py"
+    },
+    {
+      "name": "backfill_heat",
+      "category": "function",
+      "file": "scripts/heat_aggregator.py"
+    },
+    {
+      "name": "DB_PATH",
+      "category": "config",
+      "file": "scripts/heat_aggregator.py"
+    },
+    {
+      "name": "TYPE_WEIGHTS",
+      "category": "config",
+      "file": "scripts/heat_aggregator.py"
+    },
+    {
+      "name": "ComprehensiveDataCleanup",
+      "category": "class",
+      "file": "scripts/maintenance/comprehensive_data_cleanup.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/maintenance/comprehensive_data_cleanup.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/maintenance/reorganize_docs.py"
+    },
+    {
+      "name": "create_documentation_index",
+      "category": "function",
+      "file": "scripts/maintenance/reorganize_docs.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/maintenance/reorganize_test_files.py"
+    },
+    {
+      "name": "setup_session_cleanup",
+      "category": "function",
+      "file": "scripts/maintenance/session_cleanup_patch.py"
+    },
+    {
+      "name": "UserAcceptanceTestRunner",
+      "category": "class",
+      "file": "scripts/runners/run_user_acceptance_tests.py"
+    },
+    {
+      "name": "setup_weibo_cookie",
+      "category": "function",
+      "file": "scripts/setup/setup_cookie.py"
+    },
+    {
+      "name": "run_quick_command",
+      "category": "function",
+      "file": "scripts/testing/quick_health_check.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/testing/quick_health_check.py"
+    },
+    {
+      "name": "run_test_suite",
+      "category": "function",
+      "file": "scripts/testing/run_comprehensive_tests.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/testing/run_comprehensive_tests.py"
+    },
+    {
+      "name": "interactive_cookie_update",
+      "category": "function",
+      "file": "scripts/utilities/interactive_cookie_update.py"
+    },
+    {
+      "name": "test_updated_cookie",
+      "category": "function",
+      "file": "scripts/utilities/interactive_cookie_update.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/utilities/interactive_cookie_update.py"
+    },
+    {
+      "name": "main",
+      "category": "function",
+      "file": "scripts/validation/test_multi_source_crawling.py"
+    },
+    {
+      "name": "show_latest_crawled_data",
+      "category": "function",
+      "file": "show_crawled_data.py"
+    },
+    {
+      "name": "show_database_stats",
+      "category": "function",
+      "file": "show_crawled_data.py"
+    },
+    {
+      "name": "show_full_content",
+      "category": "function",
+      "file": "show_full_nbd_content.py"
+    },
+    {
+      "name": "show_nbd_database_info",
+      "category": "function",
+      "file": "show_nbd_data.py"
+    },
+    {
+      "name": "show_latest_nbd_data",
+      "category": "function",
+      "file": "show_nbd_data.py"
+    },
+    {
+      "name": "show_nbd_statistics",
+      "category": "function",
+      "file": "show_nbd_data.py"
+    },
+    {
+      "name": "show_specific_article",
+      "category": "function",
+      "file": "show_specific_article.py"
+    },
+    {
+      "name": "AntiCrawlerAdapter",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/adapters.py"
+    },
+    {
+      "name": "WeiboAntiCrawlerAdapter",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/adapters.py"
+    },
+    {
+      "name": "XHSAntiCrawlerAdapter",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/adapters.py"
+    },
+    {
+      "name": "get_weibo_anti_crawler_adapter",
+      "category": "function",
+      "file": "src/intelligent_data_agent/anti_crawler/adapters.py"
+    },
+    {
+      "name": "get_xhs_anti_crawler_adapter",
+      "category": "function",
+      "file": "src/intelligent_data_agent/anti_crawler/adapters.py"
+    },
+    {
+      "name": "BrowserInstance",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/browser_pool.py"
+    },
+    {
+      "name": "BrowserPool",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/browser_pool.py"
+    },
+    {
+      "name": "BrowserFingerprint",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/config.py"
+    },
+    {
+      "name": "RetryConfig",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/config.py"
+    },
+    {
+      "name": "PlaywrightConfig",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/config.py"
+    },
+    {
+      "name": "AntiCrawlerConfig",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/config.py"
+    },
+    {
+      "name": "ConfigManager",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/config.py"
+    },
+    {
+      "name": "get_config_manager",
+      "category": "function",
+      "file": "src/intelligent_data_agent/anti_crawler/config.py"
+    },
+    {
+      "name": "get_config",
+      "category": "function",
+      "file": "src/intelligent_data_agent/anti_crawler/config.py"
+    },
+    {
+      "name": "CrawlOptions",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/engines.py"
+    },
+    {
+      "name": "CrawlResult",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/engines.py"
+    },
+    {
+      "name": "PlaywrightEngine",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/engines.py"
+    },
+    {
+      "name": "EngineSelector",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/engines.py"
+    },
+    {
+      "name": "get_engine_selector",
+      "category": "function",
+      "file": "src/intelligent_data_agent/anti_crawler/engines.py"
+    },
+    {
+      "name": "UserAgentPool",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/fingerprint.py"
+    },
+    {
+      "name": "DeviceProfilePool",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/fingerprint.py"
+    },
+    {
+      "name": "FingerprintManager",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/fingerprint.py"
+    },
+    {
+      "name": "get_fingerprint_manager",
+      "category": "function",
+      "file": "src/intelligent_data_agent/anti_crawler/fingerprint.py"
+    },
+    {
+      "name": "AntiCrawlerManager",
+      "category": "class",
+      "file": "src/intelligent_data_agent/anti_crawler/manager.py"
+    }
+  ]
+}
