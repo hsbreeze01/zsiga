@@ -1,0 +1,74 @@
+{
+  "session_id": "optimize-norm-alignment-52843d6a",
+  "change_name": "optimize-norm-alignment",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T18:19:45.522171",
+  "outcome": "success",
+  "started_at": "2026-05-20T18:18:30.849824",
+  "finished_at": "2026-05-20T18:19:45.509316",
+  "total_runtime_seconds": 74.4,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 30.4,
+      "fix_attempts": 0,
+      "llm_calls": 1,
+      "tool_calls": 3,
+      "prompt_tokens": 8739,
+      "completion_tokens": 106
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 16.8,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 5,
+      "prompt_tokens": 43958,
+      "completion_tokens": 162
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 4.4,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 18.2,
+      "fix_attempts": 0,
+      "llm_calls": 5,
+      "tool_calls": 9,
+      "prompt_tokens": 12957,
+      "completion_tokens": 421
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.6,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 11,
+    "total_tool_calls": 17,
+    "total_prompt_tokens": 65654,
+    "total_completion_tokens": 689
+  }
+}
