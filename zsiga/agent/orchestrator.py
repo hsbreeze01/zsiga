@@ -16,6 +16,7 @@ from ..memory.context import load_active_context, update_active_context, load_re
 from ..memory.learn import record_outcome, record_lesson
 from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
 from ..metrics.collector import record_change
+from ..metrics.intent_tracker import record_intent_decision, update_intent_outcome
 from ..memory.journal import export_session
 from ..transport import Transport, create_transport
 from .enricher import enrich, derive_explore_tasks
@@ -153,21 +154,39 @@ class ZsigaOrchestrator:
             f"  Verbalization: {intent.verbalization}"
         )
 
+        # Record intent decision for accuracy tracking
+        record_intent_decision(
+            change_name=change_name,
+            project=project_name,
+            predicted_intent=intent.intent_type.value,
+            confidence=intent.confidence,
+            classification_source="openspec_override",
+            verbalization=intent.verbalization,
+            reasoning=intent.reasoning,
+        )
+
         if route_path == "ask_user":
             print(f"  Intent unclear, asking user for clarification: {intent.verbalization}")
+            update_intent_outcome(change_name, "routed", True)
             return False
 
         if route_path == "dispatch_explore":
             print("  Dispatching explore sub-agent for research intent")
-            return await self._dispatch_explore(prop, change_dir, target_path, transport)
+            explore_ok = await self._dispatch_explore(prop, change_dir, target_path, transport)
+            update_intent_outcome(change_name, "success" if explore_ok else "failed", explore_ok)
+            return explore_ok
 
         if route_path == "dispatch_diagnoser":
             print("  Dispatching diagnoser sub-agent for investigation intent")
-            return await self._dispatch_diagnoser(prop, change_dir, target_path, transport)
+            diag_ok = await self._dispatch_diagnoser(prop, change_dir, target_path, transport)
+            update_intent_outcome(change_name, "success" if diag_ok else "failed", diag_ok)
+            return diag_ok
 
         if route_path == "dispatch_review":
             print("  Dispatching review sub-agent for evaluation intent")
-            return await self._dispatch_review(prop, change_dir, target_path, transport)
+            review_ok = await self._dispatch_review(prop, change_dir, target_path, transport)
+            update_intent_outcome(change_name, "success" if review_ok else "failed", review_ok)
+            return review_ok
 
         if route_path == "pipeline_fix":
             print("  Running shortened pipeline (IMPLEMENT → VERIFY) for fix intent")
@@ -175,6 +194,7 @@ class ZsigaOrchestrator:
         # IMPLEMENTATION and FIX intents proceed to pipeline
         if intent.intent_type not in (IntentType.IMPLEMENTATION, IntentType.FIX):
             print(f"  Skipping non-pipeline intent: {route_path}")
+            update_intent_outcome(change_name, "routed", True)
             return False
 
         rec = ChangeRecord(
@@ -192,6 +212,13 @@ class ZsigaOrchestrator:
         finally:
             record_change(rec)
             export_session(change_name)
+            # Update intent accuracy outcome based on pipeline result
+            if rec.outcome == Outcome.SUCCESS:
+                update_intent_outcome(change_name, "success", True)
+            elif rec.outcome == Outcome.REVERTED:
+                update_intent_outcome(change_name, "reverted", False)
+            else:
+                update_intent_outcome(change_name, "skipped", True)
 
     async def _run_phases(self, prop, rec, change_dir, target_path,
                           project_name, project_config, change_name,

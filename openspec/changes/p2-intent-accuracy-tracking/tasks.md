@@ -2,9 +2,9 @@
 
 ## Group 1: Intent Recording in Pipeline Orchestrator
 
-- [ ] 1.1 Add intent recording to `zsiga/pipeline/orchestrator.py` — import `record_intent_decision`, `update_intent_outcome`, `update_intent_reclassification` from `intent_tracker`; call `record_intent_decision()` after `classify()` in `_process_change()` with all required fields; call `update_intent_outcome()` in the `finally` block mapping `rec.outcome` to `is_correct`; add `update_intent_outcome()` calls in each sub-agent dispatch path (explore, diagnoser, review) and in the `ask_user` path
+- [x] 1.1 Add intent recording to `zsiga/pipeline/orchestrator.py` — import `record_intent_decision`, `update_intent_outcome`, `update_intent_reclassification` from `intent_tracker`; call `record_intent_decision()` after `classify()` in `_process_change()` with all required fields; call `update_intent_outcome()` in the `finally` block mapping `rec.outcome` to `is_correct`; add `update_intent_outcome()` calls in each sub-agent dispatch path (explore, diagnoser, review) and in the `ask_user` path
 
-- [ ] 1.2 Add intent recording to `zsiga/agent/orchestrator.py` — same pattern as 1.1 applied to the parallel orchestrator file
+- [x] 1.2 Add intent recording to `zsiga/agent/orchestrator.py` — same pattern as 1.1 applied to the parallel orchestrator file
 
 ## Group 2: Confidence Gate
 
