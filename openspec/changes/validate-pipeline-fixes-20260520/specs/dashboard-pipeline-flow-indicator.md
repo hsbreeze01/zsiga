@@ -1,48 +1,29 @@
-# Delta Spec: Dashboard Pipeline Flow Indicator
-
-## Context
-The dashboard page (`site/dashboard.html`) currently shows the project title but does not communicate the full pipeline process. Adding a pipeline flow indicator makes the 8-stage process visible and confirms the dashboard frontend is being updated alongside backend changes.
+# Spec: dashboard-pipeline-flow-indicator
 
 ## ADDED Requirements
 
-### Requirement: Pipeline flow text SHALL appear below the page title
+### Requirement: Dashboard page SHALL display a pipeline flow indicator below the title
 
-A single line of text SHALL be rendered immediately below the `<h1>` heading in `site/dashboard.html`, displaying the complete pipeline flow in order:
+The `site/dashboard.html` page SHALL render a single line of text immediately below the `<h1>` page title that displays the complete pipeline phase flow.
 
-`CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER`
+#### Scenario: Pipeline flow indicator text is visible on page load
 
-#### Scenario: Text is visible on page load
 - **Given** a user opens `site/dashboard.html` in a browser
 - **When** the page finishes loading
-- **Then** the pipeline flow text SHALL be visible directly below the main heading
-- **And** the text SHALL read exactly `CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER`
+- **Then** text reading `CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER` SHALL be visible directly below the main heading
+- **And** the text SHALL use arrow characters (`→`) to separate each phase name
+- **And** the phase names SHALL appear in the exact order listed above
 
-#### Scenario: Text style is subdued and non-intrusive
-- **Given** the pipeline flow text is rendered
-- **When** a user views the page
-- **Then** the text SHALL use a smaller font size than the `<h1>` heading
-- **And** the text color SHALL be a muted tone consistent with the existing dashboard palette (e.g., `#64748b` or `#94a3b8`)
-- **And** the text SHALL have appropriate spacing below the heading (at least `0.3rem`)
+#### Scenario: Pipeline flow indicator styling is consistent with page design
 
-### Requirement: Pipeline indicator MUST NOT break existing layout
+- **Given** the dashboard dark theme uses `#94a3b8` for secondary text and `#334155` for subtle borders
+- **When** the pipeline flow indicator is rendered
+- **Then** the text SHALL use a subdued color consistent with existing secondary text (e.g., `#64748b` or `#94a3b8`)
+- **And** the font size SHALL be noticeably smaller than the `<h1>` heading (e.g., `0.85rem` or similar)
+- **And** the indicator SHALL NOT disrupt the existing page layout or spacing of adjacent elements
 
-The new text element SHALL be inserted inline within the existing title area and MUST NOT alter the positioning, styling, or functionality of any other dashboard component.
+#### Scenario: Pipeline flow indicator is static HTML
 
-#### Scenario: Existing cards and sections remain unaffected
-- **Given** the pipeline flow text has been added
-- **When** the dashboard renders
-- **Then** all stat cards, milestone sections, and journal entries SHALL retain their original layout and styling
-
-#### Scenario: Mobile viewport compatibility
-- **Given** the dashboard is viewed on a viewport narrower than 600px
-- **When** the pipeline flow text is rendered
-- **Then** the text SHALL wrap naturally without causing horizontal overflow
-- **And** no other elements SHALL be displaced
-
-## MODIFIED Requirements
-
-_(None)_
-
-## REMOVED Requirements
-
-_(None)_
+- **Given** the pipeline flow indicator content is a fixed string
+- **Then** the indicator SHALL be implemented as static HTML (not dynamically fetched via JavaScript)
+- **And** the indicator SHALL NOT depend on any API call or external data source

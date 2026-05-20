@@ -1,36 +1,31 @@
-# Delta Spec: Validation Constraints
+# Spec: validation-constraints
 
 ## ADDED Requirements
 
-### Requirement: No Regressions in Test Suite
+### Requirement: All changes SHALL pass lint and test checks
 
-All existing tests MUST continue to pass after the changes to `_phase_table` and `dashboard.html`. No new lint violations SHALL be introduced.
+Every modified file MUST pass `ruff check` without errors and all existing tests in the project MUST continue to pass.
 
-#### Scenario: Full test suite passes
+#### Scenario: Ruff lint passes on modified Python files
 
-- **Given** the changes to `zsiga/metrics/dashboard.py` and `site/dashboard.html` are applied
-- **When** `pytest tests/test_dashboard_api.py` is executed
-- **Then** all tests SHALL pass with exit code 0
-
-#### Scenario: Lint compliance
-
-- **Given** the changes are applied
-- **When** `ruff check zsiga/metrics/dashboard.py` is executed
+- **Given** `zsiga/metrics/dashboard.py` (or the file containing `_phase_table`) has been modified
+- **When** `ruff check` is executed on the modified file
 - **Then** no errors or warnings SHALL be reported
 
-#### Scenario: Scope confinement
+#### Scenario: Existing test suite passes after changes
 
-- **Given** the diff of this change
-- **When** inspected
-- **Then** only `zsiga/metrics/dashboard.py` and `site/dashboard.html` SHALL appear in the diff
-- **And** no pipeline core logic files (daemon, phase engine, scheduler, orchestrator) SHALL be modified
-- **And** no `tests/` files SHALL be modified
-- **And** no `requirements.txt` or `pyproject.toml` changes SHALL be introduced
-- **And** no data acquisition or metrics computation logic outside `_phase_table` SHALL be modified
+- **Given** all modifications to `_phase_table` and `dashboard.html` have been applied
+- **When** `pytest` is executed on the full test suite
+- **Then** all previously passing tests SHALL continue to pass
+- **And** no new test failures SHALL be introduced
 
-#### Scenario: Phase enumeration unchanged
+### Requirement: Only permitted files SHALL be modified
 
-- **Given** the Phase enumeration file
-- **When** the diff is inspected
-- **Then** the Phase enumeration definition SHALL NOT be modified
-- **Note** If CLARIFY / ENRICH / OPTIMIZE are already present in the enum, no change is needed. If missing, this constraint MAY be relaxed per clarify.md "已知风险"
+The implementation MUST NOT modify any file outside the explicitly allowed set.
+
+#### Scenario: No unauthorized files are changed
+
+- **Given** the allowed modification targets are `zsiga/metrics/dashboard.py` (or the metrics module containing `_phase_table`) and `site/dashboard.html`
+- **When** the implementation diff is reviewed
+- **Then** no file outside the allowed set SHALL appear in the diff
+- **And** files under `venv2/`, `pyproject.toml`, `requirements.txt`, pipeline role modules (daemon, reviewer, verifier, implementer), and the `Phase` enum definition file SHALL NOT be modified

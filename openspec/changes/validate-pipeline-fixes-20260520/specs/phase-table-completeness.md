@@ -1,56 +1,39 @@
-# Delta Spec: Phase Table Completeness
-
-## Context
-The dashboard's Phase Performance table (`_phase_table` in `zsiga/metrics/dashboard.py`) currently only renders rows for phases that have recorded data. Recently-added phases (CLARIFY, ENRICH, OPTIMIZE) are invisible until they accumulate data, making it impossible to verify the pipeline covers all stages.
+# Spec: phase-table-completeness
 
 ## MODIFIED Requirements
 
-### Requirement: Phase Performance Table Shows All Enum Values
+### Requirement: Phase Performance table SHALL enumerate all Phase enum members
 
-`_phase_table` SHALL iterate over every member of the Phase enum and produce one table row for each, regardless of whether any metrics data exists for that phase.
+The `_phase_table` function in `zsiga/metrics/dashboard.py` (or equivalent metrics module) SHALL iterate over every member of the `Phase` enumeration and produce one table row per member, regardless of whether historical metric data exists for that phase.
 
-#### Scenario: Phase with recorded data
+#### Scenario: Phase with no recorded metrics appears as zero-count row
 
-- **Given** the Phase enum contains the value `IMPLEMENT`
-- **And** there are 3 completed IMPLEMENT phase records in the database
-- **When** `_phase_table` is called
-- **Then** the output row for `IMPLEMENT` SHALL display the correct count (3)
-- **And** average-duration and other numeric fields SHALL reflect actual recorded values
+- **Given** the `Phase` enumeration includes at least the members `CLARIFY`, `ENRICH`, `IMPLEMENT`, `REVIEW`, `VERIFY`, `OPTIMIZE`, `REFLECT`, `DELIVER`
+- **And** the metrics database contains zero records for the `CLARIFY` phase
+- **When** `_phase_table` is invoked
+- **Then** the returned table structure SHALL contain a row for `CLARIFY` with count/duration values of `0`
+- **And** no `Phase` enum member SHALL be omitted from the output
 
-#### Scenario: Phase with no recorded data
+#### Scenario: Phase with recorded metrics appears with correct data
 
-- **Given** the Phase enum contains the value `CLARIFY`
-- **And** there are 0 completed CLARIFY phase records in the database
-- **When** `_phase_table` is called
-- **Then** the output row for `CLARIFY` SHALL appear with `count=0`
-- **And** all other numeric fields (duration, average, etc.) SHALL display `0` or equivalent zero-sentinel
-- **And** no `KeyError` or other exception SHALL be raised
+- **Given** the metrics database contains 3 records for the `IMPLEMENT` phase
+- **When** `_phase_table` is invoked
+- **Then** the row for `IMPLEMENT` SHALL display count `3`
+- **And** all other phases SHALL still appear (with `0` if no data)
 
-#### Scenario: Completely empty metrics dict
+#### Scenario: Output ordering matches Phase enum definition order
 
-- **Given** the Phase enumeration contains all eight values
-- **And** the timing records dict is empty `{}`
-- **When** `_phase_table` is called
-- **Then** the rendered table SHALL contain one row per Phase value, each showing `count=0`
-- **And** no exception SHALL be raised
+- **Given** the `Phase` enumeration defines members in a specific order
+- **When** `_phase_table` is invoked
+- **Then** the rows in the returned table SHALL appear in the same order as the `Phase` enum definition
+- **And** this ordering MUST be stable across multiple invocations
 
-#### Scenario: Enum-driven ordering
+### Requirement: Zero-data phase rows MUST NOT be suppressed
 
-- **Given** the Phase enum defines values in a specific order
-- **When** `_phase_table` is called
-- **Then** rows SHALL appear in the same order as the Phase enum definition
+The function MUST NOT skip or filter out any phase that has no corresponding metric records. Every member of the `Phase` enum SHALL produce exactly one row.
 
-#### Scenario: Future extensibility
+#### Scenario: Newly added phase enum member is automatically included
 
-- **Given** a future change adds a new value to the Phase enumeration
-- **When** `_phase_table` is called
-- **Then** the new phase SHALL appear in the rendered table without any code change to `_phase_table` itself
-- **Note** This is a SHOULD constraint — the function SHOULD iterate the enum dynamically rather than hard-code phase names
-
-## ADDED Requirements
-
-_(None)_
-
-## REMOVED Requirements
-
-_(None)_
+- **Given** a new member is added to the `Phase` enumeration in the future
+- **When** `_phase_table` is invoked
+- **Then** the new member SHALL appear in the output without any code changes to `_phase_table` beyond the enum iteration logic

@@ -310,7 +310,7 @@ async def run_review_loop(
         system_prompt, user_prompt = _build_fix_prompt(
             issues, changed_files, target_path,
         )
-        fix_result = await agent.run(system_prompt, user_prompt, max_turns=fix_max_turns)
+        fix_result = await agent.run(system_prompt, user_prompt, max_turns=fix_max_turns, timeout_seconds=300)
         # Accumulate fix RunResult metrics
         if isinstance(fix_result, RunResult):
             total_llm_calls += fix_result.llm_calls
