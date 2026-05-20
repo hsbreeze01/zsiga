@@ -1,6 +1,6 @@
 {
   "project": "repo",
-  "extracted_at": "2026-05-19T19:02:01.784246",
+  "extracted_at": "2026-05-20T19:04:18.857882",
   "entries": [
     {
       "name": "ClusterInfo",
@@ -308,6 +308,46 @@
       "file": "tests/test_config_validation.py"
     },
     {
+      "name": "TestSmartSchedulingIdlePoll",
+      "category": "class",
+      "file": "tests/test_daemon_scheduling.py"
+    },
+    {
+      "name": "TestSmartSchedulingBusy",
+      "category": "class",
+      "file": "tests/test_daemon_scheduling.py"
+    },
+    {
+      "name": "TestSmartSchedulingFallback",
+      "category": "class",
+      "file": "tests/test_daemon_scheduling.py"
+    },
+    {
+      "name": "TestSmartSchedulingSafetyValve",
+      "category": "class",
+      "file": "tests/test_daemon_scheduling.py"
+    },
+    {
+      "name": "TestRunCycleReturnValue",
+      "category": "class",
+      "file": "tests/test_daemon_scheduling.py"
+    },
+    {
+      "name": "TestDaemonStateStatsIntegration",
+      "category": "class",
+      "file": "tests/test_daemon_scheduling.py"
+    },
+    {
+      "name": "TestWriteDaemonState",
+      "category": "class",
+      "file": "tests/test_daemon_state.py"
+    },
+    {
+      "name": "TestDaemonStateStats",
+      "category": "class",
+      "file": "tests/test_daemon_state.py"
+    },
+    {
       "name": "TestLoadArchivedProposals",
       "category": "class",
       "file": "tests/test_dedup.py"
@@ -353,6 +393,71 @@
       "file": "tests/test_dependency.py"
     },
     {
+      "name": "TestParseDependsOn",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestBuildDependencyGraph",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestConflictSeverity",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestTopologicalOrder",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestConflictReport",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestBuildGraphIntegration",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestChangeGraphConstructor",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestChangeGraphAddChange",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestChangeGraphCheckConflicts",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestChangeGraphExecutionOrder",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestDetectChangeConflicts",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestSuggestMergeOrder",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
+      "name": "TestWarnChangeConflicts",
+      "category": "class",
+      "file": "tests/test_dependency.py"
+    },
+    {
       "name": "TestDiagnoserImport",
       "category": "class",
       "file": "tests/test_diagnoser.py"
@@ -381,6 +486,26 @@
       "name": "TestFullDiagnoseCycle",
       "category": "class",
       "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestExtractGithubRepo",
+      "category": "class",
+      "file": "tests/test_github_issue.py"
+    },
+    {
+      "name": "TestCreateIssue",
+      "category": "class",
+      "file": "tests/test_github_issue.py"
+    },
+    {
+      "name": "TestGithubConfigParsing",
+      "category": "class",
+      "file": "tests/test_github_issue.py"
+    },
+    {
+      "name": "TestDeliverCommitMessage",
+      "category": "class",
+      "file": "tests/test_github_issue.py"
     },
     {
       "name": "TestGlossaryDataclass",
@@ -441,6 +566,16 @@
       "name": "TestHarnessRunnerRun",
       "category": "class",
       "file": "tests/test_harness_runner.py"
+    },
+    {
+      "name": "TestBuildPatternWarningsEmpty",
+      "category": "class",
+      "file": "tests/test_implementer_warnings.py"
+    },
+    {
+      "name": "TestBuildPatternWarningsFormatted",
+      "category": "class",
+      "file": "tests/test_implementer_warnings.py"
     },
     {
       "name": "TestClassifyResearch",
@@ -513,6 +648,41 @@
       "file": "tests/test_intent_router.py"
     },
     {
+      "name": "TestConstructionMarkers",
+      "category": "class",
+      "file": "tests/test_intent_router.py"
+    },
+    {
+      "name": "TestRecordIntentDecision",
+      "category": "class",
+      "file": "tests/test_intent_tracker.py"
+    },
+    {
+      "name": "TestUpdateIntentOutcome",
+      "category": "class",
+      "file": "tests/test_intent_tracker.py"
+    },
+    {
+      "name": "TestUpdateIntentReclassification",
+      "category": "class",
+      "file": "tests/test_intent_tracker.py"
+    },
+    {
+      "name": "TestComputeIntentAccuracy",
+      "category": "class",
+      "file": "tests/test_intent_tracker.py"
+    },
+    {
+      "name": "TestGetRollingAccuracy",
+      "category": "class",
+      "file": "tests/test_intent_tracker.py"
+    },
+    {
+      "name": "db_path",
+      "category": "function",
+      "file": "tests/test_intent_tracker.py"
+    },
+    {
       "name": "TestIntentRouter",
       "category": "class",
       "file": "tests/test_l4_capabilities.py"
@@ -531,6 +701,51 @@
       "name": "TestEscalation",
       "category": "class",
       "file": "tests/test_l4_capabilities.py"
+    },
+    {
+      "name": "TestBasicKeywordMatch",
+      "category": "class",
+      "file": "tests/test_learnings_search.py"
+    },
+    {
+      "name": "TestNoMatch",
+      "category": "class",
+      "file": "tests/test_learnings_search.py"
+    },
+    {
+      "name": "TestMissingFile",
+      "category": "class",
+      "file": "tests/test_learnings_search.py"
+    },
+    {
+      "name": "TestPatternKeyFilter",
+      "category": "class",
+      "file": "tests/test_learnings_search.py"
+    },
+    {
+      "name": "TestRelevanceRanking",
+      "category": "class",
+      "file": "tests/test_learnings_search.py"
+    },
+    {
+      "name": "TestCaseInsensitive",
+      "category": "class",
+      "file": "tests/test_learnings_search.py"
+    },
+    {
+      "name": "TestResultFormat",
+      "category": "class",
+      "file": "tests/test_learnings_search.py"
+    },
+    {
+      "name": "learnings_file",
+      "category": "function",
+      "file": "tests/test_learnings_search.py"
+    },
+    {
+      "name": "SAMPLE_ENTRIES",
+      "category": "config",
+      "file": "tests/test_learnings_search.py"
     },
     {
       "name": "TestTextFormatter",
@@ -618,6 +833,116 @@
       "file": "tests/test_phase_duration.py"
     },
     {
+      "name": "TestWriteReadRoundTrip",
+      "category": "class",
+      "file": "tests/test_phase_wal.py"
+    },
+    {
+      "name": "TestDeleteWAL",
+      "category": "class",
+      "file": "tests/test_phase_wal.py"
+    },
+    {
+      "name": "TestReadNonExistent",
+      "category": "class",
+      "file": "tests/test_phase_wal.py"
+    },
+    {
+      "name": "TestPhaseBoundaries",
+      "category": "class",
+      "file": "tests/test_phase_wal.py"
+    },
+    {
+      "name": "TestFailureTracking",
+      "category": "class",
+      "file": "tests/test_recovery.py"
+    },
+    {
+      "name": "TestRollback",
+      "category": "class",
+      "file": "tests/test_recovery.py"
+    },
+    {
+      "name": "TestRootCauseAnalysis",
+      "category": "class",
+      "file": "tests/test_recovery.py"
+    },
+    {
+      "name": "TestStrategyRotation",
+      "category": "class",
+      "file": "tests/test_recovery.py"
+    },
+    {
+      "name": "TestDiagnosticReport",
+      "category": "class",
+      "file": "tests/test_recovery.py"
+    },
+    {
+      "name": "TestBackwardCompatibility",
+      "category": "class",
+      "file": "tests/test_recovery.py"
+    },
+    {
+      "name": "TestSignal",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestScanRecurringFailures",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestScanMetricDegradation",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestScanRecurringRootCauses",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestShouldProposeDedup",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestShouldProposeRateLimit",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestShouldProposeExternal",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestGenerateProposal",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestRun",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "TestErrorResilience",
+      "category": "class",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "reflector",
+      "category": "function",
+      "file": "tests/test_reflector.py"
+    },
+    {
+      "name": "base",
+      "category": "function",
+      "file": "tests/test_reflector.py"
+    },
+    {
       "name": "test_first_attempt_success",
       "category": "function",
       "file": "tests/test_retry_backoff.py"
@@ -683,6 +1008,26 @@
       "file": "tests/test_retry_backoff.py"
     },
     {
+      "name": "TestParseReviewVerdict",
+      "category": "class",
+      "file": "tests/test_reviewer.py"
+    },
+    {
+      "name": "TestHasCritical",
+      "category": "class",
+      "file": "tests/test_reviewer.py"
+    },
+    {
+      "name": "TestBuildFixPrompt",
+      "category": "class",
+      "file": "tests/test_reviewer.py"
+    },
+    {
+      "name": "TestReviewLoopResult",
+      "category": "class",
+      "file": "tests/test_reviewer.py"
+    },
+    {
       "name": "test_role_enum_values",
       "category": "function",
       "file": "tests/test_roles.py"
@@ -723,6 +1068,56 @@
       "file": "tests/test_roles.py"
     },
     {
+      "name": "TestRecordSelfAssessment",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "TestQuerySelfAssessmentStats",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "TestQueryRecentRatings",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "TestSelfRatingAlgorithm",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "TestCapabilityBoundary",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "TestPhaseReflect",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "TestReflectMdContent",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "TestPhaseReflectIntegration",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "TestPhaseReflectWithTransport",
+      "category": "class",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
+      "name": "db_path",
+      "category": "function",
+      "file": "tests/test_self_assessment.py"
+    },
+    {
       "name": "TestExportSession",
       "category": "class",
       "file": "tests/test_session_export.py"
@@ -761,6 +1156,21 @@
       "name": "TestEvolveSkills",
       "category": "class",
       "file": "tests/test_skill_evolver.py"
+    },
+    {
+      "name": "TestClassifyFailure",
+      "category": "class",
+      "file": "tests/test_structured_failure.py"
+    },
+    {
+      "name": "TestRecordOutcome",
+      "category": "class",
+      "file": "tests/test_structured_failure.py"
+    },
+    {
+      "name": "TestRecordSuccess",
+      "category": "class",
+      "file": "tests/test_structured_failure.py"
     },
     {
       "name": "TestOutcomeIcon",
@@ -854,6 +1264,16 @@
     },
     {
       "name": "TestSnapshot",
+      "category": "class",
+      "file": "tests/test_token_budget.py"
+    },
+    {
+      "name": "TestDefaultBudgetProfiles",
+      "category": "class",
+      "file": "tests/test_token_budget.py"
+    },
+    {
+      "name": "TestSelectBudgetProfile",
       "category": "class",
       "file": "tests/test_token_budget.py"
     },
@@ -978,6 +1398,11 @@
       "file": "zsiga/agent/lsp_tools.py"
     },
     {
+      "name": "ZsigaOrchestrator",
+      "category": "class",
+      "file": "zsiga/agent/orchestrator.py"
+    },
+    {
       "name": "RecoveryAction",
       "category": "class",
       "file": "zsiga/agent/recovery.py"
@@ -993,13 +1418,13 @@
       "file": "zsiga/agent/recovery.py"
     },
     {
-      "name": "parse_review_verdict",
-      "category": "function",
+      "name": "ReviewLoopResult",
+      "category": "class",
       "file": "zsiga/agent/reviewer.py"
     },
     {
-      "name": "REVIEW_SYSTEM",
-      "category": "config",
+      "name": "parse_review_verdict",
+      "category": "function",
       "file": "zsiga/agent/reviewer.py"
     },
     {
@@ -1093,9 +1518,24 @@
       "file": "zsiga/agent/token_budget.py"
     },
     {
+      "name": "select_budget_profile",
+      "category": "function",
+      "file": "zsiga/agent/token_budget.py"
+    },
+    {
       "name": "register_tools",
       "category": "function",
       "file": "zsiga/agent/tools.py"
+    },
+    {
+      "name": "ValueTracker",
+      "category": "class",
+      "file": "zsiga/agent/value_signal.py"
+    },
+    {
+      "name": "classify_turn",
+      "category": "function",
+      "file": "zsiga/agent/value_signal.py"
     },
     {
       "name": "compare_configs",
@@ -1154,6 +1594,11 @@
     },
     {
       "name": "SafetyConfig",
+      "category": "class",
+      "file": "zsiga/config.py"
+    },
+    {
+      "name": "GithubConfig",
       "category": "class",
       "file": "zsiga/config.py"
     },
@@ -1254,6 +1699,31 @@
     },
     {
       "name": "checkout",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "branch_exists",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "current_branch",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "merge_branch",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "delete_branch",
+      "category": "function",
+      "file": "zsiga/git_ops.py"
+    },
+    {
+      "name": "pull",
       "category": "function",
       "file": "zsiga/git_ops.py"
     },
@@ -1393,6 +1863,11 @@
       "file": "zsiga/harness/__init__.py"
     },
     {
+      "name": "run_behavioral_tests",
+      "category": "function",
+      "file": "zsiga/harness/__init__.py"
+    },
+    {
       "name": "run_regression",
       "category": "function",
       "file": "zsiga/harness/__init__.py"
@@ -1446,6 +1921,16 @@
       "name": "HarnessRunner",
       "category": "class",
       "file": "zsiga/harness/runner.py"
+    },
+    {
+      "name": "Signal",
+      "category": "class",
+      "file": "zsiga/intake/reflector.py"
+    },
+    {
+      "name": "Reflector",
+      "category": "class",
+      "file": "zsiga/intake/reflector.py"
     },
     {
       "name": "DirectoryScanner",
@@ -1558,6 +2043,16 @@
       "file": "zsiga/memory/learn.py"
     },
     {
+      "name": "record_success",
+      "category": "function",
+      "file": "zsiga/memory/learn.py"
+    },
+    {
+      "name": "search_learnings",
+      "category": "function",
+      "file": "zsiga/memory/learn.py"
+    },
+    {
       "name": "Pattern",
       "category": "class",
       "file": "zsiga/memory/pattern_miner.py"
@@ -1658,6 +2153,46 @@
       "file": "zsiga/metrics/db.py"
     },
     {
+      "name": "record_self_assessment",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "query_self_assessment_stats",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "query_recent_ratings",
+      "category": "function",
+      "file": "zsiga/metrics/db.py"
+    },
+    {
+      "name": "record_intent_decision",
+      "category": "function",
+      "file": "zsiga/metrics/intent_tracker.py"
+    },
+    {
+      "name": "update_intent_outcome",
+      "category": "function",
+      "file": "zsiga/metrics/intent_tracker.py"
+    },
+    {
+      "name": "update_intent_reclassification",
+      "category": "function",
+      "file": "zsiga/metrics/intent_tracker.py"
+    },
+    {
+      "name": "compute_intent_accuracy",
+      "category": "function",
+      "file": "zsiga/metrics/intent_tracker.py"
+    },
+    {
+      "name": "get_rolling_accuracy",
+      "category": "function",
+      "file": "zsiga/metrics/intent_tracker.py"
+    },
+    {
       "name": "render_timeline",
       "category": "function",
       "file": "zsiga/metrics/timeline.py"
@@ -1718,6 +2253,11 @@
       "file": "zsiga/pipeline/dedup.py"
     },
     {
+      "name": "CycleError",
+      "category": "class",
+      "file": "zsiga/pipeline/dependency.py"
+    },
+    {
       "name": "ChangeInfo",
       "category": "class",
       "file": "zsiga/pipeline/dependency.py"
@@ -1730,6 +2270,26 @@
     {
       "name": "ChangeConflictDetector",
       "category": "class",
+      "file": "zsiga/pipeline/dependency.py"
+    },
+    {
+      "name": "ConflictEdge",
+      "category": "class",
+      "file": "zsiga/pipeline/dependency.py"
+    },
+    {
+      "name": "DependencyGraph",
+      "category": "class",
+      "file": "zsiga/pipeline/dependency.py"
+    },
+    {
+      "name": "ChangeGraph",
+      "category": "class",
+      "file": "zsiga/pipeline/dependency.py"
+    },
+    {
+      "name": "build_dependency_graph",
+      "category": "function",
       "file": "zsiga/pipeline/dependency.py"
     },
     {
@@ -1763,9 +2323,29 @@
       "file": "zsiga/pipeline/enricher.py"
     },
     {
-      "name": "ENRICHER_SYSTEM",
+      "name": "estimate_token_budget",
+      "category": "function",
+      "file": "zsiga/pipeline/enricher.py"
+    },
+    {
+      "name": "CLARIFIER_SYSTEM",
       "category": "config",
       "file": "zsiga/pipeline/enricher.py"
+    },
+    {
+      "name": "MANDATORY_SECTIONS",
+      "category": "config",
+      "file": "zsiga/pipeline/enricher.py"
+    },
+    {
+      "name": "extract_github_repo",
+      "category": "function",
+      "file": "zsiga/pipeline/github_issue.py"
+    },
+    {
+      "name": "create_issue",
+      "category": "function",
+      "file": "zsiga/pipeline/github_issue.py"
     },
     {
       "name": "GlossaryEntry",
@@ -1798,6 +2378,16 @@
       "file": "zsiga/pipeline/orchestrator.py"
     },
     {
+      "name": "PhaseWAL",
+      "category": "class",
+      "file": "zsiga/pipeline/phase_wal.py"
+    },
+    {
+      "name": "PHASE_STATE_FILENAME",
+      "category": "config",
+      "file": "zsiga/pipeline/phase_wal.py"
+    },
+    {
       "name": "build_project_context",
       "category": "function",
       "file": "zsiga/pipeline/project_context.py"
@@ -1811,6 +2401,11 @@
       "name": "MAX_CONTEXT_CHARS",
       "category": "config",
       "file": "zsiga/pipeline/project_context.py"
+    },
+    {
+      "name": "ConflictResult",
+      "category": "class",
+      "file": "zsiga/pipeline/utils.py"
     },
     {
       "name": "read_file",
@@ -1849,6 +2444,21 @@
     },
     {
       "name": "retry_sync",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "detect_change_conflicts",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "suggest_merge_order",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "warn_change_conflicts",
       "category": "function",
       "file": "zsiga/pipeline/utils.py"
     },
