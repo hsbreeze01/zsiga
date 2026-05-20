@@ -1,0 +1,74 @@
+{
+  "session_id": "proposal-issue-commit-linkage-5dbd87d4",
+  "change_name": "proposal-issue-commit-linkage",
+  "project": "zsiga",
+  "exported_at": "2026-05-20T15:09:10.945744",
+  "outcome": "success",
+  "started_at": "2026-05-20T14:58:23.842228",
+  "finished_at": "2026-05-20T15:09:10.935950",
+  "total_runtime_seconds": 599.3,
+  "phases": [
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 173.9,
+      "fix_attempts": 0,
+      "llm_calls": 10,
+      "tool_calls": 18,
+      "prompt_tokens": 265440,
+      "completion_tokens": 4534
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 228.3,
+      "fix_attempts": 1,
+      "llm_calls": 21,
+      "tool_calls": 22,
+      "prompt_tokens": 602599,
+      "completion_tokens": 4996
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 94.2,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    {
+      "phase": "verify",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 98.2,
+      "fix_attempts": 0,
+      "llm_calls": 12,
+      "tool_calls": 23,
+      "prompt_tokens": 129998,
+      "completion_tokens": 1847
+    },
+    {
+      "phase": "deliver",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 4.7,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 43,
+    "total_tool_calls": 63,
+    "total_prompt_tokens": 998037,
+    "total_completion_tokens": 11377
+  }
+}

@@ -76,10 +76,10 @@ intake:
 
 pipeline:
   max_changes_per_cycle: 10
-  enrich_max_turns: 35
-  enrich_timeout: 1200
-  impl_max_turns: 30
-  impl_timeout_minutes: 20
+  enrich_max_turns: 50
+  enrich_timeout: 2400
+  impl_max_turns: 60
+  impl_timeout_minutes: 40
   fix_attempts: 10
   eval_fix_attempts: 3
   cycle_interval_hours: 8

@@ -58,7 +58,7 @@ class TokenBudget:
         per_turn_limit: int = 8192,
         compaction_threshold: int = 60000,
         compaction_ratio: float = 0.8,
-        stale_limit: int = 5,
+        stale_limit: int = 10,
         budget_extend_factor: float = 1.5,
     ):
         self.total_budget = total_budget
