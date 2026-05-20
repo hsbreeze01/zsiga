@@ -2,13 +2,13 @@
 
 ## Group 1: Data Layer
 
-- [ ] **1.1** Add `self_assessment` table and accessor functions in `metrics/db.py`
+- [x] **1.1** Add `self_assessment` table and accessor functions in `metrics/db.py`
   - Add `self_assessment` table to `_SCHEMA` with columns: id, change_name, task_type, predicted_tokens, actual_tokens, predicted_steps, actual_steps, fix_attempts, outcome, self_rating, strengths, weaknesses, lessons, created_at
   - Add `record_self_assessment(row: dict, db_path=None)` function
   - Add `query_self_assessment_stats(task_type: str, limit: int = 10, db_path=None) -> dict` function returning `{avg_tokens, avg_steps, success_rate, count}` or `{count: 0}` when no data
   - Add `query_recent_ratings(task_type: str, limit: int = 3, db_path=None) -> list[str]` function for boundary detection
 
-- [ ] **1.2** Add `REFLECT = "reflect"` to `Phase` enum in `metrics/types.py`
+- [x] **1.2** Add `REFLECT = "reflect"` to `Phase` enum in `metrics/types.py`
   - Extend the existing `Phase` enum with the new value so PhaseRecord can represent the REFLECT phase
 
 ## Group 2: Orchestrator Integration

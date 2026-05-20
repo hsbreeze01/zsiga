@@ -94,6 +94,26 @@ CREATE TABLE IF NOT EXISTS intent_accuracy (
 CREATE INDEX IF NOT EXISTS idx_intent_change ON intent_accuracy(change_name);
 CREATE INDEX IF NOT EXISTS idx_intent_predicted ON intent_accuracy(predicted_intent);
 CREATE INDEX IF NOT EXISTS idx_intent_source ON intent_accuracy(classification_source);
+
+CREATE TABLE IF NOT EXISTS self_assessment (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    change_name       TEXT NOT NULL,
+    task_type         TEXT NOT NULL,
+    predicted_tokens  INTEGER DEFAULT 0,
+    actual_tokens     INTEGER DEFAULT 0,
+    predicted_steps   INTEGER DEFAULT 0,
+    actual_steps      INTEGER DEFAULT 0,
+    fix_attempts      INTEGER DEFAULT 0,
+    outcome           TEXT NOT NULL,
+    self_rating       TEXT NOT NULL,
+    strengths         TEXT DEFAULT '[]',
+    weaknesses        TEXT DEFAULT '[]',
+    lessons           TEXT DEFAULT '[]',
+    created_at        TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_sa_change ON self_assessment(change_name);
+CREATE INDEX IF NOT EXISTS idx_sa_task_type ON self_assessment(task_type);
 """
 
 
@@ -395,5 +415,88 @@ def load_level_snapshot(level_tag: str, db_path: Optional[Path] = None) -> Optio
             data["_level_achieved_at"] = row["snapshot_time"]
             return data
         return None
+    finally:
+        conn.close()
+
+
+# ── Self-Assessment ──────────────────────────────────────────
+
+def record_self_assessment(row: dict, db_path: Optional[Path] = None):
+    """Insert a self-assessment row. row keys match self_assessment columns."""
+    conn = _get_conn(db_path)
+    try:
+        conn.execute(
+            """INSERT INTO self_assessment
+               (change_name, task_type, predicted_tokens, actual_tokens,
+                predicted_steps, actual_steps, fix_attempts, outcome,
+                self_rating, strengths, weaknesses, lessons)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                row["change_name"],
+                row["task_type"],
+                row.get("predicted_tokens", 0),
+                row.get("actual_tokens", 0),
+                row.get("predicted_steps", 0),
+                row.get("actual_steps", 0),
+                row.get("fix_attempts", 0),
+                row["outcome"],
+                row["self_rating"],
+                json.dumps(row.get("strengths", []), ensure_ascii=False),
+                json.dumps(row.get("weaknesses", []), ensure_ascii=False),
+                json.dumps(row.get("lessons", []), ensure_ascii=False),
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def query_self_assessment_stats(task_type: str, limit: int = 10,
+                                db_path: Optional[Path] = None) -> dict:
+    """Return aggregated stats for the last N entries of a task type.
+
+    Returns ``{avg_tokens, avg_steps, success_rate, count}`` or
+    ``{count: 0}`` when no matching rows exist.
+    """
+    conn = _get_conn(db_path)
+    try:
+        rows = conn.execute(
+            """SELECT actual_tokens, actual_steps, outcome
+               FROM self_assessment
+               WHERE task_type = ?
+               ORDER BY created_at DESC
+               LIMIT ?""",
+            (task_type, limit),
+        ).fetchall()
+        if not rows:
+            return {"count": 0}
+        total_tokens = sum(r["actual_tokens"] for r in rows)
+        total_steps = sum(r["actual_steps"] for r in rows)
+        success_count = sum(1 for r in rows if r["outcome"] == "success")
+        n = len(rows)
+        return {
+            "avg_tokens": total_tokens / n,
+            "avg_steps": total_steps / n,
+            "success_rate": success_count / n,
+            "count": n,
+        }
+    finally:
+        conn.close()
+
+
+def query_recent_ratings(task_type: str, limit: int = 3,
+                         db_path: Optional[Path] = None) -> list[str]:
+    """Return the most recent self_rating values for a task type."""
+    conn = _get_conn(db_path)
+    try:
+        rows = conn.execute(
+            """SELECT self_rating
+               FROM self_assessment
+               WHERE task_type = ?
+               ORDER BY created_at DESC
+               LIMIT ?""",
+            (task_type, limit),
+        ).fetchall()
+        return [r["self_rating"] for r in rows]
     finally:
         conn.close()

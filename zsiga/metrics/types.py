@@ -7,6 +7,7 @@ class Phase(str, Enum):
     IMPLEMENT = "implement"
     REVIEW = "review"
     VERIFY = "verify"
+    REFLECT = "reflect"
     DELIVER = "deliver"
 
 
