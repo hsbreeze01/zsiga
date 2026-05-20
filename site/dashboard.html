@@ -502,6 +502,7 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="hero-info">
     <h1>zsiga <span>🚀 Level 5: Autonomous Engineer · 超电磁开发智能体</span></h1>
+    <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.5rem">CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER</div>
     <span class="state-badge working">⚡ Working</span>
   </div>
 </div>
@@ -512,12 +513,12 @@ td { border-top: 1px solid #334155; }
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">174</div>
+    <div class="value">176</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">91.4%</div>
-    <div class="meta">159 hit / 15 miss</div>
+    <div class="value good">90.9%</div>
+    <div class="meta">160 hit / 16 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -530,11 +531,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">78.6%</div>
+    <div class="value warn">78.8%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value warn">50.0%</div>
+    <div class="value bad">49.6%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -575,44 +576,74 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>96</td>
+  <td>98</td>
   <td class="good">100.0%</td>
   <td>0.3</td>
-  <td>130.8s</td>
+  <td>129.3s</td>
   <td>0</td>
-  <td>766</td>
-  <td>1075</td>
-  <td>19.09M</td>
+  <td>781</td>
+  <td>1090</td>
+  <td>19.26M</td>
+</tr><tr>
+  <td>clarify</td>
+  <td>0</td>
+  <td class="bad">0%</td>
+  <td>—</td>
+  <td>—s</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
 </tr><tr>
   <td>implement</td>
-  <td>145</td>
+  <td>146</td>
   <td class="good">94.5%</td>
   <td>0.6</td>
-  <td>186.5s</td>
+  <td>185.6s</td>
   <td>100</td>
-  <td>2103</td>
-  <td>2430</td>
-  <td>58.95M</td>
+  <td>2114</td>
+  <td>2442</td>
+  <td>59.08M</td>
 </tr><tr>
   <td>review</td>
-  <td>41</td>
+  <td>42</td>
   <td class="bad">2.4%</td>
   <td>0.0</td>
-  <td>98.9s</td>
+  <td>106.1s</td>
+  <td>2</td>
+  <td>10</td>
+  <td>15</td>
+  <td>85.5K</td>
+</tr><tr>
+  <td>optimize</td>
   <td>0</td>
-  <td>1</td>
+  <td class="bad">0%</td>
+  <td>—</td>
+  <td>—s</td>
   <td>0</td>
-  <td>10.7K</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
 </tr><tr>
   <td>verify</td>
-  <td>126</td>
-  <td class="warn">50.0%</td>
+  <td>127</td>
+  <td class="bad">49.6%</td>
   <td>0.1</td>
-  <td>63.0s</td>
-  <td>22</td>
-  <td>863</td>
-  <td>1048</td>
-  <td>9.54M</td>
+  <td>62.8s</td>
+  <td>25</td>
+  <td>865</td>
+  <td>1049</td>
+  <td>9.55M</td>
+</tr><tr>
+  <td>reflect</td>
+  <td>0</td>
+  <td class="bad">0%</td>
+  <td>—</td>
+  <td>—s</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
+  <td>0</td>
 </tr><tr>
   <td>deliver</td>
   <td>121</td>
@@ -628,7 +659,8 @@ td { border-top: 1px solid #334155; }
 
 <div class="section">
   <h2>🔍 Failure Diagnosis</h2>
-  <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>dashboard-proposal-queue-mobile</strong> · zsiga · verify · 22.1min · 2026-05-21 00:13</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+  <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>validate-pipeline-fixes-20260520</strong> · zsiga · verify · 17.2min · 2026-05-21 00:52</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>dashboard-proposal-queue-mobile</strong> · zsiga · verify · 22.1min · 2026-05-21 00:13</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>p0-crash-recovery</strong> · zsiga · verify · 22.9min · 2026-05-20 13:38</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-compass-kline-table</strong> · zsiga · verify · 18.3min · 2026-05-20 11:53</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-scanner-case-insensitive</strong> · zsiga · verify · 15.8min · 2026-05-20 08:07</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
@@ -640,11 +672,6 @@ td { border-top: 1px solid #334155; }
 ============================= test session starts ==============================
 platform linux -- Python 3.12.0, pytest-9.0.2, pluggy-1.6.0
 rootdir: /home/ecs-assist-user/</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>crawler-domain-strategy</strong> · dataagent · implement · 53.3min · 2026-05-09 09:55</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at implement: lint:
-E701 Multiple statements on one line (colon)
-   --&gt; src/intelligent_data_agent/tasks/multi_source_crawl.py:201:35
-    |
-199 |             matched = _match_keywords(it.title,</div></details>
 
 </div>
 
@@ -654,27 +681,27 @@ E701 Multiple statements on one line (colon)
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">87.61M</div>
-      <div class="meta">86.55M prompt + 1.05M completion</div>
+      <div class="value">88.03M</div>
+      <div class="meta">86.96M prompt + 1.07M completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">503.5K</div>
+      <div class="value">500.1K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">3,735</div>
+      <div class="value">3,776</div>
       <div class="meta">avg 21.5 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">4,554</div>
-      <div class="meta">avg 26.2 per change</div>
+      <div class="value">4,599</div>
+      <div class="meta">avg 26.1 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">14.7h</div>
-      <div class="meta">52,748s total</div>
+      <div class="value">14.8h</div>
+      <div class="meta">53,423s total</div>
     </div>
   </div>
 </div>
@@ -872,12 +899,12 @@ E701 Multiple statements on one line (colon)
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">159/100</span>
+  <span style="color:#94a3b8;font-size:0.8rem">160/100</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">91.4/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">90.9/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1158,12 +1185,12 @@ E701 Multiple statements on one line (colon)
     <li>dashboard-proposal-queue-mobile</li>
 <li>validate-pipeline-fixes-20260520</li>
 <li>dashboard-proposal-queue-mobile</li>
-<li>validate-pipeline-fixes-20260520</li>
 <li>dashboard-proposal-queue-mobile</li>
+<li>validate-pipeline-fixes-20260520</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-21T00:40:29.225050</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-21T01:09:19.556309</div>
 <script>
 (function() {
   var REFRESH_INTERVAL = 600; // seconds

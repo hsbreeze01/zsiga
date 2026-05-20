@@ -1,41 +1,48 @@
 # Delta Spec: Dashboard Pipeline Flow Indicator
 
+## Context
+The dashboard page (`site/dashboard.html`) currently shows the project title but does not communicate the full pipeline process. Adding a pipeline flow indicator makes the 8-stage process visible and confirms the dashboard frontend is being updated alongside backend changes.
+
 ## ADDED Requirements
 
-### Requirement: Pipeline Flow Indicator Line
+### Requirement: Pipeline flow text SHALL appear below the page title
 
-The dashboard HTML page (`site/dashboard.html`) SHALL display a single line of descriptive text immediately below the main heading (`<h1>`). This line MUST show the full pipeline stage sequence in order:
+A single line of text SHALL be rendered immediately below the `<h1>` heading in `site/dashboard.html`, displaying the complete pipeline flow in order:
 
-```
-CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER
-```
+`CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER`
 
-#### Scenario: Indicator visible on page load
-
+#### Scenario: Text is visible on page load
 - **Given** a user opens `site/dashboard.html` in a browser
 - **When** the page finishes loading
-- **Then** a line of text SHALL appear directly below the `<h1>` heading
-- **And** the text SHALL read `CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER`
-- **And** the text SHALL use a subdued (gray) color consistent with existing auxiliary labels (e.g. `#64748b` or `#94a3b8`)
-- **And** the text font size SHALL be smaller than the heading (`<h1>`)
+- **Then** the pipeline flow text SHALL be visible directly below the main heading
+- **And** the text SHALL read exactly `CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER`
 
-#### Scenario: Layout preservation
+#### Scenario: Text style is subdued and non-intrusive
+- **Given** the pipeline flow text is rendered
+- **When** a user views the page
+- **Then** the text SHALL use a smaller font size than the `<h1>` heading
+- **And** the text color SHALL be a muted tone consistent with the existing dashboard palette (e.g., `#64748b` or `#94a3b8`)
+- **And** the text SHALL have appropriate spacing below the heading (at least `0.3rem`)
 
-- **Given** the existing dashboard layout before this change
-- **When** the indicator line is added
-- **Then** no existing UI elements SHALL be displaced, hidden, or resized
-- **And** the existing card grid, tables, milestone sections, and journal entries SHALL render identically
+### Requirement: Pipeline indicator MUST NOT break existing layout
 
-#### Scenario: Stage sequence ordering
+The new text element SHALL be inserted inline within the existing title area and MUST NOT alter the positioning, styling, or functionality of any other dashboard component.
 
-- **Given** the pipeline flow indicator text
-- **When** rendered
-- **Then** the stages SHALL appear in this exact left-to-right order: CLARIFY, ENRICH, IMPLEMENT, REVIEW, VERIFY, OPTIMIZE, REFLECT, DELIVER
-- **And** each adjacent pair SHALL be separated by the `→` character
+#### Scenario: Existing cards and sections remain unaffected
+- **Given** the pipeline flow text has been added
+- **When** the dashboard renders
+- **Then** all stat cards, milestone sections, and journal entries SHALL retain their original layout and styling
 
-#### Scenario: Static content only
+#### Scenario: Mobile viewport compatibility
+- **Given** the dashboard is viewed on a viewport narrower than 600px
+- **When** the pipeline flow text is rendered
+- **Then** the text SHALL wrap naturally without causing horizontal overflow
+- **And** no other elements SHALL be displaced
 
-- **Given** the pipeline flow indicator text
-- **When** the HTML source is inspected
-- **Then** the text SHALL be a static string (no JavaScript or dynamic template required)
-- **Note** This means future pipeline stage name changes will require manual HTML update, which is an accepted trade-off per the clarify boundary
+## MODIFIED Requirements
+
+_(None)_
+
+## REMOVED Requirements
+
+_(None)_
