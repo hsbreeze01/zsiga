@@ -507,18 +507,18 @@ td { border-top: 1px solid #334155; }
   </div>
 </div>
 
-<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">1452682</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-21 14:58:02</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">1</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-21 14:58:02</div></div></div>
+<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">1452682</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-21 14:58:02</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">2</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-21 14:58:11</div></div></div>
 
 
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">179</div>
+    <div class="value">180</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value good">90.5%</div>
-    <div class="meta">162 hit / 17 miss</div>
+    <div class="value good">90.0%</div>
+    <div class="meta">162 hit / 18 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -531,11 +531,11 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value warn">78.9%</div>
+    <div class="value warn">79.1%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value bad">49.2%</div>
+    <div class="value bad">48.8%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -575,14 +575,14 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>101</td>
+  <td>102</td>
   <td class="good">100.0%</td>
   <td>0.2</td>
-  <td>127.8s</td>
+  <td>133.3s</td>
   <td>0</td>
-  <td>798</td>
-  <td>1108</td>
-  <td>19.65M</td>
+  <td>831</td>
+  <td>1147</td>
+  <td>21.51M</td>
 </tr><tr>
   <td>clarify</td>
   <td>0</td>
@@ -595,24 +595,24 @@ td { border-top: 1px solid #334155; }
   <td>0</td>
 </tr><tr>
   <td>implement</td>
-  <td>147</td>
+  <td>148</td>
   <td class="good">94.6%</td>
   <td>0.6</td>
-  <td>184.6s</td>
+  <td>186.1s</td>
   <td>100</td>
-  <td>2121</td>
-  <td>2451</td>
-  <td>59.21M</td>
+  <td>2155</td>
+  <td>2487</td>
+  <td>61.07M</td>
 </tr><tr>
   <td>review</td>
-  <td>43</td>
+  <td>44</td>
   <td class="bad">2.3%</td>
   <td>0.0</td>
-  <td>107.7s</td>
-  <td>4</td>
-  <td>21</td>
+  <td>106.2s</td>
+  <td>6</td>
+  <td>25</td>
   <td>36</td>
-  <td>216.3K</td>
+  <td>242.1K</td>
 </tr><tr>
   <td>optimize</td>
   <td>0</td>
@@ -625,11 +625,11 @@ td { border-top: 1px solid #334155; }
   <td>0</td>
 </tr><tr>
   <td>verify</td>
-  <td>128</td>
-  <td class="bad">49.2%</td>
+  <td>129</td>
+  <td class="bad">48.8%</td>
   <td>0.1</td>
-  <td>62.7s</td>
-  <td>28</td>
+  <td>62.2s</td>
+  <td>31</td>
   <td>867</td>
   <td>1050</td>
   <td>9.56M</td>
@@ -658,7 +658,8 @@ td { border-top: 1px solid #334155; }
 
 <div class="section">
   <h2>🔍 Failure Diagnosis</h2>
-  <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>validate-pipeline-fixes-20260520</strong> · zsiga · verify · 10.9min · 2026-05-21 01:16</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+  <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 22.0min · 2026-05-21 14:58</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>validate-pipeline-fixes-20260520</strong> · zsiga · verify · 10.9min · 2026-05-21 01:16</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>validate-pipeline-fixes-20260520</strong> · zsiga · verify · 17.2min · 2026-05-21 00:52</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>dashboard-proposal-queue-mobile</strong> · zsiga · verify · 22.1min · 2026-05-21 00:13</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>p0-crash-recovery</strong> · zsiga · verify · 22.9min · 2026-05-20 13:38</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
@@ -667,7 +668,6 @@ td { border-top: 1px solid #334155; }
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-infopublisher-disk-full</strong> · zsiga · verify · 15.2min · 2026-05-20 00:30</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at verify: review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>build-phase-timing-comparator-utility-add-a-cli-tool-that-co</strong> · zsiga · implement · 4.7min · 2026-05-18 18:16</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at implement: review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>implement-real-sub-agent-dispatch-in-orchestratorpy-replace-</strong> · zsiga · implement · 4.0min · 2026-05-18 17:43</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Check test output for specific assertion errors; verify test expectations match implementation API</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>frontend-templates-complete</strong> · compass · verify · 10.1min · 2026-05-14 18:27</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at verify: review error and adjust approach</div></details>
 
 </div>
 
@@ -679,10 +679,10 @@ td { border-top: 1px solid #334155; }
 <tbody><tr>
   <td><span style="color:#8b5cf6;font-weight:600">glm-5.1</span></td>
   <td>zhipuai</td>
-  <td>3,819</td>
-  <td>87.66M</td>
-  <td>1.09M</td>
-  <td>88.75M</td>
+  <td>3,892</td>
+  <td>91.40M</td>
+  <td>1.12M</td>
+  <td>92.51M</td>
 </tr></tbody></table>
   <div style="margin-top:1rem"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
   <span style="width:100px;font-size:0.8rem;color:#94a3b8;text-align:right">glm-5.1</span>
@@ -699,27 +699,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">88.75M</div>
-      <div class="meta">87.66M prompt + 1.09M completion</div>
+      <div class="value">92.51M</div>
+      <div class="meta">91.40M prompt + 1.12M completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">495.8K</div>
+      <div class="value">514.0K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">3,819</div>
-      <div class="meta">avg 21.3 per change</div>
+      <div class="value">3,892</div>
+      <div class="meta">avg 21.6 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">4,651</div>
-      <div class="meta">avg 26.0 per change</div>
+      <div class="value">4,727</div>
+      <div class="meta">avg 26.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">15.0h</div>
-      <div class="meta">54,013s total</div>
+      <div class="value">15.3h</div>
+      <div class="meta">55,253s total</div>
     </div>
   </div>
 </div>
@@ -922,7 +922,7 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">90.5/85</span>
+  <span style="color:#94a3b8;font-size:0.8rem">90.0/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1200,15 +1200,15 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>dashboard-proposal-queue-mobile</li>
-<li>validate-pipeline-fixes-20260520</li>
+    <li>validate-pipeline-fixes-20260520</li>
 <li>dashboard-proposal-queue-mobile</li>
 <li>validate-pipeline-fixes-20260520</li>
 <li>dashboard-proposal-queue-mobile</li>
+<li>auto-metric_degradation-verify_pass_rate-20260521</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-21T14:58:02.134645</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-21T15:20:18.404380</div>
 <script>
 (function() {
   var REFRESH_INTERVAL = 600; // seconds
