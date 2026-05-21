@@ -1,80 +1,92 @@
-# Spec: Dashboard Feedback Loop Metrics Section
+# Spec: Feedback Loop Dashboard Section
 
 ## ADDED Requirements
 
-### Requirement: Feedback Loop Section on Dashboard
+### Requirement: Feedback Loop section in dashboard HTML
 
-The dashboard SHALL display a "Feedback Loop" metrics section showing learning loop health indicators.
+The `_render()` function in `zsiga/metrics/dashboard.py` SHALL include a "Feedback Loop" metrics section rendered as HTML, positioned **before** the "Recent Changes" section and **after** the "Failure Diagnosis" section.
 
-#### Scenario: Dashboard renders with feedback loop data
+The section SHALL use the existing `.section` and `.grid` CSS classes for visual consistency.
 
+#### Scenario: Dashboard HTML contains Feedback Loop section
+
+- **testable**: true
+- **target**: zsiga.metrics.dashboard.generate_dashboard
+- **Given** the dashboard is generated via `generate_dashboard()`
+- **When** the output HTML is inspected
+- **Then** it SHALL contain a `<div class="section">` element with an `<h2>` containing the text "Feedback Loop"
+
+#### Scenario: Feedback Loop section positioned before Recent Changes
+
+- **testable**: true
+- **target**: zsiga.metrics.dashboard.generate_dashboard
 - **Given** the dashboard is generated
-- **When** the HTML is produced
-- **Then** a section titled "Feedback Loop" SHALL appear between existing metrics and Change History
+- **When** the output HTML is inspected
+- **Then** the "Feedback Loop" section SHALL appear before the "Recent Changes" section in the HTML string
 
-### Requirement: Learnings Health Card
+### Requirement: Four metric cards rendered
 
-The dashboard SHALL display a learnings health indicator card.
+The Feedback Loop section SHALL contain four cards, each displaying one of the four feedback-loop metrics. Each card SHALL use the `.card` CSS class and show a label and value.
 
-#### Scenario: Learnings exist
+#### Scenario: Learnings Health card rendered
 
-- **Given** `memory/learnings.jsonl` has valid entries
-- **When** the dashboard is generated
-- **Then** the card SHALL show: total count, active count (excluding noise), top 5 pattern_keys by frequency, and last write timestamp
+- **testable**: true
+- **target**: zsiga.metrics.dashboard.generate_dashboard
+- **Given** the dashboard is generated
+- **When** the output HTML is inspected
+- **Then** it SHALL contain a card with a label containing "Learnings Health" and a value showing the total learnings count or "No learnings yet" when total is 0
 
-#### Scenario: No learnings exist
+#### Scenario: Auto-Proposal Success card rendered
 
-- **Given** `memory/learnings.jsonl` is empty or does not exist
-- **When** the dashboard is generated
-- **Then** the card SHALL show "No learnings yet"
+- **testable**: true
+- **target**: zsiga.metrics.dashboard.generate_dashboard
+- **Given** the dashboard is generated
+- **When** the output HTML is inspected
+- **Then** it SHALL contain a card with a label containing "Auto-Proposal Success" and a value showing the success rate percentage or "No auto-proposals yet" when total is 0
 
-### Requirement: Learning Injection Rate Card
+#### Scenario: Self-Assessment Coverage card rendered
 
-The dashboard SHALL display a learning injection rate indicator.
+- **testable**: true
+- **target**: zsiga.metrics.dashboard.generate_dashboard
+- **Given** the dashboard is generated
+- **When** the output HTML is inspected
+- **Then** it SHALL contain a card with a label containing "Self-Assessment Coverage" and a value showing the coverage percentage or "No self-assessments yet" when assessed_changes is 0
 
-#### Scenario: Injection data available
+#### Scenario: Injection Rate card rendered
 
-- **Given** the DB has injection event records
-- **When** the dashboard is generated
-- **Then** the card SHALL show: IMPLEMENT injection rate, ENRICH injection rate, and average learnings injected per session
+- **testable**: true
+- **target**: zsiga.metrics.dashboard.generate_dashboard
+- **Given** the dashboard is generated
+- **When** the output HTML is inspected
+- **Then** it SHALL contain a card with a label containing "Injection Rate" and a value showing the implement injection rate or "No data yet" when no implement phases exist
 
-#### Scenario: No injection data
+### Requirement: Graceful empty-data degradation
 
-- **Given** no injection events have been recorded
-- **When** the dashboard is generated
-- **Then** the card SHALL show "No injection data yet"
+When metrics data is unavailable (empty database, missing tables, or compute errors), the dashboard SHALL still render successfully with placeholder text instead of numeric values.
 
-### Requirement: Auto-Proposal Success Rate Card
+#### Scenario: Dashboard renders with all "No data yet" placeholders on empty DB
 
-The dashboard SHALL display auto-proposal success rate statistics.
+- **testable**: true
+- **target**: zsiga.metrics.dashboard.generate_dashboard
+- **Given** a completely empty metrics database
+- **When** `generate_dashboard()` is called
+- **Then** the HTML SHALL contain "No learnings yet", "No data yet", "No auto-proposals yet", and "No self-assessments yet" in their respective card areas, and no exceptions SHALL be raised
 
-#### Scenario: Auto-proposals exist
+### Requirement: Non-breaking insertion
 
-- **Given** changes with names starting with `auto-` exist in the DB
-- **When** the dashboard is generated
-- **Then** the card SHALL show: total count, success count, reverted count, stuck count (>=3 fails), success rate percentage
+The new Feedback Loop section SHALL NOT alter the structure or content of any existing dashboard sections. All existing sections (Phase Performance, Failure Diagnosis, Evolution Roadmap, Recent Changes, etc.) SHALL render exactly as before.
 
-#### Scenario: No auto-proposals
+#### Scenario: Existing sections unchanged after adding Feedback Loop
 
-- **Given** no auto-proposals have been generated
-- **When** the dashboard is generated
-- **Then** the card SHALL show "No auto-proposals yet"
+- **testable**: true
+- **target**: zsiga.metrics.dashboard.generate_dashboard
+- **Given** the dashboard is generated with the Feedback Loop section added
+- **When** the output HTML is inspected
+- **Then** the HTML SHALL still contain "Phase Performance", "Failure Diagnosis", "Evolution Roadmap", and "Recent Changes" sections
 
-### Requirement: Self-Assessment Coverage Card
+## MODIFIED Requirements
 
-The dashboard SHALL display self-assessment coverage statistics.
-
-#### Scenario: Self-assessments exist
-
-- **Given** the self_assessment table has records
-- **When** the dashboard is generated
-- **Then** the card SHALL show: total changes, assessed changes, coverage percentage, last assessment timestamp
-
-#### Scenario: No self-assessments
-
-- **Given** the self_assessment table is empty
-- **When** the dashboard is generated
-- **Then** the card SHALL show "No self-assessments recorded"
+None.
 
 ## REMOVED Requirements
 
