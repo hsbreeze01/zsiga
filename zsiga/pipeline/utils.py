@@ -203,6 +203,46 @@ def _get_changed_files(target_path: str, since_sha: str,
     return sorted(files)
 
 
+def get_all_changed_files(target_path: str, since_sha: str,
+                          transport: Transport = None) -> list[str]:
+    """Return changed files since *since_sha*, regardless of extension.
+
+    Like ``_get_changed_files`` but does NOT filter to ``.py`` only — needed
+    by the must-modify-files gate, which must also count ``.html``, ``.md``,
+    ``.yaml``, etc.
+    """
+    transport = transport or LocalTransport()
+    r = transport.run_shell(
+        f"git diff --name-only {since_sha} HEAD;"
+        f"git diff --name-only --cached;"
+        f"git ls-files --others --exclude-standard",
+        cwd=target_path,
+    )
+    files: set[str] = set()
+    for line in r["stdout"].strip().split("\n"):
+        f = line.strip()
+        if not f:
+            continue
+        if "/site-packages/" in f or "__pycache__" in f:
+            continue
+        files.add(f)
+    return sorted(files)
+
+
+def must_modify_coverage(must_files: list[str],
+                         changed_files: list[str]) -> tuple[float, list[str]]:
+    """Return ``(coverage_ratio, missed_files)``.
+
+    coverage_ratio = |must ∩ changed| / |must|.  Empty must_files → (1.0, []).
+    """
+    if not must_files:
+        return 1.0, []
+    changed_set = set(changed_files)
+    hit = [m for m in must_files if m in changed_set]
+    missed = [m for m in must_files if m not in changed_set]
+    return len(hit) / len(must_files), missed
+
+
 def _get_test_targets(target_path: str, since_sha: str,
                       changed_files: list[str],
                       transport: Transport = None) -> list[str]:

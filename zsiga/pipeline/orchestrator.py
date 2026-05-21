@@ -28,7 +28,8 @@ from .implementer import implement
 from .verifier import verify, read_verdict
 from .diagnoser import Diagnoser
 from .phase_wal import PhaseWAL
-from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python
+from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python, get_all_changed_files, must_modify_coverage
+from .implementer import _extract_must_modify_files, _read_all_specs
 from .github_issue import create_issue, extract_github_repo
 from .project_context import build_project_context, prefetch_mechanical
 
@@ -555,6 +556,27 @@ class ZsigaOrchestrator:
             git_ops.commit(target_path, f"zsiga: implement {change_name}",
                           transport=transport)
             print("  Post-impl checkpoint committed")
+
+        # Tier 1: must-modify-files gate.  IMPLEMENT often skips files the spec
+        # explicitly names — extract those, compute coverage on the diff, and
+        # if it's below threshold trigger ONE targeted fix attempt.  Coverage
+        # info is also stashed on the orchestrator so the eval-fix loop later
+        # (Tier 5) can include the missed list as structured feedback.
+        must_modify_missed: list[str] = []
+        must_modify_coverage_ratio = 1.0
+        try:
+            must_modify_missed, must_modify_coverage_ratio = await self._must_modify_gate(
+                change_dir=change_dir,
+                target_path=target_path,
+                pre_sha=pre_sha,
+                change_name=change_name,
+                transport=transport,
+                venv_python=venv_python,
+            )
+        except Exception as gate_err:  # pragma: no cover - defensive
+            print(f"  ⚠ must-modify gate error: {gate_err}", flush=True)
+        self._last_must_modify_missed = must_modify_missed
+        self._last_must_modify_coverage = must_modify_coverage_ratio
 
         # Mechanical verification (only check changed files)
         print("\n  Mechanical verification...")
@@ -1144,6 +1166,145 @@ class ZsigaOrchestrator:
         )
         return elapsed
 
+    async def _must_modify_gate(
+        self,
+        change_dir: str,
+        target_path: str,
+        pre_sha: str,
+        change_name: str,
+        transport: Transport,
+        venv_python: str | None,
+    ) -> tuple[list[str], float]:
+        """Check IMPLEMENT diff against MUST-MODIFY files; trigger one targeted
+        fix attempt when coverage < 80%.
+
+        Returns ``(missed_files_after_fix, coverage_ratio_after_fix)``.
+        """
+        # Build the must-modify list from the same inputs the IMPLEMENT prompt
+        # used.  Empty → nothing to enforce.
+        specs = _read_all_specs(change_dir, transport) or ""
+        design = read_file(f"{change_dir}/design.md", transport) or ""
+        tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
+        must_files = _extract_must_modify_files(specs, design, tasks)
+
+        if not must_files:
+            print("  must-modify gate: no files extracted, skipping", flush=True)
+            return [], 1.0
+
+        # Cap to avoid pathological over-extraction wedging the gate.
+        if len(must_files) > 12:
+            print(
+                f"  must-modify gate: extracted {len(must_files)} files (>12), "
+                "skipping to avoid noise",
+                flush=True,
+            )
+            return [], 1.0
+
+        changed = get_all_changed_files(target_path, pre_sha, transport=transport)
+        coverage, missed = must_modify_coverage(must_files, changed)
+        print(
+            f"  must-modify gate: coverage={coverage:.0%} "
+            f"({len(must_files) - len(missed)}/{len(must_files)} files)",
+            flush=True,
+        )
+
+        threshold = 0.8
+        if coverage >= threshold or not missed:
+            return missed, coverage
+
+        # Coverage below threshold — try one targeted fix.
+        print(
+            f"  must-modify gate: missed {missed} (<{int(threshold * 100)}%); "
+            "running ONE targeted fix attempt",
+            flush=True,
+        )
+
+        venv_hint = ""
+        if venv_python:
+            venv_hint = (
+                f"\n\nvenv 路径（必须使用）: {venv_python}; "
+                f"运行 pytest 用 {venv_python} -m pytest"
+            )
+        system_prompt = (
+            "你是 zsiga 的 must-modify 修复 agent。\n"
+            "上一轮 IMPLEMENT 没有修改 spec 明确点名的若干文件。\n"
+            "你的唯一任务：打开下面列出的每一个文件，按 spec 要求做出最小、"
+            "正确的改动；不要改其他文件，不要重排现有 import，不要重构无关代码。"
+            f"{venv_hint}"
+        )
+        files_block = "\n".join(f"- `{p}`" for p in missed)
+        user_prompt = (
+            f"项目根目录: {target_path}\n\n"
+            f"必须修改但 IMPLEMENT 漏掉的文件:\n{files_block}\n\n"
+            f"参考 specs/design/tasks（已在 {change_dir}/ 下），"
+            "对上述每个文件至少打开一次并完成对应 spec 要求的改动。"
+        )
+
+        register_tools(self.agent, target_path, transport=transport)
+        self.agent.set_phase("must-modify-fix")
+        await self.agent.run(
+            system_prompt,
+            user_prompt,
+            max_turns=self.config.pipeline.fix_max_turns,
+            timeout_seconds=300,
+        )
+
+        # Re-commit any new diff produced by the fix attempt so REVIEW/VERIFY
+        # can see it as part of pre_sha..HEAD.
+        if git_ops.has_uncommitted_changes(target_path, transport=transport):
+            git_ops.add_all(target_path, transport=transport)
+            git_ops.commit(
+                target_path,
+                f"zsiga: must-modify fix for {change_name}",
+                transport=transport,
+            )
+            print("  must-modify gate: targeted fix committed", flush=True)
+
+        changed = get_all_changed_files(target_path, pre_sha, transport=transport)
+        coverage, missed = must_modify_coverage(must_files, changed)
+        print(
+            f"  must-modify gate: post-fix coverage={coverage:.0%} "
+            f"({len(must_files) - len(missed)}/{len(must_files)} files)",
+            flush=True,
+        )
+        return missed, coverage
+
+    def _build_eval_fix_structured_ctx(
+        self, change_dir: str, transport: Transport
+    ) -> str:
+        """Build a markdown block carrying the missed-files list + REVIEW
+        CRITICAL issues, to inject into the eval-fix user prompt."""
+        parts: list[str] = []
+
+        missed = getattr(self, "_last_must_modify_missed", None) or []
+        coverage = getattr(self, "_last_must_modify_coverage", 1.0)
+        if missed:
+            files_md = "\n".join(f"- `{p}`" for p in missed)
+            parts.append(
+                "### MUST-MODIFY 仍未覆盖的文件 "
+                f"(coverage={coverage:.0%})\n"
+                "下列文件 spec 明确点名却仍未被 diff 触及，先打开它们做对应改动：\n"
+                f"{files_md}"
+            )
+
+        review_md = read_file(f"{change_dir}/review.md", transport) or ""
+        if review_md:
+            critical_lines = [
+                line for line in review_md.splitlines()
+                if "[CRITICAL]" in line
+            ]
+            if critical_lines:
+                bullet_md = "\n".join(f"- {line.strip()}" for line in critical_lines[:5])
+                parts.append(
+                    "### REVIEW 标记的 CRITICAL 问题\n"
+                    "review.md 已识别下列严重问题，本轮 eval-fix 优先解决：\n"
+                    f"{bullet_md}"
+                )
+
+        if not parts:
+            return ""
+        return "\n\n" + "\n\n".join(parts) + "\n"
+
     async def _fix_loop(self, target_path, project_config, errors,
                         pre_sha: str, transport: Transport,
                         max_attempts: int,
@@ -1302,6 +1463,12 @@ class ZsigaOrchestrator:
 
             self.agent.set_phase(f"eval-fix-{attempt}")
             register_tools(self.agent, target_path, transport=transport)
+            # Tier 5: structured context — include explicit missed-files list
+            # (from the must-modify gate at IMPLEMENT) and any CRITICAL issues
+            # already surfaced by REVIEW.  This points eval-fix at the exact
+            # spec violation instead of leaving it to re-derive from the
+            # verify.md prose.
+            structured_ctx = self._build_eval_fix_structured_ctx(change_dir, transport)
             await self.agent.run(
                 f"你是 zsiga 的修复引擎。项目根目录: {target_path}\n"
                 "严格遵守以下规则：\n"
@@ -1312,7 +1479,8 @@ class ZsigaOrchestrator:
                 "5. 只修报错的那一行，不要重排整个文件的 import 或做大规模重构\n"
                 "6. 所有 bash 命令必须先 cd 到项目根目录，不要猜测路径"
                 f"{venv_hint}{strategy_hint}",
-                f"验证反馈:\n{feedback}{changed_info}{path_hint}\n\n"
+                f"验证反馈:\n{feedback}{changed_info}{path_hint}\n"
+                f"{structured_ctx}\n"
                 f"只修改上方列出的文件。修复后运行 {project_config.test_cmd} 确认。",
                 max_turns=fix_turns,
             )
