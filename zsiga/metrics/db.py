@@ -5,12 +5,17 @@ All data (changes, journal, lessons, stats snapshots) lives here.
 """
 
 import json
+import logging
 import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 _DB_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "zsiga.db"
+
+_DB_BLACKLISTED_PREFIXES = ("daemon.cycle_error",)
+
+_DB_LOGGER = logging.getLogger(__name__)
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS changes (
@@ -222,7 +227,22 @@ def load_journal(limit: int = 0, db_path: Optional[Path] = None) -> list[dict]:
 
 def record_lesson(text: str, pattern_key: str = "", category: str = "",
                   ts: Optional[str] = None, db_path: Optional[Path] = None):
-    """Insert a lesson entry."""
+    """Insert a lesson entry with write validation."""
+    # Text length gate
+    if not text or len(text.strip()) < 10:
+        _DB_LOGGER.debug(
+            "DB record_lesson skipped: text_too_short (pattern_key=%s)", pattern_key
+        )
+        return
+    # Pattern key blacklist gate
+    if pattern_key and any(
+        pattern_key.startswith(prefix) for prefix in _DB_BLACKLISTED_PREFIXES
+    ):
+        _DB_LOGGER.debug(
+            "DB record_lesson skipped: pattern_blacklisted (%s)", pattern_key
+        )
+        return
+
     conn = _get_conn(db_path)
     try:
         conn.execute(
@@ -238,6 +258,34 @@ def count_lessons(db_path: Optional[Path] = None) -> int:
     conn = _get_conn(db_path)
     try:
         return conn.execute("SELECT COUNT(*) FROM lessons").fetchone()[0]
+    finally:
+        conn.close()
+
+
+def cleanup_lessons(db_path: Optional[Path] = None) -> int:
+    """Delete noisy rows from the lessons table.
+
+    Removes rows where:
+    - ``pattern_key`` is ``daemon.cycle_error`` or ``code.unknown``
+    - ``text`` is empty
+
+    Returns the count of deleted rows.
+    """
+    conn = _get_conn(db_path)
+    try:
+        before = conn.execute("SELECT COUNT(*) FROM lessons").fetchone()[0]
+        conn.execute(
+            "DELETE FROM lessons WHERE pattern_key IN (?, ?)",
+            ("daemon.cycle_error", "code.unknown"),
+        )
+        conn.execute(
+            "DELETE FROM lessons WHERE text = '' OR text IS NULL"
+        )
+        conn.commit()
+        after = conn.execute("SELECT COUNT(*) FROM lessons").fetchone()[0]
+        deleted = before - after
+        _DB_LOGGER.info("cleanup_lessons: deleted=%d, remaining=%d", deleted, after)
+        return deleted
     finally:
         conn.close()
 

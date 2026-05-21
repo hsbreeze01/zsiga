@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 from ..agent.loop import AgentLoop
+from ..memory.learn import fetch_relevant_learnings
 from ..transport import Transport, LocalTransport
 from .utils import read_file, dir_exists, list_files_recursive
 from .spec_pytest_check import validate_testable_artifacts
@@ -110,7 +111,14 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
 
 项目架构已在上方提供，直接开始写，不要用工具探索项目。"""
 
-    result = await agent.run(ENRICHER_SYSTEM, user_prompt, **kwargs)
+    # Build system prompt with learnings injection
+    change_name = Path(change_dir).name
+    system_prompt = ENRICHER_SYSTEM
+    learnings_text = fetch_relevant_learnings(change_name, max_count=3)
+    if learnings_text:
+        system_prompt += f"\n\n## Relevant Past Experience\n{learnings_text}"
+
+    result = await agent.run(system_prompt, user_prompt, **kwargs)
 
     # Validate specs/ directory
     specs_dir = f"{change_dir}/specs"
@@ -118,7 +126,7 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
         print("  ⚠️ specs/ directory empty or missing, retrying...")
         transport.run_shell(f"mkdir -p \'{specs_dir}\'", timeout=5)
         retry_prompt = user_prompt + f"\n\n注意：上一次你没有在 specs/ 子目录下创建文件。必须用 write_file 创建 {change_dir}/specs/<name>.md，不要创建 specs.md。"
-        result = await agent.run(ENRICHER_SYSTEM, retry_prompt, **kwargs)
+        result = await agent.run(system_prompt, retry_prompt, **kwargs)
 
     # clarify.md validation is handled by CLARIFY phase
 

@@ -1,12 +1,35 @@
 import json
+import logging
+import re
 from datetime import datetime
 from pathlib import Path
 
 _MEMORY_DIR = Path(__file__).resolve().parent.parent.parent / "memory"
 
+_BLACKLISTED_PREFIXES = ("daemon.cycle_error",)
+
+_LOGGER = logging.getLogger(__name__)
+
+
+def _is_blacklisted(pattern_key: str | None) -> bool:
+    if not pattern_key:
+        return False
+    return any(pattern_key.startswith(prefix) for prefix in _BLACKLISTED_PREFIXES)
+
+
+def _text_too_short(text: str) -> bool:
+    return not text or len(text.strip()) < 10
+
 
 def record_lesson(title: str, context: str, takeaway: str,
                   pattern_key: str = None, source: str = "pipeline"):
+    if _is_blacklisted(pattern_key):
+        _LOGGER.debug("Skipping lesson: pattern_blacklisted (%s)", pattern_key)
+        return
+    if _text_too_short(takeaway):
+        _LOGGER.debug("Skipping lesson: text_too_short (pattern_key=%s)", pattern_key)
+        return
+
     lesson = {
         "type": "lesson",
         "ts": datetime.now().isoformat(),
@@ -48,6 +71,13 @@ def record_outcome(change_name: str, project: str, success: bool,
 
     pattern_key = f"{error_domain}.{root_cause}"
     what_happened = title if not detail else f"{title}: {detail[:200]}"
+
+    if _is_blacklisted(pattern_key):
+        _LOGGER.debug("Skipping outcome: pattern_blacklisted (%s)", pattern_key)
+        return
+    if _text_too_short(prevention):
+        _LOGGER.debug("Skipping outcome: text_too_short (pattern_key=%s)", pattern_key)
+        return
 
     # Write structured lesson record
     lesson = {
@@ -178,6 +208,12 @@ def record_success(
     total_seconds: float = 0.0,
 ):
     """Record a successful change completion to learnings.jsonl."""
+    pattern_key = "pipeline.pass.deliver"
+
+    if _is_blacklisted(pattern_key):
+        _LOGGER.debug("Skipping success: pattern_blacklisted (%s)", pattern_key)
+        return
+
     # Calculate first_pass and fix_attempts from phase_records
     fix_attempts = 0
     if phase_records:
@@ -191,7 +227,7 @@ def record_success(
         "source": "orchestrator",
         "change_name": change_name,
         "project": project,
-        "pattern_key": "pipeline.pass.deliver",
+        "pattern_key": pattern_key,
         "error_domain": "success",
         "first_pass": first_pass,
         "fix_attempts": fix_attempts,
@@ -249,3 +285,138 @@ def search_learnings(keywords: list[str], pattern_key: str | None = None) -> lis
     results.sort(key=lambda e: e.get("ts", ""), reverse=True)
     results.sort(key=lambda e: e["_score"], reverse=True)
     return results
+
+
+def fetch_relevant_learnings(
+    change_name: str,
+    max_count: int = 5,
+    learnings_file: Path | None = None,
+) -> str:
+    """Fetch relevant learnings for prompt injection.
+
+    Reads ``memory/learnings.jsonl``, filters entries by relevance to the
+    given change context, and returns the most recent *max_count* entries
+    as formatted markdown text.
+
+    Relevance rules:
+    1. **Direct match**: entry's ``pattern_key`` contains a keyword from
+       *change_name* (after splitting on ``-`` and ``_``).
+    2. **Pipeline category**: entry's ``pattern_key`` starts with
+       ``pipeline.fail.`` or ``pipeline.pass.``.
+
+    Each matching entry is formatted as ``- [{pattern_key}] {takeaway}``.
+
+    Returns an empty string when no entries match.
+    """
+    lf = learnings_file or (_MEMORY_DIR / "learnings.jsonl")
+    if not lf.exists():
+        return ""
+
+    # Extract keywords from change_name
+    keywords = set(
+        kw.lower()
+        for kw in re.split(r"[-_]+", change_name)
+        if len(kw) >= 2
+    )
+
+    candidates: list[dict] = []
+    with open(lf, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            takeaway = entry.get("takeaway", "")
+            if not takeaway or not takeaway.strip():
+                continue
+
+            pk = entry.get("pattern_key", "")
+            if not pk:
+                continue
+
+            # Check relevance
+            is_relevant = False
+
+            # Rule 1: direct name match
+            pk_lower = pk.lower()
+            if any(kw in pk_lower for kw in keywords):
+                is_relevant = True
+
+            # Rule 2: pipeline category
+            if pk.startswith("pipeline.fail.") or pk.startswith("pipeline.pass."):
+                is_relevant = True
+
+            if is_relevant:
+                candidates.append(entry)
+
+    if not candidates:
+        return ""
+
+    # Sort by ts descending
+    candidates.sort(key=lambda e: e.get("ts", ""), reverse=True)
+    candidates = candidates[:max_count]
+
+    lines = [f"- [{e.get('pattern_key', '')}] {e.get('takeaway', '')}" for e in candidates]
+    return "\n".join(lines)
+
+
+_NOISY_PATTERN_KEYS = {"daemon.cycle_error", "code.unknown"}
+
+
+def cleanup_learnings_jsonl(
+    learnings_file: Path | None = None,
+) -> dict:
+    """Remove noisy entries from learnings.jsonl.
+
+    Removes records where:
+    - ``takeaway`` (or ``text`` for legacy entries) is empty / whitespace-only
+    - ``pattern_key`` equals ``daemon.cycle_error`` or ``code.unknown``
+
+    Returns a summary dict with keys ``removed`` (int) and ``kept`` (int).
+    """
+    lf = learnings_file or (_MEMORY_DIR / "learnings.jsonl")
+    if not lf.exists():
+        return {"removed": 0, "kept": 0}
+
+    kept: list[str] = []
+    removed = 0
+
+    with open(lf, "r", encoding="utf-8") as f:
+        for line in f:
+            raw = line.strip()
+            if not raw:
+                continue
+            try:
+                entry = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
+
+            pk = entry.get("pattern_key", "")
+
+            # Check blacklisted pattern keys
+            if pk in _NOISY_PATTERN_KEYS:
+                removed += 1
+                continue
+
+            # Check empty takeaway/text
+            takeaway = entry.get("takeaway", "")
+            text = entry.get("text", "")
+            primary = takeaway or text
+            if not primary or not primary.strip():
+                removed += 1
+                continue
+
+            kept.append(raw)
+
+    with open(lf, "w", encoding="utf-8") as f:
+        for entry_line in kept:
+            f.write(entry_line + "\n")
+
+    _LOGGER.info(
+        "cleanup_learnings_jsonl: removed=%d, kept=%d", removed, len(kept)
+    )
+    return {"removed": removed, "kept": len(kept)}

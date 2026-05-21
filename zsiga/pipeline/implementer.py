@@ -1,7 +1,9 @@
 
 import re
+from pathlib import Path
 
 from ..agent.loop import AgentLoop
+from ..memory.learn import fetch_relevant_learnings
 from ..memory.pattern_miner import mine_patterns
 from ..transport import Transport, LocalTransport
 from .utils import read_file, dir_exists, list_files_recursive
@@ -138,6 +140,15 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str,
     system_prompt = IMPLEMENTER_SYSTEM
     if venv_python:
         system_prompt += _venv_prompt_section(venv_python)
+
+    # Inject relevant learnings
+    change_name = Path(change_dir).name
+    learnings_text = fetch_relevant_learnings(change_name, max_count=5)
+    if learnings_text:
+        system_prompt += (
+            f"\n\n## Previous Learnings (avoid repeating mistakes)\n"
+            f"{learnings_text}"
+        )
 
     ctx_section = ""
     if project_context:
