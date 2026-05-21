@@ -92,31 +92,46 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
 2. [SUGGESTION] 描述 + 代码证据
 """
 
-    from .llm_router import LLMProfile, get_llm_profile
+    try:
+        from .llm_router import LLMProfile, get_llm_profile
+        HAS_ROUTER = True
+    except ImportError:
+        HAS_ROUTER = False
     base_url_default = getattr(agent.client, "base_url", None)
     if base_url_default is not None and not isinstance(base_url_default, str):
         base_url_default = str(base_url_default).rstrip("/")
-    profile = get_llm_profile(
-        "review",
-        LLMProfile(
-            provider=getattr(agent, "provider", "zhipuai"),
+
+    if HAS_ROUTER:
+        profile = get_llm_profile(
+            "review",
+            LLMProfile(
+                provider=getattr(agent, "provider", "zhipuai"),
+                api_key=agent.client.api_key,
+                model=agent.model,
+                base_url=base_url_default,
+            ),
+        )
+        print(
+            f"[REVIEW] sub-agent provider={profile.provider} model={profile.model}",
+            flush=True,
+        )
+        review_agent = create_with_role(
+            "review",
+            api_key=profile.api_key,
+            model=profile.model,
+            base_url=profile.base_url,
+            proxy=None,
+            provider=profile.provider,
+        )
+    else:
+        print("[REVIEW] llm_router unavailable, using default client", flush=True)
+        review_agent = create_with_role(
+            "review",
             api_key=agent.client.api_key,
             model=agent.model,
             base_url=base_url_default,
-        ),
-    )
-    print(
-        f"[REVIEW] sub-agent provider={profile.provider} model={profile.model}",
-        flush=True,
-    )
-    review_agent = create_with_role(
-        "review",
-        api_key=profile.api_key,
-        model=profile.model,
-        base_url=profile.base_url,
-        proxy=None,
-        provider=profile.provider,
-    )
+            proxy=None,
+        )
 
     print(
         f"[REVIEW] run_review: calling run_sub_agent "
