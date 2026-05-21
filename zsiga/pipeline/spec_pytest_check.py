@@ -139,6 +139,42 @@ def mock_transport():
             return Path(path).exists()
 
     return _MockTransport()
+
+
+@pytest.fixture
+def ruff_runner():
+    """Run ruff against a working directory if the binary is installed.
+
+    Returns a callable ``runner(args: list[str], cwd: str | Path)`` that
+    invokes ``ruff <args>`` in ``cwd`` and returns
+    ``(returncode, stdout, stderr)``. Tests requesting this fixture are
+    automatically skipped via ``pytest.skip(...)`` when the ``ruff``
+    binary is not on ``PATH``, so they remain green in environments
+    that don't bundle ruff.
+
+    Tests that only need to verify pipeline *behaviour* (e.g. "the
+    pipeline tried to invoke ruff") should mock ``subprocess.run``
+    directly instead of using this fixture; ``ruff_runner`` is for
+    tests that actually need to assert on ruff's real output.
+    """
+    import shutil
+    import subprocess
+
+    ruff_path = shutil.which("ruff")
+    if not ruff_path:
+        pytest.skip("ruff binary not on PATH; skipping lint-dependent test")
+
+    def _run(args, cwd):
+        result = subprocess.run(
+            [ruff_path] + list(args),
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        return result.returncode, result.stdout, result.stderr
+
+    return _run
 '''
 
 
@@ -273,12 +309,21 @@ def validate_testable_artifacts(
     change_dir: str,
     target_path: str,
     transport: Transport | None = None,
+    *,
+    allow_inferred_contract: bool = False,
 ) -> SpecPytestReport:
     """Walk specs, validate companion pytest files, demote on failure.
 
     Side effects: rewrites individual spec markdown files when a
     scenario must be demoted, deletes broken pytest files, optionally
     writes a fresh conftest_zsiga.py.
+
+    Phase 6 — when ``allow_inferred_contract`` is ``False`` (default),
+    any scenario marked ``testable: true`` without a ``contract:`` block
+    is demoted to Layer 2; this avoids the 29% L1-FAIL signature-
+    mismatch failure mode observed when ENRICH guesses signatures from
+    the When-clause text. Pass ``allow_inferred_contract=True`` to
+    accept the legacy inferred-signature path.
     """
     transport = transport or LocalTransport()
     change_id = os.path.basename(os.path.normpath(change_dir))
@@ -306,6 +351,34 @@ def validate_testable_artifacts(
         if not testable:
             report.spec_validations.append(validation)
             continue
+
+        # Phase 6: demote testable scenarios that lack an explicit contract,
+        # unless the project opted into the legacy inferred-signature path.
+        if not allow_inferred_contract:
+            no_contract = [s for s in testable if s.contract is None]
+            if no_contract:
+                updated_text = spec_text
+                for sc in no_contract:
+                    updated_text = _demote_in_spec(
+                        updated_text, sc.name,
+                        "missing contract field (Phase 6 strict mode)",
+                    )
+                    validation.scenarios_demoted.append(
+                        (sc.name, "missing contract"),
+                    )
+                transport.run_shell(
+                    f"cat > '{spec_path}' <<'ZSIGA_DEMOTE_EOF'\n"
+                    f"{updated_text}\n"
+                    f"ZSIGA_DEMOTE_EOF",
+                    timeout=10,
+                )
+                spec_text = updated_text
+                # Re-derive testable list now that some scenarios were demoted
+                scenarios = parse_spec(spec_text)
+                testable = [s for s in scenarios if s.testable]
+                if not testable:
+                    report.spec_validations.append(validation)
+                    continue
 
         # Compute expected test file path
         test_path = expected_test_path(target_path, change_id, spec_filename)

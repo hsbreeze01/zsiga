@@ -53,6 +53,19 @@ class TargetRef:
     def is_method(self) -> bool:
         return "." in self.symbol
 
+    def to_module_path(self) -> str:
+        """Return the dotted import path for the file part.
+
+        ``zsiga/pipeline/verifier.py`` -> ``zsiga.pipeline.verifier``.
+        Caller uses ``importlib.import_module(target.to_module_path())``
+        and then walks into the symbol via ``str.split(".")``. Only
+        meaningful when ``kind == "python"``.
+        """
+        f = self.file
+        if f.endswith(".py"):
+            f = f[:-3]
+        return f.replace("/", ".")
+
 
 _PY_TARGET_RE = re.compile(
     r"^(?P<file>[\w./-]+\.py)"
@@ -88,6 +101,175 @@ def parse_target(raw: str) -> TargetRef:
 
 
 # ---------------------------------------------------------------------------
+# Contract definition (Phase 6)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class ContractDef:
+    """Explicit API contract attached to a testable scenario.
+
+    Phase 6 of the spec -> pytest pipeline. When present, the contract
+    is the single source of truth for the callee signature (params,
+    returns, raises) shared by:
+
+    - the generated pytest (built from contract.params, not guessed
+      from the When-clause text);
+    - the IMPLEMENT system prompt (signature stated as a hard
+      constraint);
+    - ``contract_check.precheck_contracts()`` which uses
+      ``inspect.signature`` to fail fast on mismatch.
+
+    Fields are stored as tuples (not dicts/lists) so the dataclass
+    stays hashable.
+    """
+
+    params: tuple[tuple[str, str], ...] = ()
+    returns: str | None = None
+    raises: tuple[str, ...] = ()
+
+    @property
+    def params_dict(self) -> dict[str, str]:
+        return {k: v for k, v in self.params}
+
+
+_CONTRACT_HEADER_RE = re.compile(
+    r"^[\s*\-]*\*\*contract\*\*\s*:?\s*$",
+    re.MULTILINE,
+)
+
+_CONTRACT_SUBKEY_RE = re.compile(
+    r"^\s+(?P<key>params|returns|raises)\s*:\s*(?P<value>.*?)\s*$",
+    re.MULTILINE,
+)
+
+
+def _split_param_pair(line: str) -> tuple[str, str] | None:
+    """Parse a single ``  foo: str = 0`` line into ``("foo", "str = 0")``."""
+    s = line.expandtabs(4).strip()
+    if not s or s.startswith("#"):
+        return None
+    if ":" not in s:
+        return None
+    name, _, type_str = s.partition(":")
+    name = name.strip()
+    type_str = type_str.strip()
+    if not name or not name.replace("_", "").isalnum() or name[0].isdigit():
+        return None
+    return name, type_str
+
+
+def _parse_raises_inline(value: str) -> list[str]:
+    """Parse ``raises: [A, B]`` / ``raises: A, B`` / ``raises: []``."""
+    s = value.strip()
+    if not s:
+        return []
+    if s.startswith("[") and s.endswith("]"):
+        s = s[1:-1].strip()
+        if not s:
+            return []
+    parts = [p.strip() for p in s.split(",")]
+    return [p for p in parts if p]
+
+
+def parse_contract(block_text: str) -> ContractDef:
+    """Parse the indented body that followed a ``- **contract**:`` line.
+
+    Supports inline ``returns: <type>`` / ``raises: [...]`` and a
+    nested ``params:`` block whose children are ``name: type`` pairs.
+    Unrecognised lines are silently ignored so the contract stays
+    usable even if the LLM adds free-text annotations.
+    """
+    params: list[tuple[str, str]] = []
+    returns: str | None = None
+    raises: list[str] = []
+
+    lines = block_text.expandtabs(4).splitlines()
+    i = 0
+    in_params_block = False
+    params_block_indent: int | None = None
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        leading_ws = len(line) - len(line.lstrip(" "))
+
+        if not stripped:
+            in_params_block = False
+            params_block_indent = None
+            i += 1
+            continue
+
+        if in_params_block:
+            if leading_ws > (params_block_indent or 0):
+                pair = _split_param_pair(line)
+                if pair is not None:
+                    params.append(pair)
+                i += 1
+                continue
+            in_params_block = False
+            params_block_indent = None
+            # fall through
+
+        m = _CONTRACT_SUBKEY_RE.match(line)
+        if m:
+            key = m.group("key")
+            value = m.group("value")
+            if key == "params" and not value.strip():
+                in_params_block = True
+                params_block_indent = leading_ws
+                i += 1
+                continue
+            if key == "params" and value.strip():
+                pair = _split_param_pair(value.strip("{}"))
+                if pair is not None:
+                    params.append(pair)
+                i += 1
+                continue
+            if key == "returns":
+                returns = value.strip() or None
+                i += 1
+                continue
+            if key == "raises":
+                raises.extend(_parse_raises_inline(value))
+                i += 1
+                continue
+
+        i += 1
+
+    return ContractDef(
+        params=tuple(params),
+        returns=returns,
+        raises=tuple(raises),
+    )
+
+
+def _extract_contract_block(body: str) -> str | None:
+    """Return the text following ``- **contract**:`` up to the next
+    dedent / next ``- **<field>**`` boundary, or ``None`` if absent."""
+    m = _CONTRACT_HEADER_RE.search(body)
+    if not m:
+        return None
+    start = m.end()
+    rest = body[start:]
+    block_lines: list[str] = []
+    base_indent: int | None = None
+    for raw in rest.splitlines():
+        line = raw.expandtabs(4)
+        if not line.strip():
+            block_lines.append(line)
+            continue
+        leading = len(line) - len(line.lstrip(" "))
+        if base_indent is None:
+            base_indent = leading
+            block_lines.append(line)
+            continue
+        if leading < base_indent:
+            break
+        block_lines.append(line)
+    return "\n".join(block_lines).rstrip("\n")
+
+
+# ---------------------------------------------------------------------------
 # Scenario model
 # ---------------------------------------------------------------------------
 
@@ -106,6 +288,14 @@ class Scenario:
 
     The scenario stays parseable (testable=False forced) so the rest of
     the pipeline keeps running and the issue surfaces in REVIEW.
+    """
+    contract: ContractDef | None = None
+    """Optional explicit API contract (Phase 6).
+
+    When ``None``, the test generator falls back to inferring the
+    callee signature from the When-clause text (legacy path; prone to
+    signature-mismatch failures). When present, the contract is
+    authoritative across spec, generated test, and IMPLEMENT prompt.
     """
 
     @property
@@ -193,6 +383,11 @@ def _parse_block(heading_line: str, body: str) -> Scenario:
             sc.when = value
         elif field_name == "then":
             sc.then = value
+
+    # Phase 6: parse contract block (if present).
+    contract_body = _extract_contract_block(body)
+    if contract_body is not None:
+        sc.contract = parse_contract(contract_body)
 
     return sc
 

@@ -293,3 +293,150 @@ def test_handles_various_heading_depths():
     assert [s.name for s in out] == ["depth-3", "depth-4", "depth-5"]
     assert out[1].testable is True
     assert out[1].target.file == "a/b.py"
+
+
+# ---------------------------------------------------------------------------
+# Phase 6: ContractDef + Scenario.contract + parse_contract + to_module_path
+# ---------------------------------------------------------------------------
+
+from zsiga.pipeline.spec_parser import ContractDef, parse_contract
+
+
+class TestTargetRefToModulePath:
+    def test_simple_module(self):
+        ref = TargetRef(file="zsiga/pipeline/verifier.py", symbol="foo")
+        assert ref.to_module_path() == "zsiga.pipeline.verifier"
+
+    def test_class_method_target(self):
+        ref = TargetRef(
+            file="zsiga/pipeline/orchestrator.py",
+            symbol="ZsigaOrchestrator.run",
+        )
+        # to_module_path() is about the file part only; symbol untouched
+        assert ref.to_module_path() == "zsiga.pipeline.orchestrator"
+
+    def test_nested_directory(self):
+        ref = TargetRef(file="src/api/handlers/users.py", symbol="get")
+        assert ref.to_module_path() == "src.api.handlers.users"
+
+    def test_path_without_py_extension_falls_back_to_dotted(self):
+        # Defensive: file accidentally lacks .py — still produce a usable path
+        ref = TargetRef(file="src/foo", symbol="bar")
+        assert ref.to_module_path() == "src.foo"
+
+
+class TestParseContract:
+    def test_returns_only(self):
+        c = parse_contract("    returns: str\n")
+        assert c.returns == "str"
+        assert c.params == ()
+        assert c.raises == ()
+
+    def test_inline_raises_list_form(self):
+        c = parse_contract("    raises: [FileNotFoundError, ValueError]\n")
+        assert c.raises == ("FileNotFoundError", "ValueError")
+
+    def test_inline_raises_csv_form(self):
+        c = parse_contract("    raises: FileNotFoundError, KeyError\n")
+        assert c.raises == ("FileNotFoundError", "KeyError")
+
+    def test_empty_raises(self):
+        c = parse_contract("    raises: []\n")
+        assert c.raises == ()
+
+    def test_nested_params(self):
+        block = (
+            "    params:\n"
+            "      verify_md_content: str\n"
+            "      precheck_error_type: str | None = None\n"
+            "    returns: str\n"
+        )
+        c = parse_contract(block)
+        assert c.params_dict == {
+            "verify_md_content": "str",
+            "precheck_error_type": "str | None = None",
+        }
+        assert c.returns == "str"
+
+    def test_full_contract(self):
+        block = (
+            "    params:\n"
+            "      path: str\n"
+            "      strict: bool = False\n"
+            "    returns: dict | None\n"
+            "    raises: [FileNotFoundError, PermissionError]\n"
+        )
+        c = parse_contract(block)
+        assert c.params_dict == {"path": "str", "strict": "bool = False"}
+        assert c.returns == "dict | None"
+        assert c.raises == ("FileNotFoundError", "PermissionError")
+
+    def test_unrecognised_lines_silently_ignored(self):
+        block = (
+            "    # a comment\n"
+            "    some_random_line\n"
+            "    returns: int\n"
+        )
+        c = parse_contract(block)
+        assert c.returns == "int"
+
+    def test_dataclass_is_hashable(self):
+        # ContractDef must be hashable so it can be put in sets/used as dict key
+        a = ContractDef(params=(("x", "int"),), returns="int")
+        b = ContractDef(params=(("x", "int"),), returns="int")
+        assert hash(a) == hash(b)
+        assert a == b
+
+
+class TestParseSpecWithContract:
+    SPEC_WITH_CONTRACT = """\
+#### Scenario: classify precheck import failure
+
+- **testable**: true
+- **target**: zsiga/pipeline/verifier.py::classify_verify_failure
+- **contract**:
+    params:
+      verify_md_content: str
+      precheck_error_type: str | None = None
+    returns: str
+- **Given** a verify precheck result with error_type == "import"
+- **When** classify_verify_failure called
+- **Then** result is precheck_import
+"""
+
+    def test_scenario_carries_contract(self):
+        out = parse_spec(self.SPEC_WITH_CONTRACT)
+        assert len(out) == 1
+        sc = out[0]
+        assert sc.testable is True
+        assert sc.contract is not None
+        assert sc.contract.params_dict == {
+            "verify_md_content": "str",
+            "precheck_error_type": "str | None = None",
+        }
+        assert sc.contract.returns == "str"
+
+    def test_scenario_without_contract_field_has_none(self):
+        out = parse_spec(SPEC_TESTABLE_TRUE)  # defined earlier in this file
+        sc = out[0]
+        assert sc.contract is None
+
+    def test_contract_with_raises_only(self):
+        spec = """\
+#### Scenario: parse missing config
+
+- **testable**: true
+- **target**: src/parser.py::parse_config
+- **contract**:
+    params:
+      path: str
+    raises: [FileNotFoundError]
+- **Given** a missing path
+- **When** parse_config called
+- **Then** raises
+"""
+        out = parse_spec(spec)
+        sc = out[0]
+        assert sc.contract.raises == ("FileNotFoundError",)
+        assert sc.contract.returns is None
+

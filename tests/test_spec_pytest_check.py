@@ -48,6 +48,10 @@ SPEC_ONE_TESTABLE = """\
 
 - **testable**: true
 - **target**: src/email.py::validate_email
+- **contract**:
+    params:
+      addr: str
+    returns: bool
 - **Given** an empty string
 - **When** validate_email("") is called
 - **Then** returns False
@@ -70,6 +74,10 @@ SPEC_MIXED = """\
 
 - **testable**: true
 - **target**: zsiga/foo.py::bar
+- **contract**:
+    params:
+      x: int
+    returns: int
 - **Given** x
 - **When** y
 - **Then** z
@@ -300,3 +308,113 @@ def test_summary_line_format(change_layout):
     assert "spec→pytest" in line or "spec\u2192pytest" in line
     assert "0/1" in line or "0 / 1" in line  # 0 validated of 1 declared
     assert "1 demoted" in line
+
+
+
+# ---------------------------------------------------------------------------
+# Phase 6: contract-presence demotion (strict mode)
+# ---------------------------------------------------------------------------
+
+
+SPEC_TESTABLE_NO_CONTRACT = """\
+### Scenario: testable but no contract
+
+- **testable**: true
+- **target**: src/legacy.py::do_thing
+- **Given** an input
+- **When** do_thing("x") is called
+- **Then** something happens
+"""
+
+
+def test_phase6_strict_demotes_testable_without_contract(change_layout):
+    """Default (allow_inferred_contract=False) demotes any testable
+    scenario that lacks a `contract:` block."""
+    (change_layout["specs_dir"] / "no_contract.md").write_text(
+        SPEC_TESTABLE_NO_CONTRACT
+    )
+    report = validate_testable_artifacts(
+        change_layout["change_dir"], change_layout["target"], LocalTransport(),
+    )
+    assert report.total_testable_declared == 1
+    assert report.total_testable_validated == 0
+    assert report.total_demoted == 1
+    spec_text = (change_layout["specs_dir"] / "no_contract.md").read_text()
+    assert "**testable**: false" in spec_text
+    assert "missing contract" in spec_text
+
+
+def test_phase6_strict_does_not_demote_when_contract_present(change_layout):
+    """Scenarios with a contract block survive strict mode and proceed
+    to the normal test-file existence check (which then demotes for the
+    expected `test file missing` reason)."""
+    (change_layout["specs_dir"] / "email.md").write_text(SPEC_ONE_TESTABLE)
+    report = validate_testable_artifacts(
+        change_layout["change_dir"], change_layout["target"], LocalTransport(),
+    )
+    assert report.total_testable_declared == 1
+    assert report.total_demoted == 1
+    # demotion reason should be test-file-missing, NOT missing-contract
+    spec_text = (change_layout["specs_dir"] / "email.md").read_text()
+    assert "test file missing" in spec_text
+    assert "missing contract" not in spec_text
+
+
+def test_phase6_allow_inferred_contract_escape_hatch(change_layout):
+    """When the project explicitly opts into the legacy inferred-signature
+    path, scenarios without contract are NOT demoted by Phase-6 logic;
+    they fall through to the normal test-file check."""
+    (change_layout["specs_dir"] / "no_contract.md").write_text(
+        SPEC_TESTABLE_NO_CONTRACT
+    )
+    report = validate_testable_artifacts(
+        change_layout["change_dir"], change_layout["target"], LocalTransport(),
+        allow_inferred_contract=True,
+    )
+    assert report.total_testable_declared == 1
+    # Demoted, but reason is missing-test-file (not missing-contract)
+    assert report.total_demoted == 1
+    spec_text = (change_layout["specs_dir"] / "no_contract.md").read_text()
+    assert "test file missing" in spec_text
+    assert "missing contract" not in spec_text
+
+
+def test_phase6_strict_demotes_only_no_contract_in_mixed_spec(change_layout):
+    """One testable+contract scenario passes; one testable-no-contract
+    scenario gets demoted; the false scenario is untouched."""
+    spec = (
+        SPEC_MIXED
+        + "\n\n#### Scenario: testable but no contract\n\n"
+        + "- **testable**: true\n"
+        + "- **target**: zsiga/baz.py::qux\n"
+        + "- **Given** x\n"
+        + "- **When** y\n"
+        + "- **Then** z\n"
+    )
+    (change_layout["specs_dir"] / "mix.md").write_text(spec)
+    report = validate_testable_artifacts(
+        change_layout["change_dir"], change_layout["target"], LocalTransport(),
+    )
+    # 2 declared testable; 1 (no contract) demoted by Phase 6, the other
+    # also demoted because no test file.
+    assert report.total_testable_declared == 2
+    spec_text = (change_layout["specs_dir"] / "mix.md").read_text()
+    assert "missing contract" in spec_text  # the no-contract scenario got demoted
+    # the false scenario is unchanged
+    assert spec_text.count("**testable**: false") >= 2  # original false + demoted no-contract
+
+
+
+# ---------------------------------------------------------------------------
+# Phase 6: conftest ruff_runner fixture
+# ---------------------------------------------------------------------------
+
+
+def test_conftest_template_includes_ruff_runner():
+    """The shipped conftest_zsiga.py must offer a ruff_runner fixture
+    that uses shutil.which + pytest.skip when ruff is unavailable."""
+    from zsiga.pipeline.spec_pytest_check import CONFTEST_ZSIGA
+    assert "def ruff_runner" in CONFTEST_ZSIGA
+    assert "shutil.which" in CONFTEST_ZSIGA
+    assert 'pytest.skip("ruff binary not on PATH' in CONFTEST_ZSIGA
+
