@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "vacuous": false,
-  "scenarios_tested": 9,
-  "test_files": ["tests/test_feedback_loop_metrics.py"],
+  "vacuous": true,
+  "scenarios_tested": 0,
+  "test_files": [],
   "pytest_exit_code": 0,
-  "pytest_output": "18 passed in 0.98s",
+  "pytest_output": "",
   "pytest_stderr": "",
   "warning": ""
 }
