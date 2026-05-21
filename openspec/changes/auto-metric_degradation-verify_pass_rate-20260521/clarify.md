@@ -3,67 +3,64 @@
 ## 需求拆解
 
 ### 原始需求
-`verify_pass_rate` 指标当前为 49.2%，低于可接受阈值。需要定位 verify 阶段失败的根因，并修复导致 pass rate 低的关键问题，使指标恢复到健康水平。
+`verify_pass_rate` 当前为 49.2%，低于可接受阈值。需要定位 verify 阶段失败的根因并修复，使通过率回升到健康水平。
 
 ### 拆解后的子任务
 
-- [ ] 1. **数据采集与失败分类** — 读取 `metrics/changes.jsonl` 和相关日志，提取所有 verify 阶段失败记录，按失败原因分类（lint 错误、测试失败、daemon.cycle_error、无实现变更等），输出分类报告。（预估复杂度：中, 预估 token：~4000）
-- [ ] 2. **Verify 阶段逻辑审查** — 阅读 `zsiga/pipeline/` 下 verify 相关代码，确认 verify_pass_rate 的计算逻辑、通过条件、以及与上游 review 阶段的衔接，识别是否存在误判或过于严格的检查。（预估复杂度：中, 预估 token：~5000）
-- [ ] 3. **修复高频失败根因** — 根据任务 1 的分类结果，修复 top-2 高频失败类型（预计为 daemon.cycle_error 导致的分支冲突 和 lint/format 未预检），在 implement 阶段增加防护措施。（预估复杂度：高, 预估 token：~8000）
-- [ ] 4. **验证修复效果** — 运行 `pytest` + `ruff` 确认所有修改通过，并构造测试用例验证新增防护逻辑的正确性。（预估复杂度：低, 预估 token：~3000）
+- [ ] 1. **诊断 verify 失败模式** — 分析 `metrics/changes.jsonl`、`memory/learnings.jsonl` 及近期 verify 阶段日志，归类 TOP-N 失败原因（回归引入、依赖缺失、lint 错误、测试基础设施等），输出结构化诊断报告到 clarify.md 补充节。 (预估复杂度：中, 预估 token：~3000 / 无历史参考)
+- [ ] 2. **修复 verify 阶段高频失败根因** — 针对任务 1 排名前三的失败模式，在 `zsiga/pipeline/` 相关模块（orchestrator、verifier、reviewer）中实施防御性修复：包括但不限于 verify 前自动 lint 预检、回归快照比对、依赖完整性校验。 (预估复杂度：高, 预估 token：~6000 / 无历史参考)
+- [ ] 3. **强化 verify_pass_rate 指标采集与告警** — 在 metrics 模块中确保 `verify_pass_rate` 计算逻辑正确，增加按失败类型的细分统计（`verify_fail_lint`、`verify_fail_test`、`verify_fail_regression`），为后续自省循环提供可追溯数据。 (预估复杂度：低, 预估 token：~2500 / 无历史参考)
 
 ## 边界
 
 ### IN scope
-- 分析 verify_pass_rate 低于阈值的原因
-- 审查 verify 阶段的代码逻辑与判定标准
-- 修复可复现的高频失败根因（daemon.cycle_error、lint 未预检等）
-- 在 implement 阶段增加前置检查以防止常见失败
-- 为新增防护逻辑编写单元测试
+- 分析 verify 阶段失败的历史数据与日志
+- 修复 `zsiga/pipeline/` 下 verify 相关代码中的缺陷与防御性不足
+- 改进 metrics 模块中 `verify_pass_rate` 的采集粒度
+- 为修复项编写/更新对应 pytest 测试
 
 ### OUT of scope
-- 重构整个 pipeline 架构
-- 修改 dashboard 前端展示
-- 处理一次性/偶发的失败（如网络超时、LLM API 异常）
-- 修改 `memory/learnings.jsonl` 或 `data/zsiga.db` 的存储格式
-- 解决 cross_project 类型的问题（需独立 change 处理）
+- 不改动 `site/dashboard.html` 仪表盘展示逻辑（本次聚焦后端指标）
+- 不重构 pipeline 整体架构（仅针对 verify 阶段做增量修复）
+- 不处理 `daemon.cycle_error`（属于独立问题，已有多条 learnings）
+- 不修改 `venv2/` 下任何文件
 
 ### 依赖的外部条件
-- `metrics/changes.jsonl` 中有足够的 verify 失败记录可供分析
-- `zsiga/pipeline/` 目录下 verify 相关代码可被正常读取和修改
-- 测试环境可正常执行 `pytest` 和 `ruff`
+- `metrics/changes.jsonl` 和 `memory/learnings.jsonl` 中存在可分析的 verify 失败记录
+- 现有 `zsiga/pipeline/` 模块结构稳定，可增量修改
+- `ruff` 和 `pytest` 作为质量门禁可用
 
 ## 目标
 
 ### 成功标准
-1. 识别出至少 2 个导致 verify_pass_rate < 50% 的高频根因，并有明确的分类统计
-2. 针对每个识别出的根因，在代码中实现对应的防护/修复
-3. 新增/修改的代码通过 `pytest` 和 `ruff check`
-4. 新增的防护逻辑有对应的单元测试覆盖
+1. `verify_pass_rate` 指标在自省循环下次采集时 ≥ 70%
+2. TOP-3 失败模式各有对应的防御性修复且覆盖测试通过
+3. metrics 模块输出 `verify_pass_rate` 时附带失败类型细分（`lint`/`test`/`regression`）
+4. 所有变更通过 `ruff check` 和 `pytest` 全量测试
 
 ### 验收方式
-- `pytest` 全部通过（含新增测试用例）
-- `ruff check` 无错误
-- 分类报告中各类失败有明确的计数和占比
-- 代码 diff 可明确对应到某个根因的修复
+- 执行 `pytest tests/` 全部通过（含新增测试）
+- 执行 `ruff check zsiga/` 零错误
+- `metrics/changes.jsonl` 中最近 N 条 verify 记录的 pass 占比可视化提升
+- 代码 diff 仅涉及 `zsiga/pipeline/`、`zsiga/metrics/`、`tests/` 目录
 
 ## 约束
 
 ### 不能修改的文件
-- `data/zsiga.db`（运行时数据，不可手动修改）
-- `memory/learnings.jsonl`（记忆数据，不可手动修改）
-- `venv2/`（第三方依赖）
-- `site/dashboard.html`（前端不在本次范围内）
+- `site/dashboard.html`
+- `venv2/` 下所有文件
+- `pyproject.toml`、`requirements.txt`（不引入新依赖）
+- `skills/` 目录
 
 ### 项目部署分支
 main
 
 ### 已知风险
-- `daemon.cycle_error` 涉及 git checkout 冲突，修复可能需要调整 daemon 循环的 git 操作策略，影响面较广
-- 历史失败数据可能不够完整（部分失败未被记录到 metrics），导致分类结果有偏差
-- 修复 implement 阶段的前置检查可能引入新的边缘情况
+- verify 失败可能与其他阶段（implement、review）的输出质量耦合，单点修复未必能完全解决
+- 历史日志数据可能不完整，影响诊断准确性
+- `daemon.cycle_error` 持续出现可能导致 verify 修复无法被正确度量
 
 ### 预估 token 消耗
-- prompt: ~15000
-- completion: ~8000
-- 数据来源: 无历史参考（首次处理 verify_pass_rate 退化的 change）
+- prompt: ~8000
+- completion: ~5000
+- 数据来源: 无历史参考
