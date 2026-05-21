@@ -384,6 +384,10 @@ def _render(stats: dict, milestones: list[dict], state: str = "resting") -> str:
         sparkline_card = _sparkline_html(_rates)
     except Exception:
         sparkline_card = '<div class="meta">Insufficient data</div>'
+    try:
+        feedback_loop_section = _render_feedback_loop()
+    except Exception:
+        feedback_loop_section = ""
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -538,6 +542,8 @@ td {{ border-top: 1px solid #334155; }}
 {todo}
 
 {journal}
+
+{feedback_loop_section}
 
 <div class="section">
   <h2>Recent Changes</h2>
@@ -1340,6 +1346,127 @@ def _load_todos(base_path: str = None) -> list[dict]:
             "items": items,
         })
     return results
+
+
+def _render_feedback_loop() -> str:
+    """Render the Feedback Loop metrics section with 4 indicator cards."""
+    from .feedback_loop import (
+        compute_learnings_health,
+        compute_injection_rate,
+        compute_auto_proposal_rate,
+        compute_self_assessment_coverage,
+    )
+
+    learnings = compute_learnings_health()
+    injection = compute_injection_rate()
+    auto_proposal = compute_auto_proposal_rate()
+    coverage = compute_self_assessment_coverage()
+
+    # Card 1: Learnings Health
+    if learnings["total"] == 0:
+        learnings_card = (
+            '<div class="card">'
+            '<div class="label">🧠 Learnings Health</div>'
+            '<div class="meta">No learnings yet</div>'
+            '</div>'
+        )
+    else:
+        top_patterns_html = ""
+        for tp in learnings["top_patterns"]:
+            pk = tp["pattern_key"].replace("<", "&lt;").replace(">", "&gt;")
+            top_patterns_html += (
+                f'<div style="font-size:0.8rem;color:#94a3b8">'
+                f'{pk}: {tp["count"]}</div>'
+            )
+        last_ts = learnings["last_write"][:16].replace("T", " ")
+        learnings_card = (
+            '<div class="card">'
+            '<div class="label">🧠 Learnings Health</div>'
+            f'<div class="value">{learnings["total"]}</div>'
+            f'<div class="meta">active: {learnings["active"]}</div>'
+            f'{top_patterns_html}'
+            f'<div class="meta">last: {last_ts}</div>'
+            '</div>'
+        )
+
+    # Card 2: Injection Rate
+    if injection["implement_rate"] == 0 and injection["enrich_rate"] == 0:
+        injection_card = (
+            '<div class="card">'
+            '<div class="label">💉 Injection Rate</div>'
+            '<div class="meta">No injection data yet</div>'
+            '</div>'
+        )
+    else:
+        injection_card = (
+            '<div class="card">'
+            '<div class="label">💉 Injection Rate</div>'
+            f'<div class="value" style="font-size:1.2rem">'
+            f'{injection["implement_rate"]}%</div>'
+            f'<div class="meta">IMPLEMENT rate</div>'
+            f'<div style="font-size:0.85rem;color:#94a3b8">'
+            f'ENRICH: {injection["enrich_rate"]}%</div>'
+            f'<div class="meta">avg {injection["avg_per_session"]}/session</div>'
+            '</div>'
+        )
+
+    # Card 3: Auto-Proposal Success Rate
+    if auto_proposal["total"] == 0:
+        auto_card = (
+            '<div class="card">'
+            '<div class="label">🤖 Auto-Proposal</div>'
+            '<div class="meta">No auto-proposals yet</div>'
+            '</div>'
+        )
+    else:
+        rate_cls = _rate_class(auto_proposal["success_rate"])
+        auto_card = (
+            '<div class="card">'
+            '<div class="label">🤖 Auto-Proposal</div>'
+            f'<div class="value {rate_cls}">'
+            f'{auto_proposal["success_rate"]}%</div>'
+            f'<div class="meta">'
+            f'{auto_proposal["success"]} ok / '
+            f'{auto_proposal["reverted"]} fail / '
+            f'{auto_proposal["stuck"]} stuck</div>'
+            f'<div class="meta">total: {auto_proposal["total"]}</div>'
+            '</div>'
+        )
+
+    # Card 4: Self-Assessment Coverage
+    if coverage["assessed_changes"] == 0:
+        sa_card = (
+            '<div class="card">'
+            '<div class="label">📊 Self-Assessment</div>'
+            '<div class="meta">No self-assessments recorded</div>'
+            '</div>'
+        )
+    else:
+        cov_cls = _rate_class(coverage["coverage_pct"])
+        last_sa = coverage["last_assessment"][:16].replace("T", " ")
+        sa_card = (
+            '<div class="card">'
+            '<div class="label">📊 Self-Assessment</div>'
+            f'<div class="value {cov_cls}">'
+            f'{coverage["coverage_pct"]}%</div>'
+            f'<div class="meta">'
+            f'{coverage["assessed_changes"]}/{coverage["total_changes"]}'
+            f' changes</div>'
+            f'<div class="meta">last: {last_sa}</div>'
+            '</div>'
+        )
+
+    return (
+        '<div class="section">\n'
+        '  <h2>🔄 Feedback Loop</h2>\n'
+        '  <div class="grid">\n'
+        f'    {learnings_card}\n'
+        f'    {injection_card}\n'
+        f'    {auto_card}\n'
+        f'    {sa_card}\n'
+        '  </div>\n'
+        '</div>\n'
+    )
 
 
 def _todo_section(base_path: str = None) -> str:

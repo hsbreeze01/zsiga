@@ -7,13 +7,13 @@
 
 ### 拆解后的子任务
 
-- [ ] 1. **Feedback Loop 指标计算层** — 新增 Python 函数，从 `memory/learnings.jsonl`、`metrics/changes.jsonl` 等数据源计算 4 组指标（Learnings Health：total/active count、top-5 pattern_key 分布、上次写入时间；Injection Rate：IMPLEMENT/ENRICH 阶段注入次数及比率、平均注入条数；Auto-Proposal Success Rate：总数/成功/失败/stuck 数、成功率；Self-Assessment Coverage：总 changes 数、有记录数、覆盖率、上次时间）。空数据时返回 "No data yet" 安全默认值。涉及文件：dashboard 渲染后端模块（新增或扩展 metrics 函数）。(预估复杂度：高, 预估 token：~8000 / 无历史参考)
+- [x] 1. **Feedback Loop 指标计算层** — 新增 Python 函数，从 `memory/learnings.jsonl`、`metrics/changes.jsonl` 等数据源计算 4 组指标（Learnings Health：total/active count、top-5 pattern_key 分布、上次写入时间；Injection Rate：IMPLEMENT/ENRICH 阶段注入次数及比率、平均注入条数；Auto-Proposal Success Rate：总数/成功/失败/stuck 数、成功率；Self-Assessment Coverage：总 changes 数、有记录数、覆盖率、上次时间）。空数据时返回 "No data yet" 安全默认值。涉及文件：dashboard 渲染后端模块（新增或扩展 metrics 函数）。(预估复杂度：高, 预估 token：~8000 / 无历史参考)
 
-- [ ] 2. **Dashboard HTML 模板更新** — 在 `site/dashboard.html` 的 Metrics 区域、Change History section 之前，新增 "Feedback Loop" section，包含 4 个指标卡片的 HTML/CSS 结构。卡片样式复用现有 `.card` / `.section` 样式，支持 good/warn/bad 颜色分级。指标为空时显示 "No data yet"。(预估复杂度：中, 预估 token：~4000 / 无历史参考)
+- [x] 2. **Dashboard HTML 模板更新** — 在 `site/dashboard.html` 的 Metrics 区域、Change History section 之前，新增 "Feedback Loop" section，包含 4 个指标卡片的 HTML/CSS 结构。卡片样式复用现有 `.card` / `.section` 样式，支持 good/warn/bad 颜色分级。指标为空时显示 "No data yet"。(预估复杂度：中, 预估 token：~4000 / 无历史参考)
 
-- [ ] 3. **渲染集成：将指标注入 dashboard 输出** — 修改 dashboard 渲染管线，调用新增的计算函数获取 4 组指标，将结果填入 HTML 模板对应占位符。确保与现有 metrics 卡片渲染流程一致（Python 端渲染，无 JS）。涉及文件：dashboard 渲染主逻辑文件。(预估复杂度：中, 预估 token：~4000 / 无历史参考)
+- [x] 3. **渲染集成：将指标注入 dashboard 输出** — 修改 dashboard 渲染管线，调用新增的计算函数获取 4 组指标，将结果填入 HTML 模板对应占位符。确保与现有 metrics 卡片渲染流程一致（Python 端渲染，无 JS）。涉及文件：dashboard 渲染主逻辑文件。(预估复杂度：中, 预估 token：~4000 / 无历史参考)
 
-- [ ] 4. **测试覆盖** — 新增 pytest 测试文件，覆盖：4 组指标在正常数据下的计算正确性、空数据时返回 "No data yet" 安全默认值、dashboard HTML 输出包含 "Feedback Loop" section、页面渲染不报错。遵循项目现有测试模式（参考 `tests/test_dashboard_api.py`）。(预估复杂度：中, 预估 token：~5000 / 无历史参考)
+- [x] 4. **测试覆盖** — 新增 pytest 测试文件，覆盖：4 组指标在正常数据下的计算正确性、空数据时返回 "No data yet" 安全默认值、dashboard HTML 输出包含 "Feedback Loop" section、页面渲染不报错。遵循项目现有测试模式（参考 `tests/test_dashboard_api.py`）。(预估复杂度：中, 预估 token：~5000 / 无历史参考)
 
 ## 边界
 
