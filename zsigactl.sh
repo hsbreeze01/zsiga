@@ -13,6 +13,8 @@ DAEMON_CMD="$PYTHON -u -m zsiga daemon --port=58175"
 export PYTHONPATH="$REPO"
 export ZSIGA_HOME="$REPO"
 export PYTHONUNBUFFERED=1  # ensure daemon log shows print output in real time
+# Source secret env file if present (DEEPSEEK_API_KEY etc.)
+[ -f "$REPO/.zsiga.env" ] && set -a && . "$REPO/.zsiga.env" && set +a
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

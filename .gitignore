@@ -26,3 +26,6 @@ memory/learnings.jsonl
 memory/journal.jsonl
 zsiga.db
 openspec/changes/*/.phase_state
+
+# DeepSeek / LLM secret env file (chmod 600, never committed)
+.zsiga.env

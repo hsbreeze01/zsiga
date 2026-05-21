@@ -7,6 +7,26 @@ from zsiga.agent.compaction import compact_messages, estimate_tokens
 from zsiga.agent.token_budget import TokenBudget
 from zsiga.agent.value_signal import ValueTracker, classify_turn
 
+
+def _build_llm_client(provider: str, api_key: str, base_url: str | None,
+                     proxy: str | None):
+    """Return an OpenAI-compatible client for the requested *provider*.
+
+    Both ZaiClient (zhipuai) and openai.OpenAI expose
+    ``client.chat.completions.create(...)`` with the same return shape, so
+    the rest of AgentLoop is provider-agnostic.
+    """
+    kwargs: dict = {"api_key": api_key}
+    if base_url:
+        kwargs["base_url"] = base_url
+    if proxy:
+        import httpx
+        kwargs["http_client"] = httpx.Client(proxy=proxy, timeout=120.0)
+    if provider == "openai":
+        from openai import OpenAI
+        return OpenAI(**kwargs)
+    return ZaiClient(**kwargs)
+
 log = logging.getLogger(__name__)
 
 
@@ -39,16 +59,10 @@ class AgentLoop:
                  per_turn_limit: int = 8192,
                  compaction_ratio: float = 0.8,
                  stale_limit: int = 10,
-                 budget_extend_factor: float = 1.5):
-        kwargs = {"api_key": api_key}
-        if base_url:
-            kwargs["base_url"] = base_url
-        if proxy:
-            import httpx
-            kwargs["http_client"] = httpx.Client(
-                proxy=proxy, timeout=120.0,
-            )
-        self.client = ZaiClient(**kwargs)
+                 budget_extend_factor: float = 1.5,
+                 provider: str = "zhipuai"):
+        self.provider = provider
+        self.client = _build_llm_client(provider, api_key, base_url, proxy)
         self.model = model
         self.tools = []
         self.tool_funcs = {}

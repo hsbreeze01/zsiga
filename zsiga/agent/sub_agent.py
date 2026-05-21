@@ -24,6 +24,7 @@ def create_sub_agent(
     model: str,
     base_url: str = None,
     proxy: str = None,
+    provider: str = "zhipuai",
 ) -> AgentLoop:
     agent = AgentLoop(
         api_key=api_key,
@@ -33,6 +34,7 @@ def create_sub_agent(
         compaction_enabled=False,
         compaction_threshold=999999,
         compaction_keep_recent=999,
+        provider=provider,
     )
     return agent
 
@@ -43,10 +45,11 @@ def create_with_role(
     model: str,
     base_url: str = None,
     proxy: str = None,
+    provider: str = "zhipuai",
 ) -> AgentLoop:
     r = Role(role)
     config = get_role_config(r)
-    agent = create_sub_agent(api_key, model, base_url, proxy)
+    agent = create_sub_agent(api_key, model, base_url, proxy, provider=provider)
     agent._role_config = config
     return agent
 
