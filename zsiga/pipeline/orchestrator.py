@@ -712,6 +712,11 @@ class ZsigaOrchestrator:
         self.agent.set_phase("verify")
         register_tools(self.agent, target_path, transport=transport)
 
+        # Verify pre-check: lightweight import + lint on changed files
+        from .diagnoser import verify_precheck as _verify_precheck
+        changed_for_precheck = _get_changed_files(target_path, pre_sha, transport)
+        precheck_result = _verify_precheck(target_path, changed_for_precheck, transport)
+
         print("  Prefetching test/lint results...")
         t_mech = time.monotonic()
         mech_results = prefetch_mechanical(
@@ -723,20 +728,105 @@ class ZsigaOrchestrator:
               f"Lint: {'✅' if mech_results['lint']['passed'] else '❌'} "
               f"({time.monotonic() - t_mech:.1f}s)")
 
-        t0 = time.monotonic()
-        verify_result = await verify(self.agent, change_dir, target_path, pre_sha,
-                    transport=transport,
-                    mech_results=mech_results,
-                    max_turns=self.config.pipeline.verify_max_turns,
-                    timeout_seconds=self.config.pipeline.verify_timeout)
-        verify_seconds = time.monotonic() - t0
-        verify_calls = _extract_calls(verify_result)
-        verify_tokens = _extract_tokens(verify_result)
-
-        verdict = read_verdict(change_dir, transport)
-        print(f"  Verdict: {verdict} ({verify_seconds:.1f}s)")
-        verify_outcome = Outcome.SUCCESS if verdict == "PASS" else Outcome.FAIL
         eval_fix_attempts = 0
+
+        if not precheck_result.passed:
+            print(
+                f"  Pre-check FAILED: {precheck_result.error_type} "
+                f"in {precheck_result.file_path}"
+            )
+            print(f"  {precheck_result.message[:300]}")
+            print("  Skipping LLM verify, entering eval-fix loop directly")
+
+            # Build synthetic verify.md with the pre-check error
+            verify_content = (
+                f"Verdict: FAIL\n\n"
+                f"Pre-check failure ({precheck_result.error_type}):\n"
+                f"{precheck_result.message}\n"
+            )
+            verify_path = f"{change_dir}/verify.md"
+            transport.run_shell(
+                f"cat > '{verify_path}' << 'ZSIGA_VERIFY_EOF'\n{verify_content}\nZSIGA_VERIFY_EOF",
+                timeout=10,
+            )
+
+            verdict = "FAIL"
+            verify_outcome = Outcome.FAIL
+            verify_seconds = 0.0
+            verify_calls = (0, 0)
+            verify_tokens = (0, 0)
+
+            # Enter eval-fix loop with the pre-check error
+            print("  Attempting eval fixes for pre-check failure...")
+            fixed, eval_fix_attempts = await self._eval_fix_loop(
+                change_dir, target_path, project_config,
+                pre_sha, transport=transport,
+                max_attempts=self.config.pipeline.eval_fix_attempts,
+                venv_python=venv_python,
+                escalation=escalation,
+                recovery=recovery,
+            )
+            if not fixed:
+                # Escalation abort check (REQ-ES-04)
+                if escalation.should_abort():
+                    self._handle_escalation_abort(
+                        escalation, change_dir, change_name,
+                        project_name, transport,
+                        recovery=recovery,
+                    )
+                else:
+                    # Run structured diagnosis with pre-check details
+                    try:
+                        self._run_diagnosis(
+                            change_dir, target_path, change_name,
+                            project_name, transport,
+                            verify_feedback=precheck_result.message,
+                        )
+                    except Exception as diag_err:
+                        print(f"  Diagnosis failed: {diag_err}")
+
+                git_ops.reset_hard(target_path, pre_sha, transport=transport)
+                print(f"  REVERTED: {change_name} (verify pre-check failed)")
+                rec.outcome = Outcome.REVERTED
+                rec.phases.append(PhaseRecord(
+                    phase=Phase.VERIFY, outcome=Outcome.FAIL,
+                    seconds_used=0.0, fix_attempts=eval_fix_attempts,
+                    detail=f"pre-check: {precheck_result.error_type} in {precheck_result.file_path}",
+                ))
+                record_outcome(change_name, project_name, False, "verify")
+                return False
+
+            # Pre-check fix succeeded; re-verify to confirm
+            self.agent.set_phase("verify")
+            register_tools(self.agent, target_path, transport=transport)
+            t0 = time.monotonic()
+            verify_result = await verify(self.agent, change_dir, target_path, pre_sha,
+                        transport=transport,
+                        mech_results=mech_results,
+                        max_turns=self.config.pipeline.verify_max_turns,
+                        timeout_seconds=self.config.pipeline.verify_timeout)
+            verify_seconds = time.monotonic() - t0
+            verify_calls = _extract_calls(verify_result)
+            verify_tokens = _extract_tokens(verify_result)
+            verdict = read_verdict(change_dir, transport)
+            verify_outcome = Outcome.SUCCESS if verdict == "PASS" else Outcome.FAIL
+            print(f"  Post-fix verdict: {verdict} ({verify_seconds:.1f}s)")
+        else:
+            print("  Pre-check PASSED, proceeding with LLM verify")
+            t0 = time.monotonic()
+            verify_result = await verify(self.agent, change_dir, target_path, pre_sha,
+                        transport=transport,
+                        mech_results=mech_results,
+                        max_turns=self.config.pipeline.verify_max_turns,
+                        timeout_seconds=self.config.pipeline.verify_timeout)
+            verify_seconds = time.monotonic() - t0
+            verify_calls = _extract_calls(verify_result)
+            verify_tokens = _extract_tokens(verify_result)
+
+            verdict = read_verdict(change_dir, transport)
+            print(f"  Verdict: {verdict} ({verify_seconds:.1f}s)")
+            verify_outcome = Outcome.SUCCESS if verdict == "PASS" else Outcome.FAIL
+            eval_fix_attempts = 0
 
         if verdict == "FAIL":
             print("  Verifier: FAIL, attempting eval fixes...")

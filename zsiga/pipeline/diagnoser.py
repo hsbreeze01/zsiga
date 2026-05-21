@@ -151,16 +151,43 @@ class Diagnoser:
                 seen.add(desc)
                 unique.append((desc, evidence, conf))
 
-        # Always generate at least 3 hypotheses by adding generic fallbacks
-        fallbacks: list[tuple[str, str, float]] = [
-            ("Recent code change introduced a regression", "verify failure", 0.40),
-            ("Missing or incorrect configuration", "verify failure", 0.35),
-            ("Environment or dependency issue", "verify failure", 0.30),
-        ]
-        for fb_desc, fb_ev, fb_conf in fallbacks:
-            if fb_desc not in seen:
-                seen.add(fb_desc)
-                unique.append((fb_desc, fb_ev, fb_conf))
+        # Only add generic fallbacks if we have fewer than 3 specific
+        # hypotheses.  This ensures real evidence is never displaced by
+        # low-confidence generic guesses like "Recent code change …".
+        if len(unique) < 3:
+            fallbacks: list[tuple[str, str, float]] = [
+                (
+                    "Recent code change introduced a regression",
+                    combined[:120],
+                    0.40,
+                ),
+                (
+                    "Missing or incorrect configuration",
+                    combined[:120],
+                    0.35,
+                ),
+                (
+                    "Environment or dependency issue",
+                    combined[:120],
+                    0.30,
+                ),
+            ]
+            for fb_desc, fb_ev, fb_conf in fallbacks:
+                if fb_desc not in seen and len(unique) < 5:
+                    seen.add(fb_desc)
+                    unique.append((fb_desc, fb_ev, fb_conf))
+
+        # Ensure at least one hypothesis references actual failure detail
+        has_real_evidence = any(
+            ev != "verify failure" for _, ev, _ in unique
+        )
+        if not has_real_evidence and combined.strip():
+            snippet = combined[:120]
+            unique.append((
+                "Error detected in failure output",
+                snippet,
+                0.45,
+            ))
 
         # Sort by confidence descending
         unique.sort(key=lambda x: x[2], reverse=True)
@@ -300,7 +327,9 @@ class Diagnoser:
         """Select the most likely root cause and produce a FixPlan.
 
         If a hypothesis was confirmed by probe, use that.
-        Otherwise fall back to the highest-confidence hypothesis.
+        Otherwise generate a specific, actionable fix description from
+        the best hypothesis evidence (never the generic
+        "Unconfirmed hypothesis … Needs further investigation." string).
         """
         confirmed = None
         for h in hypotheses:
@@ -317,17 +346,112 @@ class Diagnoser:
                 confirmed=True,
             )
 
-        # Fallback: use highest-confidence hypothesis
+        # Unconfirmed path: use highest-confidence hypothesis with
+        # a specific, actionable fix description derived from evidence.
         best = hypotheses[0] if hypotheses else Hypothesis(
             rank=1, description="Unknown error",
             confidence=0.1, evidence="No evidence available",
         )
+        fix_description = self._build_actionable_fix(best)
         return FixPlan(
             root_cause=best.description,
-            fix_description=f"Unconfirmed hypothesis: {best.description}. "
-                           f"Needs further investigation.",
+            fix_description=fix_description,
             affected_files=self._extract_affected_files(best.evidence),
             confirmed=False,
+        )
+
+    def _build_actionable_fix(self, hypothesis: Hypothesis) -> str:
+        """Build a concrete, actionable fix description from hypothesis evidence."""
+        evidence = hypothesis.evidence
+        desc = hypothesis.description.lower()
+
+        # ImportError / ModuleNotFoundError
+        module_match = re.search(
+            r"No module named ['\"]([^'\"]+)['\"]", evidence,
+        )
+        if not module_match:
+            module_match = re.search(
+                r"cannot import name ['\"]([^'\"]+)['\"]", evidence,
+            )
+        if module_match:
+            module_name = module_match.group(1)
+            return (
+                f"Missing module '{module_name}'. "
+                f"Install the dependency providing '{module_name}' or "
+                f"add the missing import. Evidence: {evidence}"
+            )
+
+        # Lint errors (E701, E702, etc.)
+        lint_match = re.search(
+            r"(E\d{3})\s+(.+?)(?:\s*$|\s*-->)", evidence,
+        )
+        if lint_match:
+            rule_code = lint_match.group(1)
+            rule_msg = lint_match.group(2).strip()
+            files = self._extract_affected_files(evidence)
+            file_hint = f" in {files[0]}" if files else ""
+            return (
+                f"Lint violation {rule_code}: {rule_msg}{file_hint}. "
+                f"Fix the code style issue. Evidence: {evidence}"
+            )
+
+        # SyntaxError
+        if "syntaxerror" in desc or "syntax" in desc:
+            files = self._extract_affected_files(evidence)
+            file_hint = f" in {files[0]}" if files else ""
+            return (
+                f"Syntax error{file_hint}. "
+                f"Review and fix the syntax. Evidence: {evidence}"
+            )
+
+        # AssertionError / test expectation mismatch
+        if "assertionerror" in desc or "assert" in desc or "test" in desc:
+            # Try to extract test name
+            test_match = re.search(
+                r"(test_\w+|FAILED\s+(\S+))", evidence,
+            )
+            test_name = ""
+            if test_match:
+                test_name = test_match.group(1) if test_match.group(1) else test_match.group(2)
+            test_hint = f" in {test_name}" if test_name else ""
+            return (
+                f"Test expectation mismatch{test_hint}. "
+                f"Review test logic and expected values. Evidence: {evidence}"
+            )
+
+        # NameError / undefined variable
+        name_match = re.search(r"name ['\"](\w+)['\"]", evidence)
+        if name_match:
+            symbol = name_match.group(1)
+            return (
+                f"Undefined name '{symbol}'. "
+                f"Add missing import or define the variable. Evidence: {evidence}"
+            )
+
+        # TypeError / AttributeError
+        if "type" in desc:
+            return (
+                f"Type mismatch in function call or operation. "
+                f"Check argument types. Evidence: {evidence}"
+            )
+        if "attribute" in desc:
+            return (
+                f"Missing or wrong attribute access. "
+                f"Check object type and available attributes. Evidence: {evidence}"
+            )
+
+        # Timeout
+        if "timeout" in desc or "time" in desc:
+            return (
+                f"Execution exceeded time budget. "
+                f"Optimize slow code path or increase timeout. Evidence: {evidence}"
+            )
+
+        # Generic fallback — always include actual evidence snippet
+        snippet = evidence[:120] if evidence else "no details"
+        return (
+            f"Best guess: {hypothesis.description}. "
+            f"Evidence: {snippet}"
         )
 
     def _extract_affected_files(self, evidence: str) -> list[str]:
@@ -356,3 +480,79 @@ class Diagnoser:
             fix_plan=fix_plan,
             timestamp=datetime.now().isoformat(),
         )
+
+
+# ---------------------------------------------------------------------------
+# Verify pre-check (lightweight import + lint check on changed files)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class PreCheckResult:
+    """Result of a verify pre-check."""
+    passed: bool
+    error_type: str  # "import_error", "lint_error", ""
+    file_path: str   # file that failed, or ""
+    message: str     # human-readable description
+
+
+def verify_precheck(
+    target_path: str,
+    changed_files: list[str],
+    transport: Transport,
+) -> PreCheckResult:
+    """Run lightweight import and lint pre-checks on changed Python files.
+
+    Returns a PreCheckResult.  If any check fails the caller should skip
+    the LLM-based verify and enter the eval-fix loop directly.
+    """
+    import sys as _sys
+
+    py_files = [f for f in changed_files if f.endswith(".py")]
+    if not py_files:
+        return PreCheckResult(passed=True, error_type="", file_path="", message="")
+
+    python_bin = _sys.executable
+
+    for rel_path in py_files:
+        full_path = f"{target_path}/{rel_path}"
+
+        # --- import check: compile + import attempt ---
+        r = transport.run_shell(
+            f"{python_bin} -c \"import py_compile; py_compile.compile('{full_path}', doraise=True)\"",
+            cwd=target_path,
+            timeout=30,
+        )
+        if r["exit_code"] != 0:
+            output = r.get("stdout", "") + r.get("stderr", "")
+            return PreCheckResult(
+                passed=False,
+                error_type="import_error",
+                file_path=rel_path,
+                message=f"Import/compile error in {rel_path}: {output[:500]}",
+            )
+
+        # --- lint check ---
+        r = transport.run_shell(
+            f"{python_bin} -m ruff check '{full_path}' 2>&1",
+            cwd=target_path,
+            timeout=30,
+        )
+        if r["exit_code"] != 0:
+            output = r.get("stdout", "")
+            return PreCheckResult(
+                passed=False,
+                error_type="lint_error",
+                file_path=rel_path,
+                message=f"Lint error in {rel_path}: {output[:500]}",
+            )
+
+    return PreCheckResult(passed=True, error_type="", file_path="", message="")
+
+
+def diagnose_failure(
+    failure_info: dict,
+    target_path: str,
+    transport: Transport,
+) -> DiagnosisReport:
+    """Convenience: run the full diagnosis cycle with a fresh Diagnoser."""
+    return Diagnoser().diagnose(failure_info, target_path, transport)

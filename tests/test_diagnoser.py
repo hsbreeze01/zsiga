@@ -5,6 +5,7 @@ import tempfile
 
 from zsiga.pipeline.diagnoser import (
     Diagnoser, Hypothesis, ProbeResult, FixPlan, DiagnosisReport,
+    PreCheckResult, verify_precheck,
 )
 from zsiga.transport import LocalTransport
 
@@ -209,7 +210,7 @@ class TestTargetedFix:
         d = Diagnoser()
         hyps = [
             Hypothesis(rank=1, description="Missing or incorrect import",
-                       confidence=0.9, evidence="ImportError",
+                       confidence=0.9, evidence="ImportError: No module named 'xyz'",
                        probe_result=ProbeResult(confirmed=False, evidence="no", probe_type="search")),
             Hypothesis(rank=2, description="Test expectation mismatch",
                        confidence=0.8, evidence="AssertionError",
@@ -219,7 +220,9 @@ class TestTargetedFix:
         assert isinstance(plan, FixPlan)
         assert plan.confirmed is False
         assert "Missing or incorrect import" in plan.root_cause
-        assert "unconfirmed" in plan.fix_description.lower()
+        # Should contain actionable info about the module, NOT generic "Unconfirmed hypothesis"
+        assert "unconfirmed hypothesis" not in plan.fix_description.lower()
+        assert "needs further investigation" not in plan.fix_description.lower()
 
     def test_fix_plan_has_required_fields(self):
         d = Diagnoser()
@@ -334,3 +337,189 @@ class TestFullDiagnoseCycle:
             assert len(report.hypotheses) >= 1
             assert isinstance(report.fix_plan, FixPlan)
             assert isinstance(report.timestamp, str)
+
+
+# ---------------------------------------------------------------------------
+# Task 1.3: Enhanced root-cause classification tests
+# ---------------------------------------------------------------------------
+
+class TestImportErrorRootCause:
+    """ImportError produces specific root cause even without probe confirmation."""
+
+    def test_import_error_no_generic_unconfirmed(self):
+        d = Diagnoser()
+        hyps = [
+            Hypothesis(
+                rank=1,
+                description="Missing or incorrect import / dependency",
+                confidence=0.9,
+                evidence="ImportError: No module named 'some_module'",
+                probe_result=ProbeResult(confirmed=False, evidence="not found", probe_type="search"),
+            ),
+        ]
+        plan = d.targeted_fix(hyps)
+        assert plan.confirmed is False
+        assert "unconfirmed hypothesis" not in plan.fix_description.lower()
+        assert "some_module" in plan.fix_description
+
+    def test_import_error_mentions_module_name(self):
+        d = Diagnoser()
+        hyps = [
+            Hypothesis(
+                rank=1,
+                description="Missing or incorrect import / dependency",
+                confidence=0.9,
+                evidence="ModuleNotFoundError: No module named 'xyz'",
+                probe_result=ProbeResult(confirmed=False, evidence="no", probe_type="search"),
+            ),
+        ]
+        plan = d.targeted_fix(hyps)
+        assert "xyz" in plan.fix_description
+
+
+class TestLintErrorRootCause:
+    """Lint error produces specific root cause even without probe confirmation."""
+
+    def test_lint_error_specific_fix(self):
+        d = Diagnoser()
+        hyps = [
+            Hypothesis(
+                rank=1,
+                description="Code style or syntax violation",
+                confidence=0.75,
+                evidence="E701 Multiple statements on one line (colon)\n   --> src/foo.py:42:35",
+                probe_result=ProbeResult(confirmed=False, evidence="none", probe_type="diagnostics"),
+            ),
+        ]
+        plan = d.targeted_fix(hyps)
+        assert plan.confirmed is False
+        assert "E701" in plan.fix_description
+        assert "src/foo.py" in plan.fix_description
+        assert "unconfirmed hypothesis" not in plan.fix_description.lower()
+
+    def test_lint_error_affected_files(self):
+        d = Diagnoser()
+        hyps = [
+            Hypothesis(
+                rank=1,
+                description="Code style or syntax violation",
+                confidence=0.75,
+                evidence="E701 Multiple statements on one line (colon)\n   --> src/foo.py:42:35",
+                probe_result=ProbeResult(confirmed=False, evidence="none", probe_type="diagnostics"),
+            ),
+        ]
+        plan = d.targeted_fix(hyps)
+        assert "src/foo.py" in plan.affected_files
+
+
+class TestAssertionErrorRootCause:
+    """AssertionError produces specific root cause."""
+
+    def test_assertion_error_specific_root_cause(self):
+        d = Diagnoser()
+        hyps = [
+            Hypothesis(
+                rank=1,
+                description="Test expectation mismatch",
+                confidence=0.8,
+                evidence="FAILED test_foo.py::test_bar - AssertionError: expected 42",
+                probe_result=ProbeResult(confirmed=False, evidence="no", probe_type="search"),
+            ),
+        ]
+        plan = d.targeted_fix(hyps)
+        assert "assertion" in plan.root_cause.lower() or "expectation" in plan.root_cause.lower()
+        assert "unconfirmed hypothesis" not in plan.fix_description.lower()
+        # Should reference test name
+        assert "test_bar" in plan.fix_description or "test_foo" in plan.fix_description
+
+
+class TestGenericErrorHasContext:
+    """Unknown error pattern still produces actionable hypothesis."""
+
+    def test_unknown_error_includes_evidence_snippet(self):
+        d = Diagnoser()
+        failure = {
+            "detail": "some bizarre custom error that matches nothing xyz ABC123DEF",
+        }
+        hyps = d.hypothesize(failure)
+        # At least one hypothesis should reference actual error detail
+        evidence_texts = " ".join(h.evidence for h in hyps)
+        assert "bizarre" in evidence_texts or "ABC123DEF" in evidence_texts or "xyz" in evidence_texts
+
+    def test_multiple_patterns_no_generic_displacement(self):
+        """Generic fallbacks should not displace specific matched hypotheses."""
+        d = Diagnoser()
+        failure = {
+            "detail": "ImportError: No module named 'foo'\nTypeError: unsupported operand",
+        }
+        hyps = d.hypothesize(failure)
+        descriptions = [h.description.lower() for h in hyps]
+        # Should have specific import AND type error hypotheses
+        has_import = any("import" in d or "module" in d or "dependency" in d for d in descriptions)
+        has_type = any("type" in d for d in descriptions)
+        assert has_import
+        assert has_type
+
+
+# ---------------------------------------------------------------------------
+# Task 2.3: Verify pre-check tests
+# ---------------------------------------------------------------------------
+
+class TestVerifyPrecheck:
+    """Tests for the verify_precheck function."""
+
+    def test_precheck_detects_import_error(self):
+        """Pre-check detects import error in changed file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create a file with a broken import
+            bad_file = os.path.join(tmpdir, "broken.py")
+            with open(bad_file, "w") as f:
+                f.write("import nonexistent_xyz_module\n")
+            transport = LocalTransport()
+            result = verify_precheck(tmpdir, ["broken.py"], transport)
+            assert isinstance(result, PreCheckResult)
+            assert result.passed is False
+            assert result.error_type == "import_error"
+            assert "broken.py" in result.file_path
+
+    def test_precheck_detects_lint_error(self):
+        """Pre-check detects lint error in changed file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create a file with E701 violation
+            bad_file = os.path.join(tmpdir, "linty.py")
+            with open(bad_file, "w") as f:
+                f.write("if True: pass\n")
+            transport = LocalTransport()
+            result = verify_precheck(tmpdir, ["linty.py"], transport)
+            assert isinstance(result, PreCheckResult)
+            assert result.passed is False
+            assert result.error_type == "lint_error"
+            assert "linty.py" in result.file_path
+
+    def test_precheck_passes_on_clean_file(self):
+        """Pre-check passes on clean file."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            clean_file = os.path.join(tmpdir, "clean.py")
+            with open(clean_file, "w") as f:
+                f.write("x = 1\ny = 2\nprint(x + y)\n")
+            transport = LocalTransport()
+            result = verify_precheck(tmpdir, ["clean.py"], transport)
+            assert isinstance(result, PreCheckResult)
+            assert result.passed is True
+            assert result.error_type == ""
+            assert result.file_path == ""
+
+    def test_precheck_no_py_files_passes(self):
+        """Pre-check passes when no Python files are in changed set."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            transport = LocalTransport()
+            result = verify_precheck(tmpdir, ["readme.md", "data.json"], transport)
+            assert result.passed is True
+
+    def test_precheck_result_has_required_fields(self):
+        """PreCheckResult has all required fields."""
+        result = PreCheckResult(passed=True, error_type="", file_path="", message="")
+        assert isinstance(result.passed, bool)
+        assert isinstance(result.error_type, str)
+        assert isinstance(result.file_path, str)
+        assert isinstance(result.message, str)
