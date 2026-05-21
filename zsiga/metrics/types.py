@@ -35,6 +35,8 @@ class PhaseRecord:
     completion_tokens: int = 0
     compaction_count: int = 0
     sub_agent_count: int = 0
+    model: str = "glm-5.1"
+    provider: str = "zhipuai"
 
 
 @dataclass
@@ -69,6 +71,8 @@ class ChangeRecord:
                     "completion_tokens": p.completion_tokens,
                     "compaction_count": p.compaction_count,
                     "sub_agent_count": p.sub_agent_count,
+                    "model": p.model,
+                    "provider": p.provider,
                 }
                 for p in self.phases
             ],

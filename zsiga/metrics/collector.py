@@ -163,6 +163,22 @@ def compute_stats(changes: list[dict] = None) -> dict:
         p.get("sub_agent_count", 0) for c in changes for p in c.get("phases", [])
     )
 
+    model_usage = {}
+    for c in changes:
+        for p in c.get("phases", []):
+            model_name = p.get("model", "glm-5.1")
+            provider = p.get("provider", "zhipuai")
+            if model_name not in model_usage:
+                model_usage[model_name] = {
+                    "provider": provider,
+                    "llm_calls": 0,
+                    "prompt_tokens": 0,
+                    "completion_tokens": 0,
+                }
+            model_usage[model_name]["llm_calls"] += p.get("llm_calls", 0)
+            model_usage[model_name]["prompt_tokens"] += p.get("prompt_tokens", 0)
+            model_usage[model_name]["completion_tokens"] += p.get("completion_tokens", 0)
+
     stats = {
         "total_changes": total,
         "successful_changes": len(successes),
@@ -184,6 +200,7 @@ def compute_stats(changes: list[dict] = None) -> dict:
         "recent_changes": [c["change_name"] for c in changes[-5:]],
         "last_updated": datetime.now().isoformat(),
         "intent_accuracy": compute_intent_accuracy(),
+        "model_usage": model_usage,
     }
 
     save_stats_snapshot(stats)
@@ -313,4 +330,5 @@ def _empty_stats(lessons_count: int = 0) -> dict:
             "by_intent": {},
             "low_confidence_count": 0,
         },
+        "model_usage": {},
     }

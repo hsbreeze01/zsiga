@@ -358,6 +358,7 @@ def _render(stats: dict, milestones: list[dict], state: str = "resting") -> str:
         milestone_cards += _milestone_card(m) + "\n"
     recent = _recent_list(stats.get("recent_changes", []))
     usage_section = _usage_section(stats)
+    model_usage_section = _model_usage_section(stats)
     journal = _journal_section()
     todo = _todo_section()
     mascot = _mascot_img(state)
@@ -526,7 +527,7 @@ td {{ border-top: 1px solid #334155; }}
 
 {failure_section}
 
-{usage_section}
+{model_usage_section}{usage_section}
 
 <div class="section">
     <h2>🪙 Evolution Roadmap</h2>
@@ -1161,6 +1162,62 @@ def _fmt_tokens(n: int) -> str:
         return f"{n/1000:.1f}K"
     return f"{n/1_000_000:.2f}M"
 
+
+def _model_usage_section(stats: dict) -> str:
+    model_usage = stats.get("model_usage", {})
+    if not model_usage:
+        return ""
+
+    model_colors = {
+        "deepseek-chat": "#06b6d4",
+        "glm-5.1": "#8b5cf6",
+    }
+    default_color = "#94a3b8"
+
+    grand_total = 0
+    for m_data in model_usage.values():
+        grand_total += m_data["prompt_tokens"] + m_data["completion_tokens"]
+
+    rows = ""
+    for model_name, m_data in model_usage.items():
+        provider = m_data.get("provider", "unknown")
+        llm_calls = m_data["llm_calls"]
+        pt = m_data["prompt_tokens"]
+        ct = m_data["completion_tokens"]
+        total = pt + ct
+        color = model_colors.get(model_name, default_color)
+        rows += f"""<tr>
+  <td><span style="color:{color};font-weight:600">{model_name}</span></td>
+  <td>{provider}</td>
+  <td>{llm_calls:,}</td>
+  <td>{_fmt_tokens(pt)}</td>
+  <td>{_fmt_tokens(ct)}</td>
+  <td>{_fmt_tokens(total)}</td>
+</tr>"""
+
+    bars = ""
+    for model_name, m_data in model_usage.items():
+        total = m_data["prompt_tokens"] + m_data["completion_tokens"]
+        pct = round(total / grand_total * 100, 1) if grand_total else 0
+        color = model_colors.get(model_name, default_color)
+        bars += f"""<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
+  <span style="width:100px;font-size:0.8rem;color:#94a3b8;text-align:right">{model_name}</span>
+  <div style="flex:1;height:8px;background:#334155;border-radius:4px;overflow:hidden">
+    <div style="width:{pct}%;height:100%;background:{color};border-radius:4px"></div>
+  </div>
+  <span style="font-size:0.75rem;color:#64748b">{pct}%</span>
+</div>
+"""
+
+    return f"""<div class="section">
+    <h2>\U0001f4ca Model Usage</h2>
+  <table>
+  <thead><tr><th>Model</th><th>Provider</th><th>LLM Calls</th><th>Prompt Tokens</th><th>Completion Tokens</th><th>Total Tokens</th></tr></thead>
+<tbody>{rows}</tbody></table>
+  <div style="margin-top:1rem">{bars}</div>
+</div>
+
+"""
 
 def _usage_section(stats: dict) -> str:
     llm = stats.get("total_llm_calls", 0)
