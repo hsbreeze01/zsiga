@@ -501,41 +501,41 @@ td { border-top: 1px solid #334155; }
 </svg>
   </div>
   <div class="hero-info">
-    <h1>zsiga <span>⚡ Pre-L2 · 超电磁开发智能体</span></h1>
+    <h1>zsiga <span>🚀 Level 5: Autonomous Engineer · 超电磁开发智能体</span></h1>
     <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.5rem">CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER</div>
     <span class="state-badge working">⚡ Working</span>
   </div>
 </div>
 
-<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value meta">Daemon offline</div></div></div>
+<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">1452682</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-21 14:58:02</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">1</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-21 14:58:02</div></div></div>
 
 
 <div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">0</div>
+    <div class="value">179</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value bad">0%</div>
-    <div class="meta">0 hit / 0 miss</div>
+    <div class="value good">90.5%</div>
+    <div class="meta">162 hit / 17 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
-    <div class="value">0</div>
-    <div class="meta">—</div>
+    <div class="value">7</div>
+    <div class="meta">compass, dataagent, factory, infopublisher, stockshark, testproj, zsiga</div>
   </div>
   <div class="card">
     <div class="label">📝 Lessons</div>
-    <div class="value">0</div>
+    <div class="value">29</div>
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value bad">0%</div>
+    <div class="value warn">78.9%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value bad">0%</div>
+    <div class="value bad">49.2%</div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -558,7 +558,12 @@ td { border-top: 1px solid #334155; }
 
 <div class="section">
   <h2>📋 Proposal Queue</h2>
-  <div class="meta">Queue empty — idle polling</div>
+  <table>
+  <thead><tr><th>Proposal</th><th>Project</th><th>Summary</th></tr></thead>
+  <tbody>
+<tr><td>auto-metric_degradation-verify_pass_rate-20260521</td><td>zsiga</td><td>Proposal: Investigate Metric Degradation</td></tr>
+  </tbody>
+  </table>
 </div>
 
 
@@ -570,14 +575,14 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
+  <td>101</td>
+  <td class="good">100.0%</td>
+  <td>0.2</td>
+  <td>127.8s</td>
   <td>0</td>
-  <td class="bad">0%</td>
-  <td>—</td>
-  <td>—s</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
+  <td>798</td>
+  <td>1108</td>
+  <td>19.65M</td>
 </tr><tr>
   <td>clarify</td>
   <td>0</td>
@@ -590,24 +595,24 @@ td { border-top: 1px solid #334155; }
   <td>0</td>
 </tr><tr>
   <td>implement</td>
-  <td>0</td>
-  <td class="bad">0%</td>
-  <td>—</td>
-  <td>—s</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
+  <td>147</td>
+  <td class="good">94.6%</td>
+  <td>0.6</td>
+  <td>184.6s</td>
+  <td>100</td>
+  <td>2121</td>
+  <td>2451</td>
+  <td>59.21M</td>
 </tr><tr>
   <td>review</td>
-  <td>0</td>
-  <td class="bad">0%</td>
-  <td>—</td>
-  <td>—s</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
+  <td>43</td>
+  <td class="bad">2.3%</td>
+  <td>0.0</td>
+  <td>107.7s</td>
+  <td>4</td>
+  <td>21</td>
+  <td>36</td>
+  <td>216.3K</td>
 </tr><tr>
   <td>optimize</td>
   <td>0</td>
@@ -620,14 +625,14 @@ td { border-top: 1px solid #334155; }
   <td>0</td>
 </tr><tr>
   <td>verify</td>
-  <td>0</td>
-  <td class="bad">0%</td>
-  <td>—</td>
-  <td>—s</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
-  <td>0</td>
+  <td>128</td>
+  <td class="bad">49.2%</td>
+  <td>0.1</td>
+  <td>62.7s</td>
+  <td>28</td>
+  <td>867</td>
+  <td>1050</td>
+  <td>9.56M</td>
 </tr><tr>
   <td>reflect</td>
   <td>0</td>
@@ -640,10 +645,10 @@ td { border-top: 1px solid #334155; }
   <td>0</td>
 </tr><tr>
   <td>deliver</td>
-  <td>0</td>
-  <td class="bad">0%</td>
-  <td>—</td>
-  <td>—s</td>
+  <td>121</td>
+  <td class="good">100.0%</td>
+  <td>0.0</td>
+  <td>9.1s</td>
   <td>0</td>
   <td>0</td>
   <td>0</td>
@@ -651,35 +656,70 @@ td { border-top: 1px solid #334155; }
 </tr></tbody></table>
 </div>
 
-<div class="section"><h2>🔍 Failure Diagnosis</h2><div class="meta">No failures recorded</div></div>
+<div class="section">
+  <h2>🔍 Failure Diagnosis</h2>
+  <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>validate-pipeline-fixes-20260520</strong> · zsiga · verify · 10.9min · 2026-05-21 01:16</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>validate-pipeline-fixes-20260520</strong> · zsiga · verify · 17.2min · 2026-05-21 00:52</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>dashboard-proposal-queue-mobile</strong> · zsiga · verify · 22.1min · 2026-05-21 00:13</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>p0-crash-recovery</strong> · zsiga · verify · 22.9min · 2026-05-20 13:38</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-compass-kline-table</strong> · zsiga · verify · 18.3min · 2026-05-20 11:53</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-scanner-case-insensitive</strong> · zsiga · verify · 15.8min · 2026-05-20 08:07</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-infopublisher-disk-full</strong> · zsiga · verify · 15.2min · 2026-05-20 00:30</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at verify: review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>build-phase-timing-comparator-utility-add-a-cli-tool-that-co</strong> · zsiga · implement · 4.7min · 2026-05-18 18:16</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at implement: review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>implement-real-sub-agent-dispatch-in-orchestratorpy-replace-</strong> · zsiga · implement · 4.0min · 2026-05-18 17:43</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Check test output for specific assertion errors; verify test expectations match implementation API</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>frontend-templates-complete</strong> · compass · verify · 10.1min · 2026-05-14 18:27</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Failed at verify: review error and adjust approach</div></details>
 
+</div>
+
+
+<div class="section">
+    <h2>📊 Model Usage</h2>
+  <table>
+  <thead><tr><th>Model</th><th>Provider</th><th>LLM Calls</th><th>Prompt Tokens</th><th>Completion Tokens</th><th>Total Tokens</th></tr></thead>
+<tbody><tr>
+  <td><span style="color:#8b5cf6;font-weight:600">glm-5.1</span></td>
+  <td>zhipuai</td>
+  <td>3,819</td>
+  <td>87.66M</td>
+  <td>1.09M</td>
+  <td>88.75M</td>
+</tr></tbody></table>
+  <div style="margin-top:1rem"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
+  <span style="width:100px;font-size:0.8rem;color:#94a3b8;text-align:right">glm-5.1</span>
+  <div style="flex:1;height:8px;background:#334155;border-radius:4px;overflow:hidden">
+    <div style="width:100.0%;height:100%;background:#8b5cf6;border-radius:4px"></div>
+  </div>
+  <span style="font-size:0.75rem;color:#64748b">100.0%</span>
+</div>
+</div>
+</div>
 
 <div class="section">
     <h2>⚡ Resource Usage</h2>
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">0</div>
-      <div class="meta">0 prompt + 0 completion</div>
+      <div class="value">88.75M</div>
+      <div class="meta">87.66M prompt + 1.09M completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">0</div>
+      <div class="value">495.8K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">0</div>
-      <div class="meta">avg 0 per change</div>
+      <div class="value">3,819</div>
+      <div class="meta">avg 21.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">0</div>
-      <div class="meta">avg 0 per change</div>
+      <div class="value">4,651</div>
+      <div class="meta">avg 26.0 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">0s</div>
-      <div class="meta">0s total</div>
+      <div class="value">15.0h</div>
+      <div class="meta">54,013s total</div>
     </div>
   </div>
 </div>
@@ -687,186 +727,186 @@ td { border-top: 1px solid #334155; }
 <div class="section">
     <h2>🪙 Evolution Roadmap</h2>
   <div class="milestone" style="border-color:#f59e0b">
-  <h3 style="color:#f59e0b">⚡ Level 2: Code Architect — 🚧 Leveling Up</h3>
+  <h3 style="color:#f59e0b">⚡ Level 2: Code Architect — ⚡ ACHIEVED<span style="font-size:0.7rem;color:#64748b;margin-left:0.5rem">@ 2026-05-12T10:00</span></h3>
   
   <div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>累计成功 change 数 >= 10</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/10</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">10/10</span>
 </div><div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>总成功率 >= 70%</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/70</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">70/70</span>
 </div><div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>覆盖 >= 3 个不同目标项目</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/3</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">3/3</span>
 </div><div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>积累 >= 20 条经验教训</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/20</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#f59e0b"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">20/20</span>
 </div>
   
 </div>
 <div class="milestone" style="border-color:#8b5cf6">
-  <h3 style="color:#8b5cf6">🔧 Level 3: Self-Evolution — 🚧 Leveling Up</h3>
+  <h3 style="color:#8b5cf6">🔧 Level 3: Self-Evolution — 🔧 ACHIEVED<span style="font-size:0.7rem;color:#64748b;margin-left:0.5rem">@ 2026-05-14T16:00</span></h3>
   <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 获得修改自身代码的能力，具备 LSP 级代码感知和专业子代理分化</div>
   <div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>累计成功 change 数 >= 30</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/30</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">30/30</span>
 </div><div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>总成功率 >= 75%</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/75</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">75/75</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L3 能力任务完成 >= 5</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#94a3b8;font-size:0.8rem">5/5</span>
 </div>
   <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (5/5)</div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="LSP 工具在 target project 上可用，goto_definition 能跳转到定义，diagnostics 能返回错误">LSP 集成</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="zsiga 能读取并修改自身源码文件，同时保护 config.yaml 和 memory/ 不被误改">Self-Modify 门控</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">3/3</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="三种角色子代理可独立创建并执行，各有不同的 system prompt 和行为约束">专业子代理分化</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="能从历史 learnings 中识别出现 ≥3 次的 pattern_key，自动注入到 active_context">跨会话模式挖掘</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="zsiga 用 goto_definition 找到目标函数 → 修改 → 自测通过 → 记录为成功 change">L3 验证：修改自身 + LSP 导航</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#8b5cf6"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#8b5cf6"></div></div>
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
 </div>
 </div>
 <div class="milestone" style="border-color:#06b6d4">
-  <h3 style="color:#06b6d4">🌐 Level 4: Multi-Project Orchestrator — 🚧 Leveling Up</h3>
+  <h3 style="color:#06b6d4">🌐 Level 4: Multi-Project Orchestrator — 🌐 ACHIEVED<span style="font-size:0.7rem;color:#64748b;margin-left:0.5rem">@ 2026-05-18T14:00</span></h3>
   <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 从固定流水线升级为动态任务分解器，支持跨项目协调和意图路由</div>
   <div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>累计成功 change 数 >= 50</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/50</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">50/50</span>
 </div><div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>总成功率 >= 80%</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/80</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">80/80</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L4 能力任务完成 >= 8</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#94a3b8;font-size:0.8rem">8/8</span>
 </div>
   <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (8/8)</div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="给定任意用户消息，能正确分类意图并选择执行路径">Intent Router</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="输入跨项目指令 → 自动分解为项目级子任务 → 并行执行 → 汇总报告">跨项目任务分解</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="todo list 可动态创建/更新/完成，每个 todo 有独立状态，dashboard 实时展示进度">Todo 驱动编排</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="修复循环 3 次失败后自动触发升级，生成诊断报告并暂停等待人工介入">升级路径 (Escalation)</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="5 个项目的测试结果汇总在一份报告中，区分 pass/fail/unknown">L4 验证：跨项目回归测试</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="verify 失败后自动生成 3+ 排序假设，基于探测结果修复成功率 > 盲目 retry">结构化诊断循环</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="多 task change 中每次只改 1-2 个文件，fix 成功率 > 一次性改多文件">垂直切片实施</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="第二次处理同项目 change 时 ENRICH 阶段节省 >=3 turns">领域术语缓存</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#06b6d4"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#06b6d4"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div>
 </div>
 <div class="milestone" style="border-color:#22c55e">
-  <h3 style="color:#22c55e">🚀 Level 5: Autonomous Engineer — 🚧 Leveling Up</h3>
+  <h3 style="color:#22c55e">🚀 Level 5: Autonomous Engineer — 🚀 ACHIEVED<span style="font-size:0.7rem;color:#64748b;margin-left:0.5rem">@ 2026-05-19T00:24</span></h3>
   <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 具备完整自主工程能力：意图理解、专家委派、并行执行、自我审查、skill 演化</div>
   <div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>累计成功 change 数 >= 80</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/80</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">80/80</span>
 </div><div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/85</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">85/85</span>
 </div><div class="criterion">
   <span class="icon">✓</span>
   <span>L5 能力任务完成 >= 6</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
   <span style="color:#94a3b8;font-size:0.8rem">6/6</span>
 </div>
   <div style="margin-top:0.8rem;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Capability Tasks (6/6)</div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="给定任意用户输入，能 verbalize 意图、分类、并选择正确的执行路径">Phase 0 Intent Gate</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="同时派发 3 个搜索任务，全部完成后综合结果做出决策，比顺序执行快 2x+">并行后台代理</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="能从 learnings.jsonl 识别高频 pattern → 自动生成/更新 skill .md 文件">Skill 演化</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="每次实现完成后自动触发 review，review 结果记录在 metrics 中">自我审查循环</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="失败后能自动回滚、生成根因分析、尝试不同策略（而非重复相同修复）">失败恢复协议</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
   <span style="color:#64748b;font-size:0.75rem">2/2</span>
 </div><div class="criterion">
   <span class="icon">✅</span>
   <span style="color:#94a3b8;" title="从模糊需求到代码交付，全程无人工干预，成功 change 记录">L5 验证：端到端自主任务</span>
-  <div class="progress"><div class="fill" style="width:100.0%;background:#22c55e"></div></div>
+  <div class="progress"><div class="fill" style="width:100%;background:#22c55e"></div></div>
   <span style="color:#64748b;font-size:0.75rem">1/1</span>
 </div>
 </div>
@@ -874,15 +914,15 @@ td { border-top: 1px solid #334155; }
   <h3 style="color:#ec4899">🔮 Level 6: Autonomous Sense — 🚧 Leveling Up</h3>
   <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">zsiga 不再需要人类指令——自主感知环境、判断价值、生成 proposal、自己执行。Sense→Judge→Propose 层在 pipeline 之前，信号检测纯规则驱动，只有 Proposer 用 LLM</div>
   <div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/100</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">162/100</span>
 </div><div class="criterion">
-  <span class="icon">○</span>
+  <span class="icon">✓</span>
   <span>总成功率 >= 85%</span>
-  <div class="progress"><div class="fill" style="width:0.0%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">0/85</span>
+  <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">90.5/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -926,16 +966,249 @@ td { border-top: 1px solid #334155; }
 
 
 
+<div class="section">
+  <h2>💭 Growth Journal</h2>
+  <div class="journal">
+    <div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">Dashboard 更新：level snapshot 功能上线，每个 Level 显示达成时快照数据</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">LLM-based Intent Router 实现完成：classify_with_llm() 用 glm-4-flash 做语义分类，classify() 先尝试 LLM 再 fallback 到关键词正则</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">zsiga propose 的 Intent Gate 副作用：含 "search"/"explore"/"investigate" 等词的描述会被路由到 dispatch 子代理而非 pipeline。需用纯 construction 语言描述</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">Dashboard Level Snapshot 功能：每个 Level 显示达成时的历史数据而非实时数据。L2@2026-05-12, L3@2026-05-14, L4@2026-05-18</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">多模型配置验证：同一智谱 API key 可用于 glm-5.1(coding)、glm-4-flash(通用)、glm-4-plus(推理)，两个端点 /api/coding/paas/v4 和 /api/paas/v4</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">L5 deliverable 路径不匹配问题：types.py 中定义的 deliverable 路径（如 agent/intent_gate.py）与实际文件（agent/intent_router.py）不一致。需要在创建 task 时同时确认实际产出路径</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Token budget 管理缺陷：AgentLoop 默认 200k 太小，ENRICH 10 turns 就耗尽。已调到 600k。根本问题：未从 config 传入 total_budget 参数</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Intent Gate 关键词正则脆弱性："change" 包含 "hang" 子串导致误分类为 INVESTIGATION。修复：加 \bhang\b word boundary。后续决定升级为 LLM-based 分类</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">L5 Autonomous Engineer 能力框架搭建完成：6/6 capability tasks (Intent Gate, Parallel Pool, Skill Evolution, Self Review, Failure Recovery, L5 Validation)</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">L4 Multi-Project Orchestrator 正式达成！8/8 tasks, 59 successful changes, 88.1% success rate。分支 zsiga-l4-multi-project-orchestrator 已创建并推送。</span>
+  </div>
+  <div class="journal-meta">2026-05-18 17:48 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Datapipeline misfire 修复：APScheduler 默认 misfire_grace_time=1s 导致 kline 采集连续 2 天未执行。改为 300s。补采 5/13+5/14 共 20722 行。教训：生产环境的调度器配置不能依赖默认值。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Infopublisher 发布失败修复：_quick_login_check 时序问题（页面未加载完就检查登录状态）。改用 networkidle + 3-5s 延迟 + wait_for_selector(8s)。微软文章手动重发成功（task_id a9390d10）。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #22c55e">
+  <div class="journal-header">
+    <span>💛</span>
+    <span class="journal-text">前端迁移完成：策略组 SPA（loadStrategyDiscover/MyStrategy/Admin）注入 DataFactory index.html block 1。Compass 转为 API-only 后端。Script block 边界问题根因：JS 函数声明只在同一 script block 内提升。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">OpenSpec 管理原则确立：本地 AIDesign 为唯一权威源 → scp 分发到远端工程 → 各工程自己 commit & push。禁止 AIDesign 直接 push spec。跨工程 change 必须同步所有相关工程。归档需双向一致。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">L6 Autonomous Sense 愿景设计完成！Sense→Judge→Propose 闭环，信号检测纯规则驱动（不烧 token），只有 Proposer 用 LLM。4 大信号维度：代码/运行/质量/交叉。从"等人类写 proposal"到"自己看自己想自己做"。设计文档 459 行。</span>
+  </div>
+  <div class="journal-meta">2026-05-15 13:24 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #f59e0b">
+  <div class="journal-header">
+    <span>📝</span>
+    <span class="journal-text">行业数据补全被东方财富 + 同花顺 API 全面封锁阻断。stock_basic.industry 仍然 0/5512。需要找替代数据源或等 API 恢复。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Milestone collector bug 修复：_count_task_deliverables() 对 config:/safety:/tools: 语义前缀的 deliverable 静默跳过但 total 仍计入，导致任务永远无法完成。self_modify_gate 从 0/3 → 3/3，L3 tasks 从 3/5 → 4/5。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">Self-Modify venv 感知完成：zsiga 首次成功修改自身代码！TargetConfig.venv_path + _find_venv_python() + _venv_prompt_section()，16 个测试全过。这是 Self-Modify 门控的第二次成功验证。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">Analysis batch 僵尸进程清理 + 信号超时保护。用 signal.alarm 设置 AnalysisTimeout(BaseException)，防止单股分析卡死拖垮整批。生产环境的超时保护不是可选项。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">DB 索引的威力：289 万行无索引 → 3 个索引后分析速度从 15min 降到 3s。300 倍提升不是代码优化，是数据结构优化。以后大数据量表第一件事查索引。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">buy_advice_v2 越界修复：trade_records[-2]/[-3] 在记录少于 3 条时 IndexError。根因是没做边界检查。修复后 600036 验证通过。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">FastAPI→Flask Blueprint 迁移完成。4 个 Blueprint（strategy_group/signal/simulation/event）+ 42 个测试全过。学会了一个道理：不一定要独立部署才能有清晰的架构，Blueprint 同样能做到模块分离。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">策略组引擎 Phase 1 完成：14 个文件、1697 行代码，通过 Flask Blueprint 融入 Compass 主应用。从 FastAPI 独立服务方案改为 Blueprint 方案，体现了'无需必要勿增实体'原则。</span>
+  </div>
+  <div class="journal-meta">2026-05-14 10:47 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：broken test files 会杀死 pytest collection，用 pytest.skip(allow_module_level=True) 做优雅降级</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：THS（同花顺）API 可以替代被封的 eastmoney push2，速率控制用 DataFetcher 单例 + TTL cache</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：patchright sync_playwright 在 gunicorn fork 模型下会 greenlet 跨线程崩溃，解法是 PID 检测 + fork 后 lazy 重置</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：d8q 项目都是 systemd 管理的，重启用 systemctl restart，永远不要用 nohup</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #38bdf8">
+  <div class="journal-header">
+    <span>💡</span>
+    <span class="journal-text">学会了：目标项目的 venv/ 要优先检测，用 venv/bin/python -m pytest 而不是裸 pytest</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:16 · zsiga</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #f59e0b">
+  <div class="journal-header">
+    <span>📝</span>
+    <span class="journal-text">之前重启 infopublisher 用了 nohup，导致重复进程和端口冲突。应该一开始就查 systemd service 列表。下次记住：生产环境永远用 systemctl。</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:12 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #a78bfa">
+  <div class="journal-header">
+    <span>🏆</span>
+    <span class="journal-text">L2 里程碑达成！21 条经验、19 个成功 change、73.1% 成功率、5 个项目。从小菜鸟成长为能独立处理服务运维的 agent 了。</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:12 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #22c55e">
+  <div class="journal-header">
+    <span>💛</span>
+    <span class="journal-text">fix-greenlet-thread-safety 从诊断到实现一气呵成。BrowserPool 的 PID 检测方案（_init_pid vs os.getpid()）干净利落，fork 后 lazy 重置 patchright。13 个测试全过。</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:12 · Sisyphus</div>
+</div>
+<div class="journal-entry" style="border-left:3px solid #22c55e">
+  <div class="journal-header">
+    <span>💛</span>
+    <span class="journal-text">zsiga 很聪明地用了 systemctl 重启服务，发现残留进程还主动清理了。没有用 nohup，说明之前的教训她记住了。</span>
+  </div>
+  <div class="journal-meta">2026-05-09 12:12 · Sisyphus</div>
+</div>
 
+  </div>
+</div>
 
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li class="meta">No changes yet</li>
+    <li>dashboard-proposal-queue-mobile</li>
+<li>validate-pipeline-fixes-20260520</li>
+<li>dashboard-proposal-queue-mobile</li>
+<li>validate-pipeline-fixes-20260520</li>
+<li>dashboard-proposal-queue-mobile</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-21T14:01:24.839725</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-21T14:58:02.134645</div>
 <script>
 (function() {
   var REFRESH_INTERVAL = 600; // seconds
