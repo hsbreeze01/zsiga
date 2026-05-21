@@ -12,3 +12,17 @@ venv/
 .ruff_cache/
 site/
 venv2/
+
+# --- daemon runtime artifacts (untracked, see scripts/untrack_runtime.py) ---
+data/daemon.log
+data/daemon-err.log
+data/daemon_state.json
+data/lock.pid
+data/zsiga.db
+data/reflector_history.jsonl
+metrics/changes.jsonl
+memory/active_context.md
+memory/learnings.jsonl
+memory/journal.jsonl
+zsiga.db
+openspec/changes/*/.phase_state

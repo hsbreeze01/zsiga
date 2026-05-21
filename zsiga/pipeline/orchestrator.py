@@ -311,18 +311,36 @@ class ZsigaOrchestrator:
             else:
                 update_intent_outcome(change_name, "skipped", True)
 
-            # Cleanup: ensure working tree is clean for next proposal
+            # Cleanup: ensure working tree is clean for next proposal.
+            # IMPORTANT: reset_hard BEFORE checkout. Otherwise the daemon's own
+            # runtime writes (data/daemon.log, daemon_state.json, lock.pid, ...)
+            # leave the tree dirty and `git checkout` aborts, which would carry
+            # stale phase artifacts into the next proposal.
             try:
                 deploy_branch = project_config.deploy_branch
+                if git_ops.has_uncommitted_changes(target_path, transport=transport):
+                    print(
+                        "  Post-proposal cleanup: reset_hard to discard runtime dirt",
+                        flush=True,
+                    )
+                    git_ops.reset_hard(
+                        target_path,
+                        git_ops.rev_parse(target_path, transport=transport),
+                        transport=transport,
+                    )
                 current = git_ops.current_branch(target_path, transport=transport)
                 if current != deploy_branch:
                     git_ops.checkout(target_path, deploy_branch, transport=transport)
+                # Belt-and-suspenders: after the checkout, the new branch may
+                # still expose untracked daemon artifacts.
                 if git_ops.has_uncommitted_changes(target_path, transport=transport):
-                    git_ops.reset_hard(target_path,
+                    git_ops.reset_hard(
+                        target_path,
                         git_ops.rev_parse(target_path, transport=transport),
-                        transport=transport)
+                        transport=transport,
+                    )
             except Exception as cleanup_err:
-                print(f"  ⚠ Cleanup warning: {cleanup_err}")
+                print(f"  ⚠ Cleanup warning: {cleanup_err}", flush=True)
 
     async def _run_phases(self, prop, rec, change_dir, target_path,
                           project_name, project_config, change_name,

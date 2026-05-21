@@ -1,2 +1,0 @@
-{"timestamp": "2026-05-20T15:33:00.993808", "signal_type": "recurring_failure", "pattern_key": "pipeline.fail.implement", "directory": "auto-recurring_failure-pipeline-fail-implement-20260520"}
-{"timestamp": "2026-05-20T19:24:51.829627", "signal_type": "recurring_failure", "pattern_key": "daemon.cycle_error", "directory": "auto-recurring_failure-daemon-cycle_error-20260520"}
