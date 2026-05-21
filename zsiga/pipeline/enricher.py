@@ -5,6 +5,7 @@ from typing import Optional
 from ..agent.loop import AgentLoop
 from ..transport import Transport, LocalTransport
 from .utils import read_file, dir_exists, list_files_recursive
+from .spec_pytest_check import validate_testable_artifacts
 
 ENRICHER_SYSTEM = """你是 zsiga 的技术规格设计师。clarify.md（需求契约）已由 CLARIFY 阶段生成。
 
@@ -18,11 +19,49 @@ specs/ — Delta specs，描述行为变更
 - 用 SHALL/MUST/SHOULD 表达约束强度
 - spec 描述行为（what），不是实现（how）
 
+## Testable Scenarios（机械可验场景，新增）
+
+对每个 Scenario 决定它是否机械可验：
+- **接口契约**（输入 → 输出确定）→ testable: true
+- **错误处理**（raises 某异常）→ testable: true
+- **文件存在/内容**（path.exists / read_text 比较）→ testable: true
+- **状态不变量**（git status / 数据库行 / 字典 key）→ testable: true
+- **性能 / 风格 / 主观体验** → testable: false
+
+格式约定（**必须严格遵守**）：
+
+```
+#### Scenario: <name>
+
+- **testable**: true        ← 仅在机械可验时为 true，否则不写或写 false
+- **target**: <file>.py::<symbol>   ← testable=true 时必填，例如 src/email.py::validate_email 或 src/foo.py::Bar.baz
+- **Given** ...
+- **When** ...
+- **Then** ...
+```
+
+当 Scenario 标记 testable=true 时，**额外**用 write_file 写一个 pytest 测试文件：
+
+- 路径: <target_path>/tests/test_spec_<change_id_slug>__<spec_filename_slug>.py
+  - change_id_slug = 当前 change 目录名，把所有 - 替换为 _
+  - spec_filename_slug = spec 文件名（去掉 .md），把所有 - 替换为 _
+  - 例: change_dir 是 .../changes/dashboard-foo/，spec 是 phase-progress.md
+        → tests/test_spec_dashboard_foo__phase_progress.py
+- 文件中每个 testable scenario 一个 def test_<scenario_slug>(...): 函数
+- 函数体必须含**真实断言**，禁止 `assert True` / `pass` / `# TODO` 占位
+- 接口契约: from <module> import <func>; assert <func>(<input>) == <expected>
+- 错误处理: import pytest; with pytest.raises(<Exc>): <func>(<input>)
+- 文件存在: from pathlib import Path; assert Path("<expected>").exists()
+- 状态不变量: 用 conftest_zsiga.py 提供的 tmp_repo / mock_transport fixture
+
+如果你写不出真断言（例如行为太抽象），就不要标 testable: true，让它走 LLM judge 兜底。
+
 规则：
 - 项目代码和数据库结构已提供在下方，不需要再用工具读文件
 - specs 描述行为，不描述实现细节
 - 直接开始写 specs，不要先做探索
-- 不要生成 clarify.md（已由前置阶段生成）"""
+- 不要生成 clarify.md（已由前置阶段生成）
+- testable 字段缺省为 false，老 spec 不需要改"""
 
 
 async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
@@ -82,6 +121,15 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
         result = await agent.run(ENRICHER_SYSTEM, retry_prompt, **kwargs)
 
     # clarify.md validation is handled by CLARIFY phase
+
+    # P1-5 Phase 2: validate companion pytest artifacts for testable
+    # scenarios. Demotes scenarios whose test file is missing or fails
+    # py_compile, ensures conftest_zsiga.py exists in <target>/tests/.
+    try:
+        report = validate_testable_artifacts(change_dir, target_path, transport)
+        print(f"  {report.summary_line()}", flush=True)
+    except Exception as exc:  # pragma: no cover - defensive
+        print(f"  ⚠ spec→pytest validation error: {exc}", flush=True)
 
     return result
 
