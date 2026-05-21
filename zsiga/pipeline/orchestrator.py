@@ -1306,8 +1306,14 @@ class ZsigaOrchestrator:
     def _build_eval_fix_structured_ctx(
         self, change_dir: str, transport: Transport
     ) -> str:
-        """Build a markdown block carrying the missed-files list + REVIEW
-        CRITICAL issues, to inject into the eval-fix user prompt."""
+        """Build a markdown block carrying:
+        - missed must-modify files (Tier 1, Phase 2 of P0-3)
+        - REVIEW CRITICAL issues (Tier 5 from earlier work)
+        - LAYER 1 pytest failures (P1-5 Phase 4 — added here)
+
+        Injected into the eval-fix user prompt so the fix agent sees
+        deterministic failure pointers instead of having to re-derive
+        them from verify.md prose."""
         parts: list[str] = []
 
         missed = getattr(self, "_last_must_modify_missed", None) or []
@@ -1334,6 +1340,25 @@ class ZsigaOrchestrator:
                     "review.md 已识别下列严重问题，本轮 eval-fix 优先解决：\n"
                     f"{bullet_md}"
                 )
+
+        # Layer 1 (pytest) failure block — P1-5 Phase 4
+        try:
+            from .verify_layer1 import load_layer1_result
+            l1 = load_layer1_result(change_dir, transport)
+        except Exception:
+            l1 = None
+        if l1 is not None and not l1.vacuous and not l1.passed:
+            tail = l1.pytest_output[-1500:] if l1.pytest_output else "(no output)"
+            files_line = ", ".join(l1.test_files) if l1.test_files else "(none)"
+            parts.append(
+                "### LAYER 1 pytest 失败 (机械验证，权威)\n"
+                "spec 自动生成的测试发现以下断言失败。**优先修复这些**，"
+                "而不是重新猜测 verify.md 描述的问题：\n"
+                f"- 失败的测试文件: {files_line}\n"
+                f"- pytest exit code: {l1.pytest_exit_code}\n"
+                "- 修复后只跑失败的 test 文件验证，不必跑整个 suite\n"
+                f"\n```\n{tail}\n```"
+            )
 
         if not parts:
             return ""
