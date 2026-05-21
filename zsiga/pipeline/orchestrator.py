@@ -2,7 +2,8 @@ import time
 import traceback
 from datetime import datetime
 
-from ..agent.loop import AgentLoop, RunResult
+from ..agent.loop import AgentLoop, RunResult, _build_llm_client
+from ..agent.llm_router import get_llm_profile, LLMProfile
 from ..agent.tools import register_tools
 from ..agent.intent_router import classify, route, IntentType
 from ..agent.task_decomposer import decompose, aggregate_results
@@ -49,6 +50,37 @@ class ZsigaOrchestrator:
         )
         self._transports: dict[str, Transport] = {}
         self._load_context()
+
+
+    def _with_routed_model(self, role: str):
+        base_url_default = getattr(self.agent.client, 'base_url', None)
+        if base_url_default is not None and not isinstance(base_url_default, str):
+            base_url_default = str(base_url_default).rstrip('/')
+        profile = get_llm_profile(
+            role,
+            LLMProfile(
+                provider=getattr(self.agent, 'provider', 'zhipuai'),
+                api_key=self.agent.client.api_key,
+                model=self.agent.model,
+                base_url=base_url_default,
+            ),
+        )
+        orig_client = self.agent.client
+        orig_model = self.agent.model
+        orig_provider = self.agent.provider
+        if profile.provider != orig_provider or profile.model != orig_model:
+            new_client = _build_llm_client(profile.provider, profile.api_key, profile.base_url, None)
+            self.agent.client = new_client
+            self.agent.model = profile.model
+            self.agent.provider = profile.provider
+            print(f'[ORCH] switched agent to {profile.provider}/{profile.model} for role={role}', flush=True)
+        return orig_client, orig_model, orig_provider
+
+    def _restore_model(self, saved):
+        orig_client, orig_model, orig_provider = saved
+        self.agent.client = orig_client
+        self.agent.model = orig_model
+        self.agent.provider = orig_provider
 
     def _get_transport(self, project_name: str) -> Transport:
         if project_name not in self._transports:
@@ -835,6 +867,7 @@ class ZsigaOrchestrator:
             print(f"  Post-fix verdict: {verdict} ({verify_seconds:.1f}s)")
         else:
             print("  Pre-check PASSED, proceeding with LLM verify")
+            _saved_model = self._with_routed_model("verify")
             t0 = time.monotonic()
             verify_result = await verify(self.agent, change_dir, target_path, pre_sha,
                         transport=transport,
@@ -846,6 +879,7 @@ class ZsigaOrchestrator:
             verify_tokens = _extract_tokens(verify_result)
 
             verdict = read_verdict(change_dir, transport)
+            self._restore_model(_saved_model)
             print(f"  Verdict: {verdict} ({verify_seconds:.1f}s)")
             verify_outcome = Outcome.SUCCESS if verdict == "PASS" else Outcome.FAIL
             eval_fix_attempts = 0
@@ -1434,6 +1468,7 @@ class ZsigaOrchestrator:
 
         for attempt in range(1, max_attempts + 1):
             print(f"    Eval fix attempt {attempt}/{max_attempts}...")
+            _saved_ef = self._with_routed_model("eval-fix")
 
             # Build strategy hint from escalation or recovery (REQ-ES-03 / REQ-RI-05)
             strategy_hint = ""
@@ -1485,6 +1520,7 @@ class ZsigaOrchestrator:
                 max_turns=fix_turns,
             )
 
+            self._restore_model(_saved_ef)
             passed, mech_errors = verify_mechanical(
                 target_path, project_config.test_cmd, project_config.lint_cmd,
                 since_sha=pre_sha, transport=transport,
