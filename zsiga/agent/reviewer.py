@@ -47,17 +47,10 @@ async def run_review(
     """
     transport = transport or LocalTransport()
 
-    print("[REVIEW] run_review: reading specs", flush=True)
     specs = _read_all_specs(change_dir, transport)
-    print(f"[REVIEW] run_review: specs len={len(specs)}", flush=True)
     design = read_file(f"{change_dir}/design.md", transport) or ""
     tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
-    print(
-        f"[REVIEW] run_review: design len={len(design)} tasks len={len(tasks)} — running git diff",
-        flush=True,
-    )
     diff = git_ops.diff(target_path, pre_impl_sha, transport=transport)
-    print(f"[REVIEW] run_review: diff len={len(diff)} — building review agent", flush=True)
 
     review_md_path = f"{change_dir}/review.md"
 

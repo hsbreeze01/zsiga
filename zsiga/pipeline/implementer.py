@@ -1,4 +1,6 @@
 
+import re
+
 from ..agent.loop import AgentLoop
 from ..memory.pattern_miner import mine_patterns
 from ..transport import Transport, LocalTransport
@@ -142,10 +144,11 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str,
         ctx_section = f"\n## 项目代码上下文（已预读）\n{project_context}\n"
 
     pattern_warnings = _build_pattern_warnings()
+    must_section = _build_must_modify_section(specs, design, tasks)
 
     user_prompt = f"""## Change: {change_dir}
 ## 目标项目: {target_path}
-{ctx_section}
+{ctx_section}{must_section}
 ### specs:
 {specs}
 
@@ -193,6 +196,75 @@ def _venv_prompt_section(venv_python: str) -> str:
 - 绝对不要使用 python、python3、pip、pip3 — 必须使用上方完整路径
 - 不要 pip install 项目已有依赖（venv 已包含所有依赖）
 - 只有在 import 失败且确认 venv 中确实缺少该包时才安装"""
+
+
+_FILE_PATH_RE = re.compile(
+    r"(?<![\w/-])"
+    r"([A-Za-z_][\w./-]*?/[\w./-]+?\."
+    r"(?:py|pyi|js|jsx|ts|tsx|html|css|md|markdown|"
+    r"yaml|yml|json|toml|ini|cfg|sh|sql|rs|go|java|kt|swift|vue|c|cpp|h|hpp))"
+    r"(?![\w/])"
+)
+
+# File paths that look real but are obvious placeholders / templates / examples.
+_FILE_PATH_DENY_SUBSTR = (
+    "path/to/",
+    "your/",
+    "<",
+    ">",
+    "...",
+    "example.com",
+    "/tmp/",
+    "site-packages/",
+    "node_modules/",
+    "dist/",
+    "build/",
+    "__pycache__/",
+)
+
+
+def _extract_must_modify_files(*texts: str) -> list[str]:
+    """Return ordered, deduped list of likely 'must-modify' file paths.
+
+    Recognises paths that:
+    - contain at least one '/' (so we don't match bare names like ``foo.py``);
+    - end in a known source/asset extension;
+    - are not obvious placeholders (``path/to/foo.py`` etc.).
+    """
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for text in texts:
+        if not text:
+            continue
+        for m in _FILE_PATH_RE.finditer(text):
+            path = m.group(1).rstrip(".,;:)")
+            lowered = path.lower()
+            if any(bad in lowered for bad in _FILE_PATH_DENY_SUBSTR):
+                continue
+            if path in seen:
+                continue
+            seen.add(path)
+            ordered.append(path)
+    return ordered
+
+
+def _build_must_modify_section(specs: str, design: str, tasks: str) -> str:
+    """Render the MUST-MODIFY block injected into the IMPLEMENT user prompt."""
+    files = _extract_must_modify_files(specs, design, tasks)
+    if not files:
+        return ""
+    bullet_list = "\n".join(f"- `{p}`" for p in files)
+    return (
+        "\n## MUST-MODIFY Files (extracted from specs/design/tasks)\n\n"
+        "The files below are referenced by the specs. You **MUST** open and "
+        "edit (or create) every one of them as part of this change. After "
+        "IMPLEMENT, the diff will be checked: any file in this list that the "
+        "diff does not touch counts as a spec violation in REVIEW/VERIFY.\n\n"
+        f"{bullet_list}\n\n"
+        "If a path looks wrong (typo, moved/renamed file), keep the closest "
+        "matching real file and call out the discrepancy in your final "
+        "summary, but still produce a diff that touches the corrected file.\n"
+    )
 
 
 def _read_all_specs(change_dir: str, transport: Transport = None) -> str:
