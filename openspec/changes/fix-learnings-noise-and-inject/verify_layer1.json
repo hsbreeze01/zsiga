@@ -1,0 +1,16 @@
+{
+  "passed": false,
+  "vacuous": false,
+  "scenarios_tested": 28,
+  "test_files": [
+    "tests/test_spec_fix_learnings_noise_and_inject__enrich_prompt_injection.py",
+    "tests/test_spec_fix_learnings_noise_and_inject__implement_prompt_injection.py",
+    "tests/test_spec_fix_learnings_noise_and_inject__learnings_inject_utility.py",
+    "tests/test_spec_fix_learnings_noise_and_inject__learnings_noise_cleanup.py",
+    "tests/test_spec_fix_learnings_noise_and_inject__learnings_write_validation.py"
+  ],
+  "pytest_exit_code": 1,
+  "pytest_output": "",
+  "pytest_stderr": "/usr/bin/python3: No module named pytest\n",
+  "warning": ""
+}

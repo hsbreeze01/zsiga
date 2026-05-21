@@ -398,7 +398,6 @@ class TestDBCleanupLessons:
             db_path=db_file,
         )
         # Bypass validation to insert a blacklisted row directly
-        import sqlite3
         from zsiga.metrics.db import _get_conn
 
         conn = _get_conn(db_file)
@@ -418,7 +417,6 @@ class TestDBCleanupLessons:
         assert count_lessons(db_path=db_file) == 1
 
     def test_removes_empty_text_db_lessons(self, db_file):
-        import sqlite3
         from zsiga.metrics.db import _get_conn
 
         conn = _get_conn(db_file)
