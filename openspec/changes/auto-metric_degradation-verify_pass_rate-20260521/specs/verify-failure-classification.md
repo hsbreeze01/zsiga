@@ -2,43 +2,73 @@
 
 ## ADDED Requirements
 
-### Requirement: Verify failure records SHALL be classifiable by root cause category
+### Requirement: Verify failure record extraction
 
-The system MUST classify each verify-phase failure into one of the following root cause categories:
-- `git_conflict` — daemon cycle error caused by dirty working tree during branch checkout
-- `lint_violation` — ruff check errors on changed files (E701, E702, E401, E741, etc.)
-- `test_failure` — pytest failures on changed test targets
-- `no_implementation` — zero diff between pre-impl SHA and HEAD (empty implementation)
-- `verdict_unknown` — verifier LLM output did not contain parseable Verdict line
-- `review_critical` — review phase found CRITICAL issues that blocked progression
-- `other` — any failure not matching the above categories
+The system SHALL provide a function that reads `metrics/changes.jsonl` and extracts all records where the verify phase has a non-success outcome.
 
-#### Scenario: Classify a git conflict failure
-- **Given** a ChangeRecord with verify phase outcome "fail" and detail containing "Your local changes to the following files would be overwritten by checkout"
-- **When** the failure classifier processes this record
-- **Then** the classifier SHALL return category `git_conflict`
+#### Scenario: Extract verify failures from change history
 
-#### Scenario: Classify a lint violation failure
-- **Given** a ChangeRecord with implement phase outcome "fail" and detail starting with "lint:" containing ruff error codes
-- **When** the failure classifier processes this record
-- **Then** the classifier SHALL return category `lint_violation`
+- **Given** `metrics/changes.jsonl` contains change records with phase data
+- **When** the classification function is invoked
+- **Then** it SHALL return a list of failure entries, each containing `change_name`, `project`, `detail` (the PhaseRecord detail field), and `outcome`
 
-#### Scenario: Classify a verdict parse failure
-- **Given** a ChangeRecord with verify phase outcome "fail" and no detail text
-- **When** the failure classifier processes this record
-- **Then** the classifier SHALL return category `verdict_unknown`
+#### Scenario: Empty metrics file
 
-### Requirement: Verify failure classification SHALL produce a summary report with counts and percentages
+- **Given** `metrics/changes.jsonl` does not exist or is empty
+- **When** the classification function is invoked
+- **Then** it SHALL return an empty list without raising an exception
 
-The classifier MUST output a report containing:
-- Total verify-phase failures analyzed
-- For each category: count, percentage of total, and list of affected change names
-- Top-2 categories by count flagged as "high-frequency root causes"
+### Requirement: Failure category classification
 
-#### Scenario: Generate classification report from recent failures
-- **Given** 50 ChangeRecords of which 25 have verify phase outcome "fail"
-- **And** 15 of those failures match `git_conflict` category
-- **And** 7 match `lint_violation` category
-- **When** the classifier generates a summary report
-- **Then** the report SHALL show `git_conflict` count=15 (60.0%) and `lint_violation` count=7 (28.0%)
-- **And** the report SHALL flag `git_conflict` and `lint_violation` as high-frequency root causes
+The system SHALL classify each verify failure into one or more predefined categories based on pattern matching against the `detail` field and the phase records.
+
+Categories MUST include at minimum:
+- `lint_error` — detail contains lint error codes (E701, E702, E401, F401, etc.)
+- `test_failure` — detail contains test failure output
+- `no_impl_changes` — detail indicates no implementation diff was found
+- `daemon_cycle_error` — the change record is associated with a `daemon.cycle_error` lesson
+- `review_critical` — a preceding review phase had critical findings
+- `unknown` — detail does not match any known category
+
+#### Scenario: Classify a lint failure
+
+- **Given** a verify failure with `detail` containing `"lint:\nE701 Multiple statements"`
+- **When** the classification function processes this entry
+- **Then** it SHALL assign category `lint_error`
+
+#### Scenario: Classify a test failure
+
+- **Given** a verify failure with `detail` containing `"tests:\nFAILED test_foo.py"`
+- **When** the classification function processes this entry
+- **Then** it SHALL assign category `test_failure`
+
+#### Scenario: Classify an unknown failure
+
+- **Given** a verify failure with empty `detail`
+- **When** the classification function processes this entry
+- **Then** it SHALL assign category `unknown`
+
+### Requirement: Failure classification report output
+
+The system SHALL produce a classification report as a dictionary containing:
+- `total_failures` — total number of verify failures
+- `by_category` — a dict mapping category name to `{count, percentage}`
+- `top_categories` — ordered list of categories by count (descending)
+
+#### Scenario: Generate report from mixed failures
+
+- **Given** 5 verify failure records: 2 lint, 2 test, 1 unknown
+- **When** the report function is invoked
+- **Then** the report SHALL contain `total_failures: 5`, `by_category.lint_error.count: 2`, `by_category.test_failure.count: 2`, `by_category.unknown.count: 1`
+- **And** `top_categories` SHALL be `["lint_error", "test_failure", "unknown"]` (descending by count)
+
+### Requirement: Classification function unit-testable
+
+The classification function SHALL accept an optional list of change records as input, allowing unit tests to pass pre-constructed data without depending on the actual `metrics/changes.jsonl` file.
+
+#### Scenario: Unit test with synthetic data
+
+- **Given** a list of 3 synthetic change records passed as argument
+- **When** the classification function is invoked with that list
+- **Then** it SHALL return classification results based only on the provided records
+- **And** it SHALL NOT read from the filesystem
