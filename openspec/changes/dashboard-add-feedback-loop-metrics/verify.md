@@ -1,6 +1,6 @@
 Verdict: PASS
-Layer 1: PASS — 9/9 scenarios tested, 18 passed, exit=0
-Completeness: ✓ All 9 spec scenarios (5 requirements) are covered by tests
-Correctness: ✓ All tests pass; implementation aligns with spec requirements
-Coherence: ✓ The feedback loop section fits naturally between existing metrics and Change History as specified
+Layer 1: vacuous — No Layer 1 test run executed for this iteration; all 9 scenarios are manually evaluated below.
+Completeness: ✓ All 9 spec scenarios across 5 requirements (Feedback Loop section, Learnings Health, Injection Rate, Auto-Proposal Success Rate, Self-Assessment Coverage) are fully implemented in feedback_loop.py + dashboard.py and covered by 18 tests in test_feedback_loop_metrics.py
+Correctness: ✓ Learnings health correctly computes total/active (excluding noise)/top-5/last_write; injection rate correctly calculates IMPLEMENT/ENRICH percentages and avg/session; auto-proposal correctly counts success/reverted/stuck (>=3 fails); self-assessment correctly computes coverage percentage. All empty states and edge cases (missing file, empty file, malformed JSON, no data) are handled with spec-compliant fallback messages.
+Coherence: ✓ Feedback Loop section is placed between journal and Recent Changes in the dashboard HTML template ("between existing metrics and Change History" per spec). Four indicator cards match spec exactly: "No learnings yet", "No injection data yet", "No auto-proposals yet", "No self-assessments recorded". Good/warn/bad color classification applied via _rate_class(). Implementation follows existing project patterns (compute functions in feedback_loop.py, rendering in dashboard.py, tests in tests/).
 Issues: None
