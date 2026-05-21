@@ -924,11 +924,31 @@ class ZsigaOrchestrator:
                 record_outcome(change_name, project_name, False, "verify")
                 return False
 
+        # P1-5 Layer 1 stats: pull verify_layer1.json (if present) so the
+        # VERIFY phase record carries the mechanical-coverage signal for the
+        # dashboard's layer1_coverage_pct / layer1_pass_rate_pct widgets.
+        try:
+            from .verify_layer1 import load_layer1_result as _load_l1
+            _l1 = _load_l1(change_dir, transport)
+        except Exception:
+            _l1 = None
+        if _l1 is not None and not _l1.vacuous:
+            _l1_active = True
+            _l1_passed = _l1.passed
+            _l1_scen = _l1.scenarios_tested
+        else:
+            _l1_active = False
+            _l1_passed = False
+            _l1_scen = (_l1.scenarios_tested if _l1 is not None else 0)
+
         rec.phases.append(PhaseRecord(
             phase=Phase.VERIFY, outcome=verify_outcome,
             seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
             llm_calls=verify_calls[0], tool_calls=verify_calls[1],
             prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
+            layer1_active=_l1_active,
+            layer1_passed=_l1_passed,
+            layer1_scenarios=_l1_scen,
         ))
 
         # Phase 4.5/6: OPTIMIZE (optional norm alignment)

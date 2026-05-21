@@ -9,8 +9,9 @@ field, and the ENRICH agent has produced a companion test file at
 1. walks ``<change_dir>/specs/*.md``
 2. counts declared-testable scenarios per spec
 3. resolves the expected pytest file paths
-4. invokes ``<venv_python> -m pytest -x --tb=short -q ...`` on the
-   collected files (no network, no Layer-2 LLM call)
+4. invokes ``<venv_python> -m pytest -x --tb=short -q --timeout=60 ...``
+   on the collected files (no network, no Layer-2 LLM call); single-test
+   timeout requires the pytest-timeout plugin
 5. returns a :class:`Layer1Result` and persists ``verify_layer1.json``
    under the change dir so the eval-fix loop (Phase 4) can pick up the
    structured failure summary without re-running pytest
@@ -188,7 +189,10 @@ def run_layer1_pytest(
     py = venv_python or "python3"
     rel_files = [os.path.relpath(p, target_path) for p in test_files]
     cmd = (
-        f"{py} -m pytest -x --tb=short -q --no-header "
+        # --timeout=60 caps any single test at 60s (pytest-timeout plugin);
+        # transport-level timeout=PYTEST_TOTAL_TIMEOUT (240s) is the wall-clock
+        # backstop in case plugin is missing or a test escapes it.
+        f"{py} -m pytest -x --tb=short -q --no-header --timeout=60 "
         + " ".join(f"'{p}'" for p in rel_files)
     )
     r = transport.run_shell(cmd, cwd=target_path, timeout=PYTEST_TOTAL_TIMEOUT)

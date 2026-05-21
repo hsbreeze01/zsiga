@@ -37,6 +37,13 @@ class PhaseRecord:
     sub_agent_count: int = 0
     model: str = "glm-5.1"
     provider: str = "zhipuai"
+    # Layer 1 (P1-5): meaningful only for VERIFY phase records.
+    # ``layer1_active`` is True when ≥1 testable scenario was actually
+    # executed via pytest; vacuous L1 (no testable scenarios, or no test
+    # files on disk) leaves these at their defaults.
+    layer1_active: bool = False
+    layer1_passed: bool = False
+    layer1_scenarios: int = 0
 
 
 @dataclass
@@ -73,6 +80,9 @@ class ChangeRecord:
                     "sub_agent_count": p.sub_agent_count,
                     "model": p.model,
                     "provider": p.provider,
+                    "layer1_active": p.layer1_active,
+                    "layer1_passed": p.layer1_passed,
+                    "layer1_scenarios": p.layer1_scenarios,
                 }
                 for p in self.phases
             ],

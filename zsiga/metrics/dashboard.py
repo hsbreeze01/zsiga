@@ -496,6 +496,7 @@ td {{ border-top: 1px solid #334155; }}
   <div class="card">
     <div class="label">✅ Verify Rate</div>
     <div class="value {_rate_class(stats['verify_pass_rate_pct'])}">{stats['verify_pass_rate_pct']}%</div>
+    <div class="sub" style="font-size:0.85em;opacity:0.85">L1 cov: <strong>{stats.get('layer1_coverage_pct', 0)}%</strong>  ·  L1 pass: <strong class="{_rate_class(stats.get('layer1_pass_rate_pct', 0))}">{stats.get('layer1_pass_rate_pct', 0)}%</strong>  <span style="opacity:0.6">({stats.get('layer1_pass_count', 0)}/{stats.get('layer1_active_count', 0)} L1-active)</span></div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>

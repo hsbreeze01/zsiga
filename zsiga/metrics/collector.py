@@ -141,6 +141,22 @@ def compute_stats(changes: list[dict] = None) -> dict:
     verify_total = sum(1 for c in changes for p in c.get("phases", []) if p["phase"] == "verify")
     verify_pass_rate = round(verify_pass_count / verify_total * 100, 1) if verify_total else 0
 
+    # P1-5 Layer 1 stats:
+    #   layer1_coverage_pct = % of verify phases that exercised pytest L1
+    #   layer1_pass_rate_pct = % of L1-active verify phases where pytest passed
+    layer1_active_phases = [
+        p for c in changes for p in c.get("phases", [])
+        if p["phase"] == "verify" and p.get("layer1_active")
+    ]
+    layer1_active_count = len(layer1_active_phases)
+    layer1_pass_count = sum(1 for p in layer1_active_phases if p.get("layer1_passed"))
+    layer1_coverage = round(
+        layer1_active_count / verify_total * 100, 1,
+    ) if verify_total else 0
+    layer1_pass_rate = round(
+        layer1_pass_count / layer1_active_count * 100, 1,
+    ) if layer1_active_count else 0
+
     total_llm_calls = sum(
         p.get("llm_calls", 0) for c in changes for p in c.get("phases", [])
     )
@@ -189,6 +205,10 @@ def compute_stats(changes: list[dict] = None) -> dict:
         "lessons_learned": lessons_count,
         "first_pass_test_rate_pct": first_pass_rate,
         "verify_pass_rate_pct": verify_pass_rate,
+        "layer1_coverage_pct": layer1_coverage,
+        "layer1_pass_rate_pct": layer1_pass_rate,
+        "layer1_active_count": layer1_active_count,
+        "layer1_pass_count": layer1_pass_count,
         "phase_stats": phase_stats,
         "total_llm_calls": total_llm_calls,
         "total_tool_calls": total_tool_calls,
@@ -312,6 +332,10 @@ def _empty_stats(lessons_count: int = 0) -> dict:
         "lessons_learned": 0,
         "first_pass_test_rate_pct": 0,
         "verify_pass_rate_pct": 0,
+        "layer1_coverage_pct": 0,
+        "layer1_pass_rate_pct": 0,
+        "layer1_active_count": 0,
+        "layer1_pass_count": 0,
         "phase_stats": {},
         "total_llm_calls": 0,
         "total_tool_calls": 0,
