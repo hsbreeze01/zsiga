@@ -1185,7 +1185,7 @@ class ZsigaOrchestrator:
         specs = _read_all_specs(change_dir, transport) or ""
         design = read_file(f"{change_dir}/design.md", transport) or ""
         tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
-        must_files = _extract_must_modify_files(specs, design, tasks)
+        must_files = _extract_must_modify_files(specs, design, tasks, target_path=target_path)
 
         if not must_files:
             print("  must-modify gate: no files extracted, skipping", flush=True)

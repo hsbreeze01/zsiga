@@ -144,7 +144,7 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str,
         ctx_section = f"\n## 项目代码上下文（已预读）\n{project_context}\n"
 
     pattern_warnings = _build_pattern_warnings()
-    must_section = _build_must_modify_section(specs, design, tasks)
+    must_section = _build_must_modify_section(specs, design, tasks, target_path=target_path)
 
     user_prompt = f"""## Change: {change_dir}
 ## 目标项目: {target_path}
@@ -223,14 +223,24 @@ _FILE_PATH_DENY_SUBSTR = (
 )
 
 
-def _extract_must_modify_files(*texts: str) -> list[str]:
+def _extract_must_modify_files(
+    *texts: str, target_path: str | None = None,
+) -> list[str]:
     """Return ordered, deduped list of likely 'must-modify' file paths.
 
     Recognises paths that:
     - contain at least one '/' (so we don't match bare names like ``foo.py``);
     - end in a known source/asset extension;
     - are not obvious placeholders (``path/to/foo.py`` etc.).
+
+    When *target_path* is provided, an additional disk-aware filter is
+    applied: a path survives only if it currently exists under
+    *target_path* OR it matches a sensible new-file pattern
+    (``tests/test_*.py``).  This drops illustrative scenario paths like
+    ``src/foo.py`` that specs commonly use as examples.
     """
+    import os as _os
+
     seen: set[str] = set()
     ordered: list[str] = []
     for text in texts:
@@ -245,12 +255,34 @@ def _extract_must_modify_files(*texts: str) -> list[str]:
                 continue
             seen.add(path)
             ordered.append(path)
-    return ordered
+
+    if target_path is None:
+        return ordered
+
+    # Disk-aware sanity filter.
+    def _kept(p: str) -> bool:
+        if _os.path.exists(_os.path.join(target_path, p)):
+            return True
+        # Allow new test files (very common spec pattern).
+        base = _os.path.basename(p)
+        if (
+            p.startswith("tests/")
+            and base.startswith("test_")
+            and base.endswith(".py")
+        ):
+            return True
+        return False
+
+    return [p for p in ordered if _kept(p)]
 
 
-def _build_must_modify_section(specs: str, design: str, tasks: str) -> str:
+def _build_must_modify_section(
+    specs: str, design: str, tasks: str, target_path: str | None = None,
+) -> str:
     """Render the MUST-MODIFY block injected into the IMPLEMENT user prompt."""
-    files = _extract_must_modify_files(specs, design, tasks)
+    files = _extract_must_modify_files(
+        specs, design, tasks, target_path=target_path,
+    )
     if not files:
         return ""
     bullet_list = "\n".join(f"- `{p}`" for p in files)
