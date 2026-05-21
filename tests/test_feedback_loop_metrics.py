@@ -329,6 +329,26 @@ class TestFeedbackLoopRendering:
 
     def test_no_crash_on_empty_data(self):
         """Rendering should not raise even with no data."""
+        self._assert_empty_state_fallbacks()
+
+    def test_empty_state_fallback_messages(self):
+        """Each card SHALL show its specific fallback when data is empty.
+
+        Spec requires:
+        - 'No learnings yet'       when learnings total == 0
+        - 'No injection data yet'  when implement_rate and enrich_rate == 0
+        - 'No auto-proposals yet'  when auto-proposal total == 0
+        - 'No self-assessments recorded' when assessed_changes == 0
+        """
+        html = self._assert_empty_state_fallbacks()
+        assert "No learnings yet" in html
+        assert "No injection data yet" in html
+        assert "No auto-proposals yet" in html
+        assert "No self-assessments recorded" in html
+
+    @staticmethod
+    def _assert_empty_state_fallbacks() -> str:
+        """Patch all metric functions to return zero-state and return HTML."""
         with patch(
             "zsiga.metrics.feedback_loop.compute_learnings_health",
             return_value={
@@ -365,11 +385,7 @@ class TestFeedbackLoopRendering:
                             "last_assessment": "",
                         },
                     ):
-                        html = _render_feedback_loop()
-                        assert "No learnings yet" in html
-                        assert "No injection data yet" in html
-                        assert "No auto-proposals yet" in html
-                        assert "No self-assessments recorded" in html
+                        return _render_feedback_loop()
 
     def test_renders_with_data(self):
         with patch(
