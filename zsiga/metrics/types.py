@@ -37,6 +37,7 @@ class PhaseRecord:
     sub_agent_count: int = 0
     model: str = "glm-5.1"
     provider: str = "zhipuai"
+    failure_category: str = ""
 
 
 @dataclass
@@ -73,6 +74,7 @@ class ChangeRecord:
                     "sub_agent_count": p.sub_agent_count,
                     "model": p.model,
                     "provider": p.provider,
+                    "failure_category": p.failure_category,
                 }
                 for p in self.phases
             ],

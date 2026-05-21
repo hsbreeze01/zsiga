@@ -211,3 +211,90 @@ def read_verdict(change_dir: str, transport: Transport = None) -> str:
         return "UNKNOWN"
     match = re.search(r"Verdict:\s*(PASS|FAIL)", content)
     return match.group(1) if match else "UNKNOWN"
+
+
+def classify_verify_failure(
+    verify_md: str = "",
+    mech_results: dict = None,
+    layer1_result: dict = None,
+) -> str:
+    """Classify a verify failure into a root-cause category.
+
+    Detection order follows the priority chain:
+    lint → test → layer1_pytest → must_modify_gate → precheck_import →
+    precheck_syntax → llm_judge → unknown
+    """
+    content = verify_md or ""
+
+    # Check mech_results for lint failures
+    if mech_results:
+        lint_info = mech_results.get("lint", {})
+        if not lint_info.get("passed", True):
+            return "lint"
+
+    # Check mech_results for test failures
+    if mech_results:
+        test_info = mech_results.get("test", {})
+        if not test_info.get("passed", True):
+            return "test"
+
+    # Heuristic checks on verify.md content
+    if content:
+        # Lint error codes in content
+        lint_patterns = [
+            r"E\d{3}\b",
+            r"ruff check",
+            r"flake8",
+            r"Multiple statements on one line",
+        ]
+        for pat in lint_patterns:
+            if re.search(pat, content):
+                # But only if mech lint also failed or content is clearly lint
+                if mech_results and not mech_results.get("lint", {}).get(
+                    "passed", True
+                ):
+                    return "lint"
+                break
+
+        # Pytest failure patterns
+        test_patterns = [
+            r"FAILED\s+\S+::",
+            r"pytest.*failed",
+            r"AssertionError",
+            r"assert\s+",
+        ]
+        for pat in test_patterns:
+            if re.search(pat, content, re.IGNORECASE):
+                if mech_results and not mech_results.get("test", {}).get(
+                    "passed", True
+                ):
+                    return "test"
+                break
+
+    # Layer 1 pytest failure
+    if layer1_result is not None:
+        if not layer1_result.get("passed", True) and not layer1_result.get(
+            "vacuous", False
+        ):
+            return "layer1_pytest"
+
+    # Must-modify gate failure
+    if content and "must-modify" in content.lower() and "coverage" in content.lower():
+        return "must_modify_gate"
+
+    # Precheck failures
+    if content:
+        if "pre-check failure (import)" in content or (
+            "error_type" in content and "import" in content
+        ):
+            return "precheck_import"
+        if "pre-check failure (syntax)" in content or (
+            "error_type" in content and "syntax" in content
+        ):
+            return "precheck_syntax"
+
+    # LLM judge: content exists but no specific category matched
+    if content.strip():
+        return "llm_judge"
+
+    return "unknown"

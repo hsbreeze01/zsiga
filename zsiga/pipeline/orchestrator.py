@@ -26,7 +26,7 @@ from .enricher import enrich, derive_explore_tasks
 from .clarifier import clarify
 from .optimizer import optimize as run_optimize
 from .implementer import implement
-from .verifier import verify, read_verdict
+from .verifier import verify, read_verdict, classify_verify_failure
 from .diagnoser import Diagnoser
 from .phase_wal import PhaseWAL
 from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python, get_all_changed_files, must_modify_coverage
@@ -842,10 +842,17 @@ class ZsigaOrchestrator:
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
                 print(f"  REVERTED: {change_name} (verify pre-check failed)")
                 rec.outcome = Outcome.REVERTED
-                rec.phases.append(PhaseRecord(
-                    phase=Phase.VERIFY, outcome=Outcome.FAIL,
-                    seconds_used=0.0, fix_attempts=eval_fix_attempts,
-                    detail=f"pre-check: {precheck_result.error_type} in {precheck_result.file_path}",
+                # Read verify.md for observability
+                verify_md_for_record = read_file(
+                    f"{change_dir}/verify.md", transport
+                ) or verify_content
+                rec.phases.append(_classify_and_build_verify_record(
+                    outcome=Outcome.FAIL,
+                    seconds=0.0,
+                    fix_attempts=eval_fix_attempts,
+                    verify_md_content=verify_md_for_record,
+                    mech_results=mech_results,
+                    extra_detail=f"eval-fix attempts={eval_fix_attempts}; pre-check: {precheck_result.error_type} in {precheck_result.file_path}",
                 ))
                 record_outcome(change_name, project_name, False, "verify")
                 return False
@@ -915,20 +922,39 @@ class ZsigaOrchestrator:
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
                 print(f"  REVERTED: {change_name} (verify failed)")
                 rec.outcome = Outcome.REVERTED
-                rec.phases.append(PhaseRecord(
-                    phase=Phase.VERIFY, outcome=Outcome.FAIL,
-                    seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
-                    llm_calls=verify_calls[0], tool_calls=verify_calls[1],
-                    prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
+                # Read verify.md for observability
+                verify_md_for_record = read_file(
+                    f"{change_dir}/verify.md", transport
+                ) or ""
+                rec.phases.append(_classify_and_build_verify_record(
+                    outcome=Outcome.FAIL,
+                    seconds=verify_seconds,
+                    fix_attempts=eval_fix_attempts,
+                    verify_md_content=verify_md_for_record,
+                    mech_results=mech_results,
+                    extra_detail=f"eval-fix attempts={eval_fix_attempts}",
+                    llm_calls=verify_calls[0],
+                    tool_calls=verify_calls[1],
+                    prompt_tokens=verify_tokens[0],
+                    completion_tokens=verify_tokens[1],
                 ))
                 record_outcome(change_name, project_name, False, "verify")
                 return False
 
-        rec.phases.append(PhaseRecord(
-            phase=Phase.VERIFY, outcome=verify_outcome,
-            seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
-            llm_calls=verify_calls[0], tool_calls=verify_calls[1],
-            prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
+        # Read verify.md for observability (captured for both pass and fail)
+        verify_md_content = read_file(
+            f"{change_dir}/verify.md", transport
+        ) or ""
+        rec.phases.append(_classify_and_build_verify_record(
+            outcome=verify_outcome,
+            seconds=verify_seconds,
+            fix_attempts=eval_fix_attempts,
+            verify_md_content=verify_md_content,
+            mech_results=mech_results,
+            llm_calls=verify_calls[0],
+            tool_calls=verify_calls[1],
+            prompt_tokens=verify_tokens[0],
+            completion_tokens=verify_tokens[1],
         ))
 
         # Phase 4.5/6: OPTIMIZE (optional norm alignment)
@@ -1747,6 +1773,62 @@ class ZsigaOrchestrator:
         for transport in self._transports.values():
             transport.close()
         self._transports.clear()
+
+
+def _build_verify_detail(verdict: str, verify_md_content: str, extra: str = "") -> str:
+    """Build a detail string for verify PhaseRecord from verify.md content.
+
+    Includes the verdict and up to 200 chars of verify.md. Optionally
+    appends extra context (e.g. eval-fix attempt count).
+    """
+    parts = []
+    if verdict:
+        parts.append(f"verdict={verdict}")
+    if verify_md_content:
+        parts.append(verify_md_content[:200])
+    if extra:
+        parts.append(extra)
+    return " | ".join(parts) if parts else ""
+
+
+def _classify_and_build_verify_record(
+    outcome: Outcome,
+    seconds: float,
+    fix_attempts: int,
+    verify_md_content: str,
+    mech_results: dict = None,
+    layer1_result: dict = None,
+    extra_detail: str = "",
+    llm_calls: int = 0,
+    tool_calls: int = 0,
+    prompt_tokens: int = 0,
+    completion_tokens: int = 0,
+) -> PhaseRecord:
+    """Build a verify PhaseRecord with failure classification and rich detail."""
+    detail = _build_verify_detail(
+        "FAIL" if outcome != Outcome.SUCCESS else "PASS",
+        verify_md_content,
+        extra_detail,
+    )
+    failure_category = ""
+    if outcome != Outcome.SUCCESS:
+        failure_category = classify_verify_failure(
+            verify_md=verify_md_content,
+            mech_results=mech_results,
+            layer1_result=layer1_result,
+        )
+    return PhaseRecord(
+        phase=Phase.VERIFY,
+        outcome=outcome,
+        seconds_used=seconds,
+        fix_attempts=fix_attempts,
+        detail=detail,
+        failure_category=failure_category,
+        llm_calls=llm_calls,
+        tool_calls=tool_calls,
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+    )
 
 
 def _extract_calls(result) -> tuple[int, int]:

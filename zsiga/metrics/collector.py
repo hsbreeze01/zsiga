@@ -141,6 +141,16 @@ def compute_stats(changes: list[dict] = None) -> dict:
     verify_total = sum(1 for c in changes for p in c.get("phases", []) if p["phase"] == "verify")
     verify_pass_rate = round(verify_pass_count / verify_total * 100, 1) if verify_total else 0
 
+    # Verify failure breakdown by category
+    verify_failure_breakdown: dict[str, int] = {}
+    for c in changes:
+        for p in c.get("phases", []):
+            if p["phase"] == "verify" and p["outcome"] != "success":
+                cat = p.get("failure_category", "") or "unknown"
+                verify_failure_breakdown[cat] = (
+                    verify_failure_breakdown.get(cat, 0) + 1
+                )
+
     total_llm_calls = sum(
         p.get("llm_calls", 0) for c in changes for p in c.get("phases", [])
     )
@@ -189,6 +199,7 @@ def compute_stats(changes: list[dict] = None) -> dict:
         "lessons_learned": lessons_count,
         "first_pass_test_rate_pct": first_pass_rate,
         "verify_pass_rate_pct": verify_pass_rate,
+        "verify_failure_breakdown": verify_failure_breakdown,
         "phase_stats": phase_stats,
         "total_llm_calls": total_llm_calls,
         "total_tool_calls": total_tool_calls,
@@ -312,6 +323,7 @@ def _empty_stats(lessons_count: int = 0) -> dict:
         "lessons_learned": 0,
         "first_pass_test_rate_pct": 0,
         "verify_pass_rate_pct": 0,
+        "verify_failure_breakdown": {},
         "phase_stats": {},
         "total_llm_calls": 0,
         "total_tool_calls": 0,
