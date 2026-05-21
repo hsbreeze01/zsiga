@@ -1,0 +1,14 @@
+{
+  "passed": false,
+  "vacuous": false,
+  "scenarios_tested": 14,
+  "test_files": [
+    "tests/test_spec_fix_self_assessment_and_reflector_loop__reflector_history_injection.py",
+    "tests/test_spec_fix_self_assessment_and_reflector_loop__reflector_stuck_detection.py",
+    "tests/test_spec_fix_self_assessment_and_reflector_loop__self_assessment_reflect_write.py"
+  ],
+  "pytest_exit_code": 1,
+  "pytest_output": "",
+  "pytest_stderr": "/usr/bin/python3: No module named pytest\n",
+  "warning": ""
+}
