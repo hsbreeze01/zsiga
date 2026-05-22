@@ -37,7 +37,7 @@ class PhaseRecord:
     sub_agent_count: int = 0
     model: str = "glm-5.1"
     provider: str = "zhipuai"
-    failure_category: str | None = None
+    failure_category: str = ""
 
     def to_dict(self) -> dict:
         d = {

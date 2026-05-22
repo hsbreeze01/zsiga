@@ -168,7 +168,24 @@ def _scan_proposal_queue(changes_dir: Path | None = None) -> list[dict]:
             phase = "ENRICH"
         if has_specs:
             phase = "IMPLEMENT"
-        queue.append({"name": name, "project": project, "summary": summary or "—", "phase": phase})
+        # Detect lifecycle status from metrics
+        lifecycle = "waiting"
+        try:
+            from .metrics.db import load_all_changes
+            _all = load_all_changes()
+            _mine = [c for c in _all if c.get("change_name") == name]
+            if _mine:
+                last = _mine[-1]
+                outcome = last.get("outcome", "")
+                if outcome == "success":
+                    lifecycle = "completed"
+                elif outcome in ("fail", "reverted"):
+                    lifecycle = "stuck"
+                else:
+                    lifecycle = "active"
+        except Exception:
+            pass
+        queue.append({"name": name, "project": project, "summary": summary or "—", "phase": phase, "lifecycle": lifecycle})
     return queue
 
 
