@@ -160,7 +160,15 @@ def _scan_proposal_queue(changes_dir: Path | None = None) -> list[dict]:
             pass
         if not project:
             project = name
-        queue.append({"name": name, "project": project, "summary": summary or "—"})
+        # Detect phase progress from output files
+        has_clarify = (entry / "clarify.md").is_file()
+        has_specs = (entry / "specs").is_dir() and any((entry / "specs").glob("*.md"))
+        phase = "CLARIFY"
+        if has_clarify:
+            phase = "ENRICH"
+        if has_specs:
+            phase = "IMPLEMENT"
+        queue.append({"name": name, "project": project, "summary": summary or "—", "phase": phase})
     return queue
 
 
@@ -262,9 +270,7 @@ def _build_current_json() -> str:
             phase_progress.append({"name": p, "status": "pending"})
     current["phase_progress"] = phase_progress
     queue = _scan_proposal_queue()
-    # Add phase status to each queue item
-    for item in queue:
-        item["phase"] = _detect_proposal_phase(item["name"])
+    # Phase status already in queue items from _scan_proposal_queue
     return json.dumps({
         "daemon": daemon_info,
         "current": current,
