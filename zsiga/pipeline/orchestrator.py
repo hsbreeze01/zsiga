@@ -1016,7 +1016,7 @@ class ZsigaOrchestrator:
             if issue_number:
                 msg += f" (closes #{issue_number})"
             git_ops.commit(target_path, msg, transport=transport)
-        git_ops.tag(target_path, f"zsiga-{change_name}", transport=transport)
+        git_ops.tag(target_path, f"zsiga-{change_name}", transport=transport, force=True)
 
         # Push feature branch, then merge into deploy branch
         if not self.config.safety.dry_run:

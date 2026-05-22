@@ -41,10 +41,12 @@ def commit(target_path: str, message: str, transport: Transport = None):
     print("  ✅ committed")
 
 
-def tag(target_path: str, tag_name: str, transport: Transport = None):
+def tag(target_path: str, tag_name: str, transport: Transport = None, force: bool = False):
     transport = transport or LocalTransport()
     print(f"  git tag -a {tag_name} ...")
-    r = transport.run_shell(f"git tag -a {tag_name} -m 'zsiga: {tag_name}'", cwd=target_path)
+    if force:
+        transport.run_shell(f"git tag -d {tag_name} || true", cwd=target_path)
+    r = transport.run_shell(f"git tag -a {tag_name} -m .zsiga: {tag_name}.", cwd=target_path)
     _check_result(r, "git tag")
     print(f"  ✅ tagged {tag_name}")
 
