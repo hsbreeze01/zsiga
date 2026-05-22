@@ -199,6 +199,37 @@ def _build_metrics_json() -> str:
         return json.dumps({"error": str(e)})
 
 
+def _detect_proposal_phase(name: str) -> str:
+    """Detect which phase a proposal has reached based on output files."""
+    try:
+        from .config import load_config
+        from .transport import create_transport
+        config = load_config()
+        # Find the target and change_dir for this proposal
+        for tname, tc in config.targets.items():
+            transport = create_transport(tc)
+            change_dir = f"{tc.change_root}/{name}"
+            # Check clarify.md
+            r = transport.run_shell(f"test -s '{change_dir}/clarify.md'", timeout=5)
+            if r["exit_code"] != 0:
+                return "CLARIFY"
+            # Check specs
+            r = transport.run_shell(f"ls '{change_dir}/specs'/*.md 2>/dev/null | head -1", timeout=5)
+            if r["exit_code"] != 0 or not r["stdout"].strip():
+                return "ENRICH"
+            # Check implementation (feat commit)
+            r = transport.run_shell(
+                f"git log --oneline --all --grep='feat.*{name}' -1",
+                timeout=5,
+            )
+            if r["exit_code"] != 0 or not r["stdout"].strip():
+                return "IMPLEMENT"
+            return "REVIEW"
+    except Exception:
+        pass
+    return "CLARIFY"
+
+
 def _build_current_json() -> str:
     """Build the /api/current.json response payload."""
     ds = _read_daemon_state()
@@ -231,6 +262,9 @@ def _build_current_json() -> str:
             phase_progress.append({"name": p, "status": "pending"})
     current["phase_progress"] = phase_progress
     queue = _scan_proposal_queue()
+    # Add phase status to each queue item
+    for item in queue:
+        item["phase"] = _detect_proposal_phase(item["name"])
     return json.dumps({
         "daemon": daemon_info,
         "current": current,
