@@ -1,6 +1,6 @@
 Verdict: PASS
-Layer 1: vacuous — No testable=true scenarios in spec metadata, but 18 pytest tests exist and all pass
-Completeness: ✓ All 8 spec scenarios fully implemented (4 data-present + 4 empty-state) with correct fallback messages; section placed between Journal and Recent Changes as specified
-Correctness: ✓ Computation functions handle all edge cases (missing file, empty file, malformed JSON, no DB rows, stuck detection via >=3 fails); noise patterns correctly excluded from active count; rendering correctly uses specified fallback strings ("No learnings yet", "No injection data yet", "No auto-proposals yet", "No self-assessments recorded")
-Coherence: ✓ Follows existing dashboard patterns (metric computation in feedback_loop.py, rendering in dashboard.py, tests in test_feedback_loop_metrics.py); _render_feedback_loop() called in _render() with try/except guard matching other section handlers; 4-card grid layout consistent with existing card design
-Issues: None
+Layer 1: vacuous — 无 testable scenario (spec scenarios are LLM-evaluated only)
+Completeness: ✓ 所有 9 个 spec scenario 均已实现：Feedback Loop section 位置正确、4 个 indicator card 均包含 data-present 和 empty-state 两种模式
+Correctness: ✓ 计算逻辑正确（learnings health counts、injection rates、auto-proposal stuck detection、self-assessment coverage），渲染函数正确使用 _rate_class 做颜色标记，empty-state fallback 消息与 spec 完全一致
+Coherence: ✓ 新增的 _render_feedback_loop() 集成在 _render() 中 Journal 与 Recent Changes 之间，异常时有 try/except 保护；feedback_loop.py 模块职责清晰、依赖 db.py 的标准连接函数；测试覆盖了 4 个 computation function 的关键路径和边界情况
+Issues: 无
