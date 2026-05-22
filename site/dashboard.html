@@ -510,15 +510,15 @@ td { border-top: 1px solid #334155; }
 <div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">2199118</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-22 23:33:49</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">1</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-22 23:33:49</div></div></div>
 
 
-<div class="grid">
+<div id="summary-cards" class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">357</div>
+    <div class="value">358</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
     <div class="value warn">70.9%</div>
-    <div class="meta">253 hit / 104 miss</div>
+    <div class="meta">254 hit / 104 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -564,14 +564,14 @@ td { border-top: 1px solid #334155; }
 <thead><tr><th>Phase</th><th>Count</th><th>Pass Rate</th><th>Avg Turns</th><th>Avg Time</th><th>Fixes</th><th>LLM Calls</th><th>Tool Calls</th><th>Tokens</th></tr></thead>
 <tbody><tr>
   <td>enrich</td>
-  <td>229</td>
+  <td>230</td>
   <td class="good">100.0%</td>
   <td>0.1</td>
-  <td>179.9s</td>
+  <td>180.7s</td>
   <td>0</td>
-  <td>2881</td>
-  <td>4189</td>
-  <td>104.01M</td>
+  <td>2911</td>
+  <td>4232</td>
+  <td>105.40M</td>
 </tr><tr>
   <td>clarify</td>
   <td>0</td>
@@ -668,10 +668,10 @@ td { border-top: 1px solid #334155; }
 <tbody><tr>
   <td><span style="color:#8b5cf6;font-weight:600">glm-5.1</span></td>
   <td>zhipuai</td>
-  <td>11,227</td>
-  <td>335.86M</td>
-  <td>3.58M</td>
-  <td>339.44M</td>
+  <td>11,259</td>
+  <td>337.25M</td>
+  <td>3.60M</td>
+  <td>340.85M</td>
 </tr></tbody></table>
   <div style="margin-top:1rem"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
   <span style="width:100px;font-size:0.8rem;color:#94a3b8;text-align:right">glm-5.1</span>
@@ -688,27 +688,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">339.44M</div>
-      <div class="meta">335.86M prompt + 3.58M completion</div>
+      <div class="value">340.85M</div>
+      <div class="meta">337.25M prompt + 3.60M completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">950.8K</div>
+      <div class="value">952.1K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">11,227</div>
+      <div class="value">11,259</div>
       <div class="meta">avg 31.4 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">14,381</div>
+      <div class="value">14,425</div>
       <div class="meta">avg 40.3 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">34.9h</div>
-      <div class="meta">125,596s total</div>
+      <div class="value">35.0h</div>
+      <div class="meta">126,000s total</div>
     </div>
   </div>
 </div>
@@ -906,7 +906,7 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">253/100</span>
+  <span style="color:#94a3b8;font-size:0.8rem">254/100</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>总成功率 >= 85%</span>
@@ -1189,15 +1189,15 @@ td { border-top: 1px solid #334155; }
 <div class="section">
   <h2>Recent Changes</h2>
   <ul class="recent">
-    <li>dashboard-add-feedback-loop-metrics</li>
-<li>fix-learnings-noise-and-inject</li>
+    <li>fix-learnings-noise-and-inject</li>
 <li>auto-metric_degradation-verify_pass_rate-20260521</li>
 <li>auto-metric_degradation-verify_pass_rate-20260521</li>
 <li>dashboard-add-feedback-loop-metrics</li>
+<li>fix-learnings-noise-and-inject</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-22T23:42:31.635117</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-22T23:46:26.946327</div>
 <script>
 (function() {
   var REFRESH_INTERVAL = 600; // seconds
@@ -1237,22 +1237,45 @@ td { border-top: 1px solid #334155; }
     });
   }
 
-  function updateQueueSection(queue, daemon) {
+  function updateQueueSection(queue, daemon, phaseProgress) {
     var section = document.getElementById('queue-section');
     if (!section) return;
     if (!queue || queue.length === 0) {
-      section.innerHTML = '<h2>📋 Proposal Queue</h2><div class="meta">Queue empty — idle polling</div>';
+      section.innerHTML = '<h2>Proposal Queue</h2><div class="meta">Queue empty</div>';
       return;
     }
     var currentChange = daemon ? daemon.current_change : null;
-    var currentPhase = daemon ? daemon.current_phase : null;
-    var html = '<h2>📋 Proposal Queue</h2><table><thead><tr><th>#</th><th>Proposal</th><th>Project</th><th>Summary</th></tr></thead><tbody>';
+    var html = '<h2>Proposal Queue</h2>';
+    html += '<table><thead><tr><th>#</th><th>Proposal</th><th>Status</th></tr></thead><tbody>';
     for (var i = 0; i < queue.length; i++) {
       var q = queue[i];
       var isActive = currentChange && q.name === currentChange;
-      var highlight = isActive ? ' style="border-left:3px solid #f59e0b"' : '';
-      var badge = isActive ? ' <span style="font-size:0.75rem;background:#f59e0b20;color:#f59e0b;padding:0.1rem 0.4rem;border-radius:4px">' + (currentPhase || '') + '</span>' : '';
-      html += '<tr' + highlight + '><td>' + (i+1) + '</td><td>' + q.name + '</td><td>' + q.project + '</td><td>' + (q.summary || '—') + badge + '</td></tr>';
+      var phase = q.phase || 'CLARIFY';
+      var highlight = isActive ? ' style="border-left:3px solid #f59e0b;background:#f59e0b08"' : '';
+      html += '<tr' + highlight + '>';
+      html += '<td style="color:#64748b;font-size:0.8rem">' + (i+1) + '</td>';
+      html += '<td><div style="font-weight:600">' + q.name + '</div>';
+      html += '<div style="font-size:0.75rem;color:#64748b">' + (q.project || '') + ' &middot; ' + (q.summary || '') + '</div></td>';
+      if (isActive) {
+        var phases = phaseProgress || [];
+        var bar = '<div style="display:flex;gap:2px;align-items:center">';
+        for (var j = 0; j < phases.length; j++) {
+          var p = phases[j];
+          var color = p.status === 'active' ? '#f59e0b' : (p.status === 'done' ? '#22c55e' : '#e2e8f0');
+          bar += '<div title="' + p.name + '" style="width:24px;height:8px;border-radius:2px;background:' + color + '"></div>';
+        }
+        bar += '</div>';
+        var activePhase = '';
+        for (var j = 0; j < phases.length; j++) {
+          if (phases[j].status === 'active') activePhase = phases[j].name;
+        }
+        html += '<td>' + bar + '<div style="font-size:0.7rem;color:#f59e0b;margin-top:2px">>> ' + activePhase + '</div></td>';
+      } else {
+        var phaseColors = {CLARIFY:'#3b82f6',ENRICH:'#8b5cf6',IMPLEMENT:'#f59e0b',REVIEW:'#06b6d4',VERIFY:'#22c55e',DELIVER:'#ec4899'};
+        var pc = phaseColors[phase] || '#64748b';
+        html += '<td><span style="font-size:0.75rem;background:' + pc + '20;color:' + pc + ';padding:0.15rem 0.5rem;border-radius:4px">' + phase + '</span></td>';
+      }
+      html += '</tr>';
     }
     html += '</tbody></table>';
     section.innerHTML = html;
@@ -1321,10 +1344,8 @@ td { border-top: 1px solid #334155; }
       .catch(function() {});
   }
 
-
+  // Initial fetch after 2 seconds
   setTimeout(fetchData, 2000);
-  setTimeout(pollCurrent, 3000);
-  setTimeout(pollMetrics, 4000);
   setTimeout(pollCurrent, 3000);
   setTimeout(pollMetrics, 4000);
   // Polling every 10 minutes
