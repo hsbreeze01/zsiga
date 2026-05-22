@@ -1,81 +1,55 @@
-# Spec: Dashboard Feedback Loop Metrics Section
+# Spec: Feedback Loop Dashboard Section Rendering
 
 ## ADDED Requirements
 
-### Requirement: Feedback Loop Section on Dashboard
+### Requirement: _render_feedback_loop_section function
 
-The dashboard SHALL display a "Feedback Loop" metrics section showing learning loop health indicators.
+The system SHALL provide a function `_render_feedback_loop_section` in `zsiga/metrics/dashboard.py` that accepts a feedback loop metrics dict and returns an HTML string containing the "Feedback Loop" section.
 
-#### Scenario: Dashboard renders with feedback loop data
+The section SHALL contain 4 metric cards arranged in a grid:
+1. **Learnings Health** — showing total count and top pattern distribution
+2. **Learning Injection Rate** — showing injection rate per phase
+3. **Auto-Proposal Success Rate** — showing success rate percentage and stuck count
+4. **Self-Assessment Coverage** — showing coverage percentage
 
-- **Given** the dashboard is generated
-- **When** the HTML is produced
-- **Then** a section titled "Feedback Loop" SHALL appear between existing metrics and Change History
+Each card SHALL use the existing `.card` CSS class from the dashboard stylesheet.
 
-### Requirement: Learnings Health Card
+#### Scenario: Renders section with "No data yet" when metrics are zero
 
-The dashboard SHALL display a learnings health indicator card.
+- **testable**: true
+- **target**: zsiga/metrics/dashboard.py::_render_feedback_loop_section
+- **Given** a feedback loop metrics dict where all counts are zero (empty data state)
+- **When** `_render_feedback_loop_section(metrics)` is called
+- **Then** the returned HTML string SHALL contain the text "No data yet" and SHALL contain the substring "Feedback Loop"
 
-#### Scenario: Learnings exist
+#### Scenario: Renders metric values when data is present
 
-- **Given** `memory/learnings.jsonl` has valid entries
-- **When** the dashboard is generated
-- **Then** the card SHALL show: total count, active count (excluding noise), top 5 pattern_keys by frequency, and last write timestamp
+- **testable**: true
+- **target**: zsiga/metrics/dashboard.py::_render_feedback_loop_section
+- **Given** a feedback loop metrics dict with `learnings_health.total_count` = 42, `auto_proposal_success.success_rate_pct` = 75.0, `self_assessment_coverage.coverage_pct` = 60.0
+- **When** `_render_feedback_loop_section(metrics)` is called
+- **Then** the returned HTML SHALL contain "42" and "75.0%" and "60.0%" and SHALL NOT contain "No data yet"
 
-#### Scenario: No learnings exist
+### Requirement: Section positioning in dashboard
 
-- **Given** `memory/learnings.jsonl` is empty or does not exist
-- **When** the dashboard is generated
-- **Then** the card SHALL show "No learnings yet"
+The "Feedback Loop" section SHALL appear in the rendered dashboard HTML BEFORE the "Recent Changes" section and AFTER the "Evolution Roadmap" section.
 
-### Requirement: Learning Injection Rate Card
+#### Scenario: Feedback Loop section precedes Recent Changes
 
-The dashboard SHALL display a learning injection rate indicator.
+- **testable**: true
+- **target**: zsiga/metrics/dashboard.py::_render
+- **Given** the dashboard is being rendered with default data
+- **When** `_render(stats, milestones, "resting")` is called
+- **Then** in the returned HTML string, the substring "Feedback Loop" SHALL appear before the substring "Recent Changes"
 
-#### Scenario: Injection data available
+### Requirement: Feedback Loop metrics dict injected into render
 
-- **Given** the DB has injection event records
-- **When** the dashboard is generated
-- **Then** the card SHALL show: IMPLEMENT injection rate, ENRICH injection rate, and average learnings injected per session
+The `generate_dashboard` function or `_render` function SHALL call `collect_feedback_loop_metrics` to obtain the metrics data and pass it to `_render_feedback_loop_section`, integrating the resulting HTML into the dashboard output.
 
-#### Scenario: No injection data
+#### Scenario: generate_dashboard includes Feedback Loop section
 
-- **Given** no injection events have been recorded
-- **When** the dashboard is generated
-- **Then** the card SHALL show "No injection data yet — enable learnings injection first"
-
-### Requirement: Auto-Proposal Success Rate Card
-
-The dashboard SHALL display auto-proposal success rate statistics.
-
-#### Scenario: Auto-proposals exist
-
-- **Given** changes with names starting with `auto-` exist in the DB
-- **When** the dashboard is generated
-- **Then** the card SHALL show: total count, success count, reverted count, stuck count (≥3 fails), success rate percentage
-
-#### Scenario: No auto-proposals
-
-- **Given** no auto-proposals have been generated
-- **When** the dashboard is generated
-- **Then** the card SHALL show "No auto-proposals yet"
-
-### Requirement: Self-Assessment Coverage Card
-
-The dashboard SHALL display self-assessment coverage statistics.
-
-#### Scenario: Self-assessments exist
-
-- **Given** the self_assessment table has records
-- **When** the dashboard is generated
-- **Then** the card SHALL show: total changes, assessed changes, coverage percentage, last assessment timestamp
-
-#### Scenario: No self-assessments
-
-- **Given** the self_assessment table is empty
-- **When** the dashboard is generated
-- **Then** the card SHALL show "No self-assessments recorded"
-
-## REMOVED Requirements
-
-None.
+- **testable**: true
+- **target**: zsiga/metrics/dashboard.py::generate_dashboard
+- **Given** the dashboard is being generated (writing to a temp path)
+- **When** `generate_dashboard(output_path=tmp_output)` is called
+- **Then** the written HTML file SHALL contain the substring "Feedback Loop"
