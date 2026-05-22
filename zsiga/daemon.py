@@ -181,6 +181,63 @@ def _build_status_json() -> str:
     return json.dumps({"daemon": daemon, "queue": queue}, ensure_ascii=False)
 
 
+
+
+def _build_metrics_json() -> str:
+    """Build the /api/metrics.json response payload."""
+    try:
+        from .metrics.dashboard import compute_stats
+        stats = compute_stats()
+        summary = stats.get("summary", {})
+        phases = stats.get("phases", {})
+        return json.dumps({
+            "summary": summary,
+            "phases": phases,
+            "rolling_rates": [],
+        }, ensure_ascii=False, default=str)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+def _build_current_json() -> str:
+    """Build the /api/current.json response payload."""
+    ds = _read_daemon_state()
+    daemon_info = {
+        "pid": ds.get("pid"),
+        "state": ds.get("state", "unknown"),
+        "cycle": ds.get("cycle"),
+        "started_at": ds.get("started_at"),
+        "heartbeat": ds.get("last_heartbeat"),
+        "total_cycles": ds.get("total_cycles", 0),
+        "idle_cycles": ds.get("idle_cycles", 0),
+    }
+    current = {
+        "change": ds.get("current_change"),
+        "phase": ds.get("current_phase"),
+        "project": ds.get("current_project"),
+    }
+    # Phase progress for the progress bar
+    phases_all = ["CLARIFY", "ENRICH", "IMPLEMENT", "REVIEW", "VERIFY", "DELIVER"]
+    phase_progress = []
+    cur_phase = ds.get("current_phase")
+    found = False
+    for p in phases_all:
+        if p == cur_phase:
+            found = True
+            phase_progress.append({"name": p, "status": "active"})
+        elif not found:
+            phase_progress.append({"name": p, "status": "done"})
+        else:
+            phase_progress.append({"name": p, "status": "pending"})
+    current["phase_progress"] = phase_progress
+    queue = _scan_proposal_queue()
+    return json.dumps({
+        "daemon": daemon_info,
+        "current": current,
+        "queue": queue,
+    }, ensure_ascii=False)
+
+
 def _serve_dashboard(port: int):
     """Start HTTP server for dashboard in a daemon thread."""
     from .metrics.dashboard import generate_dashboard
@@ -192,15 +249,21 @@ def _serve_dashboard(port: int):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=serve_dir, **kwargs)
 
+        def _send_json(self, payload: str):
+            body = payload.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         def do_GET(self):
             if self.path == "/api/status.json":
-                payload = _build_status_json()
-                body = payload.encode("utf-8")
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Content-Length", str(len(body)))
-                self.end_headers()
-                self.wfile.write(body)
+                self._send_json(_build_status_json())
+            elif self.path == "/api/metrics.json":
+                self._send_json(_build_metrics_json())
+            elif self.path == "/api/current.json":
+                self._send_json(_build_current_json())
             else:
                 super().do_GET()
 

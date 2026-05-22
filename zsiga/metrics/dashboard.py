@@ -669,12 +669,60 @@ td {{ border-top: 1px solid #334155; }}
       .catch(function() {{}});
   }}
 
+  function pollCurrent() {{
+    fetch('/api/current.json')
+      .then(function(r) {{ return r.json(); }})
+      .then(function(data) {{
+        if (data.daemon) updateDaemonSection(data.daemon);
+        if (data.queue) updateQueueSection(data.queue, data.daemon);
+        if (data.current && data.current.phase_progress) {{
+          var phases = data.current.phase_progress;
+          var el = document.getElementById('phase-indicator');
+          if (el) {{
+            var icons = phases.map(function(p) {{
+              if (p.status === 'active') return '>>> ' + p.name;
+              if (p.status === 'done') return '[x] ' + p.name;
+              return '[ ] ' + p.name;
+            }});
+            el.textContent = icons.join(' -> ');
+          }}
+        }}
+      }})
+      .catch(function() {{}});
+  }}
+
+  function pollMetrics() {{
+    fetch('/api/metrics.json')
+      .then(function(r) {{ return r.json(); }})
+      .then(function(data) {{
+        if (data.error) return;
+        var cards = document.getElementById('summary-cards');
+        if (!cards) return;
+        var vals = cards.querySelectorAll('.value');
+        if (vals.length >= 8 && data.summary) {{
+          if (data.summary.total_changes !== undefined) vals[0].textContent = data.summary.total_changes;
+          if (data.summary.success_rate_pct !== undefined) vals[1].textContent = data.summary.success_rate_pct + '%';
+          if (data.summary.distinct_projects !== undefined) vals[2].textContent = data.summary.distinct_projects;
+          if (data.summary.lessons_learned !== undefined) vals[3].textContent = data.summary.lessons_learned;
+          if (data.summary.first_pass_test_rate_pct !== undefined) vals[4].textContent = data.summary.first_pass_test_rate_pct + '%';
+          if (data.summary.verify_pass_rate_pct !== undefined) vals[5].textContent = data.summary.verify_pass_rate_pct + '%';
+          if (data.summary.total_compaction_count !== undefined) vals[6].textContent = data.summary.total_compaction_count;
+          if (data.summary.total_sub_agent_count !== undefined) vals[7].textContent = data.summary.total_sub_agent_count;
+        }}
+      }})
+      .catch(function() {{}});
+  }}
+
   // Initial fetch after 2 seconds
   setTimeout(fetchData, 2000);
   setTimeout(pollCurrent, 3000);
   setTimeout(pollMetrics, 4000);
+  setTimeout(pollCurrent, 3000);
+  setTimeout(pollMetrics, 4000);
   // Polling every 10 minutes
   setInterval(fetchData, REFRESH_INTERVAL * 1000);
+  setInterval(pollCurrent, 30000);
+  setInterval(pollMetrics, 60000);
   setInterval(pollCurrent, 30000);
   setInterval(pollMetrics, 60000);
   // Countdown timer every second
