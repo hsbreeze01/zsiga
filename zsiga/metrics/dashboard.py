@@ -470,7 +470,7 @@ td {{ border-top: 1px solid #334155; }}
 
 {daemon_section}
 
-<div class="grid">
+<div id="summary-cards" class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
     <div class="value">{stats['total_changes']}</div>
@@ -515,8 +515,6 @@ td {{ border-top: 1px solid #334155; }}
     {sparkline_card}
   </div>
 </div>
-
-{proposal_queue_section}
 
 <div id="queue-section" class="section"></div>
 
@@ -585,22 +583,45 @@ td {{ border-top: 1px solid #334155; }}
     }});
   }}
 
-  function updateQueueSection(queue, daemon) {{
+  function updateQueueSection(queue, daemon, phaseProgress) {{
     var section = document.getElementById('queue-section');
     if (!section) return;
     if (!queue || queue.length === 0) {{
-      section.innerHTML = '<h2>📋 Proposal Queue</h2><div class="meta">Queue empty — idle polling</div>';
+      section.innerHTML = '<h2>Proposal Queue</h2><div class="meta">Queue empty</div>';
       return;
     }}
     var currentChange = daemon ? daemon.current_change : null;
-    var currentPhase = daemon ? daemon.current_phase : null;
-    var html = '<h2>📋 Proposal Queue</h2><table><thead><tr><th>#</th><th>Proposal</th><th>Project</th><th>Summary</th></tr></thead><tbody>';
+    var html = '<h2>Proposal Queue</h2>';
+    html += '<table><thead><tr><th>#</th><th>Proposal</th><th>Status</th></tr></thead><tbody>';
     for (var i = 0; i < queue.length; i++) {{
       var q = queue[i];
       var isActive = currentChange && q.name === currentChange;
-      var highlight = isActive ? ' style="border-left:3px solid #f59e0b"' : '';
-      var badge = isActive ? ' <span style="font-size:0.75rem;background:#f59e0b20;color:#f59e0b;padding:0.1rem 0.4rem;border-radius:4px">' + (currentPhase || '') + '</span>' : '';
-      html += '<tr' + highlight + '><td>' + (i+1) + '</td><td>' + q.name + '</td><td>' + q.project + '</td><td>' + (q.summary || '—') + badge + '</td></tr>';
+      var phase = q.phase || 'CLARIFY';
+      var highlight = isActive ? ' style="border-left:3px solid #f59e0b;background:#f59e0b08"' : '';
+      html += '<tr' + highlight + '>';
+      html += '<td style="color:#64748b;font-size:0.8rem">' + (i+1) + '</td>';
+      html += '<td><div style="font-weight:600">' + q.name + '</div>';
+      html += '<div style="font-size:0.75rem;color:#64748b">' + (q.project || '') + ' &middot; ' + (q.summary || '') + '</div></td>';
+      if (isActive) {{
+        var phases = phaseProgress || [];
+        var bar = '<div style="display:flex;gap:2px;align-items:center">';
+        for (var j = 0; j < phases.length; j++) {{
+          var p = phases[j];
+          var color = p.status === 'active' ? '#f59e0b' : (p.status === 'done' ? '#22c55e' : '#e2e8f0');
+          bar += '<div title="' + p.name + '" style="width:24px;height:8px;border-radius:2px;background:' + color + '"></div>';
+        }}
+        bar += '</div>';
+        var activePhase = '';
+        for (var j = 0; j < phases.length; j++) {{
+          if (phases[j].status === 'active') activePhase = phases[j].name;
+        }}
+        html += '<td>' + bar + '<div style="font-size:0.7rem;color:#f59e0b;margin-top:2px">>> ' + activePhase + '</div></td>';
+      }} else {{
+        var phaseColors = {{CLARIFY:'#3b82f6',ENRICH:'#8b5cf6',IMPLEMENT:'#f59e0b',REVIEW:'#06b6d4',VERIFY:'#22c55e',DELIVER:'#ec4899'}};
+        var pc = phaseColors[phase] || '#64748b';
+        html += '<td><span style="font-size:0.75rem;background:' + pc + '20;color:' + pc + ';padding:0.15rem 0.5rem;border-radius:4px">' + phase + '</span></td>';
+      }}
+      html += '</tr>';
     }}
     html += '</tbody></table>';
     section.innerHTML = html;
@@ -630,56 +651,12 @@ td {{ border-top: 1px solid #334155; }}
       .then(function(r) {{ return r.json(); }})
       .then(function(data) {{
         if (data.daemon) updateDaemonSection(data.daemon);
-        if (data.queue) updateQueueSection(data.queue, data.daemon);
-        if (data.current && data.current.phase_progress) {{
-          var phases = data.current.phase_progress;
+        var pp = (data.current && data.current.phase_progress) ? data.current.phase_progress : null;
+        if (data.queue) updateQueueSection(data.queue, data.daemon, pp);
+        if (pp) {{
           var el = document.getElementById('phase-indicator');
           if (el) {{
-            var icons = phases.map(function(p) {{
-              if (p.status === 'active') return '>>> ' + p.name;
-              if (p.status === 'done') return '[x] ' + p.name;
-              return '[ ] ' + p.name;
-            }});
-            el.textContent = icons.join(' -> ');
-          }}
-        }}
-      }})
-      .catch(function() {{}});
-  }}
-
-  function pollMetrics() {{
-    fetch('/api/metrics.json')
-      .then(function(r) {{ return r.json(); }})
-      .then(function(data) {{
-        if (data.error) return;
-        var cards = document.getElementById('summary-cards');
-        if (!cards) return;
-        var vals = cards.querySelectorAll('.value');
-        if (vals.length >= 8 && data.summary) {{
-          if (data.summary.total_changes !== undefined) vals[0].textContent = data.summary.total_changes;
-          if (data.summary.success_rate_pct !== undefined) vals[1].textContent = data.summary.success_rate_pct + '%';
-          if (data.summary.distinct_projects !== undefined) vals[2].textContent = data.summary.distinct_projects;
-          if (data.summary.lessons_learned !== undefined) vals[3].textContent = data.summary.lessons_learned;
-          if (data.summary.first_pass_test_rate_pct !== undefined) vals[4].textContent = data.summary.first_pass_test_rate_pct + '%';
-          if (data.summary.verify_pass_rate_pct !== undefined) vals[5].textContent = data.summary.verify_pass_rate_pct + '%';
-          if (data.summary.total_compaction_count !== undefined) vals[6].textContent = data.summary.total_compaction_count;
-          if (data.summary.total_sub_agent_count !== undefined) vals[7].textContent = data.summary.total_sub_agent_count;
-        }}
-      }})
-      .catch(function() {{}});
-  }}
-
-  function pollCurrent() {{
-    fetch('/api/current.json')
-      .then(function(r) {{ return r.json(); }})
-      .then(function(data) {{
-        if (data.daemon) updateDaemonSection(data.daemon);
-        if (data.queue) updateQueueSection(data.queue, data.daemon);
-        if (data.current && data.current.phase_progress) {{
-          var phases = data.current.phase_progress;
-          var el = document.getElementById('phase-indicator');
-          if (el) {{
-            var icons = phases.map(function(p) {{
+            var icons = pp.map(function(p) {{
               if (p.status === 'active') return '>>> ' + p.name;
               if (p.status === 'done') return '[x] ' + p.name;
               return '[ ] ' + p.name;
@@ -715,8 +692,6 @@ td {{ border-top: 1px solid #334155; }}
 
   // Initial fetch after 2 seconds
   setTimeout(fetchData, 2000);
-  setTimeout(pollCurrent, 3000);
-  setTimeout(pollMetrics, 4000);
   setTimeout(pollCurrent, 3000);
   setTimeout(pollMetrics, 4000);
   // Polling every 10 minutes
