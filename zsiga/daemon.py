@@ -170,22 +170,42 @@ def _scan_proposal_queue(changes_dir: Path | None = None) -> list[dict]:
             phase = "IMPLEMENT"
         # Detect lifecycle status from metrics
         lifecycle = "waiting"
+        paused = False
+        paused_reason = ""
+        consecutive_fails = 0
         try:
             from .metrics.db import load_all_changes
             _all = load_all_changes()
             _mine = [c for c in _all if c.get("change_name") == name]
             if _mine:
+                # Count consecutive fails from the end
+                for c in reversed(_mine):
+                    if c.get("outcome") in ("fail", "reverted"):
+                        consecutive_fails += 1
+                    else:
+                        break
                 last = _mine[-1]
                 outcome = last.get("outcome", "")
                 if outcome == "success":
                     lifecycle = "completed"
+                elif consecutive_fails >= 5:
+                    lifecycle = "stuck"
+                    paused = True
+                    paused_reason = f"{consecutive_fails} consecutive failures"
                 elif outcome in ("fail", "reverted"):
                     lifecycle = "stuck"
                 else:
                     lifecycle = "active"
         except Exception:
             pass
-        queue.append({"name": name, "project": project, "summary": summary or "—", "phase": phase, "lifecycle": lifecycle})
+        # Check manual .paused file
+        paused_file = entry / ".paused"
+        if paused_file.exists():
+            paused = True
+            if not paused_reason:
+                paused_reason = "manual"
+            lifecycle = "paused"
+        queue.append({"name": name, "project": project, "summary": summary or "—", "phase": phase, "lifecycle": lifecycle, "paused": paused, "paused_reason": paused_reason, "consecutive_fails": consecutive_fails})
     return queue
 
 

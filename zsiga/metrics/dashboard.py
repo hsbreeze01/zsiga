@@ -617,15 +617,19 @@ td {{ border-top: 1px solid #334155; }}
         html += '<td>' + bar + '<div style="font-size:0.7rem;color:#f59e0b;margin-top:2px">\u25B6 ' + activePhase + '</div></td>';
       }} else {{
         var lc = q.lifecycle || 'waiting';
-        var lcLabels = {{stuck:'Stuck',completed:'Done',active:'Active',waiting:'Waiting'}};
-        var lcColors = {{stuck:'#ef4444',completed:'#22c55e',active:'#f59e0b',waiting:'#94a3b8'}};
+        var lcLabels = {{paused:'Paused',stuck:'Stuck',completed:'Done',active:'Active',waiting:'Waiting'}};
+        var lcColors = {{paused:'#6b7280',stuck:'#ef4444',completed:'#22c55e',active:'#f59e0b',waiting:'#94a3b8'}};
         var lcColor = lcColors[lc] || '#94a3b8';
         var lcLabel = lcLabels[lc] || lc;
+        var failInfo = q.consecutive_fails > 0 ? ' (' + q.consecutive_fails + ' fails)' : '';
         var phaseColors = {{CLARIFY:'#3b82f6',ENRICH:'#8b5cf6',IMPLEMENT:'#f59e0b',REVIEW:'#06b6d4',VERIFY:'#22c55e',DELIVER:'#ec4899'}};
         var pc = phaseColors[q.phase] || '#64748b';
-        html += '<td><div style="display:flex;flex-direction:column;gap:2px">';
-        html += '<span style="font-size:0.7rem;background:' + lcColor + '20;color:' + lcColor + ';padding:0.1rem 0.4rem;border-radius:3px;width:fit-content">' + lcLabel + '</span>';
-        html += '<span style="font-size:0.7rem;color:' + pc + '">' + (q.phase || 'CLARIFY') + '</span>';
+        var rowOpacity = q.paused ? '0.5' : '1';
+        html += '<td style="opacity:' + rowOpacity + '"><div style="display:flex;flex-direction:column;gap:2px">';
+        html += '<span style="font-size:0.7rem;background:' + lcColor + '20;color:' + lcColor + ';padding:0.1rem 0.4rem;border-radius:3px;width:fit-content">' + lcLabel + failInfo + '</span>';
+        if (!q.paused) {{
+          html += '<span style="font-size:0.7rem;color:' + pc + '">' + (q.phase || 'CLARIFY') + '</span>';
+        }}
         html += '</div></td>';
       }}
       html += '</tr>';

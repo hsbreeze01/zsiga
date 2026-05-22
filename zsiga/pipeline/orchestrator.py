@@ -100,6 +100,33 @@ class ZsigaOrchestrator:
         scanner = DirectoryScanner(self.config.targets)
         proposals = scanner.scan(transports=self._transports)
 
+        # Filter out paused proposals (5+ consecutive failures or .paused file)
+        paused_names = []
+        active_proposals = []
+        for prop in proposals:
+            name = prop["id"]
+            prop_dir = Path(prop["change_dir"])
+            paused_file = prop_dir / ".paused"
+            # Check consecutive fails from metrics
+            consecutive_fails = 0
+            try:
+                from ..metrics.db import load_all_changes
+                _all = load_all_changes()
+                for c in reversed([x for x in _all if x.get("change_name") == name]):
+                    if c.get("outcome") in ("fail", "reverted"):
+                        consecutive_fails += 1
+                    else:
+                        break
+            except Exception:
+                pass
+            if paused_file.exists() or consecutive_fails >= 5:
+                paused_names.append(name)
+            else:
+                active_proposals.append(prop)
+        if paused_names:
+            print(f"  \u23F8 Paused ({len(paused_names)}): {', '.join(paused_names)}")
+        proposals = active_proposals
+
         print(f"\n{'='*60}")
         print(f"zsiga cycle: found {len(proposals)} active changes")
         print(f"{'='*60}")
