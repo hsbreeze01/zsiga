@@ -6,7 +6,7 @@ from .db import load_all_changes
 from .types import ALL_MILESTONES, Phase
 from ..memory.journal import load_journal
 
-_DASHBOARD_PATH = Path("/tmp/zsiga-dashboard/dashboard.html")
+_DASHBOARD_PATH = Path(__file__).resolve().parent.parent.parent / "site" / "dashboard.html"
 _MASCOT_SRC = Path(__file__).resolve().parent.parent.parent / "site" / "mascot.png"
 
 _QUEUE_EMPTY_HTML = (
@@ -470,7 +470,7 @@ td {{ border-top: 1px solid #334155; }}
 
 {daemon_section}
 
-<div id="summary-cards" class="grid">
+<div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
     <div class="value">{stats['total_changes']}</div>
@@ -587,16 +587,15 @@ td {{ border-top: 1px solid #334155; }}
     var section = document.getElementById('queue-section');
     if (!section) return;
     if (!queue || queue.length === 0) {{
-      section.innerHTML = '<h2>Proposal Queue</h2><div class="meta">Queue empty</div>';
+      section.innerHTML = '<h2>📋 Proposal Queue</h2><div class="meta">Queue empty</div>';
       return;
     }}
     var currentChange = daemon ? daemon.current_change : null;
-    var html = '<h2>Proposal Queue</h2>';
+    var html = '<h2>📋 Proposal Queue</h2>';
     html += '<table><thead><tr><th>#</th><th>Proposal</th><th>Status</th></tr></thead><tbody>';
     for (var i = 0; i < queue.length; i++) {{
       var q = queue[i];
       var isActive = currentChange && q.name === currentChange;
-      var phase = q.phase || 'CLARIFY';
       var highlight = isActive ? ' style="border-left:3px solid #f59e0b;background:#f59e0b08"' : '';
       html += '<tr' + highlight + '>';
       html += '<td style="color:#64748b;font-size:0.8rem">' + (i+1) + '</td>';
@@ -615,11 +614,19 @@ td {{ border-top: 1px solid #334155; }}
         for (var j = 0; j < phases.length; j++) {{
           if (phases[j].status === 'active') activePhase = phases[j].name;
         }}
-        html += '<td>' + bar + '<div style="font-size:0.7rem;color:#f59e0b;margin-top:2px">>> ' + activePhase + '</div></td>';
+        html += '<td>' + bar + '<div style="font-size:0.7rem;color:#f59e0b;margin-top:2px">\u25B6 ' + activePhase + '</div></td>';
       }} else {{
+        var lc = q.lifecycle || 'waiting';
+        var lcLabels = {{stuck:'Stuck',completed:'Done',active:'Active',waiting:'Waiting'}};
+        var lcColors = {{stuck:'#ef4444',completed:'#22c55e',active:'#f59e0b',waiting:'#94a3b8'}};
+        var lcColor = lcColors[lc] || '#94a3b8';
+        var lcLabel = lcLabels[lc] || lc;
         var phaseColors = {{CLARIFY:'#3b82f6',ENRICH:'#8b5cf6',IMPLEMENT:'#f59e0b',REVIEW:'#06b6d4',VERIFY:'#22c55e',DELIVER:'#ec4899'}};
-        var pc = phaseColors[phase] || '#64748b';
-        html += '<td><span style="font-size:0.75rem;background:' + pc + '20;color:' + pc + ';padding:0.15rem 0.5rem;border-radius:4px">' + phase + '</span></td>';
+        var pc = phaseColors[q.phase] || '#64748b';
+        html += '<td><div style="display:flex;flex-direction:column;gap:2px">';
+        html += '<span style="font-size:0.7rem;background:' + lcColor + '20;color:' + lcColor + ';padding:0.1rem 0.4rem;border-radius:3px;width:fit-content">' + lcLabel + '</span>';
+        html += '<span style="font-size:0.7rem;color:' + pc + '">' + (q.phase || 'CLARIFY') + '</span>';
+        html += '</div></td>';
       }}
       html += '</tr>';
     }}
@@ -696,8 +703,6 @@ td {{ border-top: 1px solid #334155; }}
   setTimeout(pollMetrics, 4000);
   // Polling every 10 minutes
   setInterval(fetchData, REFRESH_INTERVAL * 1000);
-  setInterval(pollCurrent, 30000);
-  setInterval(pollMetrics, 60000);
   setInterval(pollCurrent, 30000);
   setInterval(pollMetrics, 60000);
   // Countdown timer every second
