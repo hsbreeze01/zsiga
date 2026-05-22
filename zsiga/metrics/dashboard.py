@@ -6,7 +6,7 @@ from .db import load_all_changes
 from .types import ALL_MILESTONES, Phase
 from ..memory.journal import load_journal
 
-_DASHBOARD_PATH = Path(__file__).resolve().parent.parent.parent / "site" / "dashboard.html"
+_DASHBOARD_PATH = Path("/tmp/zsiga-dashboard/dashboard.html")
 _MASCOT_SRC = Path(__file__).resolve().parent.parent.parent / "site" / "mascot.png"
 
 _QUEUE_EMPTY_HTML = (

@@ -282,7 +282,7 @@ def _serve_dashboard(port: int):
     """Start HTTP server for dashboard in a daemon thread."""
     from .metrics.dashboard import generate_dashboard
 
-    path = generate_dashboard()
+    path = generate_dashboard(output_path="/tmp/zsiga-dashboard/dashboard.html")
     serve_dir = str(Path(path).parent)
 
     class Handler(SimpleHTTPRequestHandler):
@@ -447,7 +447,7 @@ def daemon_loop(config, dashboard_port=None):
 
             try:
                 from .metrics.dashboard import generate_dashboard
-                generate_dashboard()
+                generate_dashboard(output_path="/tmp/zsiga-dashboard/dashboard.html")
             except Exception:
                 pass
 
