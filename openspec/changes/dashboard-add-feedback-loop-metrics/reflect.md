@@ -2,9 +2,9 @@
 
 ## Task Review
 - predicted_tokens: 0
-- actual_tokens: 293430
+- actual_tokens: 171432
 - predicted_steps: 0
-- actual_steps: 49
+- actual_steps: 38
 - fix_attempts: 2
 
 ## Self-Rating
@@ -21,4 +21,4 @@
 ## Lessons Learned
 
 ## Next Time Suggestions
-- Estimated tokens for similar tasks: 293430
+- Estimated tokens for similar tasks: 171432
