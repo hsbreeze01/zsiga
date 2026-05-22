@@ -375,6 +375,80 @@ class ZsigaOrchestrator:
             except Exception as cleanup_err:
                 print(f"  ⚠ Cleanup warning: {cleanup_err}", flush=True)
 
+
+    # ── Phase resume helpers ──────────────────────────────────────────────
+    def _was_last_cycle_empty_diff(self, change_name: str) -> bool:
+        """Check if the last cycle for this change had an empty-diff guard trigger."""
+        try:
+            from ..metrics.db import load_all_changes
+            changes = load_all_changes()
+            for c in reversed(changes):
+                if c.get("change_name") == change_name:
+                    for p in c.get("phases", []):
+                        if "empty-diff" in (p.get("detail") or ""):
+                            return True
+                    return False
+        except Exception:
+            pass
+        return False
+
+    def _get_resumable_phase(self, change_dir: str, change_name: str,
+                              target_path: str, transport) -> str | None:
+        """Determine the earliest phase we can resume from by checking output files.
+        
+        Returns the phase name to START from (phases before this will be skipped).
+        Returns None if no phases can be skipped (resume from CLARIFY).
+        
+        Skip rules:
+        - CLARIFY: skip if clarify.md exists and is non-empty
+        - ENRICH: skip if specs/*.md exist (unless last cycle had empty-diff)
+        - IMPLEMENT: skip if feature branch has a feat commit for this change
+        - REVIEW/VERIFY/OPTIMIZE/REFLECT: never skip
+        """
+        was_empty = self._was_last_cycle_empty_diff(change_name)
+        
+        # Check CLARIFY output
+        clarify_path = f"{change_dir}/clarify.md"
+        clarify_exists = False
+        try:
+            r = transport.run_shell(f"test -s '{clarify_path}'", cwd=target_path, timeout=5)
+            clarify_exists = r["exit_code"] == 0
+        except Exception:
+            pass
+        
+        if not clarify_exists:
+            return None  # Start from CLARIFY
+        
+        # Check ENRICH output
+        specs_path = f"{change_dir}/specs"
+        specs_exist = False
+        try:
+            r = transport.run_shell(f"ls '{specs_path}'/*.md 2>/dev/null | head -1", cwd=target_path, timeout=5)
+            specs_exist = r["exit_code"] == 0 and r["stdout"].strip()
+        except Exception:
+            pass
+        
+        if not specs_exist or was_empty:
+            # No specs or last IMPLEMENT was empty — resume from ENRICH
+            return "enrich"
+        
+        # Check IMPLEMENT output: does the feature branch have a commit?
+        impl_exists = False
+        try:
+            r = transport.run_shell(
+                f"git log --oneline --all --grep='feat.*{change_name}' -1",
+                cwd=target_path, timeout=5,
+            )
+            impl_exists = r["exit_code"] == 0 and r["stdout"].strip()
+        except Exception:
+            pass
+        
+        if not impl_exists:
+            return "implement"  # Specs exist but no implementation yet
+        
+        # IMPLEMENT done — REVIEW/VERIFY etc. never skip
+        return "review"
+
     async def _run_phases(self, prop, rec, change_dir, target_path,
                           project_name, project_config, change_name,
                           transport: Transport,
@@ -402,8 +476,24 @@ class ZsigaOrchestrator:
                                                  proposal=proposal_text)
         print(f"  Project context ready ({len(project_context)} chars, {time.monotonic() - t_pf:.1f}s)")
 
+        # ── Phase resume: skip completed phases ────────────────────────────
+        _resume_from = self._get_resumable_phase(
+            change_dir, change_name, target_path, transport,
+        )
+        _skip_clarify = False
+        _skip_enrich = False
+        if _resume_from:
+            print(f"  [RESUME] Phase checkpoint found → resuming from {_resume_from.upper()}", flush=True)
+            if _resume_from in ("enrich", "implement", "review"):
+                _skip_clarify = True
+            if _resume_from in ("implement", "review"):
+                _skip_enrich = True
+            # Record skipped phases in WAL
+            for _skipped in []:
+                pass  # WAL already records phase outcomes from metrics
+
         # Phase 0: CLARIFY (requirement engineering — skipped for FIX intent)
-        if not skip_enrich:
+        if not skip_enrich and not _skip_clarify:
             print(f"\n  {'='*50}")
             print(f"  Phase 0/6: CLARIFY {change_name}")
             print(f"  {'='*50}")
@@ -462,7 +552,7 @@ class ZsigaOrchestrator:
             print(f"  Phase 0 done in {time.monotonic() - t0:.1f}s")
 
         # Phase 1: ENRICH (skipped for pipeline_fix — FIX intent)
-        if not skip_enrich and not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
+        if not skip_enrich and not _skip_enrich and not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
             print(f"\n  {'='*50}")
             print(f"  Phase 1/6: ENRICH {change_name}")
             print(f"  {'='*50}")
