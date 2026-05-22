@@ -3,10 +3,14 @@
 Tests that post-IMPLEMENT lint auto-fix gate works correctly.
 """
 import os
+import sys
 import tempfile
 
 from zsiga.pipeline.utils import verify_mechanical
 from zsiga.transport import LocalTransport
+
+# Resolve ruff from venv (not guaranteed on system PATH)
+_RUFF = os.path.join(os.path.dirname(sys.executable), "ruff")
 
 
 class TestPostImplementLintAutoFix:
@@ -15,39 +19,39 @@ class TestPostImplementLintAutoFix:
     def test_ruff_fix_removes_trailing_whitespace(self):
         """Scenario: Auto-fixable lint errors are corrected before REVIEW.
 
-        ruff check --fix removes trailing whitespace automatically.
+        ruff check --fix removes auto-fixable errors (e.g. unused imports).
         """
         with tempfile.TemporaryDirectory() as td:
-            # Create a file with trailing whitespace
+            # Create a file with an unused import (F401 — auto-fixable)
             test_file = os.path.join(td, "example.py")
             with open(test_file, "w") as f:
-                f.write("x = 1   \ny = 2\n")
+                f.write("import os\nx = 1\n")
 
-            # Run ruff check first — should detect trailing whitespace
+            # Run ruff check first — should detect unused import
             ruff_check = LocalTransport().run_shell(
-                f"ruff check '{test_file}' --select W291",
+                f"{_RUFF} check '{test_file}'",
                 timeout=10,
             )
-            assert ruff_check["exit_code"] != 0, "Should detect trailing whitespace"
+            assert ruff_check["exit_code"] != 0, "Should detect unused import"
 
             # Run ruff fix
             LocalTransport().run_shell(
-                f"ruff check --fix '{test_file}'",
+                f"{_RUFF} check --fix '{test_file}'",
                 timeout=10,
             )
 
-            # After fix, no trailing whitespace errors
+            # After fix, no lint errors
             ruff_after = LocalTransport().run_shell(
-                f"ruff check '{test_file}' --select W291",
+                f"{_RUFF} check '{test_file}'",
                 timeout=10,
             )
-            assert ruff_after["exit_code"] == 0, "Trailing whitespace should be fixed"
+            assert ruff_after["exit_code"] == 0, "Unused import should be fixed"
 
-            # Verify content is clean
+            # Verify content is clean (import line removed)
             with open(test_file) as f:
                 content = f.read()
-            assert "x = 1   \n" not in content
-            assert "x = 1\n" in content
+            assert "import os" not in content
+            assert "x = 1" in content
 
     def test_ruff_fix_cannot_fix_ambiguous_name(self):
         """Scenario: Unfixable lint errors remain after --fix.
@@ -61,13 +65,13 @@ class TestPostImplementLintAutoFix:
 
             # Run ruff fix (should not change anything)
             LocalTransport().run_shell(
-                f"ruff check --fix '{test_file}'",
+                f"{_RUFF} check --fix '{test_file}'",
                 timeout=10,
             )
 
             # E741 should still be present
             ruff_after = LocalTransport().run_shell(
-                f"ruff check '{test_file}' --select E741",
+                f"{_RUFF} check '{test_file}' --select E741",
                 timeout=10,
             )
             assert ruff_after["exit_code"] != 0, "E741 should not be auto-fixable"
@@ -84,7 +88,7 @@ class TestPostImplementLintAutoFix:
 
             # ruff check should pass
             ruff_result = LocalTransport().run_shell(
-                f"ruff check '{test_file}'",
+                f"{_RUFF} check '{test_file}'",
                 timeout=10,
             )
             assert ruff_result["exit_code"] == 0, "Clean file should pass ruff check"
@@ -114,7 +118,7 @@ class TestPostImplementLintAutoFix:
             passed, errors = verify_mechanical(
                 td,
                 test_cmd="python3 -m pytest -x",
-                lint_cmd="ruff check .",
+                lint_cmd=f"{_RUFF} check .",
                 since_sha=sha,
             )
             assert passed, f"Clean change should pass verify_mechanical, got: {errors}"

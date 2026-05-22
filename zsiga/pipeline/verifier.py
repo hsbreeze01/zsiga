@@ -217,6 +217,7 @@ def classify_verify_failure(
     verify_md: str = "",
     mech_results: dict = None,
     layer1_result: dict = None,
+    precheck_error_type: str = "",
 ) -> str:
     """Classify a verify failure into a root-cause category.
 
@@ -282,7 +283,11 @@ def classify_verify_failure(
     if content and "must-modify" in content.lower() and "coverage" in content.lower():
         return "must_modify_gate"
 
-    # Precheck failures
+    # Precheck failures — check explicit parameter first, then content heuristics
+    if precheck_error_type == "import":
+        return "precheck_import"
+    if precheck_error_type == "syntax":
+        return "precheck_syntax"
     if content:
         if "pre-check failure (import)" in content or (
             "error_type" in content and "import" in content

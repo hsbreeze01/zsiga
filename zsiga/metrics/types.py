@@ -37,7 +37,28 @@ class PhaseRecord:
     sub_agent_count: int = 0
     model: str = "glm-5.1"
     provider: str = "zhipuai"
-    failure_category: str = ""
+    failure_category: str | None = None
+
+    def to_dict(self) -> dict:
+        d = {
+            "phase": self.phase.value,
+            "outcome": self.outcome.value,
+            "turns_used": self.turns_used,
+            "seconds_used": round(self.seconds_used, 1),
+            "fix_attempts": self.fix_attempts,
+            "llm_calls": self.llm_calls,
+            "tool_calls": self.tool_calls,
+            "detail": self.detail,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "compaction_count": self.compaction_count,
+            "sub_agent_count": self.sub_agent_count,
+            "model": self.model,
+            "provider": self.provider,
+        }
+        if self.failure_category is not None:
+            d["failure_category"] = self.failure_category
+        return d
 
 
 @dataclass
@@ -58,26 +79,7 @@ class ChangeRecord:
             "started_at": self.started_at,
             "finished_at": self.finished_at,
             "lessons_count": self.lessons_count,
-            "phases": [
-                {
-                    "phase": p.phase.value,
-                    "outcome": p.outcome.value,
-                    "turns_used": p.turns_used,
-                    "seconds_used": round(p.seconds_used, 1),
-                    "fix_attempts": p.fix_attempts,
-                    "llm_calls": p.llm_calls,
-                    "tool_calls": p.tool_calls,
-                    "detail": p.detail,
-                    "prompt_tokens": p.prompt_tokens,
-                    "completion_tokens": p.completion_tokens,
-                    "compaction_count": p.compaction_count,
-                    "sub_agent_count": p.sub_agent_count,
-                    "model": p.model,
-                    "provider": p.provider,
-                    "failure_category": p.failure_category,
-                }
-                for p in self.phases
-            ],
+            "phases": [p.to_dict() for p in self.phases],
         }
 
 
