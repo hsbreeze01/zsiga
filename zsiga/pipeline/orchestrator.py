@@ -1672,11 +1672,55 @@ class ZsigaOrchestrator:
         )
         diff_stat = diff_r.get("stdout", "")
 
+        # P0-A: enrich failure_info with RAW signals so diagnoser pattern
+        # matching has actual exception/lint keywords to work with, not
+        # just the LLM-generated verify.md prose.
+        import json as _json
+        pytest_output = ""
+        l1_r = transport.run_shell(
+            f"cat '{change_dir}/verify_layer1.json' 2>/dev/null",
+            timeout=5,
+        )
+        if l1_r["exit_code"] == 0 and l1_r.get("stdout"):
+            try:
+                l1_data = _json.loads(l1_r["stdout"])
+                pytest_output = (
+                    (l1_data.get("pytest_output") or "")
+                    + "\n" + (l1_data.get("pytest_stderr") or "")
+                ).strip()
+            except (ValueError, TypeError):
+                pass
+
+        review_critical = ""
+        review_r = transport.run_shell(
+            f"cat '{change_dir}/review.md' 2>/dev/null",
+            timeout=5,
+        )
+        if review_r["exit_code"] == 0 and review_r.get("stdout"):
+            review_critical = "\n".join(
+                line for line in review_r["stdout"].splitlines()
+                if "[CRITICAL]" in line
+            )[:1500]
+
+        # Combined detail in priority order: raw mechanical output first
+        # (where pattern matching has the most signal), CRITICAL review
+        # issues second, LLM verify prose last.
+        detail_parts = []
+        if pytest_output:
+            detail_parts.append(f"=== Layer 1 pytest ===\n{pytest_output[:3000]}")
+        if review_critical:
+            detail_parts.append(f"=== REVIEW CRITICAL ===\n{review_critical}")
+        if verify_feedback:
+            detail_parts.append(f"=== verify.md ===\n{verify_feedback[:2000]}")
+        detail_combined = "\n\n".join(detail_parts) if detail_parts else verify_feedback[:3000]
+
         failure_info = {
-            "detail": verify_feedback[:3000],
+            "detail": detail_combined[:6000],
             "verify_feedback": verify_feedback[:3000],
             "change_name": change_name,
             "diff_stat": diff_stat[:500],
+            "pytest_output": pytest_output[:3000],
+            "review_critical": review_critical,
         }
 
         report = diagnoser.diagnose(failure_info, target_path, transport)

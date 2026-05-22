@@ -104,15 +104,49 @@ _PATTERNS: list[tuple[str, str, float]] = [
 ]
 
 
+def _expand_match_context(detail: str, match: re.Match) -> str:
+    """Expand a regex match to include the line containing the match,
+    plus the previous and next lines, so downstream callers can find
+    file:line locators near the matched keyword."""
+    lines = detail.splitlines()
+    if not lines:
+        return match.group(0)
+    # Find which line the match falls on
+    pos = match.start()
+    cumulative = 0
+    target_idx = 0
+    for i, line in enumerate(lines):
+        if cumulative + len(line) >= pos:
+            target_idx = i
+            break
+        cumulative += len(line) + 1  # +1 for the newline
+    start_idx = max(0, target_idx - 1)
+    end_idx = min(len(lines), target_idx + 2)
+    snippet = "\n".join(lines[start_idx:end_idx]).strip()
+    # Cap snippet length so a giant single line doesn't blow up logs
+    return snippet[:400]
+
+
 def _match_patterns(detail: str) -> list[tuple[str, str, float]]:
-    """Return (description, evidence, confidence) for each matched pattern."""
+    """Return (description, evidence, confidence) for each matched pattern.
+
+    Evidence preserves a small context window around the match (the
+    matched line plus the previous and next lines) so downstream
+    helpers can extract file:line locators from common pytest /
+    traceback output.
+    """
     results: list[tuple[str, str, float]] = []
     for pattern, desc, confidence in _PATTERNS:
         m = re.search(pattern, detail)
         if m:
-            results.append((desc, m.group(0), confidence))
+            evidence = _expand_match_context(detail, m)
+            results.append((desc, evidence, confidence))
     if not results:
-        results.append(("Unknown error – no specific pattern matched", detail[:120], 0.30))
+        results.append((
+            "Unknown error – no specific pattern matched",
+            detail[:200],
+            0.30,
+        ))
     return results
 
 
@@ -129,8 +163,18 @@ class Diagnoser:
         Parameters
         ----------
         failure_info : dict
-            Must contain ``detail`` (str, the error output) and optionally
-            ``verify_feedback`` (str, content of verify.md).
+            Must contain ``detail`` (str, raw failure output preferred —
+            pytest stderr / ruff stderr / python traceback). Pattern
+            matching needs raw exception keywords (ImportError, E701, …);
+            feeding only LLM prose makes everything fall through to the
+            generic "Recent code change" hypothesis (P0-A regression).
+
+            Optional fields:
+            - ``verify_feedback`` (str): content of verify.md for context
+            - ``pytest_output`` (str): Layer 1 pytest stdout/stderr
+            - ``review_critical`` (str): CRITICAL lines extracted from
+              review.md
+            - ``diff_stat`` (str): git diff --stat output
 
         Returns
         -------
@@ -447,17 +491,49 @@ class Diagnoser:
                 f"Optimize slow code path or increase timeout. Evidence: {evidence}"
             )
 
-        # Generic fallback — always include actual evidence snippet
+        # Generic fallback — always include actual evidence snippet AND
+        # any file:line locator the regex extracted, so eval-fix knows
+        # which file to open even when our pattern matchers gave up.
         snippet = evidence[:120] if evidence else "no details"
+        files = self._extract_affected_files(evidence)
+        location = files[0] if files else ""
+        location_hint = f" at {location}" if location else ""
         return (
-            f"Best guess: {hypothesis.description}. "
+            f"Best guess: {hypothesis.description}{location_hint}. "
             f"Evidence: {snippet}"
         )
 
     def _extract_affected_files(self, evidence: str) -> list[str]:
-        """Extract file paths from evidence text."""
-        files = re.findall(r"([^\s:]+\.py)", evidence)
-        return list(dict.fromkeys(files))[:5]
+        """Extract file paths (with line numbers when available) from evidence.
+
+        Recognises common pytest / ruff / python tracebacks:
+        - ``foo/bar.py:42:10`` → ``foo/bar.py:42``
+        - ``foo/bar.py:42`` → ``foo/bar.py:42``
+        - ``foo/bar.py`` → ``foo/bar.py``
+        """
+        # First pass: file:line (with optional :col) — these are the
+        # high-value entries the eval-fix loop can use directly.
+        with_line = re.findall(
+            r"([\w./-]+\.py):(\d+)(?::\d+)?",
+            evidence,
+        )
+        # Second pass: bare files (no line number) for context only.
+        bare = re.findall(r"([\w./-]+\.py)\b", evidence)
+
+        ordered: list[str] = []
+        seen: set[str] = set()
+        for fname, lineno in with_line:
+            key = f"{fname}:{lineno}"
+            if key not in seen:
+                seen.add(key)
+                # Also block the bare filename so we don't double-list it.
+                seen.add(fname)
+                ordered.append(key)
+        for fname in bare:
+            if fname not in seen:
+                seen.add(fname)
+                ordered.append(fname)
+        return ordered[:5]
 
     def diagnose(self, failure_info: dict,
                  target_path: str,
