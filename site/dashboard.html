@@ -502,23 +502,23 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="hero-info">
     <h1>zsiga <span>⚡ Level 2: Code Architect · 超电磁开发智能体</span></h1>
-    <div id="phase-indicator" style="font-size:0.8rem;color:#64748b;margin-bottom:0.5rem">CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER</div>
-    <span id="daemon-state" class="state-badge working">⚡ Working</span>
+    <div style="font-size:0.8rem;color:#64748b;margin-bottom:0.5rem">CLARIFY → ENRICH → IMPLEMENT → REVIEW → VERIFY → OPTIMIZE → REFLECT → DELIVER</div>
+    <span class="state-badge working">⚡ Working</span>
   </div>
 </div>
 
-<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">2208954</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-22 23:53:41</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">1</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-22 23:53:41</div></div></div>
+<div class="grid" style="margin-bottom:1rem"><div class="card"><div class="label"> Daemon</div><div class="value" style="font-size:1.2rem">2239857</div></div><div class="card"><div class="label"> Started At</div><div class="value" style="font-size:1rem">2026-05-23 00:57:39</div></div><div class="card"><div class="label"> Cycle</div><div class="value" style="font-size:1.2rem">14</div></div><div class="card"><div class="label"> State</div><span class="state-badge working">Running</span></div><div class="card"><div class="label"> Processing</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">Idle</div></div><div class="card"><div class="label"> Heartbeat</div><div class="meta" style="font-size:0.85rem;margin-top:0.3rem">2026-05-23 03:09:27</div></div></div>
 
 
-<div id="summary-cards" class="grid">
+<div class="grid">
   <div class="card">
     <div class="label">🪙 Total Changes</div>
-    <div class="value">358</div>
+    <div class="value">395</div>
   </div>
   <div class="card">
     <div class="label">🎯 Hit Rate</div>
-    <div class="value warn">70.9%</div>
-    <div class="meta">254 hit / 104 miss</div>
+    <div class="value warn">71.9%</div>
+    <div class="meta">284 hit / 111 miss</div>
   </div>
   <div class="card">
     <div class="label">📐 Targets</div>
@@ -531,11 +531,12 @@ td { border-top: 1px solid #334155; }
   </div>
   <div class="card">
     <div class="label">⚡ First-Pass Rate</div>
-    <div class="value good">81.5%</div>
+    <div class="value good">83.4%</div>
   </div>
   <div class="card">
     <div class="label">✅ Verify Rate</div>
-    <div class="value bad">49.5%</div>
+    <div class="value warn">53.2%</div>
+    <div class="sub" style="font-size:0.85em;opacity:0.85">L1 cov: <strong>0.6%</strong>  ·  L1 pass: <strong class="bad">0.0%</strong>  <span style="opacity:0.6">(0/2 L1-active)</span></div>
   </div>
   <div class="card">
     <div class="label">🗜️ Compactions</div>
@@ -555,6 +556,20 @@ td { border-top: 1px solid #334155; }
     <div class="meta">Insufficient data</div>
   </div>
 </div>
+
+<div class="section">
+  <h2>📋 Proposal Queue</h2>
+  <table>
+  <thead><tr><th>Proposal</th><th>Project</th><th>Summary</th></tr></thead>
+  <tbody>
+<tr><td>auto-metric_degradation-verify_pass_rate-20260521</td><td>zsiga</td><td>Proposal: Investigate Metric Degradation</td></tr>
+<tr><td>dashboard-add-feedback-loop-metrics</td><td>zsiga</td><td>Proposal: dashboard-add-feedback-loop-metrics</td></tr>
+<tr><td>fix-learnings-noise-and-inject</td><td>zsiga</td><td>Proposal: fix-learnings-noise-and-inject</td></tr>
+<tr><td>fix-self-assessment-and-reflector-loop</td><td>zsiga</td><td>Proposal: fix-self-assessment-and-reflector-loop</td></tr>
+  </tbody>
+  </table>
+</div>
+
 
 <div id="queue-section" class="section"></div>
 
@@ -584,24 +599,24 @@ td { border-top: 1px solid #334155; }
   <td>0</td>
 </tr><tr>
   <td>implement</td>
-  <td>313</td>
-  <td class="good">93.3%</td>
-  <td>0.3</td>
-  <td>183.4s</td>
+  <td>350</td>
+  <td class="good">94.0%</td>
+  <td>0.2</td>
+  <td>170.9s</td>
   <td>161</td>
-  <td>5512</td>
-  <td>6745</td>
-  <td>203.81M</td>
+  <td>5896</td>
+  <td>7211</td>
+  <td>214.94M</td>
 </tr><tr>
   <td>review</td>
-  <td>196</td>
-  <td class="bad">1.0%</td>
+  <td>233</td>
+  <td class="bad">0.9%</td>
   <td>0.0</td>
-  <td>50.8s</td>
-  <td>130</td>
-  <td>695</td>
-  <td>712</td>
-  <td>7.04M</td>
+  <td>46.4s</td>
+  <td>172</td>
+  <td>843</td>
+  <td>802</td>
+  <td>7.93M</td>
 </tr><tr>
   <td>optimize</td>
   <td>0</td>
@@ -614,14 +629,14 @@ td { border-top: 1px solid #334155; }
   <td>0</td>
 </tr><tr>
   <td>verify</td>
-  <td>277</td>
-  <td class="bad">49.5%</td>
+  <td>314</td>
+  <td class="warn">53.2%</td>
   <td>0.0</td>
-  <td>34.9s</td>
-  <td>229</td>
-  <td>1772</td>
-  <td>2548</td>
-  <td>21.07M</td>
+  <td>32.5s</td>
+  <td>250</td>
+  <td>2120</td>
+  <td>3063</td>
+  <td>25.01M</td>
 </tr><tr>
   <td>reflect</td>
   <td>0</td>
@@ -647,16 +662,16 @@ td { border-top: 1px solid #334155; }
 
 <div class="section">
   <h2>🔍 Failure Diagnosis</h2>
-  <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · implement · 13.3min · 2026-05-22 23:07</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Verify import paths and module structure; ensure __init__.py exists</div></details>
+  <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 6.7min · 2026-05-23 01:12</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 5.5min · 2026-05-23 00:57</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 4.2min · 2026-05-23 00:45</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 6.5min · 2026-05-23 00:22</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-self-assessment-and-reflector-loop</strong> · zsiga · verify · 9.8min · 2026-05-23 00:07</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>dashboard-add-feedback-loop-metrics</strong> · zsiga · verify · 5.1min · 2026-05-23 00:00</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 7.1min · 2026-05-22 23:53</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · implement · 13.3min · 2026-05-22 23:07</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
 <details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>dashboard-add-feedback-loop-metrics</strong> · zsiga · verify · 3.3min · 2026-05-22 22:44</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 5.0min · 2026-05-22 22:39</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Verify import paths and module structure; ensure __init__.py exists</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-self-assessment-and-reflector-loop</strong> · zsiga · verify · 8.7min · 2026-05-22 22:25</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>dashboard-add-feedback-loop-metrics</strong> · zsiga · verify · 3.5min · 2026-05-22 22:20</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 11.6min · 2026-05-22 22:08</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Verify import paths and module structure; ensure __init__.py exists</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-self-assessment-and-reflector-loop</strong> · zsiga · verify · 8.2min · 2026-05-22 21:55</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 6.4min · 2026-05-22 21:44</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Verify import paths and module structure; ensure __init__.py exists</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>fix-self-assessment-and-reflector-loop</strong> · zsiga · verify · 3.8min · 2026-05-22 21:35</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
-<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 7.1min · 2026-05-22 21:21</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">Verify import paths and module structure; ensure __init__.py exists</div></details>
+<details><summary style="cursor:pointer;padding:0.4rem 0.8rem;background:#1e293b;border-radius:4px;font-size:0.85rem"><strong>auto-metric_degradation-verify_pass_rate-20260521</strong> · zsiga · verify · 5.0min · 2026-05-22 22:39</summary><div style="font-size:0.8rem;color:#f59e0b;margin-top:0.3rem">review error and adjust approach</div></details>
 
 </div>
 
@@ -668,10 +683,10 @@ td { border-top: 1px solid #334155; }
 <tbody><tr>
   <td><span style="color:#8b5cf6;font-weight:600">glm-5.1</span></td>
   <td>zhipuai</td>
-  <td>11,259</td>
-  <td>337.25M</td>
-  <td>3.60M</td>
-  <td>340.85M</td>
+  <td>12,169</td>
+  <td>353.16M</td>
+  <td>3.74M</td>
+  <td>356.90M</td>
 </tr></tbody></table>
   <div style="margin-top:1rem"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">
   <span style="width:100px;font-size:0.8rem;color:#94a3b8;text-align:right">glm-5.1</span>
@@ -688,27 +703,27 @@ td { border-top: 1px solid #334155; }
   <div class="grid">
     <div class="card">
       <div class="label">Total Tokens</div>
-      <div class="value">340.85M</div>
-      <div class="meta">337.25M prompt + 3.60M completion</div>
+      <div class="value">356.90M</div>
+      <div class="meta">353.16M prompt + 3.74M completion</div>
     </div>
     <div class="card">
       <div class="label">Avg Tokens / Change</div>
-      <div class="value">952.1K</div>
+      <div class="value">903.5K</div>
     </div>
     <div class="card">
       <div class="label">Total LLM Calls</div>
-      <div class="value">11,259</div>
-      <div class="meta">avg 31.4 per change</div>
+      <div class="value">12,169</div>
+      <div class="meta">avg 30.8 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Tool Calls</div>
-      <div class="value">14,425</div>
-      <div class="meta">avg 40.3 per change</div>
+      <div class="value">15,496</div>
+      <div class="meta">avg 39.2 per change</div>
     </div>
     <div class="card">
       <div class="label">Total Runtime</div>
-      <div class="value">35.0h</div>
-      <div class="meta">126,000s total</div>
+      <div class="value">36.1h</div>
+      <div class="meta">129,915s total</div>
     </div>
   </div>
 </div>
@@ -906,12 +921,12 @@ td { border-top: 1px solid #334155; }
   <span class="icon">✓</span>
   <span>累计成功 change 数 >= 100</span>
   <div class="progress"><div class="fill" style="width:100%;background:#ec4899"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">254/100</span>
+  <span style="color:#94a3b8;font-size:0.8rem">284/100</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>总成功率 >= 85%</span>
-  <div class="progress"><div class="fill" style="width:83.4%;background:#475569"></div></div>
-  <span style="color:#94a3b8;font-size:0.8rem">70.9/85</span>
+  <div class="progress"><div class="fill" style="width:84.6%;background:#475569"></div></div>
+  <span style="color:#94a3b8;font-size:0.8rem">71.9/85</span>
 </div><div class="criterion">
   <span class="icon">○</span>
   <span>L6 能力任务完成 >= 6</span>
@@ -1190,14 +1205,14 @@ td { border-top: 1px solid #334155; }
   <h2>Recent Changes</h2>
   <ul class="recent">
     <li>fix-learnings-noise-and-inject</li>
-<li>auto-metric_degradation-verify_pass_rate-20260521</li>
-<li>auto-metric_degradation-verify_pass_rate-20260521</li>
+<li>dashboard-add-feedback-loop-metrics</li>
+<li>fix-learnings-noise-and-inject</li>
 <li>dashboard-add-feedback-loop-metrics</li>
 <li>fix-learnings-noise-and-inject</li>
   </ul>
 </div>
 
-<div class="meta" style="margin-top:2rem">Updated: 2026-05-22T23:53:41.356843</div>
+<div class="meta" style="margin-top:2rem">Updated: 2026-05-23T03:10:15.594469</div>
 <script>
 (function() {
   var REFRESH_INTERVAL = 600; // seconds
@@ -1237,45 +1252,22 @@ td { border-top: 1px solid #334155; }
     });
   }
 
-  function updateQueueSection(queue, daemon, phaseProgress) {
+  function updateQueueSection(queue, daemon) {
     var section = document.getElementById('queue-section');
     if (!section) return;
     if (!queue || queue.length === 0) {
-      section.innerHTML = '<h2>Proposal Queue</h2><div class="meta">Queue empty</div>';
+      section.innerHTML = '<h2>📋 Proposal Queue</h2><div class="meta">Queue empty — idle polling</div>';
       return;
     }
     var currentChange = daemon ? daemon.current_change : null;
-    var html = '<h2>Proposal Queue</h2>';
-    html += '<table><thead><tr><th>#</th><th>Proposal</th><th>Status</th></tr></thead><tbody>';
+    var currentPhase = daemon ? daemon.current_phase : null;
+    var html = '<h2>📋 Proposal Queue</h2><table><thead><tr><th>#</th><th>Proposal</th><th>Project</th><th>Summary</th></tr></thead><tbody>';
     for (var i = 0; i < queue.length; i++) {
       var q = queue[i];
       var isActive = currentChange && q.name === currentChange;
-      var phase = q.phase || 'CLARIFY';
-      var highlight = isActive ? ' style="border-left:3px solid #f59e0b;background:#f59e0b08"' : '';
-      html += '<tr' + highlight + '>';
-      html += '<td style="color:#64748b;font-size:0.8rem">' + (i+1) + '</td>';
-      html += '<td><div style="font-weight:600">' + q.name + '</div>';
-      html += '<div style="font-size:0.75rem;color:#64748b">' + (q.project || '') + ' &middot; ' + (q.summary || '') + '</div></td>';
-      if (isActive) {
-        var phases = phaseProgress || [];
-        var bar = '<div style="display:flex;gap:2px;align-items:center">';
-        for (var j = 0; j < phases.length; j++) {
-          var p = phases[j];
-          var color = p.status === 'active' ? '#f59e0b' : (p.status === 'done' ? '#22c55e' : '#e2e8f0');
-          bar += '<div title="' + p.name + '" style="width:24px;height:8px;border-radius:2px;background:' + color + '"></div>';
-        }
-        bar += '</div>';
-        var activePhase = '';
-        for (var j = 0; j < phases.length; j++) {
-          if (phases[j].status === 'active') activePhase = phases[j].name;
-        }
-        html += '<td>' + bar + '<div style="font-size:0.7rem;color:#f59e0b;margin-top:2px">>> ' + activePhase + '</div></td>';
-      } else {
-        var phaseColors = {CLARIFY:'#3b82f6',ENRICH:'#8b5cf6',IMPLEMENT:'#f59e0b',REVIEW:'#06b6d4',VERIFY:'#22c55e',DELIVER:'#ec4899'};
-        var pc = phaseColors[phase] || '#64748b';
-        html += '<td><span style="font-size:0.75rem;background:' + pc + '20;color:' + pc + ';padding:0.15rem 0.5rem;border-radius:4px">' + phase + '</span></td>';
-      }
-      html += '</tr>';
+      var highlight = isActive ? ' style="border-left:3px solid #f59e0b"' : '';
+      var badge = isActive ? ' <span style="font-size:0.75rem;background:#f59e0b20;color:#f59e0b;padding:0.1rem 0.4rem;border-radius:4px">' + (currentPhase || '') + '</span>' : '';
+      html += '<tr' + highlight + '><td>' + (i+1) + '</td><td>' + q.name + '</td><td>' + q.project + '</td><td>' + (q.summary || '—') + badge + '</td></tr>';
     }
     html += '</tbody></table>';
     section.innerHTML = html;
@@ -1300,60 +1292,10 @@ td { border-top: 1px solid #334155; }
       });
   }
 
-  function pollCurrent() {
-    fetch('/api/current.json')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.daemon) updateDaemonSection(data.daemon);
-        var pp = (data.current && data.current.phase_progress) ? data.current.phase_progress : null;
-        if (data.queue) updateQueueSection(data.queue, data.daemon, pp);
-        if (pp) {
-          var el = document.getElementById('phase-indicator');
-          if (el) {
-            var icons = pp.map(function(p) {
-              if (p.status === 'active') return '>>> ' + p.name;
-              if (p.status === 'done') return '[x] ' + p.name;
-              return '[ ] ' + p.name;
-            });
-            el.textContent = icons.join(' -> ');
-          }
-        }
-      })
-      .catch(function() {});
-  }
-
-  function pollMetrics() {
-    fetch('/api/metrics.json')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.error) return;
-        var cards = document.getElementById('summary-cards');
-        if (!cards) return;
-        var vals = cards.querySelectorAll('.value');
-        if (vals.length >= 8 && data.summary) {
-          if (data.summary.total_changes !== undefined) vals[0].textContent = data.summary.total_changes;
-          if (data.summary.success_rate_pct !== undefined) vals[1].textContent = data.summary.success_rate_pct + '%';
-          if (data.summary.distinct_projects !== undefined) vals[2].textContent = data.summary.distinct_projects;
-          if (data.summary.lessons_learned !== undefined) vals[3].textContent = data.summary.lessons_learned;
-          if (data.summary.first_pass_test_rate_pct !== undefined) vals[4].textContent = data.summary.first_pass_test_rate_pct + '%';
-          if (data.summary.verify_pass_rate_pct !== undefined) vals[5].textContent = data.summary.verify_pass_rate_pct + '%';
-          if (data.summary.total_compaction_count !== undefined) vals[6].textContent = data.summary.total_compaction_count;
-          if (data.summary.total_sub_agent_count !== undefined) vals[7].textContent = data.summary.total_sub_agent_count;
-        }
-      })
-      .catch(function() {});
-  }
-
   // Initial fetch after 2 seconds
   setTimeout(fetchData, 2000);
-  setTimeout(pollCurrent, 3000);
-  setTimeout(pollMetrics, 4000);
   // Polling every 10 minutes
   setInterval(fetchData, REFRESH_INTERVAL * 1000);
-  setInterval(pollCurrent, 30000);
-  setInterval(pollMetrics, 60000);
-  setInterval(pollCurrent, 30000);
-  setInterval(pollMetrics, 60000);
   // Countdown timer every second
   setInterval(function() {
     countdown--;
