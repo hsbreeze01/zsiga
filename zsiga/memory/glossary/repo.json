@@ -1,6 +1,6 @@
 {
   "project": "repo",
-  "extracted_at": "2026-05-20T19:04:18.857882",
+  "extracted_at": "2026-05-22T19:22:09.874211",
   "entries": [
     {
       "name": "ClusterInfo",
@@ -11,6 +11,16 @@
       "name": "evolve_skills",
       "category": "function",
       "file": "skills/skill_evolver.py"
+    },
+    {
+      "name": "tmp_repo",
+      "category": "function",
+      "file": "tests/conftest_zsiga.py"
+    },
+    {
+      "name": "mock_transport",
+      "category": "function",
+      "file": "tests/conftest_zsiga.py"
     },
     {
       "name": "test_detect_lang",
@@ -308,6 +318,21 @@
       "file": "tests/test_config_validation.py"
     },
     {
+      "name": "TestPerProposalIsolation",
+      "category": "class",
+      "file": "tests/test_daemon_cycle_resilience.py"
+    },
+    {
+      "name": "TestOrchestratorConstructionError",
+      "category": "class",
+      "file": "tests/test_daemon_cycle_resilience.py"
+    },
+    {
+      "name": "TestStructuredDiagnostics",
+      "category": "class",
+      "file": "tests/test_daemon_cycle_resilience.py"
+    },
+    {
       "name": "TestSmartSchedulingIdlePoll",
       "category": "class",
       "file": "tests/test_daemon_scheduling.py"
@@ -346,6 +371,56 @@
       "name": "TestDaemonStateStats",
       "category": "class",
       "file": "tests/test_daemon_state.py"
+    },
+    {
+      "name": "TestScanProposalQueue",
+      "category": "class",
+      "file": "tests/test_dashboard_api.py"
+    },
+    {
+      "name": "TestBuildStatusJson",
+      "category": "class",
+      "file": "tests/test_dashboard_api.py"
+    },
+    {
+      "name": "TestApiEndpoint",
+      "category": "class",
+      "file": "tests/test_dashboard_api.py"
+    },
+    {
+      "name": "preserve_daemon_state",
+      "category": "function",
+      "file": "tests/test_dashboard_api.py"
+    },
+    {
+      "name": "TestEmptyQueue",
+      "category": "class",
+      "file": "tests/test_dashboard_queue.py"
+    },
+    {
+      "name": "TestMultiProposalTable",
+      "category": "class",
+      "file": "tests/test_dashboard_queue.py"
+    },
+    {
+      "name": "TestCurrentChangeHighlight",
+      "category": "class",
+      "file": "tests/test_dashboard_queue.py"
+    },
+    {
+      "name": "TestProposalSummaryExtraction",
+      "category": "class",
+      "file": "tests/test_dashboard_queue.py"
+    },
+    {
+      "name": "TestConfigLoadFailure",
+      "category": "class",
+      "file": "tests/test_dashboard_queue.py"
+    },
+    {
+      "name": "preserve_daemon_state",
+      "category": "function",
+      "file": "tests/test_dashboard_queue.py"
     },
     {
       "name": "TestLoadArchivedProposals",
@@ -488,6 +563,101 @@
       "file": "tests/test_diagnoser.py"
     },
     {
+      "name": "TestImportErrorRootCause",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestLintErrorRootCause",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestAssertionErrorRootCause",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestGenericErrorHasContext",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "TestVerifyPrecheck",
+      "category": "class",
+      "file": "tests/test_diagnoser.py"
+    },
+    {
+      "name": "test_disk_filter_drops_nonexistent_paths",
+      "category": "function",
+      "file": "tests/test_disk_filter.py"
+    },
+    {
+      "name": "test_disk_filter_keeps_new_test_file_pattern",
+      "category": "function",
+      "file": "tests/test_disk_filter.py"
+    },
+    {
+      "name": "test_disk_filter_drops_non_test_new_files",
+      "category": "function",
+      "file": "tests/test_disk_filter.py"
+    },
+    {
+      "name": "test_no_target_path_preserves_old_behavior",
+      "category": "function",
+      "file": "tests/test_disk_filter.py"
+    },
+    {
+      "name": "test_build_section_uses_disk_filter",
+      "category": "function",
+      "file": "tests/test_disk_filter.py"
+    },
+    {
+      "name": "test_build_section_returns_empty_when_all_filtered_out",
+      "category": "function",
+      "file": "tests/test_disk_filter.py"
+    },
+    {
+      "name": "test_includes_layer1_block_when_l1_failed",
+      "category": "function",
+      "file": "tests/test_eval_fix_layer1_ctx.py"
+    },
+    {
+      "name": "test_no_layer1_block_when_l1_passed",
+      "category": "function",
+      "file": "tests/test_eval_fix_layer1_ctx.py"
+    },
+    {
+      "name": "test_no_layer1_block_when_vacuous",
+      "category": "function",
+      "file": "tests/test_eval_fix_layer1_ctx.py"
+    },
+    {
+      "name": "test_no_layer1_block_when_json_missing",
+      "category": "function",
+      "file": "tests/test_eval_fix_layer1_ctx.py"
+    },
+    {
+      "name": "test_no_layer1_block_when_corrupt_json",
+      "category": "function",
+      "file": "tests/test_eval_fix_layer1_ctx.py"
+    },
+    {
+      "name": "test_layer1_block_combined_with_must_modify",
+      "category": "function",
+      "file": "tests/test_eval_fix_layer1_ctx.py"
+    },
+    {
+      "name": "test_layer1_block_combined_with_review_critical",
+      "category": "function",
+      "file": "tests/test_eval_fix_layer1_ctx.py"
+    },
+    {
+      "name": "test_pytest_output_truncated_to_1500_chars",
+      "category": "function",
+      "file": "tests/test_eval_fix_layer1_ctx.py"
+    },
+    {
       "name": "TestExtractGithubRepo",
       "category": "class",
       "file": "tests/test_github_issue.py"
@@ -506,6 +676,66 @@
       "name": "TestDeliverCommitMessage",
       "category": "class",
       "file": "tests/test_github_issue.py"
+    },
+    {
+      "name": "TestCheckResult",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestPush",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestPull",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestCommit",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestMergeBranch",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestCheckout",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestDeleteBranch",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestTag",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestAddAll",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestResetHard",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestCreateBranch",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
+    },
+    {
+      "name": "TestDeliverFailureIntegration",
+      "category": "class",
+      "file": "tests/test_git_ops.py"
     },
     {
       "name": "TestGlossaryDataclass",
@@ -566,6 +796,51 @@
       "name": "TestHarnessRunnerRun",
       "category": "class",
       "file": "tests/test_harness_runner.py"
+    },
+    {
+      "name": "test_extracts_inline_backticked_paths",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
+    },
+    {
+      "name": "test_extracts_unquoted_paths",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
+    },
+    {
+      "name": "test_strips_line_number_suffix",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
+    },
+    {
+      "name": "test_dedupes_across_inputs_preserves_first_seen_order",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
+    },
+    {
+      "name": "test_skips_placeholders_and_examples",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
+    },
+    {
+      "name": "test_ignores_bare_filenames_without_directory",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
+    },
+    {
+      "name": "test_supports_multiple_extensions",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
+    },
+    {
+      "name": "test_build_section_returns_empty_when_no_files",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
+    },
+    {
+      "name": "test_build_section_emits_bullets_and_warning",
+      "category": "function",
+      "file": "tests/test_implementer_must_files.py"
     },
     {
       "name": "TestBuildPatternWarningsEmpty",
@@ -748,6 +1023,56 @@
       "file": "tests/test_learnings_search.py"
     },
     {
+      "name": "default_profile",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "clean_env",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "test_default_returned_unchanged_when_no_overrides",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "test_deepseek_key_routes_review_only_by_default",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "test_deepseek_role_allowlist_widens_routing",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "test_explicit_per_role_override_beats_deepseek_shortcut",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "test_explicit_partial_override_fills_with_default",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "test_deepseek_model_and_base_url_overridable",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "test_role_lookup_is_case_insensitive_and_handles_dashes",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
+      "name": "test_unknown_role_returns_default",
+      "category": "function",
+      "file": "tests/test_llm_router.py"
+    },
+    {
       "name": "TestTextFormatter",
       "category": "class",
       "file": "tests/test_logging.py"
@@ -766,6 +1091,56 @@
       "name": "TestLoggingConfig",
       "category": "class",
       "file": "tests/test_logging.py"
+    },
+    {
+      "name": "test_coverage_full_hit",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_coverage_partial_hit",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_coverage_zero_hit",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_coverage_empty_must_files_returns_full_coverage",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_coverage_preserves_must_file_order_in_missed",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_structured_ctx_empty_when_nothing_to_report",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_structured_ctx_includes_missed_files_block",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_structured_ctx_includes_review_critical_only",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_structured_ctx_combines_missed_and_review",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
+    },
+    {
+      "name": "test_structured_ctx_caps_critical_lines_at_5",
+      "category": "function",
+      "file": "tests/test_must_modify_gate.py"
     },
     {
       "name": "test_mine_patterns_empty_file",
@@ -1158,6 +1533,251 @@
       "file": "tests/test_skill_evolver.py"
     },
     {
+      "name": "TestPostImplementLintAutoFix",
+      "category": "class",
+      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__post_implement_lint_autofix.py"
+    },
+    {
+      "name": "TestClassifyVerifyFailure",
+      "category": "class",
+      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_classification.py"
+    },
+    {
+      "name": "TestFailureCategoryInPhaseRecord",
+      "category": "class",
+      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_classification.py"
+    },
+    {
+      "name": "TestVerifyFailureBreakdown",
+      "category": "class",
+      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_classification.py"
+    },
+    {
+      "name": "TestPhaseRecordDetail",
+      "category": "class",
+      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_observability.py"
+    },
+    {
+      "name": "TestVerifyDetailCapture",
+      "category": "class",
+      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_observability.py"
+    },
+    {
+      "name": "TestComputeVerifyRateReport",
+      "category": "class",
+      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_rate_metric_script.py"
+    },
+    {
+      "name": "TestParseTarget",
+      "category": "class",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_spec_without_scenarios_returns_empty",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_empty_input_returns_empty",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_legacy_scenario_defaults_to_not_testable",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_testable_true_with_python_target",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_multiple_scenarios_with_mixed_testable",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_collect_testable_returns_only_eligible",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_invalid_target_forces_testable_false_records_error",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_unsupported_cli_target_demotes_to_layer2",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_scenario_slug",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_raw_block_preserves_full_scenario",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_raw_block_for_each_scenario_independently",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "test_handles_various_heading_depths",
+      "category": "function",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "SPEC_NO_SCENARIOS",
+      "category": "config",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "SPEC_LEGACY_NO_TESTABLE",
+      "category": "config",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "SPEC_TESTABLE_TRUE",
+      "category": "config",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "SPEC_MIXED",
+      "category": "config",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "SPEC_TESTABLE_BAD_TARGET",
+      "category": "config",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "SPEC_TESTABLE_CLI_TARGET",
+      "category": "config",
+      "file": "tests/test_spec_parser.py"
+    },
+    {
+      "name": "change_layout",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_validate_email_rejects_empty",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_validate_email_rejects_empty",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_slugify",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_expected_test_path_combines_change_and_spec",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_demote_in_spec_replaces_first_testable_line",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_demote_in_spec_only_touches_named_scenario",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_demote_in_spec_returns_input_when_scenario_not_found",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_ensure_conftest_writes_when_missing",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_ensure_conftest_skips_when_present",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_conftest_template_compiles",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_validate_with_no_specs_returns_empty_report",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_validate_legacy_spec_no_demotion",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_validate_with_good_test_file_validates",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_validate_with_missing_test_file_demotes",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_validate_with_broken_test_file_deletes_and_demotes",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_validate_mixed_specs_demotes_only_affected",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_summary_line_format",
+      "category": "function",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "SPEC_ONE_TESTABLE",
+      "category": "config",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "SPEC_ONE_NOT_TESTABLE",
+      "category": "config",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "SPEC_MIXED",
+      "category": "config",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "GOOD_TEST_SOURCE",
+      "category": "config",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "BROKEN_TEST_SOURCE",
+      "category": "config",
+      "file": "tests/test_spec_pytest_check.py"
+    },
+    {
       "name": "TestClassifyFailure",
       "category": "class",
       "file": "tests/test_structured_failure.py"
@@ -1298,6 +1918,186 @@
       "file": "tests/test_venv_usage.py"
     },
     {
+      "name": "TestClassifyVerifyFailure",
+      "category": "class",
+      "file": "tests/test_verify_failure_classification.py"
+    },
+    {
+      "name": "TestPhaseRecordFailureCategory",
+      "category": "class",
+      "file": "tests/test_verify_failure_classification.py"
+    },
+    {
+      "name": "TestComputeStatsVerifyBreakdown",
+      "category": "class",
+      "file": "tests/test_verify_failure_classification.py"
+    },
+    {
+      "name": "TestComputeVerifyRateReport",
+      "category": "class",
+      "file": "tests/test_verify_failure_classification.py"
+    },
+    {
+      "name": "TestBuildVerifyDetail",
+      "category": "class",
+      "file": "tests/test_verify_failure_classification.py"
+    },
+    {
+      "name": "TestClassifyAndBuildVerifyRecord",
+      "category": "class",
+      "file": "tests/test_verify_failure_classification.py"
+    },
+    {
+      "name": "change_layout",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_passes",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_fails",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_no_specs_returns_vacuous_pass",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_only_non_testable_scenarios_returns_vacuous_pass",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_testable_scenarios_no_test_files_returns_vacuous_with_warning",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_passing_test_yields_l1_pass",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_failing_test_yields_l1_fail",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_result_is_persisted_as_json",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_load_layer1_result_round_trip",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_load_layer1_result_missing_returns_none",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_load_layer1_result_corrupt_json_returns_none",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_has_non_testable_true_when_no_specs",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_has_non_testable_true_when_mixed",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_has_non_testable_false_when_all_testable",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_summary_line_vacuous",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_summary_line_pass",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_summary_line_fail",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_verify_pure_l1_skips_llm",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_verify_pure_l1_fail_writes_fail_verdict",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_enforce_l1_verdict_overrides_when_l1_fail",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_enforce_l1_verdict_noop_when_l1_passed",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "test_enforce_l1_verdict_noop_when_vacuous",
+      "category": "function",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "VENV_PY",
+      "category": "config",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "SPEC_PASSING",
+      "category": "config",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "SPEC_FAILING",
+      "category": "config",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "SPEC_NON_TESTABLE",
+      "category": "config",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "SPEC_MIXED",
+      "category": "config",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "GOOD_TEST",
+      "category": "config",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
+      "name": "BAD_TEST",
+      "category": "config",
+      "file": "tests/test_verify_layer1.py"
+    },
+    {
       "name": "ast_search",
       "category": "function",
       "file": "zsiga/agent/ast_tools.py"
@@ -1371,6 +2171,71 @@
       "name": "route",
       "category": "function",
       "file": "zsiga/agent/intent_router.py"
+    },
+    {
+      "name": "is_enabled",
+      "category": "function",
+      "file": "zsiga/agent/langfuse_shim.py"
+    },
+    {
+      "name": "reset_cache",
+      "category": "function",
+      "file": "zsiga/agent/langfuse_shim.py"
+    },
+    {
+      "name": "trace_proposal",
+      "category": "function",
+      "file": "zsiga/agent/langfuse_shim.py"
+    },
+    {
+      "name": "phase_span",
+      "category": "function",
+      "file": "zsiga/agent/langfuse_shim.py"
+    },
+    {
+      "name": "sub_agent_span",
+      "category": "function",
+      "file": "zsiga/agent/langfuse_shim.py"
+    },
+    {
+      "name": "llm_generation",
+      "category": "function",
+      "file": "zsiga/agent/langfuse_shim.py"
+    },
+    {
+      "name": "flush",
+      "category": "function",
+      "file": "zsiga/agent/langfuse_shim.py"
+    },
+    {
+      "name": "update_current_observation",
+      "category": "function",
+      "file": "zsiga/agent/langfuse_shim.py"
+    },
+    {
+      "name": "LLMProfile",
+      "category": "class",
+      "file": "zsiga/agent/llm_router.py"
+    },
+    {
+      "name": "get_llm_profile",
+      "category": "function",
+      "file": "zsiga/agent/llm_router.py"
+    },
+    {
+      "name": "DEEPSEEK_DEFAULT_BASE_URL",
+      "category": "config",
+      "file": "zsiga/agent/llm_router.py"
+    },
+    {
+      "name": "DEEPSEEK_DEFAULT_MODEL",
+      "category": "config",
+      "file": "zsiga/agent/llm_router.py"
+    },
+    {
+      "name": "DEEPSEEK_DEFAULT_ROLES",
+      "category": "config",
+      "file": "zsiga/agent/llm_router.py"
     },
     {
       "name": "RunResult",
@@ -2223,6 +3088,21 @@
       "file": "zsiga/metrics/types.py"
     },
     {
+      "name": "compute_verify_rate_report",
+      "category": "function",
+      "file": "zsiga/metrics/verify_rate.py"
+    },
+    {
+      "name": "CLARIFY_SYSTEM",
+      "category": "config",
+      "file": "zsiga/pipeline/clarifier.py"
+    },
+    {
+      "name": "MANDATORY_SECTIONS",
+      "category": "config",
+      "file": "zsiga/pipeline/clarifier.py"
+    },
+    {
       "name": "ArchivedProposal",
       "category": "class",
       "file": "zsiga/pipeline/dedup.py"
@@ -2318,6 +3198,21 @@
       "file": "zsiga/pipeline/diagnoser.py"
     },
     {
+      "name": "PreCheckResult",
+      "category": "class",
+      "file": "zsiga/pipeline/diagnoser.py"
+    },
+    {
+      "name": "verify_precheck",
+      "category": "function",
+      "file": "zsiga/pipeline/diagnoser.py"
+    },
+    {
+      "name": "diagnose_failure",
+      "category": "function",
+      "file": "zsiga/pipeline/diagnoser.py"
+    },
+    {
       "name": "derive_explore_tasks",
       "category": "function",
       "file": "zsiga/pipeline/enricher.py"
@@ -2328,12 +3223,7 @@
       "file": "zsiga/pipeline/enricher.py"
     },
     {
-      "name": "CLARIFIER_SYSTEM",
-      "category": "config",
-      "file": "zsiga/pipeline/enricher.py"
-    },
-    {
-      "name": "MANDATORY_SECTIONS",
+      "name": "ENRICHER_SYSTEM",
       "category": "config",
       "file": "zsiga/pipeline/enricher.py"
     },
@@ -2373,6 +3263,11 @@
       "file": "zsiga/pipeline/implementer.py"
     },
     {
+      "name": "OPTIMIZE_SYSTEM",
+      "category": "config",
+      "file": "zsiga/pipeline/optimizer.py"
+    },
+    {
       "name": "ZsigaOrchestrator",
       "category": "class",
       "file": "zsiga/pipeline/orchestrator.py"
@@ -2401,6 +3296,76 @@
       "name": "MAX_CONTEXT_CHARS",
       "category": "config",
       "file": "zsiga/pipeline/project_context.py"
+    },
+    {
+      "name": "UnsupportedTargetKind",
+      "category": "class",
+      "file": "zsiga/pipeline/spec_parser.py"
+    },
+    {
+      "name": "TargetRef",
+      "category": "class",
+      "file": "zsiga/pipeline/spec_parser.py"
+    },
+    {
+      "name": "Scenario",
+      "category": "class",
+      "file": "zsiga/pipeline/spec_parser.py"
+    },
+    {
+      "name": "parse_target",
+      "category": "function",
+      "file": "zsiga/pipeline/spec_parser.py"
+    },
+    {
+      "name": "parse_spec",
+      "category": "function",
+      "file": "zsiga/pipeline/spec_parser.py"
+    },
+    {
+      "name": "collect_testable",
+      "category": "function",
+      "file": "zsiga/pipeline/spec_parser.py"
+    },
+    {
+      "name": "SpecValidation",
+      "category": "class",
+      "file": "zsiga/pipeline/spec_pytest_check.py"
+    },
+    {
+      "name": "SpecPytestReport",
+      "category": "class",
+      "file": "zsiga/pipeline/spec_pytest_check.py"
+    },
+    {
+      "name": "expected_test_path",
+      "category": "function",
+      "file": "zsiga/pipeline/spec_pytest_check.py"
+    },
+    {
+      "name": "tmp_repo",
+      "category": "function",
+      "file": "zsiga/pipeline/spec_pytest_check.py"
+    },
+    {
+      "name": "mock_transport",
+      "category": "function",
+      "file": "zsiga/pipeline/spec_pytest_check.py"
+    },
+    {
+      "name": "ensure_conftest",
+      "category": "function",
+      "file": "zsiga/pipeline/spec_pytest_check.py"
+    },
+    {
+      "name": "validate_testable_artifacts",
+      "category": "function",
+      "file": "zsiga/pipeline/spec_pytest_check.py"
+    },
+    {
+      "name": "CONFTEST_ZSIGA",
+      "category": "config",
+      "file": "zsiga/pipeline/spec_pytest_check.py"
     },
     {
       "name": "ConflictResult",
@@ -2438,6 +3403,16 @@
       "file": "zsiga/pipeline/utils.py"
     },
     {
+      "name": "get_all_changed_files",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
+      "name": "must_modify_coverage",
+      "category": "function",
+      "file": "zsiga/pipeline/utils.py"
+    },
+    {
       "name": "archive_change",
       "category": "function",
       "file": "zsiga/pipeline/utils.py"
@@ -2468,9 +3443,49 @@
       "file": "zsiga/pipeline/verifier.py"
     },
     {
+      "name": "classify_verify_failure",
+      "category": "function",
+      "file": "zsiga/pipeline/verifier.py"
+    },
+    {
       "name": "VERIFIER_SYSTEM",
       "category": "config",
       "file": "zsiga/pipeline/verifier.py"
+    },
+    {
+      "name": "Layer1Result",
+      "category": "class",
+      "file": "zsiga/pipeline/verify_layer1.py"
+    },
+    {
+      "name": "load_layer1_result",
+      "category": "function",
+      "file": "zsiga/pipeline/verify_layer1.py"
+    },
+    {
+      "name": "run_layer1_pytest",
+      "category": "function",
+      "file": "zsiga/pipeline/verify_layer1.py"
+    },
+    {
+      "name": "has_non_testable_scenarios",
+      "category": "function",
+      "file": "zsiga/pipeline/verify_layer1.py"
+    },
+    {
+      "name": "PYTEST_TOTAL_TIMEOUT",
+      "category": "config",
+      "file": "zsiga/pipeline/verify_layer1.py"
+    },
+    {
+      "name": "PYTEST_OUTPUT_TAIL",
+      "category": "config",
+      "file": "zsiga/pipeline/verify_layer1.py"
+    },
+    {
+      "name": "PYTEST_STDERR_TAIL",
+      "category": "config",
+      "file": "zsiga/pipeline/verify_layer1.py"
     },
     {
       "name": "Transport",
