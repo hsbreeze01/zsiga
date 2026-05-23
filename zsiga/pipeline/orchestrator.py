@@ -120,7 +120,7 @@ class ZsigaOrchestrator:
                         break
             except Exception:
                 pass
-            if paused_file.exists() or consecutive_fails >= 5:
+            if paused_file.exists() or consecutive_fails >= 3:
                 paused_names.append(name)
             else:
                 active_proposals.append(prop)
