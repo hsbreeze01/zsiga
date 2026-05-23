@@ -51,6 +51,24 @@ async def run_review(
     design = read_file(f"{change_dir}/design.md", transport) or ""
     tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
     diff = git_ops.diff(target_path, pre_impl_sha, transport=transport)
+    # Fallback: if diff is empty (proposal re-run on existing branch),
+    # get the full branch diff from the first commit on the feature branch.
+    if not diff.strip():
+        try:
+            mb_r = transport.run_shell(
+                "git log --oneline --ancestry-path --reverse HEAD | head -1",
+                cwd=target_path,
+            )
+            first_line = mb_r.get("stdout", "").strip()
+            if first_line:
+                first_sha = first_line.split()[0]
+                diff = git_ops.diff(target_path, first_sha, transport=transport)
+                print(
+                    f"[REVIEW] diff was empty, using branch-first-commit "
+                    f"{first_sha[:8]}: {len(diff)} chars"
+                )
+        except Exception:
+            pass
 
     review_md_path = f"{change_dir}/review.md"
 
