@@ -11,7 +11,7 @@ The `injection_rate` sub-dict returned by `collect_feedback_loop_metrics` SHALL 
 
 #### Scenario: injection_rate computed from injection_events and phase records
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/dashboard.py::collect_feedback_loop_metrics
 - **Given** a database with 10 "implement" phase records in changes, and 7 injection_events with phase "implement"
 - **When** `collect_feedback_loop_metrics` is called
@@ -19,8 +19,9 @@ The `injection_rate` sub-dict returned by `collect_feedback_loop_metrics` SHALL 
 
 #### Scenario: injection_rate returns empty when no injection events
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/dashboard.py::collect_feedback_loop_metrics
 - **Given** a database with no injection_events rows
 - **When** `collect_feedback_loop_metrics` is called
 - **Then** `injection_rate.by_phase` SHALL be an empty dict and `injection_rate.avg_injected` SHALL be 0.0
+

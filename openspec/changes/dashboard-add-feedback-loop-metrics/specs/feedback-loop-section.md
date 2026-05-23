@@ -16,7 +16,7 @@ Each card SHALL use the existing `.card` CSS class from the dashboard stylesheet
 
 #### Scenario: Renders section with "No data yet" when metrics are zero
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/dashboard.py::_render_feedback_loop_section
 - **Given** a feedback loop metrics dict where all counts are zero (empty data state)
 - **When** `_render_feedback_loop_section(metrics)` is called
@@ -24,7 +24,7 @@ Each card SHALL use the existing `.card` CSS class from the dashboard stylesheet
 
 #### Scenario: Renders metric values when data is present
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/dashboard.py::_render_feedback_loop_section
 - **Given** a feedback loop metrics dict with `learnings_health.total_count` = 42, `auto_proposal_success.success_rate_pct` = 75.0, `self_assessment_coverage.coverage_pct` = 60.0
 - **When** `_render_feedback_loop_section(metrics)` is called
@@ -36,7 +36,7 @@ The "Feedback Loop" section SHALL appear in the rendered dashboard HTML BEFORE t
 
 #### Scenario: Feedback Loop section precedes Recent Changes
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/dashboard.py::_render
 - **Given** the dashboard is being rendered with default data
 - **When** `_render(stats, milestones, "resting")` is called
@@ -48,8 +48,9 @@ The `generate_dashboard` function or `_render` function SHALL call `collect_feed
 
 #### Scenario: generate_dashboard includes Feedback Loop section
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/dashboard.py::generate_dashboard
 - **Given** the dashboard is being generated (writing to a temp path)
 - **When** `generate_dashboard(output_path=tmp_output)` is called
 - **Then** the written HTML file SHALL contain the substring "Feedback Loop"
+

@@ -15,7 +15,7 @@ The table SHALL be created via the `_SCHEMA` mechanism in `zsiga/metrics/db.py` 
 
 #### Scenario: Table is created on first database connection
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/db.py::_get_conn
 - **Given** a new temporary sqlite database file
 - **When** `_get_conn(db_path=tmp_db)` is called
@@ -33,7 +33,7 @@ The function SHALL accept:
 
 #### Scenario: record_injection_event inserts a row
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/db.py::record_injection_event
 - **Given** a temporary sqlite database with the injection_events table
 - **When** `record_injection_event(change_name="test-change", phase="implement", injected_count=5, db_path=tmp_db)` is called
@@ -41,7 +41,7 @@ The function SHALL accept:
 
 #### Scenario: record_injection_event with zero injected count
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/db.py::record_injection_event
 - **Given** a temporary sqlite database with the injection_events table
 - **When** `record_injection_event(change_name="test-change", phase="enrich", injected_count=0, db_path=tmp_db)` is called
@@ -57,7 +57,7 @@ The function SHALL return a dict with:
 
 #### Scenario: query_injection_events aggregates by phase
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/db.py::query_injection_events
 - **Given** a temporary database with 3 injection_events: 2 for "implement" (counts 3, 5) and 1 for "enrich" (count 2)
 - **When** `query_injection_events(db_path=tmp_db)` is called
@@ -65,8 +65,9 @@ The function SHALL return a dict with:
 
 #### Scenario: query_injection_events returns empty when no events
 
-- **testable**: true
+- **testable**: false  <!-- demoted by zsiga: test file missing after ENRICH -->
 - **target**: zsiga/metrics/db.py::query_injection_events
 - **Given** a temporary database with injection_events table but no rows
 - **When** `query_injection_events(db_path=tmp_db)` is called
 - **Then** `by_phase` SHALL be an empty dict and `avg_injected` SHALL be 0.0
+
