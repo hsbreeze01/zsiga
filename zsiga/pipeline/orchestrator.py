@@ -1,7 +1,6 @@
 import time
 import traceback
 from datetime import datetime
-from pathlib import Path
 
 from ..agent.loop import AgentLoop, RunResult, _build_llm_client
 from ..agent.llm_router import get_llm_profile, LLMProfile
@@ -27,7 +26,7 @@ from .enricher import enrich, derive_explore_tasks
 from .clarifier import clarify
 from .optimizer import optimize as run_optimize
 from .implementer import implement
-from .verifier import verify, read_verdict, classify_verify_failure
+from .verifier import verify, read_verdict
 from .diagnoser import Diagnoser
 from .phase_wal import PhaseWAL
 from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python, get_all_changed_files, must_modify_coverage
@@ -101,31 +100,42 @@ class ZsigaOrchestrator:
         scanner = DirectoryScanner(self.config.targets)
         proposals = scanner.scan(transports=self._transports)
 
-        # Filter out paused proposals (5+ consecutive failures or .paused file)
+        # Filter out paused (3+ consecutive fails or .paused file) and completed proposals
+        from ..metrics.db import load_all_changes as _load_metrics
+        _all_metrics = _load_metrics()
         paused_names = []
+        completed_names = []
         active_proposals = []
         for prop in proposals:
             name = prop["id"]
             prop_dir = Path(prop["change_dir"])
             paused_file = prop_dir / ".paused"
-            # Check consecutive fails from metrics
             consecutive_fails = 0
-            try:
-                from ..metrics.db import load_all_changes
-                _all = load_all_changes()
-                for c in reversed([x for x in _all if x.get("change_name") == name]):
-                    if c.get("outcome") in ("fail", "reverted"):
-                        consecutive_fails += 1
-                    else:
-                        break
-            except Exception:
-                pass
+            last_outcome = ""
+            for c in reversed([x for x in _all_metrics if x.get("change_name") == name]):
+                if c.get("outcome") in ("fail", "reverted"):
+                    consecutive_fails += 1
+                else:
+                    break
+            # Get last outcome
+            mine = [x for x in _all_metrics if x.get("change_name") == name]
+            if mine:
+                last_outcome = mine[-1].get("outcome", "")
             if paused_file.exists() or consecutive_fails >= 3:
                 paused_names.append(name)
+            elif last_outcome == "success":
+                completed_names.append(name)
+                # Auto-archive completed proposals
+                try:
+                    archive_change(prop.get("target_path", str(prop_dir.parent.parent)), name, transport=self._get_transport(prop["project"]))
+                except Exception:
+                    pass
             else:
                 active_proposals.append(prop)
         if paused_names:
-            print(f"  \u23F8 Paused ({len(paused_names)}): {', '.join(paused_names)}")
+            print(f"  ⏸ Paused ({len(paused_names)}): {', '.join(paused_names)}")
+        if completed_names:
+            print(f"  ✅ Completed & archived ({len(completed_names)}): {', '.join(completed_names)}")
         proposals = active_proposals
 
         print(f"\n{'='*60}")
@@ -403,80 +413,6 @@ class ZsigaOrchestrator:
             except Exception as cleanup_err:
                 print(f"  ⚠ Cleanup warning: {cleanup_err}", flush=True)
 
-
-    # ── Phase resume helpers ──────────────────────────────────────────────
-    def _was_last_cycle_empty_diff(self, change_name: str) -> bool:
-        """Check if the last cycle for this change had an empty-diff guard trigger."""
-        try:
-            from ..metrics.db import load_all_changes
-            changes = load_all_changes()
-            for c in reversed(changes):
-                if c.get("change_name") == change_name:
-                    for p in c.get("phases", []):
-                        if "empty-diff" in (p.get("detail") or ""):
-                            return True
-                    return False
-        except Exception:
-            pass
-        return False
-
-    def _get_resumable_phase(self, change_dir: str, change_name: str,
-                              target_path: str, transport) -> str | None:
-        """Determine the earliest phase we can resume from by checking output files.
-        
-        Returns the phase name to START from (phases before this will be skipped).
-        Returns None if no phases can be skipped (resume from CLARIFY).
-        
-        Skip rules:
-        - CLARIFY: skip if clarify.md exists and is non-empty
-        - ENRICH: skip if specs/*.md exist (unless last cycle had empty-diff)
-        - IMPLEMENT: skip if feature branch has a feat commit for this change
-        - REVIEW/VERIFY/OPTIMIZE/REFLECT: never skip
-        """
-        was_empty = self._was_last_cycle_empty_diff(change_name)
-        
-        # Check CLARIFY output
-        clarify_path = f"{change_dir}/clarify.md"
-        clarify_exists = False
-        try:
-            r = transport.run_shell(f"test -s '{clarify_path}'", cwd=target_path, timeout=5)
-            clarify_exists = r["exit_code"] == 0
-        except Exception:
-            pass
-        
-        if not clarify_exists:
-            return None  # Start from CLARIFY
-        
-        # Check ENRICH output
-        specs_path = f"{change_dir}/specs"
-        specs_exist = False
-        try:
-            r = transport.run_shell(f"ls '{specs_path}'/*.md 2>/dev/null | head -1", cwd=target_path, timeout=5)
-            specs_exist = r["exit_code"] == 0 and r["stdout"].strip()
-        except Exception:
-            pass
-        
-        if not specs_exist or was_empty:
-            # No specs or last IMPLEMENT was empty — resume from ENRICH
-            return "enrich"
-        
-        # Check IMPLEMENT output: does the feature branch have a commit?
-        impl_exists = False
-        try:
-            r = transport.run_shell(
-                f"git log --oneline --all --grep='feat.*{change_name}' -1",
-                cwd=target_path, timeout=5,
-            )
-            impl_exists = r["exit_code"] == 0 and r["stdout"].strip()
-        except Exception:
-            pass
-        
-        if not impl_exists:
-            return "implement"  # Specs exist but no implementation yet
-        
-        # IMPLEMENT done — REVIEW/VERIFY etc. never skip
-        return "review"
-
     async def _run_phases(self, prop, rec, change_dir, target_path,
                           project_name, project_config, change_name,
                           transport: Transport,
@@ -504,24 +440,8 @@ class ZsigaOrchestrator:
                                                  proposal=proposal_text)
         print(f"  Project context ready ({len(project_context)} chars, {time.monotonic() - t_pf:.1f}s)")
 
-        # ── Phase resume: skip completed phases ────────────────────────────
-        _resume_from = self._get_resumable_phase(
-            change_dir, change_name, target_path, transport,
-        )
-        _skip_clarify = False
-        _skip_enrich = False
-        if _resume_from:
-            print(f"  [RESUME] Phase checkpoint found → resuming from {_resume_from.upper()}", flush=True)
-            if _resume_from in ("enrich", "implement", "review"):
-                _skip_clarify = True
-            if _resume_from in ("implement", "review"):
-                _skip_enrich = True
-            # Record skipped phases in WAL
-            for _skipped in []:
-                pass  # WAL already records phase outcomes from metrics
-
         # Phase 0: CLARIFY (requirement engineering — skipped for FIX intent)
-        if not skip_enrich and not _skip_clarify:
+        if not skip_enrich:
             print(f"\n  {'='*50}")
             print(f"  Phase 0/6: CLARIFY {change_name}")
             print(f"  {'='*50}")
@@ -580,7 +500,7 @@ class ZsigaOrchestrator:
             print(f"  Phase 0 done in {time.monotonic() - t0:.1f}s")
 
         # Phase 1: ENRICH (skipped for pipeline_fix — FIX intent)
-        if not skip_enrich and not _skip_enrich and not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
+        if not skip_enrich and not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
             print(f"\n  {'='*50}")
             print(f"  Phase 1/6: ENRICH {change_name}")
             print(f"  {'='*50}")
@@ -960,17 +880,10 @@ class ZsigaOrchestrator:
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
                 print(f"  REVERTED: {change_name} (verify pre-check failed)")
                 rec.outcome = Outcome.REVERTED
-                # Read verify.md for observability
-                verify_md_for_record = read_file(
-                    f"{change_dir}/verify.md", transport
-                ) or verify_content
-                rec.phases.append(_classify_and_build_verify_record(
-                    outcome=Outcome.FAIL,
-                    seconds=0.0,
-                    fix_attempts=eval_fix_attempts,
-                    verify_md_content=verify_md_for_record,
-                    mech_results=mech_results,
-                    extra_detail=f"eval-fix attempts={eval_fix_attempts}; pre-check: {precheck_result.error_type} in {precheck_result.file_path}",
+                rec.phases.append(PhaseRecord(
+                    phase=Phase.VERIFY, outcome=Outcome.FAIL,
+                    seconds_used=0.0, fix_attempts=eval_fix_attempts,
+                    detail=f"pre-check: {precheck_result.error_type} in {precheck_result.file_path}",
                 ))
                 record_outcome(change_name, project_name, False, "verify")
                 return False
@@ -1040,39 +953,40 @@ class ZsigaOrchestrator:
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
                 print(f"  REVERTED: {change_name} (verify failed)")
                 rec.outcome = Outcome.REVERTED
-                # Read verify.md for observability
-                verify_md_for_record = read_file(
-                    f"{change_dir}/verify.md", transport
-                ) or ""
-                rec.phases.append(_classify_and_build_verify_record(
-                    outcome=Outcome.FAIL,
-                    seconds=verify_seconds,
-                    fix_attempts=eval_fix_attempts,
-                    verify_md_content=verify_md_for_record,
-                    mech_results=mech_results,
-                    extra_detail=f"eval-fix attempts={eval_fix_attempts}",
-                    llm_calls=verify_calls[0],
-                    tool_calls=verify_calls[1],
-                    prompt_tokens=verify_tokens[0],
-                    completion_tokens=verify_tokens[1],
+                rec.phases.append(PhaseRecord(
+                    phase=Phase.VERIFY, outcome=Outcome.FAIL,
+                    seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
+                    llm_calls=verify_calls[0], tool_calls=verify_calls[1],
+                    prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
                 ))
                 record_outcome(change_name, project_name, False, "verify")
                 return False
 
-        # Read verify.md for observability (captured for both pass and fail)
-        verify_md_content = read_file(
-            f"{change_dir}/verify.md", transport
-        ) or ""
-        rec.phases.append(_classify_and_build_verify_record(
-            outcome=verify_outcome,
-            seconds=verify_seconds,
-            fix_attempts=eval_fix_attempts,
-            verify_md_content=verify_md_content,
-            mech_results=mech_results,
-            llm_calls=verify_calls[0],
-            tool_calls=verify_calls[1],
-            prompt_tokens=verify_tokens[0],
-            completion_tokens=verify_tokens[1],
+        # P1-5 Layer 1 stats: pull verify_layer1.json (if present) so the
+        # VERIFY phase record carries the mechanical-coverage signal for the
+        # dashboard's layer1_coverage_pct / layer1_pass_rate_pct widgets.
+        try:
+            from .verify_layer1 import load_layer1_result as _load_l1
+            _l1 = _load_l1(change_dir, transport)
+        except Exception:
+            _l1 = None
+        if _l1 is not None and not _l1.vacuous:
+            _l1_active = True
+            _l1_passed = _l1.passed
+            _l1_scen = _l1.scenarios_tested
+        else:
+            _l1_active = False
+            _l1_passed = False
+            _l1_scen = (_l1.scenarios_tested if _l1 is not None else 0)
+
+        rec.phases.append(PhaseRecord(
+            phase=Phase.VERIFY, outcome=verify_outcome,
+            seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
+            llm_calls=verify_calls[0], tool_calls=verify_calls[1],
+            prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
+            layer1_active=_l1_active,
+            layer1_passed=_l1_passed,
+            layer1_scenarios=_l1_scen,
         ))
 
         # Phase 4.5/6: OPTIMIZE (optional norm alignment)
@@ -1796,11 +1710,55 @@ class ZsigaOrchestrator:
         )
         diff_stat = diff_r.get("stdout", "")
 
+        # P0-A: enrich failure_info with RAW signals so diagnoser pattern
+        # matching has actual exception/lint keywords to work with, not
+        # just the LLM-generated verify.md prose.
+        import json as _json
+        pytest_output = ""
+        l1_r = transport.run_shell(
+            f"cat '{change_dir}/verify_layer1.json' 2>/dev/null",
+            timeout=5,
+        )
+        if l1_r["exit_code"] == 0 and l1_r.get("stdout"):
+            try:
+                l1_data = _json.loads(l1_r["stdout"])
+                pytest_output = (
+                    (l1_data.get("pytest_output") or "")
+                    + "\n" + (l1_data.get("pytest_stderr") or "")
+                ).strip()
+            except (ValueError, TypeError):
+                pass
+
+        review_critical = ""
+        review_r = transport.run_shell(
+            f"cat '{change_dir}/review.md' 2>/dev/null",
+            timeout=5,
+        )
+        if review_r["exit_code"] == 0 and review_r.get("stdout"):
+            review_critical = "\n".join(
+                line for line in review_r["stdout"].splitlines()
+                if "[CRITICAL]" in line
+            )[:1500]
+
+        # Combined detail in priority order: raw mechanical output first
+        # (where pattern matching has the most signal), CRITICAL review
+        # issues second, LLM verify prose last.
+        detail_parts = []
+        if pytest_output:
+            detail_parts.append(f"=== Layer 1 pytest ===\n{pytest_output[:3000]}")
+        if review_critical:
+            detail_parts.append(f"=== REVIEW CRITICAL ===\n{review_critical}")
+        if verify_feedback:
+            detail_parts.append(f"=== verify.md ===\n{verify_feedback[:2000]}")
+        detail_combined = "\n\n".join(detail_parts) if detail_parts else verify_feedback[:3000]
+
         failure_info = {
-            "detail": verify_feedback[:3000],
+            "detail": detail_combined[:6000],
             "verify_feedback": verify_feedback[:3000],
             "change_name": change_name,
             "diff_stat": diff_stat[:500],
+            "pytest_output": pytest_output[:3000],
+            "review_critical": review_critical,
         }
 
         report = diagnoser.diagnose(failure_info, target_path, transport)
@@ -1891,62 +1849,6 @@ class ZsigaOrchestrator:
         for transport in self._transports.values():
             transport.close()
         self._transports.clear()
-
-
-def _build_verify_detail(verdict: str, verify_md_content: str, extra: str = "") -> str:
-    """Build a detail string for verify PhaseRecord from verify.md content.
-
-    Includes the verdict and up to 200 chars of verify.md. Optionally
-    appends extra context (e.g. eval-fix attempt count).
-    """
-    parts = []
-    if verdict:
-        parts.append(f"verdict={verdict}")
-    if verify_md_content:
-        parts.append(verify_md_content[:200])
-    if extra:
-        parts.append(extra)
-    return " | ".join(parts) if parts else ""
-
-
-def _classify_and_build_verify_record(
-    outcome: Outcome,
-    seconds: float,
-    fix_attempts: int,
-    verify_md_content: str,
-    mech_results: dict = None,
-    layer1_result: dict = None,
-    extra_detail: str = "",
-    llm_calls: int = 0,
-    tool_calls: int = 0,
-    prompt_tokens: int = 0,
-    completion_tokens: int = 0,
-) -> PhaseRecord:
-    """Build a verify PhaseRecord with failure classification and rich detail."""
-    detail = _build_verify_detail(
-        "FAIL" if outcome != Outcome.SUCCESS else "PASS",
-        verify_md_content,
-        extra_detail,
-    )
-    failure_category = ""
-    if outcome != Outcome.SUCCESS:
-        failure_category = classify_verify_failure(
-            verify_md=verify_md_content,
-            mech_results=mech_results,
-            layer1_result=layer1_result,
-        )
-    return PhaseRecord(
-        phase=Phase.VERIFY,
-        outcome=outcome,
-        seconds_used=seconds,
-        fix_attempts=fix_attempts,
-        detail=detail,
-        failure_category=failure_category,
-        llm_calls=llm_calls,
-        tool_calls=tool_calls,
-        prompt_tokens=prompt_tokens,
-        completion_tokens=completion_tokens,
-    )
 
 
 def _extract_calls(result) -> tuple[int, int]:
