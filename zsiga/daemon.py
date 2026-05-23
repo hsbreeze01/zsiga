@@ -189,7 +189,7 @@ def _scan_proposal_queue(changes_dir: Path | None = None) -> list[dict]:
                 if outcome == "success":
                     lifecycle = "completed"
                 elif consecutive_fails >= 3:
-                    lifecycle = "stuck"
+                    lifecycle = "paused"
                     paused = True
                     paused_reason = f"{consecutive_fails} consecutive failures"
                 elif outcome in ("fail", "reverted"):
