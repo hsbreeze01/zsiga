@@ -209,6 +209,21 @@ def _scan_proposal_queue(changes_dir: Path | None = None) -> list[dict]:
     return queue
 
 
+def _compute_uptime_seconds(started_at: str | None) -> float | None:
+    """Compute elapsed seconds since *started_at*, rounded to 1 decimal.
+
+    Returns ``None`` when *started_at* is missing or cannot be parsed.
+    """
+    if not started_at:
+        return None
+    try:
+        started_dt = datetime.fromisoformat(started_at)
+    except (ValueError, TypeError):
+        return None
+    elapsed = (datetime.now() - started_dt).total_seconds()
+    return round(elapsed, 1)
+
+
 def _build_status_json() -> str:
     """Build the /api/status.json response payload."""
     # Daemon state with safe defaults
@@ -221,6 +236,7 @@ def _build_status_json() -> str:
         "current_phase": ds.get("current_phase"),
         "current_project": ds.get("current_project"),
         "heartbeat": ds.get("last_heartbeat"),
+        "uptime_seconds": _compute_uptime_seconds(ds.get("started_at")),
     }
     queue = _scan_proposal_queue()
     return json.dumps({"daemon": daemon, "queue": queue}, ensure_ascii=False)
