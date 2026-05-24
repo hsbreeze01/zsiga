@@ -1,46 +1,64 @@
-# Spec: SRE Pipeline Orchestrator Integration
+# Spec: SRE Orchestrator Integration
 
 ## ADDED Requirements
 
-### Requirement: SRE Dispatch in Orchestrator
+### Requirement: SRE Intent Routing Mutual Exclusion with Implementation
 
-The `ZsigaOrchestrator._process_change()` method SHALL handle `route_path == "dispatch_sre"` by dispatching to the SRE pipeline instead of the code pipeline. When dispatched to SRE, the orchestrator SHALL NOT create a `ChangeRecord`, SHALL NOT run the ENRICH→IMPLEMENT→VERIFY→DELIVER phases, and SHALL NOT perform git operations (feature branch, commit, tag, push).
-
-#### Scenario: SRE intent routes to dispatch_sre in orchestrator
-
-- **testable**: true
-- **target**: zsiga.pipeline.orchestrator::ZsigaOrchestrator._process_change
-- **Given** a proposal with intent classified as `IntentType.SRE` and `route_path == "dispatch_sre"`
-- **When** `_process_change(prop)` is called
-- **Then** the SRE pipeline SHALL be invoked
-- **And** the code pipeline phases SHALL NOT execute
-
-### Requirement: SRE and Code Pipeline Mutual Exclusion
-
-When an intent is classified as `IntentType.SRE`, it SHALL NOT simultaneously be classified as `IntentType.IMPLEMENTATION` or `IntentType.FIX`. The `classify()` function SHALL return exactly one `IntentType` value. The orchestrator SHALL dispatch to exactly one pipeline based on the route.
+The orchestrator SHALL route SRE-intent messages to the SRE pipeline and NOT to the code pipeline. Messages classified as `IntentType.SRE` SHALL NOT be simultaneously classified as `IntentType.IMPLEMENTATION`.
 
 #### Scenario: SRE intent not also classified as implementation
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::classify
-- **Given** a message containing only SRE keywords (e.g., "检查服务健康状态")
-- **When** `classify(message)` is called without LLM config
-- **Then** the returned `Intent.intent_type` SHALL be `IntentType.SRE`
-- **And** SHALL NOT be `IntentType.IMPLEMENTATION`
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "检查服务健康状态"
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.SRE` and SHALL NOT be `IntentType.IMPLEMENTATION`
 
 #### Scenario: Implementation intent not classified as SRE
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::classify
-- **Given** a message containing only implementation keywords (e.g., "实现用户登录模块")
-- **When** `classify(message)` is called without LLM config
-- **Then** the returned `Intent.intent_type` SHALL be `IntentType.IMPLEMENTATION`
-- **And** SHALL NOT be `IntentType.SRE`
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "实现用户登录模块"
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.IMPLEMENTATION` and SHALL NOT be `IntentType.SRE`
 
-## MODIFIED Requirements
+---
 
-None.
+### Requirement: FIX Intent Priority Over SRE in Orchestrator
 
-## REMOVED Requirements
+When a message contains both FIX and SRE keywords, the intent classifier MUST classify it as `IntentType.FIX`. FIX intent has higher priority than SRE in the routing hierarchy.
 
-None.
+#### Scenario: SRE mutual exclusion — fix has priority over SRE
+
+- **testable**: true
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "修复服务启动失败的问题" containing both FIX and SRE keywords
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.FIX`
+
+---
+
+### Requirement: Mixed SRE and Research Keywords Resolved to SRE
+
+When a message contains both SRE and research keywords (查看, 分析) without FIX keywords, the classifier SHALL classify it as `IntentType.SRE`. SRE keywords dominate research intent.
+
+#### Scenario: Mixed SRE + research keywords resolved to SRE
+
+- **testable**: true
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "查看日志分析磁盘问题" containing both research and SRE keywords
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.SRE`
+
+---
+
+### Requirement: SRE Pipeline Bypasses Code Pipeline Phases
+
+When the orchestrator routes to the SRE pipeline, it SHALL NOT enter the code pipeline's ENRICH → IMPLEMENT → VERIFY flow. The SRE pipeline follows its own DIAGNOSE → PLAN → EXECUTE → VERIFY → REPORT phases.
+
+#### Scenario: SRE pipeline does not enter code phases
+
+- **testable**: false
+- **Given** an SRE-intent message dispatched by the orchestrator
+- **When** the SRE pipeline runs to completion
+- **Then** no ENRICH, IMPLEMENT, or code-VERIFY phases SHALL be invoked

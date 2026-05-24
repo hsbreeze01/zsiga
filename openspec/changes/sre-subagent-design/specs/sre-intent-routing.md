@@ -2,104 +2,144 @@
 
 ## ADDED Requirements
 
-### Requirement: SRE Intent Type
+### Requirement: SRE Intent Type in Intent Router
 
-The `IntentType` enum SHALL include a new value `SRE = "sre"` representing infrastructure operations intent. The `route()` function SHALL map `IntentType.SRE` to `"dispatch_sre"`.
-
-#### Scenario: Route returns dispatch_sre for SRE intent type
-
-- **testable**: true
-- **target**: zsiga.agent.intent_router::route
-- **Given** an `Intent` object with `intent_type=IntentType.SRE`
-- **When** `route(intent)` is called
-- **Then** the return value SHALL be `"dispatch_sre"`
+The intent router SHALL recognize a new `sre` intent type for infrastructure operations messages. The `IntentType` enum MUST include an `SRE` member with value `"sre"`.
 
 #### Scenario: SRE value in IntentType enum
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::IntentType
-- **Given** the `IntentType` enum
-- **When** `IntentType("sre")` is called
-- **Then** it SHALL return `IntentType.SRE`
+- **target**: zsiga/agent/intent_router.py::IntentType
+- **Given** the `IntentType` enum is loaded
+- **When** accessing `IntentType("sre")` and `IntentType.SRE.value`
+- **Then** `IntentType("sre")` SHALL be `IntentType.SRE` and `.value` SHALL equal `"sre"`
 
-### Requirement: SRE Keyword Detection
+---
 
-The `classify()` function SHALL detect SRE intent when the user message contains any of the following keywords (Chinese or English): 服务, 重启, 健康检测, 清理, 磁盘, 宕机, 日志, 进程, 监控, systemctl, service, restart, health, cleanup, disk, downtime, log, process, monitor, nginx, apache, docker, container, deploy, deployment, uptime, load, memory, cpu, swap, zombie, oom, kill, port, socket, tunnel, ssh, cron, journalctl, dmesg.
+### Requirement: SRE Keyword Classification
 
-SRE keyword detection SHALL take priority over IMPLEMENTATION and RESEARCH keyword matches when both are present. SRE detection MUST NOT override FIX intent (fix/修复 keywords remain highest priority for bug fixing).
+The `classify()` function SHALL detect SRE keywords in both Chinese and English and return an `Intent` with `intent_type == IntentType.SRE`. Chinese keywords: 服务、重启、健康、清理、磁盘、宕机、日志、进程、监控. English keywords: restart, service, health, cleanup, disk, down, log, process, monitor.
 
 #### Scenario: Chinese SRE keywords classified as SRE intent
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::classify
-- **Given** a user message containing "服务重启，磁盘满了"
-- **When** `classify(message)` is called without LLM config (keyword-only)
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message containing Chinese SRE keywords (e.g., "服务重启，磁盘满了")
+- **When** `classify(msg)` is called
 - **Then** the returned `Intent.intent_type` SHALL be `IntentType.SRE`
 
 #### Scenario: English SRE keywords classified as SRE intent
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::classify
-- **Given** a user message containing "restart the nginx service and check health"
-- **When** `classify(message)` is called without LLM config
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message containing English SRE keywords (e.g., "restart the nginx service and check health")
+- **When** `classify(msg)` is called
 - **Then** the returned `Intent.intent_type` SHALL be `IntentType.SRE`
+
+---
+
+### Requirement: SRE Priority Over Implementation Keywords
+
+When a message contains SRE keywords but no FIX keywords, `classify()` SHALL return `IntentType.SRE` rather than `IntentType.IMPLEMENTATION`.
 
 #### Scenario: SRE intent takes priority over implementation keywords
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::classify
-- **Given** a user message containing "清理磁盘空间" (cleanup + disk, both SRE and implementation keywords)
-- **When** `classify(message)` is called without LLM config
-- **Then** the returned `Intent.intent_type` SHALL be `IntentType.SRE`
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "清理磁盘空间" containing SRE keywords but no FIX keywords
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.SRE`
+
+---
+
+### Requirement: FIX Intent Preserves Priority Over SRE
+
+When a message contains FIX keywords (修复, fix, bug), `classify()` MUST return `IntentType.FIX` even if SRE keywords are also present. FIX intent takes precedence over SRE.
 
 #### Scenario: FIX intent is not overridden by SRE keywords
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::classify
-- **Given** a user message containing "修复日志错误" (fix + log keywords)
-- **When** `classify(message)` is called without LLM config
-- **Then** the returned `Intent.intent_type` SHALL be `IntentType.FIX`
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "修复日志错误" containing both FIX and SRE keywords
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.FIX`
+
+---
+
+### Requirement: Non-SRE Messages Not Misclassified
+
+Messages that do not contain SRE or FIX keywords SHALL NOT be classified as `IntentType.SRE`. Pure implementation messages SHALL remain `IntentType.IMPLEMENTATION`. Empty messages SHALL be `IntentType.OPEN_ENDED`.
 
 #### Scenario: Pure implementation message not misclassified as SRE
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::classify
-- **Given** a user message containing "实现一个新功能模块" (only implementation keywords)
-- **When** `classify(message)` is called without LLM config
-- **Then** the returned `Intent.intent_type` SHALL be `IntentType.IMPLEMENTATION`
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "实现一个新功能模块"
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.IMPLEMENTATION`
 
 #### Scenario: Empty message does not produce SRE intent
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::classify
-- **Given** an empty user message
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** an empty string message
 - **When** `classify("")` is called
-- **Then** the returned `Intent.intent_type` SHALL be `IntentType.OPEN_ENDED`
+- **Then** `result.intent_type` SHALL be `IntentType.OPEN_ENDED`
+
+---
+
+### Requirement: SRE Intent Route Dispatch
+
+The `route()` function SHALL return `"dispatch_sre"` when given an `Intent` with `intent_type == IntentType.SRE`.
+
+#### Scenario: Route returns dispatch_sre for SRE intent type
+
+- **testable**: true
+- **target**: zsiga/agent/intent_router.py::route
+- **Given** an `Intent` with `intent_type=IntentType.SRE`
+- **When** `route(intent)` is called
+- **Then** the return value SHALL be `"dispatch_sre"`
+
+---
 
 ### Requirement: SRE Verbalization
 
-When SRE intent is detected via keywords, the `_verbalize()` function SHALL return a verbalization that identifies the intent as infrastructure operations.
+The `_verbalize()` function SHALL produce a verbalization containing SRE-related terms (运维, 基础设施, SRE, infrastructure, operations) when the input message contains SRE keywords.
 
 #### Scenario: Chinese SRE verbalization
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::_verbalize
-- **Given** a message containing SRE keywords in Chinese
-- **When** `_verbalize(message)` is called
-- **Then** the verbalization SHALL contain "运维" or "基础设施" or "SRE"
+- **target**: zsiga/agent/intent_router.py::_verbalize
+- **Given** a message like "重启服务检查健康状态"
+- **When** `_verbalize(msg)` is called
+- **Then** the result SHALL contain at least one of: "运维", "基础设施", or "SRE"
 
 #### Scenario: English SRE verbalization
 
 - **testable**: true
-- **target**: zsiga.agent.intent_router::_verbalize
-- **Given** a message containing SRE keywords in English
-- **When** `_verbalize(message)` is called
-- **Then** the verbalization SHALL contain "infrastructure" or "SRE" or "operations"
+- **target**: zsiga/agent/intent_router.py::_verbalize
+- **Given** a message like "restart service and check health status"
+- **When** `_verbalize(msg)` is called
+- **Then** the result SHALL contain at least one of: "infrastructure", "SRE", or "operations"
 
-## MODIFIED Requirements
+---
 
-None.
+### Requirement: SRE and Implementation Intent Mutual Exclusion
 
-## REMOVED Requirements
+A single message SHALL NOT be classified as both SRE and IMPLEMENTATION. When SRE keywords dominate, the result MUST be `IntentType.SRE`; when implementation keywords dominate without SRE keywords, the result MUST be `IntentType.IMPLEMENTATION`.
 
-None.
+#### Scenario: SRE intent not also classified as implementation
+
+- **testable**: true
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "检查服务健康状态"
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.SRE` and SHALL NOT be `IntentType.IMPLEMENTATION`
+
+#### Scenario: Implementation intent not classified as SRE
+
+- **testable**: true
+- **target**: zsiga/agent/intent_router.py::classify
+- **Given** a message like "实现用户登录模块"
+- **When** `classify(msg)` is called
+- **Then** `result.intent_type` SHALL be `IntentType.IMPLEMENTATION` and SHALL NOT be `IntentType.SRE`
