@@ -2,18 +2,14 @@
 
 ## 我的判断
 
-这是一个教科书级的精准小改动，我毫不犹豫地批准。proposal 精确命中了 `_build_status_json`（行212）和 `started_at`（行74/76），所有关键依赖经确定性事实验证全部存在，影响范围被锁定在单个函数内，约5行代码。我唯一要指出的是 proposal 中有一个事实性小错误——`started_at` 是 `time.time()` 返回的 **unix timestamp 浮点数**，而非 proposal 所述的"ISO 格式字符串"。这意味着实现时不需要解析 ISO 时间戳，直接做 `time.time() - started_at` 即可。这不构成驳回理由，执行者看到代码自会纠正。
+这个 proposal 我很放心放行。它精确地定位了 `_build_status_json`（L212）和已有的数据源 `started_at`（L74），改动边界清晰到只需往一个 dict 里加一个字段、约 5 行代码。测试文件也已经就位，验收标准具体可执行。唯一让我皱眉头的是 proposal 声称 `time` 模块已导入，但 Scout 对 `time.time` 的 grep 返回空结果——这意味着 implementer 需要验证这一前提，必要时加一行 `import time`。历史教训里 `NameError: name 'Path' is not defined` 连续出现两次，正是同一种模式的失败：**假设某模块已导入，实际没有**。但这个风险足够小、修复足够简单，不构成驳回理由。
 
 ## 评分详情
-- 可行性: 2/2 -- `_build_status_json`(行212)、`_read_daemon_state`(行46)、`started_at`(行74) 均经确定性事实验证存在。`time` 模块已导入。目标函数和所有数据源完全匹配。
-- 能力匹配: 2/2 -- 核心操作是两个浮点数相减再取 round，不涉及任何复杂逻辑、外部依赖或架构变动。历史失败记录（NameError、test assertion）与本次变更完全无关。
-- 历史风险: 2/2 -- 历史失败模式是 Path import 缺失和测试断言不匹配，本次变更不引入新 import、不涉及 Path、无既有测试需要适配，无重合风险。
-- 范围合理性: 2/2 -- 单文件、单函数、单字段添加，5行代码。验收标准具体且可验证（递增性、null 兜底、不影响现有字段）。范围极度收敛。
-- 总分: 8/8
-
-## 执行提醒（非阻塞）
-1. **`started_at` 是浮点数不是 ISO 字符串**：proposal 中"解析 ISO 时间戳"是错的。实际 `started_at` 由 `time.time()` 写入（行69），直接 `round(time.time() - started_at, 1)` 即可，无需 `datetime.strptime` 或任何解析。
-2. **兜底逻辑需注意默认值 0**：当前代码用 `state.get("started_at", 0)` 取值（Analyst 报告行216），若状态文件缺失，`started_at` 为 0，此时 `time.time() - 0` 会产生约 1.7×10⁹ 的荒谬值。建议显式判断 `if started_at and started_at > 0` 再计算，否则返回 `null`——这恰好与 proposal 的防御性设计一致。
+- 可行性: 2/2 -- `_build_status_json`(L212)、`_read_daemon_state`(L46)、`started_at`(L74) 全部经确定性验证存在。数据源和修改目标点都明确。
+- 能力匹配: 1/2 -- 无直接同类任务（给 API 响应添加计算字段）的成功/失败记录。属于常规小改动，能力上无障碍，但也没有成功先例可背书。
+- 历史风险: 1/2 -- 历史教训中 `NameError: name 'Path' is not defined` 重复出现两次（2026-05-23），模式是"假设某模块已导入但实际没有"。本 proposal 声称 `time` 已导入，Scout 证据对此未确认（`time.time` 在 daemon.py 中无匹配）。风险存在但修复成本极低。
+- 范围合理性: 2/2 -- 单文件单函数改动，约 5 行代码，4 条验收标准全部可量化验证。测试文件已预写。范围无可挑剔。
+- 总分: 6/8
 
 ## 历史参考
-- FAIL: daemon cycle #1 at cycle (2026-05-23) — NameError: Path 未定义。与本次无关，本次不引入新 import。
+- FAIL: daemon cycle #1 at runtime (2026-05-23) — `NameError: name 'Path' is not defined`，连续两次。**模式：假设模块已导入但实际未导入。** implementer 执行本 proposal 时必须验证 `time` 是否已在 daemon.py 顶部导入，若未导入则补上 `import time`，不要重蹈 Path 的覆辙。
