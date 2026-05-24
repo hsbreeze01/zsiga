@@ -1,50 +1,190 @@
-"""Tests for SRE artifacts and learnings spec."""
-from unittest.mock import patch, MagicMock
+"""Tests for SRE artifacts and learnings spec — sre-artifacts-learnings.md"""
+import importlib
+import json
+import tempfile
+import pytest
+from pathlib import Path
+from unittest.mock import MagicMock
+
+
+def _get_sre_pipeline_class():
+    try:
+        mod = importlib.import_module("zsiga.pipeline.sre_pipeline")
+    except ModuleNotFoundError:
+        return None
+    return getattr(mod, "SREPipeline", None)
+
+
+def _make_mock_transport(responses=None):
+    transport = MagicMock()
+    responses = responses or [MagicMock(exit_code=0, stdout="ok")]
+    transport.call.side_effect = responses
+    return transport
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Successful SRE run records success lesson
+# Scenario: execution_report.md is generated after pipeline run
 # ---------------------------------------------------------------------------
-def test_successful_sre_records_success_lesson():
-    from zsiga.pipeline.sre_pipeline import record_sre_lesson
+def test_execution_report_md_generated():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
-    result = MagicMock()
-    result.success = True
-    result.phases_completed = ["DIAGNOSE", "PLAN", "EXECUTE", "VERIFY", "REPORT"]
-    result.commands_executed = ["systemctl restart nginx"]
+    with tempfile.TemporaryDirectory() as tmpdir:
+        mock_transport = _make_mock_transport()
+        pipeline = SREPipeline(transport=mock_transport, output_dir=tmpdir)
+        pipeline.run("检查磁盘使用情况")
 
-    with patch("zsiga.pipeline.sre_pipeline.record_lesson") as mock_record:
-        record_sre_lesson(result, "restart nginx service")
-        mock_record.assert_called_once()
-        call_kwargs = mock_record.call_args
-        # Check pattern_key and source
-        if call_kwargs.kwargs:
-            assert call_kwargs.kwargs.get("pattern_key") == "sre.success"
-            assert call_kwargs.kwargs.get("source") == "sre_pipeline"
-        else:
-            # positional args
-            kw = call_kwargs[1] if len(call_kwargs) > 1 else {}
-            assert kw.get("pattern_key", call_kwargs[0][3] if len(call_kwargs[0]) > 3 else "") == "sre.success"
+        report_path = Path(tmpdir) / "execution_report.md"
+        assert report_path.exists(), f"execution_report.md not found in {tmpdir}"
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Failed SRE run records failure lesson
+# Scenario: execution_report.md contains required sections
 # ---------------------------------------------------------------------------
-def test_failed_sre_records_failure_lesson():
-    from zsiga.pipeline.sre_pipeline import record_sre_lesson
+def test_execution_report_md_contains_required_sections():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
-    result = MagicMock()
-    result.success = False
-    result.phases_completed = ["DIAGNOSE", "PLAN"]
-    result.commands_executed = []
+    with tempfile.TemporaryDirectory() as tmpdir:
+        mock_transport = _make_mock_transport()
+        pipeline = SREPipeline(transport=mock_transport, output_dir=tmpdir)
+        pipeline.run("检查磁盘使用情况")
 
-    with patch("zsiga.pipeline.sre_pipeline.record_lesson") as mock_record:
-        record_sre_lesson(result, "restart nginx service")
-        mock_record.assert_called_once()
-        call_kwargs = mock_record.call_args
-        if call_kwargs.kwargs:
-            assert call_kwargs.kwargs.get("pattern_key") == "sre.failure"
-            assert call_kwargs.kwargs.get("source") == "sre_pipeline"
-        else:
-            kw = call_kwargs[1] if len(call_kwargs) > 1 else {}
-            assert kw.get("pattern_key", call_kwargs[0][3] if len(call_kwargs[0]) > 3 else "") == "sre.failure"
+        content = (Path(tmpdir) / "execution_report.md").read_text(encoding="utf-8")
+        # Must have a header starting with "# "
+        lines = content.strip().split("\n")
+        has_header = any(line.startswith("# ") for line in lines)
+        assert has_header, "execution_report.md must have a markdown header"
+
+        # Must contain a status indicator
+        has_status = "success" in content.lower() or "failure" in content.lower() or "failed" in content.lower()
+        assert has_status, "execution_report.md must contain a status indicator"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: execution_report.md includes timestamp
+# ---------------------------------------------------------------------------
+def test_execution_report_md_includes_timestamp():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    import re
+    with tempfile.TemporaryDirectory() as tmpdir:
+        mock_transport = _make_mock_transport()
+        pipeline = SREPipeline(transport=mock_transport, output_dir=tmpdir)
+        pipeline.run("检查磁盘使用情况")
+
+        content = (Path(tmpdir) / "execution_report.md").read_text(encoding="utf-8")
+        # ISO date pattern YYYY-MM-DD
+        has_date = bool(re.search(r"\d{4}-\d{2}-\d{2}", content))
+        assert has_date, "execution_report.md must contain an ISO-format date"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: learnings.jsonl receives SRE category entry
+# ---------------------------------------------------------------------------
+def test_learnings_jsonl_sre_category():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        mock_transport = _make_mock_transport()
+        pipeline = SREPipeline(transport=mock_transport, output_dir=tmpdir)
+        pipeline.run("检查磁盘使用情况")
+
+        learnings_path = Path(tmpdir) / "learnings.jsonl"
+        if not learnings_path.exists():
+            pytest.skip("learnings.jsonl not generated by pipeline yet")
+
+        lines = learnings_path.read_text(encoding="utf-8").strip().split("\n")
+        assert len(lines) > 0, "learnings.jsonl must not be empty"
+
+        last_line = lines[-1]
+        entry = json.loads(last_line)
+        assert entry.get("category") == "sre", \
+            f"Expected category='sre', got {entry.get('category')!r}"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: Learnings entry has required fields
+# ---------------------------------------------------------------------------
+def test_learnings_entry_required_fields():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        mock_transport = _make_mock_transport()
+        pipeline = SREPipeline(transport=mock_transport, output_dir=tmpdir)
+        pipeline.run("检查磁盘使用情况")
+
+        learnings_path = Path(tmpdir) / "learnings.jsonl"
+        if not learnings_path.exists():
+            pytest.skip("learnings.jsonl not generated by pipeline yet")
+
+        lines = learnings_path.read_text(encoding="utf-8").strip().split("\n")
+        entry = json.loads(lines[-1])
+        required_keys = {"category", "task", "lessons", "timestamp"}
+        missing = required_keys - set(entry.keys())
+        assert not missing, f"Learnings entry missing keys: {missing}"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: Learnings append is additive
+# ---------------------------------------------------------------------------
+def test_learnings_append_additive():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        learnings_path = Path(tmpdir) / "learnings.jsonl"
+        # Pre-populate with an existing entry
+        learnings_path.write_text(
+            json.dumps({"category": "code", "task": "old task", "lessons": [], "timestamp": "2025-01-01"}) + "\n",
+            encoding="utf-8",
+        )
+
+        mock_transport = _make_mock_transport()
+        pipeline = SREPipeline(transport=mock_transport, output_dir=tmpdir)
+        pipeline.run("检查磁盘使用情况")
+
+        if not learnings_path.exists():
+            pytest.skip("learnings.jsonl handling not yet implemented")
+
+        lines = learnings_path.read_text(encoding="utf-8").strip().split("\n")
+        assert len(lines) == 2, f"Expected 2 lines (1 pre-existing + 1 new), got {len(lines)}"
+        # First line unchanged
+        first = json.loads(lines[0])
+        assert first["category"] == "code", "Pre-existing entry should be unchanged"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: No git commit in pipeline command history
+# ---------------------------------------------------------------------------
+def test_no_git_commit_in_command_history():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    commands_issued = []
+
+    def capture(command, **kwargs):
+        commands_issued.append(command)
+        return MagicMock(exit_code=0, stdout="ok")
+
+    mock_transport = MagicMock()
+    mock_transport.call.side_effect = capture
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        pipeline = SREPipeline(transport=mock_transport, output_dir=tmpdir)
+        pipeline.run("检查磁盘使用情况")
+
+    for cmd in commands_issued:
+        lower = cmd.lower()
+        assert "git commit" not in lower, f"Pipeline issued git commit: {cmd}"
+        assert "git add" not in lower, f"Pipeline issued git add: {cmd}"

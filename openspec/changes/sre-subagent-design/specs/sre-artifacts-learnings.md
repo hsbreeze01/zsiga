@@ -2,41 +2,78 @@
 
 ## ADDED Requirements
 
-### Requirement: SRE Lesson Recording on Success
+### Requirement: Execution Report Generation
 
-The SRE pipeline SHALL expose a `record_sre_lesson(result, intent)` function that, after a successful SRE execution (where `result.success is True` and all 5 phases completed), calls `record_lesson()` with `pattern_key == "sre.success"` and `source == "sre_pipeline"`.
+The SRE pipeline SHALL produce an `execution_report.md` file in the change directory upon completion. The report MUST contain:
+1. A header with the task description and timestamp
+2. A list of executed steps with their results (success/failure)
+3. A verification summary
+4. An overall status (success/failure)
 
-#### Scenario: Successful SRE run records success lesson
-
-- **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::record_sre_lesson
-- **Given** a mock result with `success=True` and all 5 phases completed
-- **When** `record_sre_lesson(result, "restart nginx service")` is called with `record_lesson` patched
-- **Then** `record_lesson` SHALL be called once with `pattern_key="sre.success"` and `source="sre_pipeline"`
-
----
-
-### Requirement: SRE Lesson Recording on Failure
-
-The `record_sre_lesson()` function SHALL record a failure lesson when `result.success is False`. It MUST call `record_lesson()` with `pattern_key == "sre.failure"` and `source == "sre_pipeline"`.
-
-#### Scenario: Failed SRE run records failure lesson
+#### Scenario: execution_report.md is generated after pipeline run
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::record_sre_lesson
-- **Given** a mock result with `success=False` and partial phases completed
-- **When** `record_sre_lesson(result, "restart nginx service")` is called with `record_lesson` patched
-- **Then** `record_lesson` SHALL be called once with `pattern_key="sre.failure"` and `source="sre_pipeline"`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._report
+- **Given** the SRE pipeline has completed all phases (DIAGNOSE through VERIFY)
+- **When** the REPORT phase runs
+- **Then** an `execution_report.md` file SHALL exist in the output directory
 
----
+#### Scenario: execution_report.md contains required sections
 
-### Requirement: No Git Commit from SRE Pipeline
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._report
+- **Given** the REPORT phase has completed
+- **When** the `execution_report.md` content is read
+- **Then** it SHALL contain a header line starting with `"# "`, at least one step result, and a status indicator (success or failure)
 
-The SRE pipeline SHALL NOT produce any git commits as part of its execution. Artifacts are limited to `execution_report.md` and learnings appended to `learnings.jsonl`.
+#### Scenario: execution_report.md includes timestamp
 
-#### Scenario: SRE pipeline does not create git commits
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._report
+- **Given** the REPORT phase has completed
+- **When** the `execution_report.md` content is read
+- **Then** it SHALL contain an ISO-format timestamp (pattern: `YYYY-MM-DD`)
 
-- **testable**: false
-- **Given** a completed SRE pipeline run
-- **When** checking git status
-- **Then** there SHALL be no new commits created by the SRE pipeline
+### Requirement: Learnings Append
+
+The SRE pipeline SHALL append operational experience records to `learnings.jsonl`. Each record MUST be a valid JSON line with at minimum:
+- `"category": "sre"`
+- `"task"`: the original task description
+- `"lessons"`: list of lessons learned
+- `"timestamp"`: ISO-format timestamp
+
+#### Scenario: learnings.jsonl receives SRE category entry
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._report
+- **Given** the SRE pipeline has completed a task
+- **When** the REPORT phase writes learnings
+- **Then** a new line SHALL be appended to `learnings.jsonl` that is valid JSON with `"category": "sre"`
+
+#### Scenario: Learnings entry has required fields
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._report
+- **Given** a learnings entry is written
+- **When** the JSON line is parsed
+- **Then** it SHALL contain keys `"category"`, `"task"`, `"lessons"`, and `"timestamp"`
+
+#### Scenario: Learnings append is additive
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._report
+- **Given** an existing `learnings.jsonl` with N lines
+- **When** the REPORT phase appends a new learning entry
+- **Then** the file SHALL have N+1 lines, and all previous lines SHALL be unchanged
+
+### Requirement: No Git Commit From SRE Pipeline
+
+The SRE pipeline MUST NOT create any git commits. The REPORT phase and all other phases SHALL NOT invoke `git add`, `git commit`, or `git push`.
+
+#### Scenario: No git commit in pipeline command history
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline.run
+- **Given** a full SRE pipeline run (all 5 phases)
+- **When** all commands issued during the run are collected
+- **Then** none SHALL match the pattern `git commit` or `git add`

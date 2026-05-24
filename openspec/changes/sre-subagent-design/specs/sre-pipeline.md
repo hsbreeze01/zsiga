@@ -2,146 +2,106 @@
 
 ## ADDED Requirements
 
-### Requirement: Command Validation Function
+### Requirement: Five-Phase Pipeline Execution
 
-The SRE pipeline SHALL expose a `validate_command(cmd, whitelist, blacklist)` function that returns `True` only when `cmd` is non-empty, matches at least one whitelist entry prefix, and does not match any blacklist entry. A command matching both whitelist and blacklist SHALL be rejected (blacklist takes priority).
+The SRE pipeline SHALL execute exactly 5 phases in order: DIAGNOSE → PLAN → EXECUTE → VERIFY → REPORT. Each phase MUST complete before the next begins. The pipeline SHALL be implemented in `zsiga/pipeline/sre_pipeline.py`.
 
-#### Scenario: Command Validation — whitelisted command passes
-
-- **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
-- **Given** a whitelist containing `"systemctl restart"` and `"df"`, and a blacklist containing `"rm -rf"` and `"eval"`
-- **When** `validate_command("systemctl restart nginx", whitelist, blacklist)` is called
-- **Then** the result SHALL be `True`
-
-#### Scenario: Command Validation — non-whitelisted command fails
+#### Scenario: Pipeline defines all five phases in order
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
-- **Given** a whitelist containing `"systemctl"` and `"df"` and `"free"`, and an empty blacklist
-- **When** `validate_command("apt-get install something", whitelist, blacklist)` is called
-- **Then** the result SHALL be `False`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline
+- **Given** the `SREPipeline` class is imported
+- **When** its phase names or phase order is inspected
+- **Then** it SHALL contain exactly the phases `["DIAGNOSE", "PLAN", "EXECUTE", "VERIFY", "REPORT"]` in that order
 
-#### Scenario: Command Validation — blacklisted command fails even with whitelist match
-
-- **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
-- **Given** a whitelist containing `"systemctl"` and a blacklist containing `"eval"`
-- **When** `validate_command("systemctl eval malicious", whitelist, blacklist)` is called
-- **Then** the result SHALL be `False`
-
-#### Scenario: Command Validation — empty command fails
+#### Scenario: Pipeline run produces phase completion record for each phase
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
-- **Given** a whitelist containing `"systemctl"` and a blacklist containing `"rm -rf"`
-- **When** `validate_command("", whitelist, blacklist)` is called
-- **Then** the result SHALL be `False`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline.run
+- **Given** a valid SRE task input (e.g., "检查磁盘使用情况")
+- **When** `SREPipeline.run` is called with the task and mocked transport (no real bash execution)
+- **Then** the result SHALL contain records for all 5 phases, each with a `"phase"` key and a `"status"` key
 
----
+### Requirement: DIAGNOSE Phase — State Collection
 
-### Requirement: DIAGNOSE Phase
+The DIAGNOSE phase SHALL collect current system state information: service status, recent logs, and resource usage. It MUST NOT execute any state-changing commands.
 
-The SRE pipeline SHALL expose a `diagnose(transport)` function that collects system state and returns a dict with keys `"services"`, `"disk"`, `"memory"`, and `"processes"`.
-
-#### Scenario: DIAGNOSE phase collects system state
+#### Scenario: DIAGNOSE phase collects read-only information
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::diagnose
-- **Given** a `LocalTransport` instance
-- **When** `diagnose(transport)` is called
-- **Then** the result SHALL be a dict containing keys `"services"`, `"disk"`, `"memory"`, and `"processes"`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._diagnose
+- **Given** a mock transport that records all commands sent
+- **When** the DIAGNOSE phase runs with input "检查 nginx 服务状态"
+- **Then** all commands issued during DIAGNOSE SHALL be read-only commands (e.g., `systemctl status`, `df`, `free`, `journalctl`, `ps`) — no `start`, `stop`, `restart` commands
 
----
+### Requirement: PLAN Phase — Whitelist-Constrained Command Generation
 
-### Requirement: PLAN Phase
+The PLAN phase SHALL generate a sequence of shell commands that are all within the command whitelist. Any command not in the whitelist MUST be rejected before execution.
 
-The SRE pipeline SHALL expose a `plan(intent_description, proposed_commands, whitelist, blacklist)` function that validates all proposed commands against the whitelist and blacklist. If any command fails validation, `result["success"]` SHALL be `False`. If all pass, `result["success"]` SHALL be `True`.
-
-#### Scenario: PLAN rejects blacklisted commands
+#### Scenario: PLAN phase only generates whitelisted commands
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::plan
-- **Given** proposed commands containing `"rm -rf /var/log"` and `"df -h"`, with whitelist `["systemctl", "df"]` and blacklist `["rm -rf"]`
-- **When** `plan(...)` is called
-- **Then** `result["success"]` SHALL be `False`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._plan
+- **Given** the DIAGNOSE phase has completed with collected state
+- **When** the PLAN phase generates a command plan
+- **Then** every command in the plan SHALL pass the whitelist validation function
 
-#### Scenario: PLAN accepts whitelisted commands
+### Requirement: EXECUTE Phase — Step-by-Step Execution with Assertion
 
-- **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::plan
-- **Given** proposed commands containing `"systemctl restart nginx"` and `"df -h"`, with whitelist `["systemctl restart", "df"]` and blacklist `["rm -rf"]`
-- **When** `plan(...)` is called
-- **Then** `result["success"]` SHALL be `True`
+The EXECUTE phase SHALL execute planned commands one at a time. After each command, it MUST check the result. If any step fails, execution SHALL halt and the pipeline SHALL proceed to REPORT with a failure status.
 
----
-
-### Requirement: EXECUTE Phase
-
-The SRE pipeline SHALL expose an `execute(commands, transport)` function that runs commands sequentially via the transport. It SHALL record each command's `command`, `exit_code`, and `stdout`. If a command fails (non-zero exit code), execution SHALL stop immediately and `result["success"]` SHALL be `False` with only completed commands recorded.
-
-#### Scenario: EXECUTE records each command result
+#### Scenario: EXECUTE stops on first failure
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::execute
-- **Given** a `LocalTransport` instance and commands `["echo hello", "echo world", "echo done"]`
-- **When** `execute(commands, transport)` is called
-- **Then** `result["success"]` SHALL be `True` and `result["commands"]` SHALL contain 3 entries, each with keys `"command"`, `"exit_code"`, and `"stdout"`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._execute
+- **Given** a plan with 3 commands where the 2nd command returns a non-zero exit code
+- **When** the EXECUTE phase runs
+- **Then** only 2 commands SHALL be executed (the first and the failing second), and the execute result SHALL have `"status" == "failed"`
 
-#### Scenario: EXECUTE stops on command failure
-
-- **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::execute
-- **Given** a `LocalTransport` instance and commands `["echo ok", "false", "echo should_not_run"]`
-- **When** `execute(commands, transport)` is called
-- **Then** `result["success"]` SHALL be `False` and only 2 command records SHALL be present (the successful first command and the failed second command)
-
----
-
-### Requirement: VERIFY Phase
-
-The SRE pipeline SHALL expose a `verify(pre, post, intent)` function that compares pre-execution and post-execution system state dicts and returns a dict with keys `"passed"` and `"differences"`.
-
-#### Scenario: VERIFY compares pre and post state
+#### Scenario: EXECUTE succeeds when all commands pass
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::verify
-- **Given** pre-state and post-state dicts with `"services"`, `"disk"`, and `"memory"` keys, and an intent description
-- **When** `verify(pre, post, "free up disk space")` is called
-- **Then** the result SHALL contain keys `"passed"` and `"differences"`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._execute
+- **Given** a plan with 2 commands where both return exit code 0
+- **When** the EXECUTE phase runs
+- **Then** all 2 commands SHALL be executed, and the execute result SHALL have `"status" == "success"`
 
----
+### Requirement: VERIFY Phase — Target State Validation
 
-### Requirement: REPORT Phase
+The VERIFY phase SHALL run verification commands to confirm the target state is achieved. If verification fails, the phase SHALL return a `"status" == "failed"` result with diagnostic details.
 
-The SRE pipeline SHALL expose a `report(results, output_dir, transport)` function that writes an `execution_report.md` file to `output_dir`. The report SHALL contain sections: `## Intent`, `## Timeline` (or `## Phases`), `## Commands`, and `## Verification`.
-
-#### Scenario: REPORT generates execution_report.md
+#### Scenario: VERIFY returns success when target state matches
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::report
-- **Given** execution results with phases, commands, and verification data, and a temporary output directory
-- **When** `report(results, tmpdir, transport)` is called
-- **Then** a file named `execution_report.md` SHALL exist in `tmpdir` containing sections `## Intent`, `## Timeline` or `## Phases`, `## Commands`, and `## Verification`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._verify
+- **Given** the EXECUTE phase completed successfully and verification commands return expected output
+- **When** the VERIFY phase runs
+- **Then** the result SHALL have `"status" == "success"`
 
----
-
-### Requirement: Report Content Generation
-
-The SRE pipeline SHALL expose a `generate_report_content(results)` function that returns a markdown string starting with `# SRE Execution Report` and containing sections `## Intent`, `## Timeline`, `## Commands`, `## Verification`, and `## Summary`. All executed commands SHALL appear in the Commands section.
-
-#### Scenario: Report contains all required sections
+#### Scenario: VERIFY returns failure when target state not achieved
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::generate_report_content
-- **Given** execution results with intent, phases, commands, and verification data
-- **When** `generate_report_content(results)` is called
-- **Then** the returned string SHALL contain `# SRE Execution Report`, `## Intent`, `## Timeline`, `## Commands`, `## Verification`, and `## Summary`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._verify
+- **Given** the EXECUTE phase completed but verification commands show the issue persists
+- **When** the VERIFY phase runs
+- **Then** the result SHALL have `"status" == "failed"` with diagnostic information
 
-#### Scenario: Report commands table includes all executed commands
+### Requirement: REPORT Phase — Output Without Git Commit
+
+The REPORT phase SHALL produce an execution report. The pipeline MUST NOT create any git commit during its entire lifecycle.
+
+#### Scenario: Pipeline does not invoke git commit
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::generate_report_content
-- **Given** execution results with 2 commands: `"systemctl status nginx"` and `"df -h"`
-- **When** `generate_report_content(results)` is called
-- **Then** the returned string SHALL contain both `"systemctl status nginx"` and `"df -h"`
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline.run
+- **Given** a mock transport that records all commands
+- **When** the full pipeline runs to completion
+- **Then** no `git commit` command SHALL appear in the recorded commands
+
+#### Scenario: REPORT phase produces execution report data
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._report
+- **Given** all previous phases have completed
+- **When** the REPORT phase runs
+- **Then** it SHALL return a dict containing at minimum keys: `"phases"`, `"status"`, `"steps"` (or equivalent summary of what was done)

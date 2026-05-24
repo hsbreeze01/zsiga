@@ -2,108 +2,141 @@
 
 ## ADDED Requirements
 
-### Requirement: Command Validation Passes Whitelisted Commands
+### Requirement: Command Whitelist Enforcement
 
-The `validate_command()` function SHALL return `True` when a command starts with a whitelisted prefix and does not match any blacklist pattern.
+The SRE pipeline SHALL maintain a hardcoded command whitelist. Only commands whose base executable matches the whitelist SHALL be allowed for execution. The whitelist MUST include at minimum:
+
+- `systemctl` (subcommands: start, stop, restart, status)
+- `curl`
+- `df`
+- `free`
+- `du`
+- `journalctl`
+- `dmesg`
+- `crontab`
+- `ps`
+- `cat`
+- `ls`
+- `grep`
 
 #### Scenario: Whitelisted command passes validation
 
 - **testable**: true
 - **target**: zsiga/pipeline/sre_pipeline.py::validate_command
-- **Given** a whitelist `["systemctl restart", "df"]` and blacklist `["rm -rf"]`
-- **When** `validate_command("systemctl restart nginx", whitelist, blacklist)` is called
-- **Then** the result SHALL be `True`
+- **Given** a command string `"systemctl status nginx"`
+- **When** `validate_command` is called with that string
+- **Then** it SHALL return `True`
 
----
-
-### Requirement: Command Validation Rejects Non-Whitelisted Commands
-
-The `validate_command()` function SHALL return `False` when a command does not start with any whitelisted prefix.
-
-#### Scenario: Non-whitelisted command fails validation
+#### Scenario: Whitelisted command with sudo passes validation
 
 - **testable**: true
 - **target**: zsiga/pipeline/sre_pipeline.py::validate_command
-- **Given** a whitelist `["systemctl"]` and an empty blacklist
-- **When** `validate_command("apt-get install something", whitelist, blacklist)` is called
-- **Then** the result SHALL be `False`
+- **Given** a command string `"sudo systemctl restart nginx"`
+- **When** `validate_command` is called with that string
+- **Then** it SHALL return `True` (sudo prefix is transparent)
 
----
-
-### Requirement: Blacklist Overrides Whitelist
-
-The `validate_command()` function SHALL return `False` when a command matches a blacklist entry, even if it also matches a whitelist entry. Blacklist takes priority over whitelist.
-
-#### Scenario: Blacklisted command fails even if whitelisted
+#### Scenario: Non-whitelisted command is rejected
 
 - **testable**: true
 - **target**: zsiga/pipeline/sre_pipeline.py::validate_command
-- **Given** a whitelist `["systemctl"]` and a blacklist `["eval"]`
-- **When** `validate_command("systemctl eval malicious", whitelist, blacklist)` is called
-- **Then** the result SHALL be `False`
+- **Given** a command string `"apt-get install something"`
+- **When** `validate_command` is called with that string
+- **Then** it SHALL return `False`
 
----
+### Requirement: Blacklisted Command Rejection
 
-### Requirement: Empty Command Rejected
+The following commands and patterns MUST be unconditionally rejected regardless of whitelist status:
 
-The `validate_command()` function SHALL return `False` for an empty string command.
+- `rm -rf` or `rm -r` (recursive delete)
+- `iptables` (firewall rules)
+- `sysctl` (kernel parameters)
+- `ssh-keygen`, `ssh-copy-id` (key operations)
+- `chmod 777`, `chown` (permission changes)
+- `dd` (raw disk operations)
+- `mkfs` (filesystem format)
+- `shutdown`, `reboot`, `poweroff` (system power)
+- `passwd` (password changes)
 
-#### Scenario: Empty command fails validation
+#### Scenario: Blacklisted rm -rf is rejected
 
 - **testable**: true
 - **target**: zsiga/pipeline/sre_pipeline.py::validate_command
-- **Given** any whitelist and blacklist
-- **When** `validate_command("", whitelist, blacklist)` is called
-- **Then** the result SHALL be `False`
+- **Given** a command string `"rm -rf /var/log/old"`
+- **When** `validate_command` is called
+- **Then** it SHALL return `False`
 
----
-
-### Requirement: Pre-Execution State Snapshot
-
-The SRE pipeline SHALL expose a `take_snapshot(transport)` function that captures the current system state as a dict with keys `"services"`, `"disk"`, and `"memory"`. Each value SHALL be a non-empty string.
-
-#### Scenario: Snapshot captures service and resource state
+#### Scenario: Blacklisted iptables is rejected
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::take_snapshot
-- **Given** a `LocalTransport` instance
-- **When** `take_snapshot(transport)` is called
-- **Then** the result SHALL be a dict containing keys `"services"`, `"disk"`, and `"memory"`
+- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
+- **Given** a command string `"iptables -A INPUT -j DROP"`
+- **When** `validate_command` is called
+- **Then** it SHALL return `False`
 
-#### Scenario: Snapshot contains non-empty string values
-
-- **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::take_snapshot
-- **Given** a `LocalTransport` instance
-- **When** `take_snapshot(transport)` is called
-- **Then** each of `snapshot["services"]`, `snapshot["disk"]`, and `snapshot["memory"]` SHALL be a non-empty string
-
----
-
-### Requirement: Dangerous Command Detection
-
-The SRE pipeline SHALL expose an `is_dangerous_command(cmd)` function that returns `True` for commands that perform state mutations on services (e.g., `systemctl stop`, `systemctl restart`) and `False` for read-only commands (e.g., `systemctl status`, `df -h`).
-
-#### Scenario: Service stop commands are flagged as dangerous
+#### Scenario: Blacklisted reboot is rejected
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::is_dangerous_command
+- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
+- **Given** a command string `"reboot"`
+- **When** `validate_command` is called
+- **Then** it SHALL return `False`
+
+#### Scenario: Blacklisted command hidden behind sudo is still rejected
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
+- **Given** a command string `"sudo reboot"`
+- **When** `validate_command` is called
+- **Then** it SHALL return `False`
+
+#### Scenario: Blacklisted sysctl is rejected
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
+- **Given** a command string `"sysctl -w vm.swappiness=10"`
+- **When** `validate_command` is called
+- **Then** it SHALL return `False`
+
+### Requirement: Blacklist Takes Precedence Over Whitelist
+
+If a command matches both whitelist and blacklist patterns, the blacklist MUST take precedence and the command SHALL be rejected.
+
+#### Scenario: systemctl is whitelisted but shutdown subcommand is not
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::validate_command
+- **Given** a command string `"systemctl shutdown"` (shutdown is blacklisted)
+- **When** `validate_command` is called
+- **Then** it SHALL return `False`
+
+### Requirement: Pre-Execution Snapshot for Revert
+
+Before executing each command in the EXECUTE phase, the pipeline SHOULD capture a lightweight snapshot of relevant state. If execution fails, the pipeline SHOULD attempt to revert to the pre-execution state using rollback commands from the PLAN phase.
+
+#### Scenario: Execution failure triggers rollback attempt
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::SREPipeline._execute
+- **Given** a plan with a step that fails, and the plan includes a rollback command for that step
+- **When** the EXECUTE phase encounters the failure
+- **Then** the rollback command for the failed step SHALL be invoked before proceeding to REPORT
+
+### Requirement: Dangerous Operation Approval Gate
+
+Operations classified as dangerous (e.g., `systemctl stop`, `systemctl restart`) SHALL be flagged with `require_approval: true`. When running in a context without approval, these operations MUST be skipped with a warning.
+
+#### Scenario: Dangerous command flagged in plan
+
+- **testable**: true
+- **target**: zsiga/pipeline/sre_pipeline.py::classify_command_risk
 - **Given** a command `"systemctl stop nginx"`
-- **When** `is_dangerous_command("systemctl stop nginx")` is called
-- **Then** the result SHALL be `True`
+- **When** `classify_command_risk` is called
+- **Then** it SHALL return a dict with `"require_approval" == True`
 
-#### Scenario: Status query is not flagged as dangerous
+#### Scenario: Safe command not flagged
 
 - **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::is_dangerous_command
+- **target**: zsiga/pipeline/sre_pipeline.py::classify_command_risk
 - **Given** a command `"systemctl status nginx"`
-- **When** `is_dangerous_command("systemctl status nginx")` is called
-- **Then** the result SHALL be `False`
-
-#### Scenario: Disk usage query is not flagged as dangerous
-
-- **testable**: true
-- **target**: zsiga/pipeline/sre_pipeline.py::is_dangerous_command
-- **Given** a command `"df -h"`
-- **When** `is_dangerous_command("df -h")` is called
-- **Then** the result SHALL be `False`
+- **When** `classify_command_risk` is called
+- **Then** it SHALL return a dict with `"require_approval" == False`

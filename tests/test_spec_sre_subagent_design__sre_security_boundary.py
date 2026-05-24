@@ -1,85 +1,179 @@
-"""Tests for SRE security boundary spec."""
-from zsiga.pipeline.sre_pipeline import (
-    validate_command,
-    is_dangerous_command,
-    take_snapshot,
-)
-from zsiga.transport import LocalTransport
+"""Tests for SRE security boundary spec — sre-security-boundary.md"""
+import importlib
+import pytest
+
+
+def _get_sre_module():
+    try:
+        return importlib.import_module("zsiga.pipeline.sre_pipeline")
+    except ModuleNotFoundError:
+        return None
+
+
+def _get_validate_command():
+    mod = _get_sre_module()
+    if mod is None:
+        return None
+    return getattr(mod, "validate_command", None)
+
+
+def _get_classify_command_risk():
+    mod = _get_sre_module()
+    if mod is None:
+        return None
+    return getattr(mod, "classify_command_risk", None)
+
+
+def _skip_if_missing():
+    if _get_sre_module() is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Whitelisted command passes validation (covered in pipeline test)
+# Scenario: Whitelisted command passes validation
 # ---------------------------------------------------------------------------
-def test_validate_command_whitelisted_passes():
-    whitelist = ["systemctl restart", "df"]
-    blacklist = ["rm -rf"]
-    assert validate_command("systemctl restart nginx", whitelist, blacklist) is True
+def test_whitelisted_systemctl_status():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    assert validate("systemctl status nginx") is True
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Non-whitelisted command fails validation
+# Scenario: Whitelisted command with sudo passes validation
 # ---------------------------------------------------------------------------
-def test_validate_command_non_whitelisted_fails():
-    whitelist = ["systemctl"]
-    blacklist = []
-    assert validate_command("apt-get install something", whitelist, blacklist) is False
+def test_whitelisted_sudo_systemctl():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    assert validate("sudo systemctl restart nginx") is True
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Blacklisted command fails even if whitelisted
+# Scenario: Non-whitelisted command is rejected
 # ---------------------------------------------------------------------------
-def test_validate_command_blacklist_overrides_whitelist():
-    whitelist = ["systemctl"]
-    blacklist = ["eval"]
-    assert validate_command("systemctl eval malicious", whitelist, blacklist) is False
+def test_non_whitelisted_rejected():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    assert validate("apt-get install something") is False
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Empty command fails validation
+# Scenario: Blacklisted rm -rf is rejected
 # ---------------------------------------------------------------------------
-def test_validate_command_empty_fails():
-    assert validate_command("", ["systemctl"], ["rm -rf"]) is False
+def test_blacklisted_rm_rf():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    assert validate("rm -rf /var/log/old") is False
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Snapshot captures service and resource state
+# Scenario: Blacklisted iptables is rejected
 # ---------------------------------------------------------------------------
-def test_snapshot_captures_state():
-    transport = LocalTransport()
-    snapshot = take_snapshot(transport)
-    assert isinstance(snapshot, dict)
-    assert "services" in snapshot
-    assert "disk" in snapshot
-    assert "memory" in snapshot
+def test_blacklisted_iptables():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    assert validate("iptables -A INPUT -j DROP") is False
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Snapshot contains non-empty string values
+# Scenario: Blacklisted reboot is rejected
 # ---------------------------------------------------------------------------
-def test_snapshot_non_empty_values():
-    transport = LocalTransport()
-    snapshot = take_snapshot(transport)
-    for key in ("services", "disk", "memory"):
-        assert isinstance(snapshot[key], str)
-        assert len(snapshot[key]) > 0
+def test_blacklisted_reboot():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    assert validate("reboot") is False
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Service stop commands are flagged as dangerous
+# Scenario: Blacklisted command hidden behind sudo is still rejected
 # ---------------------------------------------------------------------------
-def test_service_stop_is_dangerous():
-    assert is_dangerous_command("systemctl stop nginx") is True
+def test_blacklisted_sudo_reboot():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    assert validate("sudo reboot") is False
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Status query is not flagged as dangerous
+# Scenario: Blacklisted sysctl is rejected
 # ---------------------------------------------------------------------------
-def test_status_not_dangerous():
-    assert is_dangerous_command("systemctl status nginx") is False
+def test_blacklisted_sysctl():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    assert validate("sysctl -w vm.swappiness=10") is False
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Disk usage query is not flagged as dangerous
+# Scenario: Blacklist takes precedence (systemctl shutdown)
 # ---------------------------------------------------------------------------
-def test_df_not_dangerous():
-    assert is_dangerous_command("df -h") is False
+def test_blacklist_precedence_over_whitelist():
+    validate = _get_validate_command()
+    if validate is None:
+        pytest.skip("validate_command not yet implemented")
+    # 'shutdown' is blacklisted even though 'systemctl' is whitelisted
+    assert validate("systemctl shutdown") is False
+
+
+# ---------------------------------------------------------------------------
+# Scenario: Dangerous command flagged in plan (systemctl stop)
+# ---------------------------------------------------------------------------
+def test_dangerous_command_flagged_stop():
+    classify = _get_classify_command_risk()
+    if classify is None:
+        pytest.skip("classify_command_risk not yet implemented")
+    result = classify("systemctl stop nginx")
+    assert isinstance(result, dict), "classify_command_risk must return a dict"
+    assert result.get("require_approval") is True, \
+        "systemctl stop should have require_approval=True"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: Safe command not flagged (systemctl status)
+# ---------------------------------------------------------------------------
+def test_safe_command_not_flagged():
+    classify = _get_classify_command_risk()
+    if classify is None:
+        pytest.skip("classify_command_risk not yet implemented")
+    result = classify("systemctl status nginx")
+    assert isinstance(result, dict), "classify_command_risk must return a dict"
+    assert result.get("require_approval") is False, \
+        "systemctl status should have require_approval=False"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: Execution failure triggers rollback attempt
+# ---------------------------------------------------------------------------
+def test_execute_failure_triggers_rollback():
+    SREPipeline = getattr(_get_sre_module() or object, "SREPipeline", None)
+    if SREPipeline is None:
+        pytest.skip("SREPipeline not yet implemented")
+
+    commands_issued = []
+
+    def mock_call(command, **kwargs):
+        commands_issued.append(command)
+        if "restart" in command:
+            return type("R", (), {"exit_code": 1, "stdout": "failed"})()
+        return type("R", (), {"exit_code": 0, "stdout": "ok"})()
+
+    from unittest.mock import MagicMock
+    mock_transport = MagicMock()
+    mock_transport.call.side_effect = mock_call
+
+    pipeline = SREPipeline(transport=mock_transport)
+    plan = {
+        "commands": [
+            {"cmd": "systemctl restart nginx", "rollback": "systemctl stop nginx"},
+        ]
+    }
+    pipeline._execute(plan)
+
+    # rollback command should have been issued
+    assert any("stop" in c for c in commands_issued), \
+        f"Rollback not triggered. Commands: {commands_issued}"

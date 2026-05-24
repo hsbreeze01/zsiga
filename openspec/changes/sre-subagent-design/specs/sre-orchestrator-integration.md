@@ -2,63 +2,58 @@
 
 ## ADDED Requirements
 
-### Requirement: SRE Intent Routing Mutual Exclusion with Implementation
+### Requirement: SRE Pipeline Registration in Orchestrator
 
-The orchestrator SHALL route SRE-intent messages to the SRE pipeline and NOT to the code pipeline. Messages classified as `IntentType.SRE` SHALL NOT be simultaneously classified as `IntentType.IMPLEMENTATION`.
+The orchestrator SHALL register the SRE pipeline as a distinct pipeline alongside the existing code pipeline. When the intent router returns `"sre"`, the orchestrator MUST dispatch to the SRE pipeline. When the intent router returns `"code"`, the orchestrator MUST dispatch to the existing code pipeline.
 
-#### Scenario: SRE intent not also classified as implementation
-
-- **testable**: true
-- **target**: zsiga/agent/intent_router.py::classify
-- **Given** a message like "检查服务健康状态"
-- **When** `classify(msg)` is called
-- **Then** `result.intent_type` SHALL be `IntentType.SRE` and SHALL NOT be `IntentType.IMPLEMENTATION`
-
-#### Scenario: Implementation intent not classified as SRE
+#### Scenario: Orchestrator dispatches SRE intent to SRE pipeline
 
 - **testable**: true
-- **target**: zsiga/agent/intent_router.py::classify
-- **Given** a message like "实现用户登录模块"
-- **When** `classify(msg)` is called
-- **Then** `result.intent_type` SHALL be `IntentType.IMPLEMENTATION` and SHALL NOT be `IntentType.SRE`
+- **target**: zsiga/orchestrator.py::Orchestrator.dispatch
+- **Given** the orchestrator is initialized with the intent router and both pipelines registered
+- **When** a task with SRE intent (e.g., "检查磁盘空间") is dispatched
+- **Then** the orchestrator SHALL invoke the SRE pipeline's `run` method, not the code pipeline
 
----
-
-### Requirement: FIX Intent Priority Over SRE in Orchestrator
-
-When a message contains both FIX and SRE keywords, the intent classifier MUST classify it as `IntentType.FIX`. FIX intent has higher priority than SRE in the routing hierarchy.
-
-#### Scenario: SRE mutual exclusion — fix has priority over SRE
+#### Scenario: Orchestrator dispatches code intent to code pipeline
 
 - **testable**: true
-- **target**: zsiga/agent/intent_router.py::classify
-- **Given** a message like "修复服务启动失败的问题" containing both FIX and SRE keywords
-- **When** `classify(msg)` is called
-- **Then** `result.intent_type` SHALL be `IntentType.FIX`
+- **target**: zsiga/orchestrator.py::Orchestrator.dispatch
+- **Given** the orchestrator is initialized with the intent router and both pipelines registered
+- **When** a task with code intent (e.g., "修复这个函数") is dispatched
+- **Then** the orchestrator SHALL invoke the code pipeline, not the SRE pipeline
 
----
+### Requirement: Pipeline Dispatch Mutual Exclusivity
 
-### Requirement: Mixed SRE and Research Keywords Resolved to SRE
+The SRE pipeline and code pipeline SHALL be mutually exclusive. The orchestrator MUST NOT invoke both pipelines for the same task.
 
-When a message contains both SRE and research keywords (查看, 分析) without FIX keywords, the classifier SHALL classify it as `IntentType.SRE`. SRE keywords dominate research intent.
-
-#### Scenario: Mixed SRE + research keywords resolved to SRE
+#### Scenario: Single dispatch — never both pipelines for one task
 
 - **testable**: true
-- **target**: zsiga/agent/intent_router.py::classify
-- **Given** a message like "查看日志分析磁盘问题" containing both research and SRE keywords
-- **When** `classify(msg)` is called
-- **Then** `result.intent_type` SHALL be `IntentType.SRE`
+- **target**: zsiga/orchestrator.py::Orchestrator.dispatch
+- **Given** the orchestrator has both pipelines registered and tracks which pipelines are invoked
+- **When** any task is dispatched
+- **Then** exactly one pipeline SHALL be invoked — either the SRE pipeline or the code pipeline, never both
 
----
+### Requirement: Existing Code Pipeline Unchanged
 
-### Requirement: SRE Pipeline Bypasses Code Pipeline Phases
+The integration of SRE pipeline into the orchestrator SHALL NOT alter the behavior of the existing code pipeline. When code intent is detected, the dispatch path and pipeline execution MUST remain identical to the pre-SRE-integration behavior.
 
-When the orchestrator routes to the SRE pipeline, it SHALL NOT enter the code pipeline's ENRICH → IMPLEMENT → VERIFY flow. The SRE pipeline follows its own DIAGNOSE → PLAN → EXECUTE → VERIFY → REPORT phases.
+#### Scenario: Code pipeline execution path preserved
 
-#### Scenario: SRE pipeline does not enter code phases
+- **testable**: true
+- **target**: zsiga/orchestrator.py::Orchestrator.dispatch
+- **Given** a code-intent task
+- **When** the orchestrator dispatches it
+- **Then** the dispatch result SHALL be structurally identical to the result produced before SRE integration (same keys, same pipeline name)
 
-- **testable**: false
-- **Given** an SRE-intent message dispatched by the orchestrator
-- **When** the SRE pipeline runs to completion
-- **Then** no ENRICH, IMPLEMENT, or code-VERIFY phases SHALL be invoked
+### Requirement: SRE Pipeline Registration Does Not Break Initialization
+
+The orchestrator SHALL initialize successfully with both pipelines registered. If the SRE pipeline module is missing or fails to import, the orchestrator SHOULD still initialize with only the code pipeline and log a warning.
+
+#### Scenario: Orchestrator initializes with both pipelines
+
+- **testable**: true
+- **target**: zsiga/orchestrator.py::Orchestrator.__init__
+- **Given** both the code pipeline and SRE pipeline modules are available
+- **When** the orchestrator is initialized
+- **Then** it SHALL have both pipelines registered and no error SHALL be raised

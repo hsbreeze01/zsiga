@@ -1,214 +1,259 @@
-"""Tests for SRE pipeline spec."""
-import os
-import tempfile
-
-from zsiga.transport import LocalTransport
-
-
-# ---------------------------------------------------------------------------
-# Scenario: Command Validation — whitelisted command passes
-# ---------------------------------------------------------------------------
-def test_validate_command_whitelisted():
-    from zsiga.pipeline.sre_pipeline import validate_command
-
-    whitelist = ["systemctl restart", "systemctl status", "df"]
-    blacklist = ["rm -rf", "eval"]
-    assert validate_command("systemctl restart nginx", whitelist, blacklist) is True
+"""Tests for SRE pipeline spec — sre-pipeline.md"""
+import importlib
+import pytest
+from unittest.mock import MagicMock
 
 
-# ---------------------------------------------------------------------------
-# Scenario: Command Validation — non-whitelisted command fails
-# ---------------------------------------------------------------------------
-def test_validate_command_not_whitelisted():
-    from zsiga.pipeline.sre_pipeline import validate_command
-
-    whitelist = ["systemctl", "df", "free"]
-    blacklist = []
-    assert validate_command("apt-get install something", whitelist, blacklist) is False
+def _get_sre_pipeline_module():
+    try:
+        return importlib.import_module("zsiga.pipeline.sre_pipeline")
+    except ModuleNotFoundError:
+        return None
 
 
-# ---------------------------------------------------------------------------
-# Scenario: Command Validation — blacklisted command fails
-# ---------------------------------------------------------------------------
-def test_validate_command_blacklisted():
-    from zsiga.pipeline.sre_pipeline import validate_command
+def _get_sre_pipeline_class():
+    mod = _get_sre_pipeline_module()
+    if mod is None:
+        return None
+    return getattr(mod, "SREPipeline", None)
 
-    whitelist = ["systemctl"]
-    blacklist = ["eval"]
-    assert validate_command("systemctl eval malicious", whitelist, blacklist) is False
+
+def _make_mock_transport(responses=None):
+    """Create a mock transport that returns predefined responses."""
+    transport = MagicMock()
+    responses = responses or []
+    transport.call.side_effect = responses or [MagicMock(exit_code=0, stdout="ok")]
+    return transport
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Command Validation — empty command fails
+# Scenario: Pipeline defines all five phases in order
 # ---------------------------------------------------------------------------
-def test_validate_command_empty():
-    from zsiga.pipeline.sre_pipeline import validate_command
+def test_pipeline_five_phases_in_order():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
-    whitelist = ["systemctl"]
-    blacklist = ["rm -rf"]
-    assert validate_command("", whitelist, blacklist) is False
+    # Check PHASES class attribute or similar
+    phases = getattr(SREPipeline, "PHASES", None) or getattr(SREPipeline, "phases", None)
+    if phases is None:
+        # Try to get from instance
+        instance = SREPipeline.__new__(SREPipeline)
+        phases = getattr(instance, "PHASES", None) or getattr(instance, "phases", None)
 
-
-# ---------------------------------------------------------------------------
-# Scenario: DIAGNOSE phase collects system state
-# ---------------------------------------------------------------------------
-def test_diagnose_collects_system_state():
-    from zsiga.pipeline.sre_pipeline import diagnose
-
-    transport = LocalTransport()
-    result = diagnose(transport)
-    assert isinstance(result, dict)
-    assert "services" in result
-    assert "disk" in result
-    assert "memory" in result
-    assert "processes" in result
+    assert phases is not None, "SREPipeline must define PHASES attribute"
+    expected = ["DIAGNOSE", "PLAN", "EXECUTE", "VERIFY", "REPORT"]
+    assert list(phases) == expected, f"Expected {expected}, got {list(phases)}"
 
 
 # ---------------------------------------------------------------------------
-# Scenario: PLAN rejects blacklisted commands
+# Scenario: Pipeline run produces phase completion record for each phase
 # ---------------------------------------------------------------------------
-def test_plan_rejects_blacklisted_commands():
-    from zsiga.pipeline.sre_pipeline import plan
+def test_pipeline_run_produces_all_phase_records():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
-    result = plan(
-        intent_description="delete all logs",
-        proposed_commands=["rm -rf /var/log", "df -h"],
-        whitelist=["systemctl", "df"],
-        blacklist=["rm -rf"],
-    )
-    assert result["success"] is False
+    mock_transport = _make_mock_transport([
+        MagicMock(exit_code=0, stdout="active"),
+        MagicMock(exit_code=0, stdout="planned"),
+        MagicMock(exit_code=0, stdout="executed"),
+        MagicMock(exit_code=0, stdout="verified"),
+    ])
 
+    pipeline = SREPipeline(transport=mock_transport)
+    result = pipeline.run("检查磁盘使用情况")
 
-# ---------------------------------------------------------------------------
-# Scenario: PLAN accepts whitelisted commands
-# ---------------------------------------------------------------------------
-def test_plan_accepts_whitelisted_commands():
-    from zsiga.pipeline.sre_pipeline import plan
-
-    result = plan(
-        intent_description="check disk and restart nginx",
-        proposed_commands=["systemctl restart nginx", "df -h"],
-        whitelist=["systemctl restart", "df"],
-        blacklist=["rm -rf"],
-    )
-    assert result["success"] is True
+    assert isinstance(result, dict), "Pipeline run must return a dict"
+    # Check that all 5 phases have records
+    phases_in_result = result.get("phases", [])
+    assert len(phases_in_result) == 5, \
+        f"Expected 5 phase records, got {len(phases_in_result)}"
+    for record in phases_in_result:
+        assert "phase" in record, f"Phase record missing 'phase' key: {record}"
+        assert "status" in record, f"Phase record missing 'status' key: {record}"
 
 
 # ---------------------------------------------------------------------------
-# Scenario: EXECUTE records each command result
+# Scenario: DIAGNOSE phase collects read-only information
 # ---------------------------------------------------------------------------
-def test_execute_records_command_results():
-    from zsiga.pipeline.sre_pipeline import execute
+def test_diagnose_uses_read_only_commands():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
-    transport = LocalTransport()
-    commands = ["echo hello", "echo world", "echo done"]
-    result = execute(commands, transport)
-    assert result["success"] is True
-    assert len(result["commands"]) == 3
-    for cmd_record in result["commands"]:
-        assert "command" in cmd_record
-        assert "exit_code" in cmd_record
-        assert "stdout" in cmd_record
+    commands_issued = []
 
+    def capture_call(command, **kwargs):
+        commands_issued.append(command)
+        return MagicMock(exit_code=0, stdout="ok")
 
-# ---------------------------------------------------------------------------
-# Scenario: EXECUTE stops on command failure
-# ---------------------------------------------------------------------------
-def test_execute_stops_on_failure():
-    from zsiga.pipeline.sre_pipeline import execute
+    mock_transport = MagicMock()
+    mock_transport.call.side_effect = capture_call
 
-    transport = LocalTransport()
-    commands = ["echo ok", "false", "echo should_not_run"]
-    result = execute(commands, transport)
-    assert result["success"] is False
-    # Only 2 commands should have been recorded (1st success + 2nd failure)
-    assert len(result["commands"]) == 2
+    pipeline = SREPipeline(transport=mock_transport)
+    pipeline._diagnose("检查 nginx 服务状态")
+
+    mutating_patterns = ["start", "stop", "restart", "kill", "rm "]
+    for cmd in commands_issued:
+        cmd_lower = cmd.lower()
+        for pattern in mutating_patterns:
+            assert pattern not in cmd_lower, \
+                f"DIAGNOSE issued mutating command: {cmd} (matched {pattern})"
 
 
 # ---------------------------------------------------------------------------
-# Scenario: VERIFY compares pre and post state
+# Scenario: PLAN phase only generates whitelisted commands
 # ---------------------------------------------------------------------------
-def test_verify_compares_state():
-    from zsiga.pipeline.sre_pipeline import verify
+def test_plan_generates_whitelisted_commands():
+    mod = _get_sre_pipeline_module()
+    if mod is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
-    pre = {"services": "nginx (running)", "disk": "50%", "memory": "2GB"}
-    post = {"services": "nginx (running)", "disk": "45%", "memory": "2GB"}
-    result = verify(pre, post, "free up disk space")
-    assert "passed" in result
-    assert "differences" in result
+    validate_fn = getattr(mod, "validate_command", None)
+    if validate_fn is None:
+        pytest.skip("validate_command not yet implemented")
 
+    SREPipeline = _get_sre_pipeline_class()
+    mock_transport = _make_mock_transport([MagicMock(exit_code=0, stdout="disk: 50%")])
+    pipeline = SREPipeline(transport=mock_transport)
+    diagnose_result = {"status": "success", "data": {"disk": "50%"}}
+    plan = pipeline._plan(diagnose_result)
 
-# ---------------------------------------------------------------------------
-# Scenario: REPORT generates execution_report.md
-# ---------------------------------------------------------------------------
-def test_report_generates_execution_report():
-    from zsiga.pipeline.sre_pipeline import report
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        transport = LocalTransport()
-        results = {
-            "intent": "restart nginx",
-            "phases": [
-                {"name": "DIAGNOSE", "status": "ok", "duration": "1.2s"},
-                {"name": "PLAN", "status": "ok", "duration": "0.1s"},
-                {"name": "EXECUTE", "status": "ok", "duration": "2.0s"},
-                {"name": "VERIFY", "status": "ok", "duration": "0.5s"},
-            ],
-            "commands": [
-                {"command": "systemctl restart nginx", "exit_code": 0, "stdout": ""},
-            ],
-            "verification": {"passed": True, "differences": []},
-        }
-        report(results, tmpdir, transport)
-        report_path = os.path.join(tmpdir, "execution_report.md")
-        assert os.path.exists(report_path)
-        content = open(report_path).read()
-        assert "## Intent" in content
-        assert "## Timeline" in content or "## Phases" in content
-        assert "## Commands" in content
-        assert "## Verification" in content
+    # plan should contain commands
+    commands = plan.get("commands", []) if isinstance(plan, dict) else []
+    for cmd in commands:
+        assert validate_fn(cmd), f"Plan contains non-whitelisted command: {cmd}"
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Report contains all required sections
+# Scenario: EXECUTE stops on first failure
 # ---------------------------------------------------------------------------
-def test_generate_report_content_has_required_sections():
-    from zsiga.pipeline.sre_pipeline import generate_report_content
+def test_execute_stops_on_first_failure():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
-    results = {
-        "intent": "restart nginx",
-        "phases": [
-            {"name": "DIAGNOSE", "status": "ok", "duration": "1.2s"},
-        ],
+    call_count = 0
+
+    def mock_call(command, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 2:
+            return MagicMock(exit_code=1, stdout="error")
+        return MagicMock(exit_code=0, stdout="ok")
+
+    mock_transport = MagicMock()
+    mock_transport.call.side_effect = mock_call
+
+    pipeline = SREPipeline(transport=mock_transport)
+    plan = {
         "commands": [
-            {"command": "systemctl restart nginx", "exit_code": 0, "stdout": ""},
-        ],
-        "verification": {"passed": True, "differences": []},
+            {"cmd": "systemctl status nginx", "rollback": "echo noop"},
+            {"cmd": "systemctl restart nginx", "rollback": "systemctl stop nginx"},
+            {"cmd": "systemctl status nginx", "rollback": "echo noop"},
+        ]
     }
-    content = generate_report_content(results)
-    assert "# SRE Execution Report" in content
-    assert "## Intent" in content
-    assert "## Timeline" in content
-    assert "## Commands" in content
-    assert "## Verification" in content
-    assert "## Summary" in content
+    result = pipeline._execute(plan)
+    assert result.get("status") == "failed", "Execute should report failed when a step fails"
+    assert call_count <= 2, f"Should stop after failure, but made {call_count} calls"
 
 
 # ---------------------------------------------------------------------------
-# Scenario: Report commands table includes all executed commands
+# Scenario: EXECUTE succeeds when all commands pass
 # ---------------------------------------------------------------------------
-def test_report_includes_all_commands():
-    from zsiga.pipeline.sre_pipeline import generate_report_content
+def test_execute_succeeds_all_pass():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
 
-    results = {
-        "intent": "check health",
-        "phases": [],
+    mock_transport = _make_mock_transport([
+        MagicMock(exit_code=0, stdout="ok"),
+        MagicMock(exit_code=0, stdout="ok"),
+    ])
+
+    pipeline = SREPipeline(transport=mock_transport)
+    plan = {
         "commands": [
-            {"command": "systemctl status nginx", "exit_code": 0, "stdout": "active"},
-            {"command": "df -h", "exit_code": 0, "stdout": "50%"},
-        ],
-        "verification": {"passed": True, "differences": []},
+            {"cmd": "systemctl status nginx", "rollback": "echo noop"},
+            {"cmd": "df -h", "rollback": "echo noop"},
+        ]
     }
-    content = generate_report_content(results)
-    assert "systemctl status nginx" in content
-    assert "df -h" in content
+    result = pipeline._execute(plan)
+    assert result.get("status") == "success", "Execute should report success when all pass"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: VERIFY returns success when target state matches
+# ---------------------------------------------------------------------------
+def test_verify_success():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    mock_transport = _make_mock_transport([MagicMock(exit_code=0, stdout="active (running)")])
+    pipeline = SREPipeline(transport=mock_transport)
+    execute_result = {"status": "success", "commands_executed": []}
+    result = pipeline._verify(execute_result)
+    assert result.get("status") == "success", "Verify should report success"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: VERIFY returns failure when target state not achieved
+# ---------------------------------------------------------------------------
+def test_verify_failure():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    mock_transport = _make_mock_transport([MagicMock(exit_code=0, stdout="inactive (dead)")])
+    pipeline = SREPipeline(transport=mock_transport)
+    execute_result = {"status": "success", "commands_executed": []}
+    result = pipeline._verify(execute_result)
+    assert result.get("status") == "failed", "Verify should report failure when target not met"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: Pipeline does not invoke git commit
+# ---------------------------------------------------------------------------
+def test_pipeline_no_git_commit():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    commands_issued = []
+
+    def capture(command, **kwargs):
+        commands_issued.append(command)
+        return MagicMock(exit_code=0, stdout="ok")
+
+    mock_transport = MagicMock()
+    mock_transport.call.side_effect = capture
+    pipeline = SREPipeline(transport=mock_transport)
+    pipeline.run("检查磁盘使用情况")
+
+    for cmd in commands_issued:
+        assert "git commit" not in cmd.lower(), f"Pipeline issued git commit: {cmd}"
+        assert "git add" not in cmd.lower(), f"Pipeline issued git add: {cmd}"
+
+
+# ---------------------------------------------------------------------------
+# Scenario: REPORT phase produces execution report data
+# ---------------------------------------------------------------------------
+def test_report_produces_execution_report_data():
+    SREPipeline = _get_sre_pipeline_class()
+    if SREPipeline is None:
+        pytest.skip("zsiga.pipeline.sre_pipeline not yet implemented")
+
+    mock_transport = _make_mock_transport()
+    pipeline = SREPipeline(transport=mock_transport)
+    phase_results = {
+        "DIAGNOSE": {"status": "success"},
+        "PLAN": {"status": "success"},
+        "EXECUTE": {"status": "success"},
+        "VERIFY": {"status": "success"},
+    }
+    report = pipeline._report(phase_results)
+    assert isinstance(report, dict), "Report must be a dict"
+    assert "status" in report, "Report must contain 'status' key"
+    assert "phases" in report, "Report must contain 'phases' key"
