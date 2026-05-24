@@ -1,8 +1,8 @@
 """Proposal Gate — Steward pre-flight review before pipeline entry.
 
-Runs scout + analyst agents in parallel to gather facts, then dispatches
-a Steward agent to evaluate the proposal against historical experience
-and codebase reality.  Outputs ACCEPT / PUSHBACK / REJECT.
+Runs deterministic fact extraction first (zero LLM), then scout + analyst
+agents in parallel to gather qualitative context, then dispatches a Steward
+agent to evaluate the proposal.  Outputs ACCEPT / PUSHBACK / REJECT.
 """
 
 import re
@@ -22,6 +22,7 @@ from ..agent.sub_agent import (
 from ..transport import Transport, LocalTransport
 from .utils import read_file
 from ..memory.learn import search_learnings
+from .proposal_fact_extractor import extract_facts
 
 log = logging.getLogger(__name__)
 
@@ -35,19 +36,17 @@ class GateVerdict(str, Enum):
 @dataclass
 class ProposalGateResult:
     verdict: GateVerdict
-    review_text: str        # Full steward output
-    score: int = 0          # 0-8 total score
+    review_text: str
+    score: int = 0
     scout_results: list[SubAgentResult] = None
     analyst_result: SubAgentResult = None
     elapsed_seconds: float = 0.0
 
 
 def _parse_verdict(text: str) -> tuple[GateVerdict, int]:
-    """Parse verdict and score from Steward output."""
     verdict = GateVerdict.ACCEPT
     score = 8
 
-    # Extract verdict
     vm = re.search(r"##\s*Verdict:\s*(ACCEPT|PUSHBACK|REJECT)", text, re.IGNORECASE)
     if vm:
         try:
@@ -55,7 +54,6 @@ def _parse_verdict(text: str) -> tuple[GateVerdict, int]:
         except ValueError:
             pass
 
-    # Extract total score
     sm = re.search(r"总分:\s*(\d)\s*/\s*8", text)
     if sm:
         score = int(sm.group(1))
@@ -67,8 +65,6 @@ def _build_history_section(
     proposal_text: str,
     learning_weight_days: int = 90,
 ) -> str:
-    """Search learnings.jsonl for similar failures and format them."""
-    # Extract keywords from proposal title/first line
     lines = [l.strip() for l in proposal_text.splitlines() if l.strip()]
     title = lines[0] if lines else ""
     keywords = [w for w in re.split(r"[\s\-_:,.!?/\\]+", title) if len(w) >= 2][:8]
@@ -80,7 +76,6 @@ def _build_history_section(
     if not results:
         return ""
 
-    # Filter to failures only, limit to 5
     failures = [r for r in results if r.get("type") == "lesson" and "FAIL" in r.get("title", "").upper()]
     failures = failures[:5]
 
@@ -106,12 +101,10 @@ async def run_proposal_gate(
     change_dir: str,
     target_path: str,
     transport: Transport = None,
-    # LLM config
     api_key: str = "",
     model: str = "",
     base_url: str = None,
     proxy: str = None,
-    # Gate config
     score_accept: int = 6,
     score_pushback: int = 3,
     steward_max_turns: int = 3,
@@ -119,39 +112,38 @@ async def run_proposal_gate(
     learning_weight_days: int = 90,
     max_concurrency: int = 3,
 ) -> ProposalGateResult:
-    """Run the Proposal Gate: scout + analyst → steward → verdict.
-
-    Returns a ProposalGateResult with the verdict and steward review text.
-    """
     import time
     transport = transport or LocalTransport()
     start = time.monotonic()
 
     proposal = read_file(f"{change_dir}/proposal.md", transport) or ""
 
-    # --- Phase A: parallel fact-gathering (scout × 2 + analyst × 1) ---
+    # --- Phase 0: deterministic fact extraction (zero LLM calls) ---
+    fact_report = extract_facts(proposal, target_path)
+    hard_facts = fact_report.to_prompt_section()
+    if hard_facts:
+        print(f"  🛡️ Deterministic facts: {fact_report.files_exist_summary}, {fact_report.symbols_exist_summary}")
+
     title = proposal.splitlines()[0] if proposal else "unknown"
     kw = title[:40]
 
-    # Extract specific file paths from proposal for targeted search
-    import re as _re
-    mentioned_files = _re.findall(r'[\w/]+\.py', proposal)
-    files_hint = ", ".join(mentioned_files[:5]) if mentioned_files else ""
-
+    # --- Phase A: parallel qualitative context (scout × 2 + analyst × 1) ---
     scout1_instr = (
-        f"验证以下文件是否存在于项目中: {files_hint}. " if files_hint else ""
-    ) + (
-        f"搜索项目中与「{kw}」直接相关的代码模块和函数。"
-        "第一步：用 bash 运行 find . -not -path '*/venv/*' -not -path '*/.git/*' -name '*.py' 确认目录结构。"
-        "第二步：用 read_file 读取关键文件头部（前30行）确认函数存在。"
-        "排除 venv/ 和 .git/ 目录。"
-        "告诉我：1) 每个文件是否存在及完整路径 2) 关键函数是否存在 3) 不存在时最近匹配。"
+        f"以下文件和符号已经过确定性验证：\n{hard_facts}\n\n"
+        f"基于以上事实，分析与「{kw}」相关的代码上下文：\n"
+        "1) 读取已确认存在的文件，分析其结构和职责\n"
+        "2) 确认 proposal 提到的符号是否与实际代码匹配\n"
+        "3) 如果 proposal 描述与代码实际不符，指出具体差异\n"
+        "不要重复验证文件是否存在 — 这已经确定了。"
     )
 
     scout2_instr = (
-        f"搜索项目中与「{kw}」相关的测试和配置。"
-        "用 bash find 排除 venv/ 和 .git/ 搜索整个项目目录树。"
-        "告诉我：1) 测试覆盖情况 2) 配置模式 3) 外部依赖。"
+        f"搜索与「{kw}」相关的测试文件、配置文件和依赖关系。\n"
+        f"确定性事实参考：\n{hard_facts}\n\n"
+        "1) 这些文件是否有测试覆盖\n"
+        "2) 是否涉及配置变更\n"
+        "3) 外部依赖是否受影响\n"
+        "排除 venv/ 和 .git/ 目录。"
     )
 
     discovery_tasks = [
@@ -170,7 +162,8 @@ async def run_proposal_gate(
         {
             "role": "analyst",
             "instruction": (
-                f"分析 proposal「{kw}」如果实施，会影响哪些模块和文件。"
+                f"分析 proposal「{kw}」如果实施，会影响哪些模块和文件。\n"
+                f"确定性事实：\n{hard_facts}\n\n"
                 "输出：1) 受影响的模块列表 2) 需要修改的文件清单 3) 风险评估。"
             ),
             "max_turns": 5,
@@ -190,11 +183,9 @@ async def run_proposal_gate(
     )
     discovery_results = await collect_multi_role(handle)
 
-    # Separate scout vs analyst results
     scout_results = [discovery_results[0], discovery_results[1]]
     analyst_result = discovery_results[2] if len(discovery_results) > 2 else None
 
-    # Build fact sections
     scout_facts = ""
     for i, r in enumerate(scout_results):
         if r and r.success:
@@ -216,15 +207,20 @@ async def run_proposal_gate(
     user_prompt = f"""## proposal.md
 {proposal}
 
-## Scout 事实信号（代码库中是否存在 proposal 提到的模块）
+{hard_facts}
+
+**注意：以上「确定性事实」由代码验证产生，不可质疑。你的判断必须基于这些事实，而非 Scout 的推断。**
+
+## Scout 定性分析（可参考但需独立判断）
 {scout_facts}
 
-## Analyst 影响分析（改动会影响哪些文件/模块）
+## Analyst 影响分析（可参考但需独立判断）
 {analyst_facts}
 
 {history_section}
 
-请基于以上信息，对 proposal 做出你的判断。"""
+请基于以上信息，对 proposal 做出你的判断。确定性事实中的文件/符号存在性是绝对可靠的，
+Scout 的分析可能包含推断或幻觉——如果 Scout 的结论与确定性事实矛盾，以确定性事实为准。"""
 
     steward_result = await run_sub_agent(
         steward_agent,
@@ -240,7 +236,6 @@ async def run_proposal_gate(
     # --- Phase D: parse verdict ---
     parsed_verdict, score = _parse_verdict(review_text)
 
-    # Apply threshold override from config
     if score >= score_accept:
         final_verdict = GateVerdict.ACCEPT
     elif score >= score_pushback:
@@ -254,7 +249,6 @@ async def run_proposal_gate(
         f"({elapsed:.1f}s)"
     )
 
-    # Write steward-review.md to change_dir
     review_path = f"{change_dir}/steward-review.md"
     escaped = review_text.replace("'", "'\\''")
     transport.run_shell(
@@ -273,6 +267,5 @@ async def run_proposal_gate(
 
 
 def register_tools_for_steward(agent, target_path: str, transport: Transport):
-    """Register read-only tools for steward agent."""
     from ..agent.tools import register_tools
     register_tools(agent, target_path, transport=transport)
