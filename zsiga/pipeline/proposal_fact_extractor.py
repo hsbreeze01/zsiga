@@ -180,6 +180,15 @@ def _verify_symbol(name: str, target_path: str, file_facts: list[FileFact]) -> S
                                 fact.line_content = stripped[:80]
                                 fact.kind = "class"
                                 return fact
+                            dq = f'"{name}"' in stripped or f"'{name}'" in stripped
+                            if dq:
+                                rel = os.path.relpath(fpath, target_path)
+                                fact.exists = True
+                                fact.defined_in = rel
+                                fact.line_number = i
+                                fact.line_content = stripped[:80]
+                                fact.kind = "reference"
+                                return fact
                 except (OSError, UnicodeDecodeError):
                     continue
 
