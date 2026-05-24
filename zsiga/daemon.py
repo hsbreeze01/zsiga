@@ -19,7 +19,7 @@ import asyncio
 import fcntl
 from pathlib import Path
 from datetime import datetime
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import HTTPServer, ThreadingHTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 
 
@@ -347,7 +347,7 @@ def _serve_dashboard(port: int):
         def log_message(self, fmt, *args):
             pass
 
-    server = HTTPServer(("0.0.0.0", port), Handler)
+    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
     print(f"  📊 Dashboard: http://0.0.0.0:{port}")
     server.serve_forever()
 
