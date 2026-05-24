@@ -1,13 +1,13 @@
 # Pipeline Gates Configuration
 
 Describes the configuration delta for enabling Proposal Gate and Design Gate
-in `zsiga.yaml`. All scenarios are mechanically testable via YAML parsing.
+in `zsiga.yaml`. All scenarios are mechanically testable via YAML parsing
+and config module loading.
 
-> **Implementation dependency note**: The gate config blocks defined here are
-> consumed by Python code (orchestrator / gates module). If no consuming code
-> exists, these config entries are inert. The clarify phase flagged this as a
-> high-severity risk. The scenarios below verify structural correctness only;
-> runtime enforcement is specified separately in `gate-runtime-behavior.md`.
+> **Note**: The gate config blocks are consumed by `zsiga/config.py` which
+> reads the nested YAML mapping and exposes flat attributes on the
+> `PipelineConfig` dataclass. Runtime gate enforcement (orchestrator
+> branching) is specified separately in `gate-runtime-behavior.md`.
 
 ## ADDED Requirements
 
@@ -93,6 +93,42 @@ with exactly 4 keys.
 
 ---
 
+### Requirement: Config Parsing Integration
+
+The `zsiga/config.py` module SHALL correctly parse the gate configuration
+values from `zsiga.yaml` into the corresponding `PipelineConfig` attributes.
+
+#### Scenario: config-parses-proposal-gate
+
+- **testable**: true
+- **target**: zsiga/config.py::load_config
+- **Given** `zsiga.yaml` contains `pipeline.proposal_gate` with `enabled: true`
+  and the values specified in the Proposal Gate Configuration Block table
+- **When** `load_config()` is called with the path to this `zsiga.yaml`
+- **Then** the returned `ZsigaConfig.pipeline` SHALL have:
+  `proposal_gate_enabled == True`,
+  `proposal_gate_max_retries == 1`,
+  `proposal_gate_steward_max_turns == 3`,
+  `proposal_gate_steward_timeout == 90`,
+  `proposal_gate_score_accept == 6`,
+  `proposal_gate_score_pushback == 3`,
+  `proposal_gate_learning_weight_days == 90`
+
+#### Scenario: config-parses-design-gate
+
+- **testable**: true
+- **target**: zsiga/config.py::load_config
+- **Given** `zsiga.yaml` contains `pipeline.design_gate` with `enabled: true`
+  and the values specified in the Design Gate Configuration Block table
+- **When** `load_config()` is called with the path to this `zsiga.yaml`
+- **Then** the returned `ZsigaConfig.pipeline` SHALL have:
+  `design_gate_enabled == True`,
+  `design_gate_max_retries == 2`,
+  `design_gate_max_turns == 4`,
+  `design_gate_timeout == 120`
+
+---
+
 ### Requirement: Existing Pipeline Config Preservation
 
 Adding `proposal_gate` and `design_gate` MUST NOT alter any pre-existing
@@ -153,7 +189,6 @@ parseable by Python `yaml.safe_load` without warnings or exceptions.
 - **Given** the raw text of `zsiga.yaml`
 - **When** each mapping block is scanned for duplicate keys
 - **Then** no mapping block contains the same key name more than once
-  (YAML 1.1 spec: duplicate keys are an error)
 
 ---
 

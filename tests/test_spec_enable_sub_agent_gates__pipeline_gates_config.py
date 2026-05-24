@@ -2,6 +2,8 @@
 
 Verifies that zsiga.yaml contains proposal_gate and design_gate configuration
 blocks with correct fields and values, while preserving existing config.
+Also verifies that zsiga/config.py correctly parses these blocks into
+PipelineConfig attributes.
 Covers all testable scenarios from:
   - pipeline-gates-config.md
 """
@@ -139,6 +141,89 @@ class TestDesignGateValueTypes:
             assert isinstance(dg[field], int), (
                 f"design_gate.{field} is {type(dg[field]).__name__}, expected int"
             )
+
+
+# ---------------------------------------------------------------------------
+# Config Parsing Integration
+# ---------------------------------------------------------------------------
+
+
+class TestConfigParsesProposalGate:
+    """Scenario: config-parses-proposal-gate"""
+
+    def test_proposal_gate_enabled(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.proposal_gate_enabled is True, (
+            f"Expected proposal_gate_enabled=True, got {config.pipeline.proposal_gate_enabled!r}"
+        )
+
+    def test_proposal_gate_max_retries(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.proposal_gate_max_retries == 1
+
+    def test_proposal_gate_steward_max_turns(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.proposal_gate_steward_max_turns == 3
+
+    def test_proposal_gate_steward_timeout(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.proposal_gate_steward_timeout == 90
+
+    def test_proposal_gate_score_accept(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.proposal_gate_score_accept == 6
+
+    def test_proposal_gate_score_pushback(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.proposal_gate_score_pushback == 3
+
+    def test_proposal_gate_learning_weight_days(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.proposal_gate_learning_weight_days == 90
+
+
+class TestConfigParsesDesignGate:
+    """Scenario: config-parses-design-gate"""
+
+    def test_design_gate_enabled(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.design_gate_enabled is True, (
+            f"Expected design_gate_enabled=True, got {config.pipeline.design_gate_enabled!r}"
+        )
+
+    def test_design_gate_max_retries(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.design_gate_max_retries == 2
+
+    def test_design_gate_max_turns(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.design_gate_max_turns == 4
+
+    def test_design_gate_timeout(self):
+        from zsiga.config import load_config
+
+        config = load_config(str(YAML_PATH))
+        assert config.pipeline.design_gate_timeout == 120
 
 
 # ---------------------------------------------------------------------------

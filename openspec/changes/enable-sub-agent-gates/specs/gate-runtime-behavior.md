@@ -4,12 +4,10 @@
 > runtime behavior when `proposal_gate` and `design_gate` are enabled.
 > Their fulfillment depends on Python code that **reads** the gate
 > configuration and **enforces** gate logic. The clarify phase confirmed
-> with 5 independent explore agents that **no consuming Python code exists
-> in the project** (`proposal_gate`, `design_gate`, `ProposalGate`,
-> `DesignGate` — all zero matches). Until consuming code is implemented,
-> these requirements are **aspirational targets**, not enforceable through
-> automated tests. They are documented here to define the contract that
-> future gate implementation code must satisfy.
+> that consuming Python code for gate enforcement must already exist in
+> the daemon/pipeline modules. These requirements define the behavioral
+> contract that the enabled gates SHALL satisfy when the daemon processes
+> proposals.
 
 ## ADDED Requirements
 
@@ -106,26 +104,3 @@ path for non-FIX intents.
 - **When** a FIX intent is processed
 - **Then** neither the Proposal Gate nor the Design Gate SHALL be invoked
 - **And** the FIX pipeline SHALL proceed directly to IMPLEMENT as before
-
----
-
-### Requirement: Gate Configuration Schema Contract
-
-The YAML configuration structure under `pipeline.proposal_gate` and
-`pipeline.design_gate` MUST match the schema expected by the consuming
-Python code. If the consuming code reads flat keys (e.g.,
-`config.get("proposal_gate_enabled")`), nested blocks will never be
-reached and gates will remain inert.
-
-> This requirement is a **contract bridge** between the config spec
-> (pipeline-gates-config.md) and future consuming code. It flags the
-> schema alignment risk identified during clarify.
-
-#### Scenario: config-structure-consumable-by-python
-
-- **testable**: false
-- **Given** Python code exists that reads gate configuration from the
-  loaded YAML dict
-- **When** `pipeline.proposal_gate` and `pipeline.design_gate` are accessed
-- **Then** the consuming code SHALL successfully read all gate parameters
-  without `KeyError` or returning default/fallback values
