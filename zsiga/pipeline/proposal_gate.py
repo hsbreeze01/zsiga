@@ -142,13 +142,15 @@ async def run_proposal_gate(
         f"验证以下文件是否存在于项目中: {files_hint}. " if files_hint else ""
     ) + (
         f"搜索项目中与「{kw}」直接相关的代码模块和函数。"
-        "用 search 和 bash(find/ls) 搜索完整路径（含子目录如 zsiga/xxx.py）。"
+        "第一步：用 bash 运行 find . -not -path '*/venv/*' -not -path '*/.git/*' -name '*.py' 确认目录结构。"
+        "第二步：用 read_file 读取关键文件头部（前30行）确认函数存在。"
+        "排除 venv/ 和 .git/ 目录。"
         "告诉我：1) 每个文件是否存在及完整路径 2) 关键函数是否存在 3) 不存在时最近匹配。"
     )
 
     scout2_instr = (
         f"搜索项目中与「{kw}」相关的测试和配置。"
-        "用 bash find 搜索整个项目目录树（包含子目录）。"
+        "用 bash find 排除 venv/ 和 .git/ 搜索整个项目目录树。"
         "告诉我：1) 测试覆盖情况 2) 配置模式 3) 外部依赖。"
     )
 
@@ -156,14 +158,14 @@ async def run_proposal_gate(
         {
             "role": "scout",
             "instruction": scout1_instr,
-            "max_turns": 3,
-            "timeout": 60,
+            "max_turns": 5,
+            "timeout": 90,
         },
         {
             "role": "scout",
             "instruction": scout2_instr,
-            "max_turns": 3,
-            "timeout": 60,
+            "max_turns": 5,
+            "timeout": 90,
         },
         {
             "role": "analyst",
