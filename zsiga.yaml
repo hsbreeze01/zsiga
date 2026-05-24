@@ -95,6 +95,24 @@ pipeline:
     threshold_chars: 60000
     keep_recent: 3
     use_llm_summary: true
+  enrich_parallel_explore: true
+  explore_pool:
+    max_concurrency: 3
+    max_turns_per_task: 5
+    timeout_per_task: 120
+  proposal_gate:
+    enabled: true
+    max_retries: 1
+    steward_max_turns: 3
+    steward_timeout: 90
+    score_accept: 6
+    score_pushback: 3
+    learning_weight_days: 90
+  design_gate:
+    enabled: true
+    max_retries: 2
+    max_turns: 4
+    timeout: 120
 
 safety:
   require_approval: false
