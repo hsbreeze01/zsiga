@@ -18,8 +18,8 @@ import time
 import asyncio
 import fcntl
 from pathlib import Path
-from datetime import datetime
-from http.server import HTTPServer, ThreadingHTTPServer, SimpleHTTPRequestHandler
+from datetime import datetime, timezone
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 
 
@@ -220,7 +220,12 @@ def _compute_uptime_seconds(started_at: str | None) -> float | None:
         started_dt = datetime.fromisoformat(started_at)
     except (ValueError, TypeError):
         return None
-    elapsed = (datetime.now() - started_dt).total_seconds()
+    if started_dt.tzinfo is not None:
+        now = datetime.now(timezone.utc)
+        started_utc = started_dt.astimezone(timezone.utc)
+        elapsed = (now - started_utc).total_seconds()
+    else:
+        elapsed = (datetime.now() - started_dt).total_seconds()
     return round(elapsed, 1)
 
 
