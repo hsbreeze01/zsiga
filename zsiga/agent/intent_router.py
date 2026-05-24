@@ -18,6 +18,7 @@ class IntentType(str, Enum):
     EVALUATION = "evaluation"
     FIX = "fix"
     OPEN_ENDED = "open-ended"
+    SRE = "sre"
 
 
 @dataclass
@@ -71,6 +72,14 @@ _FIX_KEYWORDS = re.compile(
 _CONSTRUCTION_MARKERS = re.compile(
     r"新增|面板|模块|功能|卡片|组件|页面|feature|panel|module|component|"
     r"widget|card|section|展示|显示|图表|dashboard|趋势",
+    re.IGNORECASE,
+)
+
+_SRE_KEYWORDS = re.compile(
+    r"健康检查|服务状态|重启|部署|监控|告警|磁盘|内存|CPU|"
+    r"healthcheck|restart|deploy|monitor|alert|disk|memory|"
+    r"infrastructure|运维|operation|service|服务恢复|故障恢复|"
+    r"cmdb|inventory|巡检",
     re.IGNORECASE,
 )
 
@@ -147,6 +156,7 @@ _CLASSIFICATION_SYSTEM_PROMPT = (
     "- investigation: user wants to DEBUG or DIAGNOSE a problem/crash/error\n"
     "- evaluation: user wants to REVIEW or COMPARE existing code/decisions\n"
     "- fix: user wants to FIX a known bug, test failure, or lint error\n"
+    "- sre: infrastructure operations — healthcheck, restart, deploy, monitor, service management, CMDB\n"
     "- open-ended: unclear intent requiring clarification\n\n"
     "CRITICAL RULES:\n"
     "1. cleanup, migrate, remove, delete, replace, convert, unify → ALWAYS 'implementation'\n"
@@ -203,6 +213,7 @@ def _classify_via_llm(message: str, config: LLMFastConfig,
             IntentType.INVESTIGATION: "dispatch_diagnoser: 派发 diagnoser 子代理排查问题",
             IntentType.EVALUATION: "dispatch_review: 派发 review 子代理评估审查",
             IntentType.FIX: "pipeline_fix: IMPLEMENT (fix) → VERIFY",
+            IntentType.SRE: "dispatch_operator: 派发 operator 子代理执行运维任务",
             IntentType.OPEN_ENDED: "ask_user: 请提供更多信息",
         }
 
@@ -313,6 +324,12 @@ def classify(message: str, config: ZsigaConfig | None = None, source: str = None
                        f"实现类关键词 ({len(impl_matches)} 个匹配)"
                        + (" + 具体目标" if has_target else "")))
 
+    sre_matches = _SRE_KEYWORDS.findall(text)
+    if sre_matches:
+        sre_score = len(sre_matches) + 1
+        scores.append((sre_score, IntentType.SRE,
+                       f"SRE/运维类关键词 ({len(sre_matches)} 个匹配)"))
+
     if eval_matches:
         scores.append((len(eval_matches), IntentType.EVALUATION,
                        f"评估/审查类关键词 ({len(eval_matches)} 个匹配)"))
@@ -328,6 +345,7 @@ def classify(message: str, config: ZsigaConfig | None = None, source: str = None
         IntentType.INVESTIGATION: "dispatch_diagnoser: 派发 diagnoser 子代理排查问题",
         IntentType.EVALUATION: "dispatch_review: 派发 review 子代理评估审查",
         IntentType.FIX: "pipeline_fix: IMPLEMENT (fix) → VERIFY",
+        IntentType.SRE: "dispatch_operator: 派发 operator 子代理执行运维任务",
         IntentType.OPEN_ENDED: "ask_user: 请提供更多信息",
     }
 
@@ -417,6 +435,7 @@ def route(intent: Intent) -> str:
         IntentType.INVESTIGATION: "dispatch_diagnoser",
         IntentType.EVALUATION: "dispatch_review",
         IntentType.FIX: "pipeline_fix",
+        IntentType.SRE: "dispatch_operator",
         IntentType.OPEN_ENDED: "ask_user",
     }
     return routing.get(intent.intent_type, "ask_user")

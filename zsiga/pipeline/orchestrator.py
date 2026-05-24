@@ -350,6 +350,12 @@ class ZsigaOrchestrator:
             update_intent_outcome(change_name, "success" if review_ok else "failed", review_ok)
             return review_ok
 
+        if route_path == "dispatch_operator":
+            print("  Dispatching operator sub-agent for SRE intent")
+            op_ok = await self._dispatch_operator(prop, change_dir, target_path, transport)
+            update_intent_outcome(change_name, "success" if op_ok else "failed", op_ok)
+            return op_ok
+
         if route_path == "pipeline_fix":
             print("  Running shortened pipeline (IMPLEMENT → VERIFY) for fix intent")
 
@@ -367,6 +373,43 @@ class ZsigaOrchestrator:
         )
 
         try:
+            # Proposal Gate: Steward pre-flight review (if enabled)
+            if self.config.pipeline.proposal_gate_enabled and intent.intent_type == IntentType.IMPLEMENTATION:
+                from .proposal_gate import run_proposal_gate, GateVerdict
+                gate_result = await run_proposal_gate(
+                    change_dir=change_dir,
+                    target_path=target_path,
+                    transport=transport,
+                    api_key=self.config.llm.api_key,
+                    model=self.config.llm.model,
+                    base_url=self.config.llm.base_url,
+                    proxy=self.config.llm.proxy,
+                    score_accept=self.config.pipeline.proposal_gate_score_accept,
+                    score_pushback=self.config.pipeline.proposal_gate_score_pushback,
+                    steward_max_turns=self.config.pipeline.proposal_gate_steward_max_turns,
+                    steward_timeout=self.config.pipeline.proposal_gate_steward_timeout,
+                    learning_weight_days=self.config.pipeline.proposal_gate_learning_weight_days,
+                )
+                if gate_result.verdict == GateVerdict.REJECT:
+                    print(f"  🛡️ Proposal REJECTED by Steward (score {gate_result.score}/8)")
+                    from ..memory.learn import record_lesson
+                    record_lesson(
+                        title=f"STEWARD REJECT: {change_name}",
+                        context=f"score={gate_result.score}/8, project={project_name}",
+                        takeaway=f"Steward rejected: {gate_result.review_text[:200]}",
+                        pattern_key="proposal_gate.reject",
+                        source="steward",
+                    )
+                    rec.outcome = Outcome.SKIPPED
+                    return False
+                elif gate_result.verdict == GateVerdict.PUSHBACK:
+                    print(f"  🛡️ Proposal PUSHED BACK by Steward (score {gate_result.score}/8)")
+                    print(f"  🛡️ See {change_dir}/steward-review.md for details")
+                    rec.outcome = Outcome.SKIPPED
+                    return False
+                else:
+                    print(f"  🛡️ Proposal ACCEPTED by Steward (score {gate_result.score}/8)")
+
             skip_enrich = intent.intent_type == IntentType.FIX
             return await self._run_phases(prop, rec, change_dir, target_path,
                                           project_name, project_config, change_name,
@@ -509,14 +552,20 @@ class ZsigaOrchestrator:
             register_tools(self.agent, target_path, transport=transport)
             t0 = time.monotonic()
 
-            # Optional parallel explore pool (REQ-PP-04)
+            # Optional parallel explore pool (REQ-PP-04) with analyst
             supplementary_context = ""
             if self.config.pipeline.enrich_parallel_explore:
-                from ..agent.sub_agent import dispatch_many, collect_all
-                explore_tasks = derive_explore_tasks(proposal_text)
+                from ..agent.sub_agent import dispatch_multi_role, collect_multi_role
+                title = proposal_text.splitlines()[0] if proposal_text else "项目"
+                kw = title[:40]
+                enrich_discovery_tasks = [
+                    {"role": "analyst", "instruction": f"分析 proposal「{kw}」的影响范围。输出：1) 受影响模块 2) 需修改文件 3) 风险评估", "max_turns": 5, "timeout": 90},
+                    {"role": "scout", "instruction": f"搜索项目中与「{kw}」相关的代码实现细节", "max_turns": 3, "timeout": 60},
+                    {"role": "scout", "instruction": f"搜索项目中与「{kw}」相关的测试和配置", "max_turns": 3, "timeout": 60},
+                ]
                 pool_cfg = self.config.pipeline
-                handle = dispatch_many(
-                    tasks=explore_tasks,
+                handle = dispatch_multi_role(
+                    tasks=enrich_discovery_tasks,
                     api_key=self.config.llm.api_key,
                     model=self.config.llm.model,
                     base_url=self.config.llm.base_url,
@@ -524,19 +573,18 @@ class ZsigaOrchestrator:
                     target_path=target_path,
                     transport=transport,
                     max_concurrency=pool_cfg.explore_pool_max_concurrency,
-                    max_turns_per_task=pool_cfg.explore_pool_max_turns,
-                    timeout_per_task=pool_cfg.explore_pool_timeout,
                 )
-                explore_results = await collect_all(handle)
+                explore_results = await collect_multi_role(handle)
                 parts = []
                 for idx, r in enumerate(explore_results):
                     if r.success:
+                        role = enrich_discovery_tasks[idx]["role"]
                         parts.append(
-                            f"### Explore Agent #{idx + 1}\n{r.content}"
+                            f"### {role.capitalize()} Agent #{idx + 1}\n{r.content}"
                         )
                     else:
                         print(
-                            f"  ⚠️ explore-agent #{idx + 1} failed: "
+                            f"  ⚠️ discovery-agent #{idx + 1} failed: "
                             f"{r.content[:100]}"
                         )
                 if parts:
@@ -560,6 +608,50 @@ class ZsigaOrchestrator:
 
             # WAL: record ENRICH boundary
             wal.write(phase="enrich", target_path=target_path, project=project_name)
+
+            # Design Gate: Judge reviews design/spec quality (if enabled)
+            if self.config.pipeline.design_gate_enabled:
+                from ..agent.sub_agent import create_with_role, run_sub_agent as _run_sub
+                design_gate_retries = 0
+                max_gate_retries = self.config.pipeline.design_gate_max_retries
+                while design_gate_retries <= max_gate_retries:
+                    judge_agent = create_with_role(
+                        "judge", self.config.llm.api_key, self.config.llm.model,
+                        self.config.llm.base_url, self.config.llm.proxy,
+                    )
+                    judge_result = await _run_sub(
+                        judge_agent, target_path, transport,
+                        f"评审 {change_dir}/specs/ 下的所有 spec 文件。"
+                        f"proposal 在 {change_dir}/proposal.md。"
+                        f"项目根目录: {target_path}。",
+                        max_turns=self.config.pipeline.design_gate_max_turns,
+                        timeout_seconds=self.config.pipeline.design_gate_timeout,
+                    )
+                    judge_content = judge_result.content.upper()
+                    if "DESIGN GATE VERDICT: PASS" in judge_content:
+                        print(f"  🏛️ Design Gate PASS (attempt {design_gate_retries + 1})")
+                        break
+                    else:
+                        design_gate_retries += 1
+                        print(f"  🏛️ Design Gate FAIL (attempt {design_gate_retries})")
+                        if design_gate_retries <= max_gate_retries:
+                            print(f"  🏛️ Re-running ENRICH with judge feedback...")
+                            judge_feedback = judge_result.content[:2000]
+                            retry_prompt_suffix = (
+                                f"\n\n## Judge 审查反馈（上一轮 ENRICH 被拒绝）\n{judge_feedback}\n"
+                                "请根据以上反馈改进 specs。"
+                            )
+                            from .enricher import enrich as _enrich_retry
+                            self.agent.set_phase("enrich")
+                            register_tools(self.agent, target_path, transport=transport)
+                            await _enrich_retry(self.agent, change_dir, target_path,
+                                transport=transport, project_context=project_context,
+                                max_turns=self.config.pipeline.enrich_max_turns,
+                                timeout_seconds=self.config.pipeline.enrich_timeout)
+                        else:
+                            print(f"  🏛️ Design Gate failed {design_gate_retries} times, auto-pausing")
+                            rec.outcome = Outcome.SKIPPED
+                            return False
 
         # Approval gate
         if self.config.safety.require_approval:
@@ -1845,6 +1937,25 @@ class ZsigaOrchestrator:
             for issue in issues:
                 print(f"    [{issue['severity']}] {issue['description'][:80]}")
         return verdict in ("CLEAN", "UNKNOWN")
+
+    async def _dispatch_operator(self, prop, change_dir, target_path, transport) -> bool:
+        """Dispatch operator sub-agent for SRE/infrastructure intents."""
+        proposal_name = prop.get("proposal_filename", "proposal.md")
+        proposal_text = read_file(f"{change_dir}/{proposal_name}", transport) or prop.get("id", "")
+        agent = create_with_role(
+            "operator",
+            api_key=self.agent.client.api_key,
+            model=self.agent.model,
+            base_url=getattr(self.agent.client, "base_url", None),
+        )
+        result = await run_sub_agent(
+            agent, target_path, transport, proposal_text,
+            max_turns=self.config.pipeline.operator_max_turns,
+            timeout_seconds=self.config.pipeline.operator_timeout,
+        )
+        print(f"  Operator agent done: success={result.success}, {result.elapsed_seconds:.1f}s")
+        print(f"  Result: {result.content[:300]}...")
+        return result.success
 
     def close(self):
         for transport in self._transports.values():

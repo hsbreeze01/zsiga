@@ -250,3 +250,121 @@ async def collect_all(handle: PoolHandle) -> list[SubAgentResult]:
     )
 
     return results
+
+# ---------------------------------------------------------------------------
+# Multi-role parallel dispatch (supports different roles per task)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class MultiRoleHandle:
+    """Opaque handle for multi-role dispatch; pass to collect_multi_role."""
+    tasks: list[dict]          # Each: {"role": "scout", "instruction": "..."}
+    pending: asyncio.Task | None
+    max_concurrency: int
+
+
+def dispatch_multi_role(
+    tasks: list[dict],
+    api_key: str,
+    model: str,
+    base_url: str = None,
+    proxy: str = None,
+    target_path: str = "/tmp",
+    transport: Transport | None = None,
+    max_concurrency: int = 3,
+    max_turns_per_task: int = 5,
+    timeout_per_task: int = 120,
+) -> MultiRoleHandle:
+    """Create agents with different roles for *tasks* and return a MultiRoleHandle.
+
+    Each task dict must have:
+      - "role": str — one of the Role enum values (e.g. "scout", "analyst", "steward")
+      - "instruction": str — the task instruction for the agent
+
+    Optional per-task overrides:
+      - "max_turns": int — override max_turns_per_task for this specific task
+      - "timeout": int — override timeout_per_task for this specific task
+    """
+    from ..transport import LocalTransport
+
+    if transport is None:
+        transport = LocalTransport()
+
+    if not tasks:
+        return MultiRoleHandle(tasks=tasks, pending=None, max_concurrency=max_concurrency)
+
+    sem = asyncio.Semaphore(max_concurrency)
+
+    async def _bounded_multi_role(
+        idx: int, task_spec: dict
+    ) -> tuple[int, SubAgentResult]:
+        async with sem:
+            role_name = task_spec["role"]
+            instruction = task_spec["instruction"]
+            task_max_turns = task_spec.get("max_turns", max_turns_per_task)
+            task_timeout = task_spec.get("timeout", timeout_per_task)
+
+            agent = create_with_role(role_name, api_key, model, base_url, proxy)
+            result = await run_sub_agent(
+                agent,
+                target_path,
+                transport,
+                instruction,
+                max_turns=task_max_turns,
+                timeout_seconds=task_timeout,
+            )
+            return idx, result
+
+    coros = [_bounded_multi_role(i, task) for i, task in enumerate(tasks)]
+
+    role_names = [t.get("role", "?") for t in tasks]
+    print(
+        f"  🚀 Dispatching {len(tasks)} multi-role agents "
+        f"(roles: {', '.join(role_names)}, concurrency={max_concurrency})..."
+    )
+
+    pending = asyncio.ensure_future(asyncio.gather(*coros, return_exceptions=True))
+
+    return MultiRoleHandle(tasks=tasks, pending=pending, max_concurrency=max_concurrency)
+
+
+async def collect_multi_role(handle: MultiRoleHandle) -> list[SubAgentResult]:
+    """Await all dispatched multi-role agents and return results in original task order."""
+    if handle.pending is None:
+        return []
+
+    indexed_results = await handle.pending
+    n = len(handle.tasks)
+    results: list[SubAgentResult] = [None] * n
+    succeeded = 0
+
+    for item in indexed_results:
+        if isinstance(item, Exception):
+            idx = indexed_results.index(item)
+            results[idx] = SubAgentResult(
+                content=f"SUB_AGENT_ERROR: {item}",
+                success=False,
+            )
+            print(
+                f"  🚀 multi-role-agent #{idx + 1} ({handle.tasks[idx].get('role', '?')}) done "
+                f"(error)"
+            )
+        else:
+            idx, result = item
+            results[idx] = result
+            elapsed = result.elapsed_seconds
+            role = handle.tasks[idx].get("role", "?")
+            print(
+                f"  🚀 multi-role-agent #{idx + 1} ({role}) done "
+                f"({elapsed:.1f}s, success={result.success})"
+            )
+            if result.success:
+                succeeded += 1
+
+    total_elapsed = sum(r.elapsed_seconds for r in results if r is not None)
+    print(
+        f"  🚀 Multi-role pool complete: "
+        f"{succeeded}/{n} succeeded (total {total_elapsed:.1f}s)"
+    )
+
+    return results

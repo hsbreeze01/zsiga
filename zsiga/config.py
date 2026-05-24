@@ -131,7 +131,32 @@ class PipelineConfig:
                  idle_poll_minutes: int = 5,
                  max_continuous_cycles: int = 20,
                  cooldown_minutes: int = 30,
-                 budget_profiles: dict[str, int] = None):
+                 budget_profiles: dict[str, int] = None,
+        # Proposal Gate (Steward)
+        proposal_gate_enabled: bool = False,
+        proposal_gate_max_retries: int = 1,
+        proposal_gate_steward_max_turns: int = 3,
+        proposal_gate_steward_timeout: int = 90,
+        proposal_gate_score_accept: int = 6,
+        proposal_gate_score_pushback: int = 3,
+        proposal_gate_learning_weight_days: int = 90,
+        # Design Gate (Judge)
+        design_gate_enabled: bool = False,
+        design_gate_max_retries: int = 2,
+        design_gate_max_turns: int = 4,
+        design_gate_timeout: int = 120,
+        # Role-specific timeouts
+        analyst_max_turns: int = 8,
+        analyst_timeout: int = 180,
+        surveyor_max_turns: int = 3,
+        surveyor_timeout: int = 60,
+        fixer_max_turns: int = 8,
+        fixer_timeout: int = 300,
+        operator_max_turns: int = 10,
+        operator_timeout: int = 600,
+        # SRE safety
+        operator_allowed_dirs: list = None,
+        operator_blocked_commands: list = None):
         self.max_changes_per_cycle = max_changes_per_cycle
         self.impl_timeout_minutes = impl_timeout_minutes
         self.fix_attempts = fix_attempts
@@ -156,6 +181,33 @@ class PipelineConfig:
         self.idle_poll_minutes = idle_poll_minutes
         self.max_continuous_cycles = max_continuous_cycles
         self.cooldown_minutes = cooldown_minutes
+        # Proposal Gate
+        self.proposal_gate_enabled = proposal_gate_enabled
+        self.proposal_gate_max_retries = proposal_gate_max_retries
+        self.proposal_gate_steward_max_turns = proposal_gate_steward_max_turns
+        self.proposal_gate_steward_timeout = proposal_gate_steward_timeout
+        self.proposal_gate_score_accept = proposal_gate_score_accept
+        self.proposal_gate_score_pushback = proposal_gate_score_pushback
+        self.proposal_gate_learning_weight_days = proposal_gate_learning_weight_days
+        # Design Gate
+        self.design_gate_enabled = design_gate_enabled
+        self.design_gate_max_retries = design_gate_max_retries
+        self.design_gate_max_turns = design_gate_max_turns
+        self.design_gate_timeout = design_gate_timeout
+        # Role-specific
+        self.analyst_max_turns = analyst_max_turns
+        self.analyst_timeout = analyst_timeout
+        self.surveyor_max_turns = surveyor_max_turns
+        self.surveyor_timeout = surveyor_timeout
+        self.fixer_max_turns = fixer_max_turns
+        self.fixer_timeout = fixer_timeout
+        self.operator_max_turns = operator_max_turns
+        self.operator_timeout = operator_timeout
+        # SRE safety
+        self.operator_allowed_dirs = operator_allowed_dirs or []
+        self.operator_blocked_commands = operator_blocked_commands or [
+            "rm -rf /", "shutdown", "reboot", "mkfs", "dd if=", "chmod 777", "> /etc/",
+        ]
         self.budget_profiles = dict(DEFAULT_BUDGET_PROFILES)
         if budget_profiles:
             self.budget_profiles.update(budget_profiles)
@@ -351,6 +403,31 @@ def load_config(path: str = None) -> ZsigaConfig:
         max_continuous_cycles=pipeline_raw.get("max_continuous_cycles", 20),
         cooldown_minutes=pipeline_raw.get("cooldown_minutes", 30),
         budget_profiles=pipeline_raw.get("budget_profiles"),
+        # Proposal Gate
+        proposal_gate_enabled=pipeline_raw.get("proposal_gate", {}).get("enabled", False),
+        proposal_gate_max_retries=pipeline_raw.get("proposal_gate", {}).get("max_retries", 1),
+        proposal_gate_steward_max_turns=pipeline_raw.get("proposal_gate", {}).get("steward_max_turns", 3),
+        proposal_gate_steward_timeout=pipeline_raw.get("proposal_gate", {}).get("steward_timeout", 90),
+        proposal_gate_score_accept=pipeline_raw.get("proposal_gate", {}).get("score_accept", 6),
+        proposal_gate_score_pushback=pipeline_raw.get("proposal_gate", {}).get("score_pushback", 3),
+        proposal_gate_learning_weight_days=pipeline_raw.get("proposal_gate", {}).get("learning_weight_days", 90),
+        # Design Gate
+        design_gate_enabled=pipeline_raw.get("design_gate", {}).get("enabled", False),
+        design_gate_max_retries=pipeline_raw.get("design_gate", {}).get("max_retries", 2),
+        design_gate_max_turns=pipeline_raw.get("design_gate", {}).get("max_turns", 4),
+        design_gate_timeout=pipeline_raw.get("design_gate", {}).get("timeout", 120),
+        # Role-specific
+        analyst_max_turns=pipeline_raw.get("analyst_max_turns", 8),
+        analyst_timeout=pipeline_raw.get("analyst_timeout", 180),
+        surveyor_max_turns=pipeline_raw.get("surveyor_max_turns", 3),
+        surveyor_timeout=pipeline_raw.get("surveyor_timeout", 60),
+        fixer_max_turns=pipeline_raw.get("fixer_max_turns", 8),
+        fixer_timeout=pipeline_raw.get("fixer_timeout", 300),
+        operator_max_turns=pipeline_raw.get("operator_max_turns", 10),
+        operator_timeout=pipeline_raw.get("operator_timeout", 600),
+        # SRE safety
+        operator_allowed_dirs=pipeline_raw.get("operator_allowed_dirs"),
+        operator_blocked_commands=pipeline_raw.get("operator_blocked_commands"),
     )
 
     intake_raw = raw.get("intake", {})
