@@ -1,0 +1,63 @@
+{
+  "session_id": "cmdb-infra-registry-and-monitor-fix-42f3f61b",
+  "change_name": "cmdb-infra-registry-and-monitor-fix",
+  "project": "factory",
+  "exported_at": "2026-05-24T11:58:51.634584",
+  "outcome": "success",
+  "started_at": "2026-05-24T11:49:27.328032",
+  "finished_at": "2026-05-24T11:58:51.600499",
+  "total_runtime_seconds": 501.9,
+  "phases": [
+    {
+      "phase": "clarify",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 43.9,
+      "fix_attempts": 0,
+      "llm_calls": 2,
+      "tool_calls": 1,
+      "prompt_tokens": 21173,
+      "completion_tokens": 1920
+    },
+    {
+      "phase": "enrich",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 265.1,
+      "fix_attempts": 0,
+      "llm_calls": 26,
+      "tool_calls": 28,
+      "prompt_tokens": 1160471,
+      "completion_tokens": 7929
+    },
+    {
+      "phase": "implement",
+      "outcome": "success",
+      "turns_used": 0,
+      "seconds_used": 144.5,
+      "fix_attempts": 0,
+      "llm_calls": 17,
+      "tool_calls": 19,
+      "prompt_tokens": 699541,
+      "completion_tokens": 4562
+    },
+    {
+      "phase": "review",
+      "outcome": "fail",
+      "turns_used": 0,
+      "seconds_used": 48.4,
+      "fix_attempts": 0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  ],
+  "lessons": [],
+  "metrics": {
+    "total_llm_calls": 45,
+    "total_tool_calls": 48,
+    "total_prompt_tokens": 1881185,
+    "total_completion_tokens": 14411
+  }
+}

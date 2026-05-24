@@ -1,15 +1,10 @@
 {
   "project": "d8q-intelligentengine-datafactory",
-  "extracted_at": "2026-05-19T13:38:55.980863",
+  "extracted_at": "2026-05-24T11:40:11.215214",
   "entries": [
     {
       "name": "ReportCache",
       "category": "class",
-      "file": "app.py"
-    },
-    {
-      "name": "get_db",
-      "category": "function",
       "file": "app.py"
     },
     {
@@ -1113,11 +1108,6 @@
       "file": "app.py"
     },
     {
-      "name": "DB_PATH",
-      "category": "config",
-      "file": "app.py"
-    },
-    {
       "name": "AGENT_API",
       "category": "config",
       "file": "app.py"
@@ -2016,6 +2006,26 @@
       "name": "DEFAULT_AGENT_DATA_DIR",
       "category": "config",
       "file": "src/datafactory/infrastructure/agent_datasource/reader.py"
+    },
+    {
+      "name": "get_db_ctx",
+      "category": "function",
+      "file": "src/datafactory/infrastructure/db_utils.py"
+    },
+    {
+      "name": "DB_PATH",
+      "category": "config",
+      "file": "src/datafactory/infrastructure/db_utils.py"
+    },
+    {
+      "name": "TestGetDbCtx",
+      "category": "class",
+      "file": "tests/test_db_utils.py"
+    },
+    {
+      "name": "TestDbUtilsImport",
+      "category": "class",
+      "file": "tests/test_db_utils.py"
     },
     {
       "name": "TestMonitorCookieAlert",

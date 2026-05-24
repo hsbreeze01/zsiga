@@ -1,6 +1,6 @@
 {
   "project": "repo",
-  "extracted_at": "2026-05-22T19:22:09.874211",
+  "extracted_at": "2026-05-24T11:58:55.575616",
   "entries": [
     {
       "name": "ClusterInfo",
@@ -1566,6 +1566,251 @@
       "name": "TestComputeVerifyRateReport",
       "category": "class",
       "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_rate_metric_script.py"
+    },
+    {
+      "name": "test_render_feedback_loop_before_change_history",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+    },
+    {
+      "name": "test_render_feedback_loop_uses_css_classes",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+    },
+    {
+      "name": "test_render_feedback_loop_no_data_yet",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+    },
+    {
+      "name": "test_render_feedback_loop_partial_data",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+    },
+    {
+      "name": "test_render_feedback_loop_in_full_page_ordering",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+    },
+    {
+      "name": "test_render_feedback_loop_no_crash_with_empty_data",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+    },
+    {
+      "name": "test_compute_learnings_health_populated",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_learnings_health_missing_file",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_learnings_health_empty_file",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_injection_rate_mixed",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_injection_rate_empty_table",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_injection_rate_no_table",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_auto_proposal_success_varied",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_auto_proposal_success_empty",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_self_assessment_coverage_partial",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_self_assessment_coverage_empty",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_all_feedback_metrics_with_data",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_compute_all_feedback_metrics_missing_sources",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_ensure_injections_table_idempotent",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
+    },
+    {
+      "name": "test_record_injection_valid",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
+    },
+    {
+      "name": "test_record_injection_multiple_phases",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
+    },
+    {
+      "name": "test_record_injection_zero_count",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
+    },
+    {
+      "name": "test_record_injection_explicit_timestamp",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
+    },
+    {
+      "name": "TestRemoveDaemonCycleErrorFromJsonl",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
+    },
+    {
+      "name": "TestRemoveCodeUnknownFromJsonl",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
+    },
+    {
+      "name": "TestRemoveEmptyTextFromJsonl",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
+    },
+    {
+      "name": "TestRemoveNoisyFromDb",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
+    },
+    {
+      "name": "TestCleanupIdempotent",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
+    },
+    {
+      "name": "memory_dir",
+      "category": "function",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
+    },
+    {
+      "name": "NOISY_AND_CLEAN",
+      "category": "config",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
+    },
+    {
+      "name": "TestEmptyTakeawaySkipped",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
+    },
+    {
+      "name": "TestDaemonCycleErrorSkipped",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
+    },
+    {
+      "name": "TestCodeUnknownSkipped",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
+    },
+    {
+      "name": "TestValidLearningWritten",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
+    },
+    {
+      "name": "memory_dir",
+      "category": "function",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
+    },
+    {
+      "name": "TestEnrichLearningsSectionInjected",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_enrich.py"
+    },
+    {
+      "name": "TestEnrichNoLearningsSectionWhenEmpty",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_enrich.py"
+    },
+    {
+      "name": "TestEnrichMax3Learnings",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_enrich.py"
+    },
+    {
+      "name": "memory_dir",
+      "category": "function",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_enrich.py"
+    },
+    {
+      "name": "TestLearningsSectionInjected",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_implement.py"
+    },
+    {
+      "name": "TestNoLearningsSectionWhenEmpty",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_implement.py"
+    },
+    {
+      "name": "TestMax5Learnings",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_implement.py"
+    },
+    {
+      "name": "memory_dir",
+      "category": "function",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_implement.py"
+    },
+    {
+      "name": "TestMatchByChangeNameToken",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
+    },
+    {
+      "name": "TestMatchPipelineFailWildcard",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
+    },
+    {
+      "name": "TestResultsCapped",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
+    },
+    {
+      "name": "TestNoMatchingLearnings",
+      "category": "class",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
+    },
+    {
+      "name": "memory_dir",
+      "category": "function",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
+    },
+    {
+      "name": "SAMPLE_LEARNINGS",
+      "category": "config",
+      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
     },
     {
       "name": "TestParseTarget",
