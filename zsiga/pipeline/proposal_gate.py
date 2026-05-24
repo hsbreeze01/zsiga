@@ -133,23 +133,35 @@ async def run_proposal_gate(
     title = proposal.splitlines()[0] if proposal else "unknown"
     kw = title[:40]
 
+    # Extract specific file paths from proposal for targeted search
+    import re as _re
+    mentioned_files = _re.findall(r'[\w/]+\.py', proposal)
+    files_hint = ", ".join(mentioned_files[:5]) if mentioned_files else ""
+
+    scout1_instr = (
+        f"验证以下文件是否存在于项目中: {files_hint}. " if files_hint else ""
+    ) + (
+        f"搜索项目中与「{kw}」直接相关的代码模块和函数。"
+        "用 search 和 bash(find/ls) 搜索完整路径（含子目录如 zsiga/xxx.py）。"
+        "告诉我：1) 每个文件是否存在及完整路径 2) 关键函数是否存在 3) 不存在时最近匹配。"
+    )
+
+    scout2_instr = (
+        f"搜索项目中与「{kw}」相关的测试和配置。"
+        "用 bash find 搜索整个项目目录树（包含子目录）。"
+        "告诉我：1) 测试覆盖情况 2) 配置模式 3) 外部依赖。"
+    )
+
     discovery_tasks = [
         {
             "role": "scout",
-            "instruction": (
-                f"搜索项目中与「{kw}」直接相关的代码模块、函数和文件。"
-                "告诉我：1) 这些模块是否存在 2) 它们的主要职责 3) 关键文件路径。"
-                "如果不存在，明确说明。"
-            ),
+            "instruction": scout1_instr,
             "max_turns": 3,
             "timeout": 60,
         },
         {
             "role": "scout",
-            "instruction": (
-                f"搜索项目中与「{kw}」相关的测试文件、配置文件和依赖关系。"
-                "告诉我：1) 测试覆盖情况 2) 配置模式 3) 外部依赖。"
-            ),
+            "instruction": scout2_instr,
             "max_turns": 3,
             "timeout": 60,
         },
