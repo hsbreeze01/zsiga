@@ -638,16 +638,29 @@ class ZsigaOrchestrator:
                         "judge", self.config.llm.api_key, self.config.llm.model,
                         self.config.llm.base_url, self.config.llm.proxy,
                     )
+                    from ..agent.tools import register_tools as _reg_tools
+                    _reg_tools(judge_agent, target_path, transport=transport)
+                    judge_prompt = (
+                        f"你是 Judge（裁判）。评审以下 spec 的质量。"
+                        f"\n\nSpec 目录: {change_dir}/specs/"
+                        f"\nProposal: {change_dir}/proposal.md"
+                        f"\n项目根目录: {target_path}"
+                        "\n\n请阅读每个 spec 文件，检查："
+                        "\n1) 是否覆盖了 proposal 的所有需求"
+                        "\n2) 验收标准是否明确可测"
+                        "\n3) 技术方案是否可行"
+                        "\n\n输出格式："
+                        "\n## Design Gate Verdict: PASS 或 FAIL"
+                        "\n## 评分"
+                        "\n## 详细意见"
+                    )
                     judge_result = await _run_sub(
-                        judge_agent, target_path, transport,
-                        f"评审 {change_dir}/specs/ 下的所有 spec 文件。"
-                        f"proposal 在 {change_dir}/proposal.md。"
-                        f"项目根目录: {target_path}。",
+                        judge_agent, target_path, transport, judge_prompt,
                         max_turns=self.config.pipeline.design_gate_max_turns,
                         timeout_seconds=self.config.pipeline.design_gate_timeout,
                     )
                     judge_content = judge_result.content.upper()
-                    if "DESIGN GATE VERDICT: PASS" in judge_content:
+                    if "VERDICT: PASS" in judge_content or "GATE PASS" in judge_content:
                         print(f"  🏛️ Design Gate PASS (attempt {design_gate_retries + 1})")
                         break
                     else:

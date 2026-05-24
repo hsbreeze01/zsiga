@@ -47,7 +47,13 @@ def create_with_role(
     proxy: str = None,
     provider: str = "zhipuai",
 ) -> AgentLoop:
-    r = Role(role)
+    try:
+        r = Role(role)
+    except ValueError:
+        try:
+            r = Role[role.upper()]
+        except KeyError:
+            raise ValueError(f"'{role}' is not a valid Role") from None
     config = get_role_config(r)
     agent = create_sub_agent(api_key, model, base_url, proxy, provider=provider)
     agent._role_config = config
