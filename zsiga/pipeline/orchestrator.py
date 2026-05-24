@@ -404,7 +404,6 @@ class ZsigaOrchestrator:
                 )
                 if gate_result.verdict == GateVerdict.REJECT:
                     print(f"  🛡️ Proposal REJECTED by Steward (score {gate_result.score}/8)")
-                    from ..memory.learn import record_lesson
                     _save_steward_review(change_name, gate_result.review_text, transport)
                     record_lesson(
                         title=f"STEWARD REJECT: {change_name}",
