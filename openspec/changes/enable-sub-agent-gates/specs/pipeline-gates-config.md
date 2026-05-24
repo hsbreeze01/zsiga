@@ -1,110 +1,181 @@
 # Pipeline Gates Configuration
 
+Describes the configuration delta for enabling Proposal Gate and Design Gate
+in `zsiga.yaml`. All scenarios are mechanically testable via YAML parsing.
+
+> **Implementation dependency note**: The gate config blocks defined here are
+> consumed by Python code (orchestrator / gates module). If no consuming code
+> exists, these config entries are inert. The clarify phase flagged this as a
+> high-severity risk. The scenarios below verify structural correctness only;
+> runtime enforcement is specified separately in `gate-runtime-behavior.md`.
+
 ## ADDED Requirements
 
 ### Requirement: Proposal Gate Configuration Block
 
-zsiga.yaml 的 pipeline 节 SHALL 包含 `proposal_gate` 配置块，且 `enabled` 值为 `true`。
+The `pipeline` section of `zsiga.yaml` SHALL contain a `proposal_gate` mapping
+with exactly 7 keys, all with deterministic scalar values.
 
-proposal_gate MUST 包含以下全部 7 个字段：
-- `enabled`: true
-- `max_retries`: 1
-- `steward_max_turns`: 3
-- `steward_timeout`: 90
-- `score_accept`: 6
-- `score_pushback`: 3
-- `learning_weight_days`: 90
+| Key                  | Type    | Value |
+|----------------------|---------|-------|
+| `enabled`            | bool    | true  |
+| `max_retries`        | int     | 1     |
+| `steward_max_turns`  | int     | 3     |
+| `steward_timeout`    | int     | 90    |
+| `score_accept`       | int     | 6     |
+| `score_pushback`     | int     | 3     |
+| `learning_weight_days`| int    | 90    |
 
-#### Scenario: proposal_gate block exists with all required fields
-
-- **testable**: true
-- **target**: zsiga.yaml
-- **Given** zsiga.yaml is loaded as YAML
-- **When** the `pipeline` key is accessed
-- **Then** `pipeline.proposal_gate` is a dict containing exactly the keys `enabled`, `max_retries`, `steward_max_turns`, `steward_timeout`, `score_accept`, `score_pushback`, `learning_weight_days` with the specified values
-
-#### Scenario: proposal_gate is enabled
+#### Scenario: proposal-gate-block-structure
 
 - **testable**: true
 - **target**: zsiga.yaml
-- **Given** zsiga.yaml is loaded as YAML
-- **When** the `pipeline.proposal_gate.enabled` key is accessed
-- **Then** the value is `true` (boolean)
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** the `pipeline.proposal_gate` mapping is accessed
+- **Then** it is a `dict` containing exactly the keys `enabled`, `max_retries`,
+  `steward_max_turns`, `steward_timeout`, `score_accept`, `score_pushback`,
+  `learning_weight_days` with the values specified in the table above
+
+#### Scenario: proposal-gate-enabled-true
+
+- **testable**: true
+- **target**: zsiga.yaml
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** `pipeline.proposal_gate.enabled` is accessed
+- **Then** the value equals `True` (Python `bool`)
+
+#### Scenario: proposal-gate-value-types
+
+- **testable**: true
+- **target**: zsiga.yaml
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** each value in `pipeline.proposal_gate` is inspected
+- **Then** `enabled` is `bool`; all other values are `int` (not `float`, not `str`)
 
 ---
 
 ### Requirement: Design Gate Configuration Block
 
-zsiga.yaml 的 pipeline 节 SHALL 包含 `design_gate` 配置块，且 `enabled` 值为 `true`。
+The `pipeline` section of `zsiga.yaml` SHALL contain a `design_gate` mapping
+with exactly 4 keys.
 
-design_gate MUST 包含以下全部 4 个字段：
-- `enabled`: true
-- `max_retries`: 2
-- `max_turns`: 4
-- `timeout`: 120
+| Key           | Type    | Value |
+|---------------|---------|-------|
+| `enabled`     | bool    | true  |
+| `max_retries` | int     | 2     |
+| `max_turns`   | int     | 4     |
+| `timeout`     | int     | 120   |
 
-#### Scenario: design_gate block exists with all required fields
-
-- **testable**: true
-- **target**: zsiga.yaml
-- **Given** zsiga.yaml is loaded as YAML
-- **When** the `pipeline` key is accessed
-- **Then** `pipeline.design_gate` is a dict containing exactly the keys `enabled`, `max_retries`, `max_turns`, `timeout` with the specified values
-
-#### Scenario: design_gate is enabled
+#### Scenario: design-gate-block-structure
 
 - **testable**: true
 - **target**: zsiga.yaml
-- **Given** zsiga.yaml is loaded as YAML
-- **When** the `pipeline.design_gate.enabled` key is accessed
-- **Then** the value is `true` (boolean)
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** the `pipeline.design_gate` mapping is accessed
+- **Then** it is a `dict` containing exactly the keys `enabled`, `max_retries`,
+  `max_turns`, `timeout` with the values specified in the table above
+
+#### Scenario: design-gate-enabled-true
+
+- **testable**: true
+- **target**: zsiga.yaml
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** `pipeline.design_gate.enabled` is accessed
+- **Then** the value equals `True` (Python `bool`)
+
+#### Scenario: design-gate-value-types
+
+- **testable**: true
+- **target**: zsiga.yaml
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** each value in `pipeline.design_gate` is inspected
+- **Then** `enabled` is `bool`; all other values are `int` (not `float`, not `str`)
 
 ---
 
 ### Requirement: Existing Pipeline Config Preservation
 
-添加 proposal_gate 和 design_gate 后，pipeline 节中所有现有配置项 MUST 保持不变。
+Adding `proposal_gate` and `design_gate` MUST NOT alter any pre-existing
+pipeline configuration keys.
 
-#### Scenario: existing pipeline fields unchanged after gate addition
+#### Scenario: existing-pipeline-scalars-unchanged
 
 - **testable**: true
 - **target**: zsiga.yaml
-- **Given** zsiga.yaml is loaded as YAML
-- **When** the `pipeline` key is accessed
-- **Then** the following existing keys still exist with their original values: `max_changes_per_cycle` (10), `enrich_max_turns` (50), `enrich_timeout` (2400), `impl_max_turns` (60), `impl_timeout_minutes` (40), `fix_attempts` (10), `optimize_enabled` (true), `eval_fix_attempts` (3), `cycle_interval_hours` (8), `compaction.enabled` (false)
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** the `pipeline` mapping is accessed
+- **Then** the following keys retain their original values:
+  `max_changes_per_cycle` → 10, `enrich_max_turns` → 50,
+  `enrich_timeout` → 2400, `impl_max_turns` → 60,
+  `impl_timeout_minutes` → 40, `fix_attempts` → 10,
+  `optimize_enabled` → true, `eval_fix_attempts` → 3,
+  `cycle_interval_hours` → 8
+
+#### Scenario: compaction-subtree-unchanged
+
+- **testable**: true
+- **target**: zsiga.yaml
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** `pipeline.compaction` is accessed
+- **Then** it equals `{"enabled": False, "threshold_chars": 60000,
+  "keep_recent": 3, "use_llm_summary": True}`
 
 ---
 
 ### Requirement: YAML Syntax Validity
 
-修改后的 zsiga.yaml MUST 是合法的 YAML 文件，可被 Python `yaml.safe_load` 正常解析，不引发异常。
+The modified `zsiga.yaml` MUST be well-formed YAML with no duplicate keys,
+parseable by Python `yaml.safe_load` without warnings or exceptions.
 
-#### Scenario: zsiga.yaml is valid YAML
+#### Scenario: yaml-safe-load-succeeds
 
 - **testable**: true
 - **target**: zsiga.yaml
-- **Given** zsiga.yaml file exists at project root
-- **When** the file is parsed with `yaml.safe_load`
-- **Then** no exception is raised and the result is a dict with top-level key `pipeline`
+- **Given** the file `zsiga.yaml` exists at project root
+- **When** it is parsed with `yaml.safe_load()`
+- **Then** no exception is raised and the result is a `dict` with a
+  top-level `pipeline` key
+
+#### Scenario: yaml-roundtrip-preserves-gates
+
+- **testable**: true
+- **target**: zsiga.yaml
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** the loaded dict is dumped with `yaml.dump()` and re-loaded
+  with `yaml.safe_load()`
+- **Then** `pipeline.proposal_gate.enabled` is `True` and
+  `pipeline.design_gate.enabled` is `True`
+
+#### Scenario: no-duplicate-yaml-keys
+
+- **testable**: true
+- **target**: zsiga.yaml
+- **Given** the raw text of `zsiga.yaml`
+- **When** each mapping block is scanned for duplicate keys
+- **Then** no mapping block contains the same key name more than once
+  (YAML 1.1 spec: duplicate keys are an error)
 
 ---
 
 ### Requirement: Rollback Capability
 
-将 `proposal_gate.enabled` 或 `design_gate.enabled` 改回 `false` SHALL 立即禁用对应的 gate，无需修改任何 Python 代码。
+Each gate's `enabled` flag SHALL be independently toggleable to `false`
+without affecting other configuration.
 
-#### Scenario: setting proposal_gate.enabled to false disables proposal gate
-
-- **testable**: true
-- **target**: zsiga.yaml
-- **Given** zsiga.yaml is loaded as YAML
-- **When** `pipeline.proposal_gate.enabled` is set to `false` and the config is re-loaded
-- **Then** the value of `pipeline.proposal_gate.enabled` is `false`
-
-#### Scenario: setting design_gate.enabled to false disables design gate
+#### Scenario: proposal-gate-can-be-disabled
 
 - **testable**: true
 - **target**: zsiga.yaml
-- **Given** zsiga.yaml is loaded as YAML
-- **When** `pipeline.design_gate.enabled` is set to `false` and the config is re-loaded
-- **Then** the value of `pipeline.design_gate.enabled` is `false`
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** `pipeline.proposal_gate.enabled` is set to `False` in a deep copy
+- **Then** `pipeline.proposal_gate.enabled` in the copy is `False` and all
+  other gate fields remain unchanged
+
+#### Scenario: design-gate-can-be-disabled
+
+- **testable**: true
+- **target**: zsiga.yaml
+- **Given** zsiga.yaml is loaded via `yaml.safe_load()`
+- **When** `pipeline.design_gate.enabled` is set to `False` in a deep copy
+- **Then** `pipeline.design_gate.enabled` in the copy is `False` and all
+  other gate fields remain unchanged
