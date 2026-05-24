@@ -38,6 +38,9 @@ class PhaseRecord:
     model: str = "glm-5.1"
     provider: str = "zhipuai"
     failure_category: str = ""
+    layer1_active: bool = False
+    layer1_passed: bool = False
+    layer1_scenarios: int = 0
 
     def to_dict(self) -> dict:
         d = {
