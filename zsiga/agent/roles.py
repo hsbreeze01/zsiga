@@ -296,7 +296,7 @@ _ROLES: dict[Role, RoleConfig] = {
         name="steward",
         max_turns=3,
         read_only=True,
-        allowed_tools=["read_file", "search", "list_files"],
+        allowed_tools=["bash", "read_file", "search", "list_files"],
         system_prompt=_STEWARD_PROMPT,
     ),
     Role.CRITIC: RoleConfig(

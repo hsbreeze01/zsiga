@@ -36,6 +36,18 @@ from .github_issue import create_issue, extract_github_repo
 from .project_context import build_project_context, prefetch_mechanical
 
 
+
+def _save_steward_review(change_name: str, review_text: str, transport):
+    """Save steward review to data/ so it survives git reset_hard."""
+    import os
+    save_dir = "data/steward-reviews"
+    os.makedirs(save_dir, exist_ok=True)
+    path = f"{save_dir}/{change_name}.md"
+    with open(path, "w") as f:
+        f.write(review_text)
+    print(f"  🛡️ Steward review saved to {path}")
+
+
 class ZsigaOrchestrator:
 
     def __init__(self, config: ZsigaConfig):
@@ -393,10 +405,11 @@ class ZsigaOrchestrator:
                 if gate_result.verdict == GateVerdict.REJECT:
                     print(f"  🛡️ Proposal REJECTED by Steward (score {gate_result.score}/8)")
                     from ..memory.learn import record_lesson
+                    _save_steward_review(change_name, gate_result.review_text, transport)
                     record_lesson(
                         title=f"STEWARD REJECT: {change_name}",
                         context=f"score={gate_result.score}/8, project={project_name}",
-                        takeaway=f"Steward rejected: {gate_result.review_text[:200]}",
+                        takeaway=gate_result.review_text[:1500],
                         pattern_key="proposal_gate.reject",
                         source="steward",
                     )
@@ -404,7 +417,14 @@ class ZsigaOrchestrator:
                     return False
                 elif gate_result.verdict == GateVerdict.PUSHBACK:
                     print(f"  🛡️ Proposal PUSHED BACK by Steward (score {gate_result.score}/8)")
-                    print(f"  🛡️ See {change_dir}/steward-review.md for details")
+                    _save_steward_review(change_name, gate_result.review_text, transport)
+                    record_lesson(
+                        title=f"STEWARD PUSHBACK: {change_name}",
+                        context=f"score={gate_result.score}/8, project={project_name}",
+                        takeaway=gate_result.review_text[:1500],
+                        pattern_key="proposal_gate.pushback",
+                        source="steward",
+                    )
                     rec.outcome = Outcome.SKIPPED
                     return False
                 else:
