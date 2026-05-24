@@ -6,7 +6,7 @@
     "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
   ],
   "pytest_exit_code": 0,
-  "pytest_output": ".........                                                                [100%]\n9 passed in 0.20s\n",
+  "pytest_output": ".........                                                                [100%]\n9 passed in 0.22s\n",
   "pytest_stderr": "",
   "warning": ""
 }
