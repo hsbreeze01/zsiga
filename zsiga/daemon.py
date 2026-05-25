@@ -351,6 +351,108 @@ def _health_check(db_path: str) -> dict:
             conn.close()
 
 
+
+
+def _build_pipeline_status(db_path: str, base_path: str) -> dict:
+    """Build real-time pipeline status for the active proposal.
+
+    Combines daemon_state, phase_state file, and DB records to show
+    detailed phase-by-phase progress.
+    """
+    import glob as _glob
+
+    ALL_PHASES = ["PROPOSAL_GATE", "CLARIFY", "ENRICH", "DESIGN_GATE",
+                  "IMPLEMENT", "REVIEW", "VERIFY", "OPTIMIZE", "REFLECT", "DELIVER"]
+
+    result = {"active_proposal": None, "current_phase": None,
+              "phase_progress": [], "design_gate_attempts": 0,
+              "judge_feedback": None, "queue": [], "daemon": {}}
+
+    # 1. Daemon state
+    ds = _read_daemon_state()
+    result["daemon"] = {
+        "state": ds.get("state", "unknown"),
+        "cycle": ds.get("cycle", 0),
+        "uptime_seconds": (datetime.now() - datetime.fromisoformat(ds["started_at"])).total_seconds() if ds.get("started_at") else 0,
+        "total_changes_processed": ds.get("total_changes_processed", 0),
+    }
+    current = ds.get("current_change")
+
+    # 2. Scan active proposals from openspec/changes/
+    changes_dir = Path(base_path) / "openspec" / "changes"
+    if changes_dir.exists():
+        for d in sorted(changes_dir.iterdir()):
+            if not d.is_dir() or d.name == "archive":
+                continue
+            pm = d / "proposal.md"
+            if not pm.exists():
+                continue
+            name = d.name
+            ps_file = d / ".phase_state"
+            phase_state = {}
+            if ps_file.exists():
+                try:
+                    phase_state = json.loads(ps_file.read_text())
+                except Exception:
+                    pass
+            is_active = (current is not None and name == current) or (current is None and phase_state.get("current_phase"))
+            result["queue"].append({
+                "name": name,
+                "current_phase": phase_state.get("current_phase"),
+                "started_at": phase_state.get("started_at"),
+                "is_active": is_active,
+            })
+            if is_active and result["active_proposal"] is None:
+                result["active_proposal"] = name
+                result["current_phase"] = phase_state.get("current_phase")
+
+    # 3. DB phases_json for completed phases
+    active_name = result["active_proposal"]
+    if active_name:
+        try:
+            conn = sqlite3.connect(db_path, timeout=2)
+            conn.row_factory = sqlite3.Row
+            cur = conn.execute(
+                "SELECT phases_json FROM changes WHERE change_name = ? ORDER BY id DESC LIMIT 1",
+                (active_name,))
+            row = cur.fetchone()
+            if row and row["phases_json"]:
+                phases = json.loads(row["phases_json"])
+                completed_phases = {p["phase"].upper(): p for p in phases}
+            else:
+                completed_phases = {}
+            conn.close()
+        except Exception:
+            completed_phases = {}
+
+        # 4. Build phase progress
+        for phase in ALL_PHASES:
+            if phase in completed_phases:
+                p = completed_phases[phase]
+                entry = {"phase": phase, "status": "PASS" if p.get("outcome") == "success" else p.get("outcome", "DONE"),
+                         "duration_s": round(p.get("seconds_used", 0), 1),
+                         "llm_calls": p.get("llm_calls", 0),
+                         "tokens": p.get("prompt_tokens", 0) + p.get("completion_tokens", 0)}
+                if phase == "PROPOSAL_GATE" and p.get("detail"):
+                    entry["score"] = p["detail"]
+                result["phase_progress"].append(entry)
+            elif phase == result["current_phase"].upper() if result["current_phase"] else False:
+                elapsed = 0
+                ps_data = {}
+                ps_file = changes_dir / active_name / ".phase_state"
+                if ps_file.exists():
+                    try:
+                        ps_data = json.loads(ps_file.read_text())
+                        if ps_data.get("started_at"):
+                            elapsed = round((datetime.now() - datetime.fromisoformat(ps_data["started_at"])).total_seconds(), 1)
+                    except Exception:
+                        pass
+                result["phase_progress"].append({"phase": phase, "status": "RUNNING", "elapsed_s": elapsed})
+            else:
+                result["phase_progress"].append({"phase": phase, "status": "PENDING"})
+
+    return result
+
 def _build_proposal_stats_json(db_path: str) -> dict:
     """Query the changes table and return aggregate statistics.
 
@@ -459,6 +561,11 @@ def _serve_dashboard(port: int):
                     self._send_json(json.dumps(result), status=200)
                 else:
                     self._send_json(json.dumps(result), status=503)
+            elif self.path == "/api/pipeline-status":
+                from .metrics.db import _DB_PATH
+                home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+                result = _build_pipeline_status(str(_DB_PATH), home)
+                self._send_json(json.dumps(result))
             elif self.path == "/api/proposal-stats":
                 from .metrics.db import _DB_PATH
                 result = _build_proposal_stats_json(str(_DB_PATH))
