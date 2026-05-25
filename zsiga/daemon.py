@@ -438,6 +438,8 @@ def _build_pipeline_status(db_path: str, base_path: str) -> dict:
                 if phase == "PROPOSAL_GATE" and p.get("detail"):
                     entry["score"] = p["detail"]
                 result["phase_progress"].append(entry)
+            elif phase == "PROPOSAL_GATE" and normalized:
+                result["phase_progress"].append({"phase": phase, "status": "PASS"})
             elif phase == result["current_phase"].upper() if result["current_phase"] else False:
                 elapsed = 0
                 ps_data = {}
