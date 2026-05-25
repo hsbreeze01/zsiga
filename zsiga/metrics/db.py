@@ -25,10 +25,6 @@ CREATE TABLE IF NOT EXISTS changes (
     created_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now'))
 );
 
-ALTER TABLE changes ADD COLUMN steward_verdict TEXT DEFAULT '';
-ALTER TABLE changes ADD COLUMN steward_score INTEGER DEFAULT -1;
-ALTER TABLE changes ADD COLUMN skip_reason TEXT DEFAULT '';
-
 CREATE TABLE IF NOT EXISTS journal (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     ts              TEXT NOT NULL,
@@ -128,7 +124,23 @@ def _get_conn(db_path: Optional[Path] = None) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     conn.executescript(_SCHEMA)
+    _migrate(conn)
     return conn
+
+
+_MIGRATIONS = [
+    ("steward_verdict", "ALTER TABLE changes ADD COLUMN steward_verdict TEXT DEFAULT ''"),
+    ("steward_score", "ALTER TABLE changes ADD COLUMN steward_score INTEGER DEFAULT -1"),
+    ("skip_reason", "ALTER TABLE changes ADD COLUMN skip_reason TEXT DEFAULT ''"),
+]
+
+
+def _migrate(conn: sqlite3.Connection):
+    existing = {r[1] for r in conn.execute("PRAGMA table_info(changes)").fetchall()}
+    for col_name, sql in _MIGRATIONS:
+        if col_name not in existing:
+            conn.execute(sql)
+    conn.commit()
 
 
 # ── Changes ──────────────────────────────────────────────────
