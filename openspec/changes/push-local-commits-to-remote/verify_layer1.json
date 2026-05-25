@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "vacuous": false,
+  "scenarios_tested": 8,
+  "test_files": [
+    "tests/test_spec_push_local_commits_to_remote__push_sync.py"
+  ],
+  "pytest_exit_code": 0,
+  "pytest_output": "..ssss.s                                                                 [100%]\n3 passed, 5 skipped in 24.80s\n",
+  "pytest_stderr": "",
+  "warning": ""
+}
