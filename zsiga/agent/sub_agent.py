@@ -68,6 +68,7 @@ async def run_sub_agent(
     max_turns: int = 15,
     timeout_seconds: int = 600,
 ) -> SubAgentResult:
+    from .langfuse_shim import sub_agent_span
     register_tools(agent, target_path, transport=transport)
     role_config = getattr(agent, "_role_config", None)
 
@@ -76,11 +77,14 @@ async def run_sub_agent(
         effective_max_turns = min(max_turns, role_config.max_turns)
         system_prompt = role_config.system_prompt
         agent.set_phase(f"sub-agent:{role_config.name}")
+        span_cm = sub_agent_span(role_config.name)
     else:
         effective_max_turns = max_turns
         system_prompt = "你是 zsiga 的子 agent。精确执行分配给你的任务，完成后简洁报告结果。"
         agent.set_phase("sub-agent")
+        span_cm = sub_agent_span("default")
 
+    _span = span_cm.__enter__()
     start = time.monotonic()
     result = await agent.run(
         system_prompt=system_prompt,
@@ -91,6 +95,7 @@ async def run_sub_agent(
     elapsed = time.monotonic() - start
 
     success = result.content not in ("TIMEOUT", "MAX_TURNS_REACHED")
+    if _span: _span.__exit__(None, None, None)
 
     return SubAgentResult(
         content=result.content,
