@@ -1,86 +1,67 @@
-# cleanup-stale-test-files — 需求契约
-
 ## 需求拆解
 
 ### 原始需求
-删除 `tests/` 目录下所有 `test_spec_*` 文件（共 26 个），这些文件由已归档或已删除 proposal 的 VERIFY 阶段生成，污染每次新 proposal 的全量测试运行。
+从 tests/ 目录中删除所有属于已归档或已删除 proposal 的 test_spec_* 测试文件。这些残留文件会在每个新 proposal 的 VERIFY 阶段被 pytest 一并加载运行，造成干扰和性能浪费。
 
 ### 拆解后的子任务
-- [ ] 1. 删除已归档 proposal 的 test_spec_* 文件（预估复杂度：低, 预估 token：~1200 / 无历史参考）
-  - `test_spec_add_health_check_endpoint__health_check_endpoint.py`
-  - `test_spec_add_health_check_endpoint__health_check.py`
-  - `test_spec_add_proposal_stats_to_dashboard__proposal_stats_endpoint.py`
-  - `test_spec_add_uptime_to_status_api__uptime_seconds_field.py`
-  - `test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py`
-  - `test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py`
-  - `test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py`
-- [ ] 2. 删除已删除 proposal 的 test_spec_* 文件（预估复杂度：低, 预估 token：~1200 / 无历史参考）
-  - `test_spec_sre_subagent_design__sre_artifacts_learnings.py`
-  - `test_spec_sre_subagent_design__sre_intent_routing.py`
-  - `test_spec_sre_subagent_design__sre_orchestrator_integration.py`
-  - `test_spec_sre_subagent_design__sre_pipeline.py`
-  - `test_spec_sre_subagent_design__sre_role_definition.py`
-  - `test_spec_sre_subagent_design__sre_security_boundary.py`
-  - `test_spec_auto_metric_degradation_verify_pass_rate_20260521__post_implement_lint_autofix.py`
-  - `test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_classification.py`
-  - `test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_observability.py`
-  - `test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_rate_metric_script.py`
-  - `test_spec_push_local_commits_to_remote__push_sync.py`
-  - `test_spec_enable_sub_agent_gates__pipeline_gates_config.py`
-- [ ] 3. 删除旧 proposal的 test_spec_* 文件及通用 spec 基础设施测试（预估复杂度：低, 预估 token：~1200 / 无历史参考）
-  - `test_spec_fix_learnings_noise_and_inject__cleanup.py`
-  - `test_spec_fix_learnings_noise_and_inject__filter_and_inject.py`
-  - `test_spec_fix_learnings_noise_and_inject__inject_enrich.py`
-  - `test_spec_fix_learnings_noise_and_inject__inject_implement.py`
-  - `test_spec_fix_learnings_noise_and_inject__search.py`
-  - `test_spec_parser.py` ⚠️ 可能是 spec parser 基础设施测试而非 proposal 测试
-  - `test_spec_pytest_check.py` ⚠️ 可能是 pytest check 基础设施测试而非 proposal 测试
-- [ ] 4. 验证剩余测试全部通过（预估复杂度：低, 预估 token：~1000 / 无历史参考）
-  - 运行 `pytest tests/ -x` 确认无回归
+- [ ] 1. 删除已归档 proposal 对应的 test_spec_* 文件 (预估复杂度：低, 预估 token：~800 / 无历史参考)
+  - 涉及文件：test_spec_add_health_check_endpoint__*.py, test_spec_add_proposal_stats_to_dashboard__*.py, test_spec_add_uptime_to_status_api__*.py, test_spec_dashboard_add_feedback_loop_metrics__*.py（共 7 个文件）
+- [ ] 2. 删除已删除 proposal 对应的 test_spec_* 文件 (预估复杂度：低, 预估 token：~800 / 无历史参考)
+  - 涉及文件：test_spec_sre_subagent_design__*.py, test_spec_auto_metric_degradation_*__*.py, test_spec_push_local_commits_to_remote__*.py, test_spec_enable_sub_agent_gates__*.py, test_spec_fix_learnings_noise_and_inject__*.py, test_spec_unify_api_route_style__*.py（共 20 个文件）
+- [ ] 3. 验证剩余测试套件完整性 (预估复杂度：低, 预估 token：~600 / 无历史参考)
+  - 运行 pytest tests/ -x 确认所有非 spec 测试正常通过，无 import 残留或 fixture 依赖断裂
 
 ## 边界
 
 ### IN scope
-- 删除 `tests/test_spec_*` 全部 26 个文件
-- 验证删除后 `pytest tests/ -x` 通过
+- 删除 tests/ 目录下所有 test_spec_* 文件（共约 27 个文件）
+- 验证删除后剩余测试可正常通过
+- 保留 conftest_zsiga.py 及所有非 spec 测试文件不变
 
 ### OUT of scope
-- 修改任何源代码（`*.py` 非 tests 目录）
-- 修改 `conftest_zsiga.py` 或任何非 `test_spec_*` 测试文件
-- 清理其他目录下的陈旧文件
-- 修改 CI/CD 配置
+- 不修改任何源代码文件（skills/, site/ 等目录）
+- 不修改 conftest_zsiga.py 或非 spec 测试文件
+- 不清理 tests/ 以外的目录
+- 不新增任何文件或功能
+- 不处理 test_spec_cleanup_stale_test_files__stale_test_removal.py 的保留/删除决策（由 VERIFY 阶段自行管理）
 
 ### 依赖的外部条件
-- 删除文件后剩余测试不依赖被删文件中的 fixture 或 conftest 定义
-- `pytest tests/ -x` 在当前环境下可以正常运行（需测试基础设施完整）
+- git 历史保留所有被删除文件，可随时恢复
+- 剩余测试文件的 import 路径和 fixture 不依赖任何 test_spec_* 文件
 
 ## 目标
 
 ### 成功标准
-1. `tests/` 目录中不存在任何 `test_spec_*` 文件（`ls tests/test_spec_*` 返回空）
-2. `conftest_zsiga.py` 及所有非 `test_spec_*` 测试文件保持不变
-3. `pytest tests/ -x` 全部通过，无失败用例
+1. tests/ 目录中不存在任何 test_spec_* 文件
+2. conftest_zsiga.py 及所有非 spec 测试文件（test_ast_tools.py, test_compaction.py 等 ~46 个文件）保持不变
+3. `pytest tests/ -x` 执行通过，无失败用例
+4. 被删除文件可通过 `git checkout` 恢复
 
 ### 验收方式
-- `find tests/ -name 'test_spec_*' | wc -l` 输出 0
-- `git diff --name-only` 仅包含 `tests/test_spec_*.py` 文件（全部为 delete 操作）
-- `pytest tests/ -x` exit code 为 0
+- `ls tests/test_spec_* 2>/dev/null | wc -l` 返回 0
+- `git diff --stat` 仅显示 tests/ 下的文件删除（无修改）
+- `pytest tests/ -x` 全部通过
+- `git log --oneline -1` 提交信息清晰描述删除操作
 
 ## 约束
 
 ### 不能修改的文件
-- `tests/conftest_zsiga.py`
-- 所有 `tests/test_*.py` 中非 `test_spec_*` 开头的文件
-- 项目根目录下所有源代码和配置文件
+- tests/conftest_zsiga.py
+- tests/test_*.py（所有非 spec 测试文件）
+- skills/*
+- site/*
+- pyproject.toml
+- requirements.txt
 
 ### 项目部署分支
-- 未指定（由主分支策略决定）
+main
 
 ### 已知风险
-- `test_spec_parser.py` 和 `test_spec_pytest_check.py` 可能测试的是 spec 基础设施功能（spec parser / pytest checker），而非特定 proposal 的验证测试。删除前应确认这两个文件是否被其他测试间接依赖，或者是否确实属于陈旧 proposal
-- 被删文件中若定义了共享 fixture，可能导致剩余测试因缺少 fixture 而失败。需在验收阶段通过 `pytest tests/ -x` 捕获
+- 风险极低：删除的是已归档/已删除 proposal 的测试，对应功能已不在项目中
+- 若某个 test_spec_* 文件被其他非 spec 测试 import，删除可能导致 import 错误（需验证）
+- test_spec_cleanup_stale_test_files__stale_test_removal.py 是当前 proposal 自身的 VERIFY 测试，需注意其生命周期管理
 
 ### 预估 token 消耗
-- prompt: ~2000
-- completion: ~1000
+- prompt: ~4000
+- completion: ~1500
 - 数据来源: 无历史参考
