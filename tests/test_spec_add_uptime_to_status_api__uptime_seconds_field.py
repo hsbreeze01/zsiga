@@ -182,3 +182,64 @@ class TestExistingDaemonFieldsUnchanged:
         # Verify the new field is present
         assert "uptime_seconds" in d, "uptime_seconds should be present in daemon object"
         assert d["uptime_seconds"] is not None, "uptime_seconds should not be None with valid started_at"
+
+
+class TestTimezoneAwareStartedAt:
+    """Scenario: timezone-aware started_at handled correctly."""
+
+    def test_tz_aware_started_at_returns_positive_float(self):
+        """When started_at contains timezone info, uptime_seconds is a correct positive float."""
+        from datetime import timezone, timedelta
+
+        # Use a recent timestamp with UTC offset
+        aware_ts = (datetime.now(timezone.utc) - timedelta(seconds=60)).isoformat()
+        assert "+" in aware_ts or "Z" in aware_ts, f"Expected tz info in {aware_ts}"
+
+        state = {
+            "pid": 1234,
+            "state": "running",
+            "cycle": 1,
+            "started_at": aware_ts,
+            "last_heartbeat": aware_ts,
+        }
+        _write_daemon_state(state)
+        with patch("zsiga.daemon._scan_proposal_queue", return_value=[]):
+            data = json.loads(_build_status_json())
+
+        uptime = data["daemon"]["uptime_seconds"]
+        assert uptime is not None, "Should return non-None for valid tz-aware started_at"
+        assert isinstance(uptime, (int, float)), f"Expected numeric, got {type(uptime)}"
+        assert uptime >= 0, f"Expected non-negative uptime, got {uptime}"
+        # Should be roughly 60 seconds, allow generous tolerance
+        assert 50 <= uptime <= 120, f"Expected ~60s uptime for 60s-old timestamp, got {uptime}"
+
+    def test_tz_aware_and_naive_produce_similar_results(self):
+        """A tz-aware started_at and equivalent naive started_at produce similar uptime values."""
+        state_naive = {
+            "pid": 1234,
+            "state": "running",
+            "cycle": 1,
+            "started_at": datetime.now().isoformat(),
+            "last_heartbeat": "2025-01-15T10:00:00",
+        }
+        from datetime import timezone
+
+        state_aware = {
+            "pid": 1234,
+            "state": "running",
+            "cycle": 1,
+            "started_at": datetime.now(timezone.utc).isoformat(),
+            "last_heartbeat": "2025-01-15T10:00:00",
+        }
+
+        _write_daemon_state(state_naive)
+        with patch("zsiga.daemon._scan_proposal_queue", return_value=[]):
+            result_naive = json.loads(_build_status_json())["daemon"]["uptime_seconds"]
+
+        _write_daemon_state(state_aware)
+        with patch("zsiga.daemon._scan_proposal_queue", return_value=[]):
+            result_aware = json.loads(_build_status_json())["daemon"]["uptime_seconds"]
+
+        assert result_naive is not None and result_aware is not None
+        diff = abs(result_naive - result_aware)
+        assert diff < 5, f"Naive and aware results differ by {diff}s, expected < 5s"
