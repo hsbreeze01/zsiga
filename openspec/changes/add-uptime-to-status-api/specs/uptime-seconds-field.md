@@ -2,50 +2,57 @@
 
 ## ADDED Requirements
 
-### Requirement: uptime_seconds in daemon status response
+### Requirement: daemon status SHALL include uptime_seconds
 
-The `_build_status_json` function SHALL include an `uptime_seconds` field in the `daemon` object of the status JSON payload.
+The `_build_status_json` function in `zsiga/daemon.py` SHALL compute and include an
+`uptime_seconds` field in the `daemon` object returned by `/api/status.json`.
 
-The value SHALL be calculated as the elapsed wall-clock seconds between the current time and the `started_at` ISO timestamp read from daemon state. The result SHALL be rounded to one decimal place.
+The value SHALL be derived from the existing `started_at` ISO timestamp stored in
+`daemon_state.json`. The calculation SHALL use `time.time() - parsed_timestamp`,
+rounded to one decimal place.
 
-When `started_at` is absent or cannot be parsed as an ISO timestamp, the value SHALL be `null` (Python `None`, serialized as JSON `null`).
+When `started_at` is absent, empty, or cannot be parsed as an ISO datetime,
+`uptime_seconds` SHALL be `null` (JSON `null` / Python `None`).
+
+No new module-level variables or imports SHALL be introduced. The `time` module is
+already imported.
 
 #### Scenario: uptime_seconds present with valid started_at
 
 - **testable**: true
 - **target**: zsiga/daemon.py::_build_status_json
-- **Given** the daemon state contains a valid `started_at` ISO timestamp (e.g. `"2025-06-01T12:00:00"`)
-- **When** `_build_status_json` is called
-- **Then** the parsed response `daemon` object contains `uptime_seconds` as a positive float, rounded to 1 decimal place
-
-#### Scenario: uptime_seconds is null when started_at is missing
-
-- **testable**: true
-- **target**: zsiga/daemon.py::_build_status_json
-- **Given** the daemon state has no `started_at` key
-- **When** `_build_status_json` is called
-- **Then** the parsed response `daemon` object contains `uptime_seconds` with value `null`
-
-#### Scenario: uptime_seconds is null when started_at is unparseable
-
-- **testable**: true
-- **target**: zsiga/daemon.py::_build_status_json
-- **Given** the daemon state contains `started_at` with a value that is not a valid ISO timestamp (e.g. `"garbage"`)
-- **When** `_build_status_json` is called
-- **Then** the parsed response `daemon` object contains `uptime_seconds` with value `null`
+- **Given** `daemon_state.json` contains a valid `started_at` ISO timestamp (e.g. `"2025-06-01T12:00:00"`)
+- **When** `_build_status_json()` is called
+- **Then** the returned JSON `daemon` object SHALL contain `"uptime_seconds"` with a positive numeric value rounded to 1 decimal place
 
 #### Scenario: uptime_seconds increases between consecutive calls
 
 - **testable**: true
 - **target**: zsiga/daemon.py::_build_status_json
-- **Given** the daemon state contains a valid `started_at` ISO timestamp in the recent past
-- **When** `_build_status_json` is called twice with a short delay between calls
-- **Then** the second `uptime_seconds` value is strictly greater than the first
+- **Given** `daemon_state.json` contains a valid `started_at` in the recent past
+- **When** `_build_status_json()` is called twice with a short time interval between calls
+- **Then** the second `uptime_seconds` value SHALL be strictly greater than the first
+
+#### Scenario: uptime_seconds null when started_at is missing
+
+- **testable**: true
+- **target**: zsiga/daemon.py::_build_status_json
+- **Given** `daemon_state.json` does not contain a `started_at` key, or the file does not exist
+- **When** `_build_status_json()` is called
+- **Then** the returned JSON `daemon` object SHALL contain `"uptime_seconds": null`
+
+#### Scenario: uptime_seconds null when started_at is unparseable
+
+- **testable**: true
+- **target**: zsiga/daemon.py::_build_status_json
+- **Given** `daemon_state.json` contains a `started_at` value that is not a valid ISO datetime (e.g. `""`, `"garbage"`, `"not-a-date"`)
+- **When** `_build_status_json()` is called
+- **Then** the returned JSON `daemon` object SHALL contain `"uptime_seconds": null` and SHALL NOT raise an exception
 
 #### Scenario: existing daemon fields remain unchanged
 
 - **testable**: true
 - **target**: zsiga/daemon.py::_build_status_json
-- **Given** the daemon state contains `pid`, `state`, `cycle`, `current_change`, `current_phase`, `current_project`, and `last_heartbeat`
-- **When** `_build_status_json` is called
-- **Then** the parsed response `daemon` object contains all pre-existing fields (`pid`, `state`, `cycle`, `current_change`, `current_phase`, `current_project`, `heartbeat`) with their expected values, in addition to `uptime_seconds`
+- **Given** `daemon_state.json` contains all standard fields (`pid`, `state`, `cycle`, `current_change`, `current_phase`, `current_project`, `last_heartbeat`)
+- **When** `_build_status_json()` is called
+- **Then** all pre-existing fields in the `daemon` object SHALL retain their original values, and `uptime_seconds` SHALL be present as an additional field
