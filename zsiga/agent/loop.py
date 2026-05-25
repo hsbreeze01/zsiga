@@ -179,6 +179,24 @@ class AgentLoop:
                 completion_tokens_total += getattr(resp.usage, "completion_tokens", 0) or 0
             _ = (time.monotonic() - t_llm) * 1000
 
+            try:
+                from .langfuse_shim import llm_generation
+                _msg = resp.choices[0].message if resp.choices else None
+                with llm_generation(f"turn-{llm_calls_total}", model=self.model) as _gen:
+                    if _gen is not None:
+                        _gen.update(
+                            input=str(messages[-1])[:2000] if messages else None,
+                            output=_msg.content[:2000] if _msg and _msg.content else None,
+                            usage={
+                                "input": getattr(resp.usage, "prompt_tokens", 0) or 0,
+                                "output": getattr(resp.usage, "completion_tokens", 0) or 0,
+                                "total": (getattr(resp.usage, "prompt_tokens", 0) or 0)
+                                         + (getattr(resp.usage, "completion_tokens", 0) or 0),
+                            },
+                        )
+            except Exception:
+                pass
+
             # Budget enforcement after recording token usage
             if resp.usage:
                 budget_status = self.budget.record(

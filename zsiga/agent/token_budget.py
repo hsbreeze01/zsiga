@@ -3,35 +3,6 @@
 from ..agent.intent_router import IntentType
 
 
-def select_budget_profile(
-    intent_type: IntentType,
-    project: str,
-    is_cross_project: bool,
-    profiles: dict[str, int],
-) -> tuple[str, int]:
-    """Select a budget profile based on intent, project, and cross-project flag.
-
-    Rules evaluated in order:
-    1. cross_project sub-task → "cross_project" profile
-    2. target project is "zsiga" → "self_modify" profile
-    3. intent type is FIX → "fix" profile
-    4. otherwise → "implementation" profile
-
-    Returns (profile_name, total_budget).
-    """
-    if is_cross_project:
-        name = "cross_project"
-    elif project == "zsiga":
-        name = "self_modify"
-    elif intent_type == IntentType.FIX:
-        name = "fix"
-    else:
-        name = "implementation"
-
-    total_budget = profiles.get(name, 600000)
-    return name, total_budget
-
-
 class TokenBudget:
     """Tracks cumulative token usage and enforces budget limits.
 
