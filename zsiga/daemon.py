@@ -332,6 +332,24 @@ def _build_current_json() -> str:
     }, ensure_ascii=False)
 
 
+def _health_check(db_path: str) -> dict:
+    """Perform a lightweight liveness probe against the SQLite database.
+
+    Returns ``{"status": "healthy", "db_records": <int>}`` on success or
+    ``{"status": "unhealthy", "error": "<message>"}`` on any failure.
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(db_path, timeout=2)
+        count = conn.execute("SELECT COUNT(*) FROM changes").fetchone()[0]
+        return {"status": "healthy", "db_records": count}
+    except Exception as exc:
+        return {"status": "unhealthy", "error": str(exc)}
+    finally:
+        if conn is not None:
+            conn.close()
+
+
 def _build_proposal_stats_json(db_path: str) -> dict:
     """Query the changes table and return aggregate statistics.
 
@@ -430,6 +448,16 @@ def _serve_dashboard(port: int):
                 self._send_json(_build_metrics_json())
             elif self.path == "/api/current.json":
                 self._send_json(_build_current_json())
+            elif self.path == "/api/health":
+                from .metrics.db import _DB_PATH
+                result = _health_check(str(_DB_PATH))
+                if result["status"] == "healthy":
+                    result["timestamp"] = datetime.utcnow().strftime(
+                        "%Y-%m-%dT%H:%M:%SZ"
+                    )
+                    self._send_json(json.dumps(result), status=200)
+                else:
+                    self._send_json(json.dumps(result), status=503)
             elif self.path == "/api/proposal-stats":
                 from .metrics.db import _DB_PATH
                 result = _build_proposal_stats_json(str(_DB_PATH))
