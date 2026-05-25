@@ -11,6 +11,12 @@ TESTS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = TESTS_DIR.parent
 THIS_FILE = Path(__file__).resolve().name
 
+# Non-stale test_spec_* files that test real project code and must be kept
+NON_STALE_SPEC_FILES = {
+    "test_spec_parser.py",
+    "test_spec_pytest_check.py",
+}
+
 # Known stale proposal prefixes that MUST be gone
 STALE_PREFIXES = [
     "test_spec_add_health_check_endpoint__",
@@ -48,6 +54,8 @@ def test_no_stale_test_spec_files_remain():
     remaining = []
     for f in sorted(TESTS_DIR.glob("test_spec_*.py")):
         if f.name == THIS_FILE:
+            continue
+        if f.name in NON_STALE_SPEC_FILES:
             continue
         remaining.append(f.name)
     assert remaining == [], (
