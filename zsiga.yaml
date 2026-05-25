@@ -73,6 +73,8 @@ targets:
     test_cmd: "venv/bin/python -m pytest -x --tb=short"
     lint_cmd: "venv/bin/python -m ruff check ."
     deploy_branch: zsiga-l5-autonomous-engineer
+    merge_to_branches:
+      - main
     transport: local
 
 intake:

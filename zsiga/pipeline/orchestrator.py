@@ -1248,6 +1248,23 @@ class ZsigaOrchestrator:
             except RuntimeError:
                 print(f"  ⚠ Tag push failed (non-blocking)")
 
+            # Merge to additional branches (e.g. main) — best-effort
+            extra_branches = project_config.merge_to_branches
+            for extra_branch in extra_branches:
+                try:
+                    git_ops.checkout(target_path, extra_branch, transport=transport)
+                    git_ops.pull(target_path, branch=extra_branch, transport=transport)
+                    git_ops.merge_branch(target_path, deploy_branch, transport=transport)
+                    git_ops.push(target_path, branch=extra_branch, transport=transport)
+                    print(f"  ✅ Merged {deploy_branch} into {extra_branch} and pushed")
+                except RuntimeError as e:
+                    print(f"  ⚠ Merge into {extra_branch} failed (non-blocking): {e}")
+                # Switch back to deploy branch for cleanup
+                try:
+                    git_ops.checkout(target_path, deploy_branch, transport=transport)
+                except RuntimeError:
+                    pass
+
             # Best-effort branch cleanup
             try:
                 git_ops.delete_branch(target_path, feature_branch, transport=transport)

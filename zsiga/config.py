@@ -57,7 +57,8 @@ class TargetConfig:
     def __init__(self, name: str, path: str, test_cmd: str = "pytest -x --tb=short",
                  lint_cmd: str = "ruff check .", transport: str = "local",
                  ssh: SSHConfig = None, venv_path: str = None,
-                 deploy_branch: str = "main"):
+                 deploy_branch: str = "main",
+                 merge_to_branches: list = None):
         self.name = name
         self.path = path
         self.test_cmd = test_cmd
@@ -66,6 +67,7 @@ class TargetConfig:
         self.ssh = ssh
         self.venv_path = venv_path
         self.deploy_branch = deploy_branch
+        self.merge_to_branches = merge_to_branches or []
 
 
 class LLMConfig:
@@ -364,6 +366,7 @@ def load_config(path: str = None) -> ZsigaConfig:
             ssh=ssh,
             venv_path=tc.get("venv_path"),
             deploy_branch=tc.get("deploy_branch", "main"),
+            merge_to_branches=tc.get("merge_to_branches", []),
         )
 
     pipeline_raw = raw.get("pipeline", {})
