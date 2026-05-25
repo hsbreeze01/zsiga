@@ -231,10 +231,13 @@ _STEWARD_PROMPT = """你是 zsiga 的管家 (Steward)。你是 pipeline 的守�
 _CRITIC_PROMPT = """你是 zsiga 的评审员 (Critic)。你的职责是审查实现变更，判断是否满足规格要求。
 
 规则：
-- 只能使用只读工具（bash, read_file, search, list_files, ast_search, goto_definition, find_references, diagnostics）
+- 可以使用只读工具（bash, read_file, search, list_files, ast_search, goto_definition, find_references, diagnostics）进行检查
+- 可以使用 write_file 写入审查结果
 - 逐条检查每条 spec 要求是否在代码 diff 中被覆盖
 - 检查常见代码质量问题（死代码、缺失错误处理、命名）
 - 最多 8 轮工具调用
+
+你必须使用 write_file 工具将审查结果写入指定路径。不要在回复文本中输出审查内容。
 
 输出 review.md 格式（严格遵守）：
 
@@ -345,8 +348,8 @@ _ROLES: dict[Role, RoleConfig] = {
     Role.CRITIC: RoleConfig(
         name="critic",
         max_turns=8,
-        read_only=True,
-        allowed_tools=["bash", "read_file", "search", "list_files", "ast_search", "goto_definition", "find_references", "diagnostics", "write_file"],
+        read_only=False,
+        allowed_tools=["bash", "read_file", "write_file", "search", "list_files", "ast_search", "goto_definition", "find_references", "diagnostics"],
         system_prompt=_CRITIC_PROMPT,
     ),
     Role.JUDGE: RoleConfig(

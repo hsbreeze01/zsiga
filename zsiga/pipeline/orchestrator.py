@@ -1128,11 +1128,13 @@ class ZsigaOrchestrator:
                 git_ops.reset_hard(target_path, pre_sha, transport=transport)
                 print(f"  REVERTED: {change_name} (verify failed)")
                 rec.outcome = Outcome.REVERTED
+                verify_detail = self._verify_failure_detail(change_dir, mech_results, transport)
                 rec.phases.append(PhaseRecord(
                     phase=Phase.VERIFY, outcome=Outcome.FAIL,
                     seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
                     llm_calls=verify_calls[0], tool_calls=verify_calls[1],
                     prompt_tokens=verify_tokens[0], completion_tokens=verify_tokens[1],
+                    detail=verify_detail,
                 ))
                 record_outcome(change_name, project_name, False, "verify")
                 return False
@@ -1154,6 +1156,10 @@ class ZsigaOrchestrator:
             _l1_passed = False
             _l1_scen = (_l1.scenarios_tested if _l1 is not None else 0)
 
+        verify_detail = ""
+        if verify_outcome == Outcome.FAIL:
+            verify_detail = self._verify_failure_detail(change_dir, mech_results, transport)
+
         rec.phases.append(PhaseRecord(
             phase=Phase.VERIFY, outcome=verify_outcome,
             seconds_used=verify_seconds, fix_attempts=eval_fix_attempts,
@@ -1162,6 +1168,7 @@ class ZsigaOrchestrator:
             layer1_active=_l1_active,
             layer1_passed=_l1_passed,
             layer1_scenarios=_l1_scen,
+            detail=verify_detail,
         ))
 
         # Phase 4.5/6: OPTIMIZE (optional norm alignment)
@@ -2096,6 +2103,24 @@ class ZsigaOrchestrator:
         for transport in self._transports.values():
             transport.close()
         self._transports.clear()
+
+    def _verify_failure_detail(self, change_dir, mech_results, transport) -> str:
+        from .verifier import classify_verify_failure
+        verify_md = read_file(f"{change_dir}/verify.md", transport) or ""
+        category = classify_verify_failure(verify_md, mech_results)
+        parts = [f"category={category}"]
+        test_info = (mech_results or {}).get("test", {})
+        if not test_info.get("passed", True):
+            parts.append("test_fail")
+        lint_info = (mech_results or {}).get("lint", {})
+        if not lint_info.get("passed", True):
+            parts.append("lint_fail")
+        if verify_md:
+            for line in verify_md.split("\n"):
+                if "FAIL" in line and len(line) < 120:
+                    parts.append(line.strip()[:80])
+                    break
+        return "; ".join(parts)[:200]
 
 
 def _extract_calls(result) -> tuple[int, int]:

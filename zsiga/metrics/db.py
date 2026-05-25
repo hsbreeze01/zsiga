@@ -366,8 +366,8 @@ def _migrate_lessons(conn: sqlite3.Connection, base: Path):
             (
                 entry.get("ts", ""),
                 entry.get("pattern_key", ""),
-                entry.get("category", ""),
-                entry.get("text", entry.get("lesson", "")),
+                entry.get("category", entry.get("error_domain", "")),
+                entry.get("text", "") or entry.get("takeaway", "") or entry.get("title", ""),
             ),
         )
 

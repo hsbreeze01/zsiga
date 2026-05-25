@@ -23,6 +23,17 @@ def record_lesson(title: str, context: str, takeaway: str,
     with open(learnings_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(lesson, ensure_ascii=False) + "\n")
 
+    try:
+        from ..metrics.db import record_lesson as _db_record
+        _db_record(
+            text=takeaway or title,
+            pattern_key=pattern_key or "",
+            category=source,
+            ts=lesson["ts"],
+        )
+    except Exception:
+        pass
+
 
 def record_outcome(change_name: str, project: str, success: bool,
                    phase: str, detail: str = None,
@@ -68,6 +79,17 @@ def record_outcome(change_name: str, project: str, success: bool,
     learnings_file.parent.mkdir(parents=True, exist_ok=True)
     with open(learnings_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(lesson, ensure_ascii=False) + "\n")
+
+    try:
+        from ..metrics.db import record_lesson as _db_record
+        _db_record(
+            text=prevention or what_happened,
+            pattern_key=pattern_key,
+            category=error_domain,
+            ts=lesson["ts"],
+        )
+    except Exception:
+        pass
 
 
 def _classify_failure(detail: str) -> dict:
@@ -204,6 +226,17 @@ def record_success(
     learnings_file.parent.mkdir(parents=True, exist_ok=True)
     with open(learnings_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+    try:
+        from ..metrics.db import record_lesson as _db_record
+        _db_record(
+            text=f"success: {change_name} first_pass={first_pass} fix_attempts={fix_attempts} turns={total_turns}",
+            pattern_key="pipeline.pass.deliver",
+            category="success",
+            ts=record["ts"],
+        )
+    except Exception:
+        pass
 
 
 def search_learnings(keywords: list[str], pattern_key: str | None = None) -> list[dict]:

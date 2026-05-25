@@ -74,8 +74,6 @@ async def run_review(
 
     user_prompt = f"""## Change: {change_dir}
 
-**IMPORTANT: You MUST call the write_file tool to write the review result to {review_md_path}. Do NOT output the review content only in your reply text. The review is only considered complete when {review_md_path} exists on disk.**
-
 ### specs:
 {specs}
 
@@ -91,15 +89,13 @@ async def run_review(
 基于以上信息：
 1. 逐条检查每条 spec 要求是否在 diff 中被实现
 2. 检查代码质量（死代码、错误处理、命名）
-3. You MUST call write_file tool to write the results to {review_md_path}
+3. 你必须使用 write_file 工具将审查结果写入 {review_md_path}
 
 关键规则：
 - write_file 的 content 参数只能包含 review.md 的正文内容
 - 不要把 tool_call、tool_response 或对话历史写入文件
 - 不要用 bash cd 切换目录，项目根目录就是工作目录
 - 所有信息已在 prompt 中提供，不需要运行 bash 查找项目文件
-- 不要 cd 到其他目录，项目根目录是 {target_path}
-- 所有信息（specs、diff）已在 prompt 中提供，不需要用 bash 查找项目文件
 - 直接调用 write_file，不要先输出内容再调用
 
 review.md 格式（content 参数必须严格遵循）：
@@ -170,32 +166,43 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
     review_path = os.path.join(change_dir, 'review.md')
     logger = logging.getLogger(__name__)
 
+    # Helper: extract clean verdict + issues from raw text (handles tool_call XML artifacts)
+    def _extract_clean_review(raw: str) -> str:
+        m = re.search(r'Verdict:\s*(CLEAN|ISSUES_FOUND)', raw)
+        if not m:
+            return raw
+        verdict = m.group(1)
+        clean = 'Verdict: ' + verdict + '\n'
+        if verdict == 'ISSUES_FOUND':
+            issues = re.findall(
+                r'(\d+\.\s*\[(CRITICAL|SUGGESTION)\].+?)(?=\n\d+\. |$)',
+                raw, re.DOTALL,
+            )
+            if issues:
+                clean += '\nIssues:\n'
+                for issue_text, _ in issues:
+                    clean += issue_text + '\n'
+        return clean
+
     if not os.path.isfile(review_path):
         logger.warning(
-            'Review sub-agent did not call write_file; writing review.md as fallback'
+            'Review sub-agent did not call write_file; writing review.md from result.content'
         )
         os.makedirs(os.path.dirname(review_path), exist_ok=True)
+        clean_content = _extract_clean_review(result.content)
         with open(review_path, 'w', encoding='utf-8') as f:
-            f.write(result.content)
+            f.write(clean_content)
     else:
         with open(review_path, 'r', encoding='utf-8') as f:
             written = f.read()
-        if '<tool_call:' in written[:200] or written.strip().startswith('<tool_call'):
+        # Detect tool_call artifacts (multiple formats: <tool_call:...>, <tool_calling>, etc.)
+        if ('<tool_call' in written[:300] or written.strip().startswith('<tool_call')):
             logger.warning('review.md contains tool_call artifacts, extracting clean content')
-            import re as _re
-            m = _re.search(r'Verdict: (CLEAN|ISSUES_FOUND)', written)
-            if m:
-                verdict = m.group(1)
-                # Extract issues if present
-                issues = _re.findall(r'(\d+\. \[(CRITICAL|SUGGESTION)\].+?)(?=\d+\. |$)', written, _re.DOTALL)
-                clean = 'Verdict: ' + verdict + '\n'
-                if issues:
-                    clean += '\nIssues:\n'
-                    for issue_text, _ in issues:
-                        clean += issue_text + '\n'
+            clean = _extract_clean_review(written)
+            if clean != written:
                 with open(review_path, 'w', encoding='utf-8') as f:
                     f.write(clean)
-                logger.info('Cleaned review.md: verdict=%s, issues=%d', verdict, len(issues))
+                logger.info('Cleaned review.md from tool_call artifacts')
             else:
                 logger.warning('Could not extract verdict from tool_call artifacts')
 
