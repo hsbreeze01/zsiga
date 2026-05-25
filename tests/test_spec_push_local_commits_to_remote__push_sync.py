@@ -42,10 +42,10 @@ def test_preflight_working_directory_clean():
 
 
 def test_preflight_correct_branch():
-    """Current branch must be zsiga-l5-autonomous-engineer."""
+    """Current branch must be zsiga/push-local-commits-to-remote."""
     branch = _git("branch", "--show-current")
-    assert branch == "zsiga-l5-autonomous-engineer", (
-        f"Expected branch 'zsiga-l5-autonomous-engineer', got '{branch}'"
+    assert branch == "zsiga/push-local-commits-to-remote", (
+        f"Expected branch 'zsiga/push-local-commits-to-remote', got '{branch}'"
     )
 
 
