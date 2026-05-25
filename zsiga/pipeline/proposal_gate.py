@@ -245,7 +245,7 @@ Scout 的分析可能包含推断或幻觉——如果 Scout 的结论与确定�
 
     elapsed = time.monotonic() - start
     print(
-        f"  🛡️ Proposal Gate: verdict={final_verdict.value} score={score}/8 "
+        f"  🛡️ Proposal Gate: verdict={final_verdict.value} score={score}/10 "
         f"({elapsed:.1f}s)"
     )
 
