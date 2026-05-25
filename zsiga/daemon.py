@@ -18,6 +18,7 @@ import sys
 import time
 import asyncio
 import fcntl
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -588,6 +589,21 @@ def daemon_loop(config, dashboard_port=None):
                 continuous_busy_cycles += 1
                 idle_cycles = 0
                 last_change_at = datetime.now().isoformat()
+
+                # Auto-restart: reload new code after successful delivery
+                print("  🔄 Auto-restarting daemon to reload delivered code...")
+                _write_daemon_state(
+                    started_at=started_at,
+                    cycle=cycle_count,
+                    state="restarting",
+                    total_cycles=total_cycles,
+                    total_changes_processed=total_changes_processed,
+                    idle_cycles=idle_cycles,
+                    continuous_busy_cycles=continuous_busy_cycles,
+                    last_change_at=last_change_at,
+                )
+                release_lock(lock_fd)
+                subprocess.run(["sudo", "systemctl", "restart", "zsiga-daemon"], check=False)
             else:
                 idle_cycles += 1
                 continuous_busy_cycles = 0
