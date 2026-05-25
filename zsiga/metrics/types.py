@@ -79,6 +79,9 @@ class ChangeRecord:
     started_at: str = ""
     finished_at: str = ""
     lessons_count: int = 0
+    steward_verdict: str = ""     # ACCEPT / PUSHBACK / REJECT / "" (no gate)
+    steward_score: int = -1       # -1 = not evaluated
+    skip_reason: str = ""         # why the proposal was skipped
 
     def to_dict(self) -> dict:
         return {
@@ -89,6 +92,9 @@ class ChangeRecord:
             "finished_at": self.finished_at,
             "lessons_count": self.lessons_count,
             "phases": [p.to_dict() for p in self.phases],
+            "steward_verdict": self.steward_verdict,
+            "steward_score": self.steward_score,
+            "skip_reason": self.skip_reason,
         }
 
 

@@ -25,6 +25,10 @@ CREATE TABLE IF NOT EXISTS changes (
     created_at      TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now'))
 );
 
+ALTER TABLE changes ADD COLUMN steward_verdict TEXT DEFAULT '';
+ALTER TABLE changes ADD COLUMN steward_score INTEGER DEFAULT -1;
+ALTER TABLE changes ADD COLUMN skip_reason TEXT DEFAULT '';
+
 CREATE TABLE IF NOT EXISTS journal (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     ts              TEXT NOT NULL,
@@ -135,8 +139,9 @@ def record_change(rec_dict: dict, db_path: Optional[Path] = None):
     try:
         conn.execute(
             """INSERT INTO changes (change_name, project, outcome, started_at,
-               finished_at, lessons_count, phases_json)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+               finished_at, lessons_count, phases_json,
+               steward_verdict, steward_score, skip_reason)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 rec_dict["change_name"],
                 rec_dict["project"],
@@ -145,6 +150,9 @@ def record_change(rec_dict: dict, db_path: Optional[Path] = None):
                 rec_dict.get("finished_at", "") or datetime.now().isoformat(),
                 rec_dict.get("lessons_count", 0),
                 json.dumps(rec_dict.get("phases", []), ensure_ascii=False),
+                rec_dict.get("steward_verdict", ""),
+                rec_dict.get("steward_score", -1),
+                rec_dict.get("skip_reason", ""),
             ),
         )
         conn.commit()
@@ -174,6 +182,9 @@ def _row_to_change(row: dict) -> dict:
         "finished_at": row["finished_at"],
         "lessons_count": row["lessons_count"],
         "phases": json.loads(row["phases_json"]) if row["phases_json"] else [],
+        "steward_verdict": row.get("steward_verdict", ""),
+        "steward_score": row.get("steward_score", -1),
+        "skip_reason": row.get("skip_reason", ""),
     }
 
 

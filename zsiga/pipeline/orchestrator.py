@@ -443,6 +443,9 @@ class ZsigaOrchestrator:
                         source="steward",
                     )
                     rec.outcome = Outcome.SKIPPED
+                    rec.steward_verdict = "REJECT"
+                    rec.steward_score = gate_result.score
+                    rec.skip_reason = f"steward_reject:score={gate_result.score}"
                     return False
                 elif gate_result.verdict == GateVerdict.PUSHBACK:
                     print(f"  🛡️ Proposal PUSHED BACK by Steward (score {gate_result.score}/8)")
@@ -455,15 +458,27 @@ class ZsigaOrchestrator:
                         source="steward",
                     )
                     rec.outcome = Outcome.SKIPPED
+                    rec.steward_verdict = "PUSHBACK"
+                    rec.steward_score = gate_result.score
+                    rec.skip_reason = f"steward_pushback:score={gate_result.score}"
                     return False
                 else:
                     print(f"  🛡️ Proposal ACCEPTED by Steward (score {gate_result.score}/8)")
+                    rec.steward_verdict = "ACCEPT"
+                    rec.steward_score = gate_result.score
 
             skip_enrich = intent.intent_type == IntentType.FIX
             return await self._run_phases(prop, rec, change_dir, target_path,
                                           project_name, project_config, change_name,
                                           transport, skip_enrich=skip_enrich,
                                           intent=intent, trace_cm=_trace_cm)
+        except Exception as exc:
+            rec.outcome = Outcome.SKIPPED
+            rec.skip_reason = f"exception:{type(exc).__name__}:{str(exc)[:200]}"
+            import traceback as _tb
+            print(f"  ❌ _process_change exception: {type(exc).__name__}: {exc}")
+            print(_tb.format_exc())
+            return False
         finally:
             record_change(rec)
             export_session(change_name)
@@ -724,6 +739,7 @@ class ZsigaOrchestrator:
                         else:
                             print(f"  🏛️ Design Gate failed {design_gate_retries} times, auto-pausing")
                             rec.outcome = Outcome.SKIPPED
+                            rec.skip_reason = f"design_gate_exhausted:retries={design_gate_retries}"
                             return False
 
         # Approval gate
@@ -732,6 +748,7 @@ class ZsigaOrchestrator:
             if not approved:
                 print("  Skipped: not approved")
                 rec.outcome = Outcome.SKIPPED
+                rec.skip_reason = "require_approval:denied"
                 return False
 
         # Phase 2: IMPLEMENT

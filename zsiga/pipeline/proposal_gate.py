@@ -255,6 +255,12 @@ Scout 的分析可能包含推断或幻觉——如果 Scout 的结论与确定�
         f"cat > '{review_path}' << 'ZSIGA_STEWARD_EOF'\n{review_text}\nZSIGA_STEWARD_EOF",
         timeout=10,
     )
+    from datetime import datetime as _dt
+    ts_path = f"{change_dir}/steward-review-{_dt.now().strftime('%Y%m%d-%H%M%S')}.md"
+    transport.run_shell(
+        f"cat > '{ts_path}' << 'ZSIGA_STEWARD_EOF'\n{review_text}\nZSIGA_STEWARD_EOF",
+        timeout=10,
+    )
 
     return ProposalGateResult(
         verdict=final_verdict,
