@@ -137,8 +137,8 @@ class PipelineConfig:
         proposal_gate_max_retries: int = 1,
         proposal_gate_steward_max_turns: int = 3,
         proposal_gate_steward_timeout: int = 90,
-        proposal_gate_score_accept: int = 6,
-        proposal_gate_score_pushback: int = 3,
+        proposal_gate_score_accept: int = 8,
+        proposal_gate_score_pushback: int = 5,
         proposal_gate_learning_weight_days: int = 90,
         # Design Gate (Judge)
         design_gate_enabled: bool = False,
@@ -408,8 +408,8 @@ def load_config(path: str = None) -> ZsigaConfig:
         proposal_gate_max_retries=pipeline_raw.get("proposal_gate", {}).get("max_retries", 1),
         proposal_gate_steward_max_turns=pipeline_raw.get("proposal_gate", {}).get("steward_max_turns", 3),
         proposal_gate_steward_timeout=pipeline_raw.get("proposal_gate", {}).get("steward_timeout", 90),
-        proposal_gate_score_accept=pipeline_raw.get("proposal_gate", {}).get("score_accept", 6),
-        proposal_gate_score_pushback=pipeline_raw.get("proposal_gate", {}).get("score_pushback", 3),
+        proposal_gate_score_accept=pipeline_raw.get("proposal_gate", {}).get("score_accept", 8),
+        proposal_gate_score_pushback=pipeline_raw.get("proposal_gate", {}).get("score_pushback", 5),
         proposal_gate_learning_weight_days=pipeline_raw.get("proposal_gate", {}).get("learning_weight_days", 90),
         # Design Gate
         design_gate_enabled=pipeline_raw.get("design_gate", {}).get("enabled", False),
