@@ -881,7 +881,7 @@ class ZsigaOrchestrator:
             # hang forever even if an inner timeout misbehaves.
             review_loop_ceiling = max(
                 900,
-                int(getattr(self.config.pipeline, "review_timeout", 180))
+                int(self._adaptive_timeout("review", getattr(self.config.pipeline, "review_timeout", 180)))
                 * max(1, getattr(self.config.pipeline, "review_max_rounds", 1))
                 * 3,
             )
@@ -893,7 +893,7 @@ class ZsigaOrchestrator:
                         self.agent, change_dir, target_path, pre_sha, transport,
                         max_rounds=self.config.pipeline.review_max_rounds,
                         review_max_turns=self.config.pipeline.review_max_turns,
-                        review_timeout=self.config.pipeline.review_timeout,
+                        review_timeout=self._adaptive_timeout("review", self.config.pipeline.review_timeout),
                         fix_max_turns=self.config.pipeline.review_fix_max_turns,
                     ),
                     timeout=review_loop_ceiling,
