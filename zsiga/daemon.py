@@ -13,6 +13,7 @@ Features:
 import json
 import os
 import signal
+import sqlite3
 import sys
 import time
 import asyncio
@@ -331,6 +332,73 @@ def _build_current_json() -> str:
     }, ensure_ascii=False)
 
 
+def _build_proposal_stats_json(db_path: str) -> dict:
+    """Query the changes table and return aggregate statistics.
+
+    Returns a dict with keys: total, by_outcome, avg_duration_seconds, recent.
+    On error, returns a dict with a single ``"error"`` key.
+    """
+    p = Path(db_path)
+    if not p.exists():
+        return {"error": f"Database file not found: {db_path}"}
+    try:
+        conn = sqlite3.connect(str(p))
+        conn.row_factory = sqlite3.Row
+        # Check that the changes table exists
+        tables = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='changes'"
+        ).fetchall()
+        if not tables:
+            conn.close()
+            return {"error": "changes table does not exist in database"}
+
+        # Total count
+        total = conn.execute("SELECT COUNT(*) FROM changes").fetchone()[0]
+
+        # Group by outcome
+        rows = conn.execute(
+            "SELECT outcome, COUNT(*) AS cnt FROM changes GROUP BY outcome"
+        ).fetchall()
+        by_outcome = {r["outcome"]: r["cnt"] for r in rows}
+
+        # Average duration (only rows with non-empty finished_at)
+        avg_row = conn.execute(
+            """SELECT AVG(
+                (julianday(finished_at) - julianday(started_at)) * 86400
+            ) AS avg_dur
+            FROM changes
+            WHERE finished_at IS NOT NULL AND finished_at != ''
+        """
+        ).fetchone()
+        avg_duration_seconds = avg_row["avg_dur"]
+        if avg_duration_seconds is not None:
+            avg_duration_seconds = round(avg_duration_seconds, 3)
+
+        # Recent 5 entries ordered by id descending
+        recent_rows = conn.execute(
+            """SELECT change_name, outcome, started_at, finished_at
+               FROM changes ORDER BY id DESC LIMIT 5"""
+        ).fetchall()
+        recent = [
+            {
+                "change_name": r["change_name"],
+                "outcome": r["outcome"],
+                "started_at": r["started_at"],
+                "finished_at": r["finished_at"],
+            }
+            for r in recent_rows
+        ]
+        conn.close()
+        return {
+            "total": total,
+            "by_outcome": by_outcome,
+            "avg_duration_seconds": avg_duration_seconds,
+            "recent": recent,
+        }
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 def _serve_dashboard(port: int):
     """Start HTTP server for dashboard in a daemon thread."""
     from .metrics.dashboard import generate_dashboard
@@ -350,6 +418,14 @@ def _serve_dashboard(port: int):
             self.end_headers()
             self.wfile.write(body)
 
+        def _send_json_error(self, message: str):
+            body = json.dumps({"error": message}).encode("utf-8")
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
         def do_GET(self):
             if self.path == "/api/status.json":
                 self._send_json(_build_status_json())
@@ -357,6 +433,13 @@ def _serve_dashboard(port: int):
                 self._send_json(_build_metrics_json())
             elif self.path == "/api/current.json":
                 self._send_json(_build_current_json())
+            elif self.path == "/api/proposal-stats":
+                from .metrics.db import _DB_PATH
+                result = _build_proposal_stats_json(str(_DB_PATH))
+                if "error" in result:
+                    self._send_json_error(result["error"])
+                else:
+                    self._send_json(json.dumps(result))
             else:
                 super().do_GET()
 
