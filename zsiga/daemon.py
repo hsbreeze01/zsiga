@@ -400,7 +400,7 @@ def _build_pipeline_status(db_path: str, base_path: str) -> dict:
                 "name": name,
                 "current_phase": phase_state.get("current_phase"),
                 "started_at": phase_state.get("started_at"),
-                "is_active": is_active,
+                "is_active": bool(is_active),
             })
             if is_active and result["active_proposal"] is None:
                 result["active_proposal"] = name
@@ -427,8 +427,10 @@ def _build_pipeline_status(db_path: str, base_path: str) -> dict:
 
         # 4. Build phase progress
         for phase in ALL_PHASES:
-            if phase in completed_phases:
+            normalized = {k.upper(): v for k, v in completed_phases.items()}
+            if phase in normalized:
                 p = completed_phases[phase]
+                p = normalized[phase]
                 entry = {"phase": phase, "status": "PASS" if p.get("outcome") == "success" else p.get("outcome", "DONE"),
                          "duration_s": round(p.get("seconds_used", 0), 1),
                          "llm_calls": p.get("llm_calls", 0),
