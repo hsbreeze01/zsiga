@@ -681,6 +681,10 @@ class ZsigaOrchestrator:
                             print(f"  🏛️ Re-running ENRICH with judge feedback...")
                             judge_feedback = judge_result.content[:2000]
                             print(f"  🏛️ Judge feedback: {judge_feedback[:500]}")
+                            # Persist judge feedback to change_dir for diagnostics
+                            (change_dir / "judge-feedback.md").write_text(
+                                f"# Design Gate Judge Feedback (attempt {design_gate_retries})\n\n{judge_feedback}"
+                            )
                             from .enricher import enrich as _enrich_retry
                             self.agent.set_phase("enrich")
                             register_tools(self.agent, target_path, transport=transport)

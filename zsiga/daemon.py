@@ -526,6 +526,84 @@ def _build_proposal_stats_json(db_path: str) -> dict:
             conn.close()
 
 
+def _build_proposal_detail(db_path: str, base_path: str, proposal_name: str) -> dict:
+    """Return detailed info for a single proposal: files + DB phases + state."""
+    result = {"proposal_name": proposal_name, "files": {}, "phases": [], "phase_state": None}
+
+    # Read change_dir files
+    changes_dir = Path(base_path) / "openspec" / "changes"
+    change_dir = changes_dir / proposal_name
+    if not change_dir.exists():
+        for archive_sub in (changes_dir / "archive").iterdir():
+            if archive_sub.is_dir() and archive_sub.name.endswith(f"-{proposal_name}"):
+                change_dir = archive_sub
+                break
+    if not change_dir.exists():
+        result["error"] = f"Proposal directory not found: {proposal_name}"
+        return result
+
+    result["change_dir"] = str(change_dir)
+
+    # Read known diagnostic files
+    diag_files = [
+        "proposal.md", "clarify.md", "steward-review.md",
+        "judge-feedback.md", "review.md", "reflect.md",
+    ]
+    for fname in diag_files:
+        fpath = change_dir / fname
+        if fpath.exists():
+            try:
+                result["files"][fname] = fpath.read_text()[:8000]
+            except Exception:
+                pass
+
+    # Read specs/ if exists
+    specs_dir = change_dir / "specs"
+    if specs_dir.exists():
+        for sp in sorted(specs_dir.glob("*.md")):
+            try:
+                result["files"][f"specs/{sp.name}"] = sp.read_text()[:8000]
+            except Exception:
+                pass
+
+    # Read .phase_state
+    ps_path = change_dir / ".phase_state"
+    if ps_path.exists():
+        try:
+            result["phase_state"] = json.loads(ps_path.read_text())
+        except Exception:
+            pass
+
+    # Read DB phases_json
+    p = Path(db_path)
+    if p.exists():
+        conn = None
+        try:
+            conn = sqlite3.connect(str(p))
+            conn.row_factory = sqlite3.Row
+            row = conn.execute(
+                "SELECT * FROM changes WHERE change_name = ? ORDER BY id DESC LIMIT 1",
+                (proposal_name,),
+            ).fetchone()
+            if row:
+                result["db_record"] = {
+                    "id": row["id"],
+                    "outcome": row["outcome"],
+                    "started_at": row["started_at"],
+                    "finished_at": row["finished_at"],
+                }
+                phases_json = row["phases_json"]
+                if phases_json:
+                    result["phases"] = json.loads(phases_json)
+        except Exception as exc:
+            result["db_error"] = str(exc)
+        finally:
+            if conn:
+                conn.close()
+
+    return result
+
+
 def _serve_dashboard(port: int):
     """Start HTTP server for dashboard in a daemon thread."""
     from .metrics.dashboard import generate_dashboard
@@ -576,6 +654,16 @@ def _serve_dashboard(port: int):
                 if "error" in result:
                     self._send_json_error(result["error"])
                 else:
+                    self._send_json(json.dumps(result))
+            elif self.path.startswith("/api/proposal/"):
+                from .metrics.db import _DB_PATH
+                proposal_name = self.path[len("/api/proposal/"):]
+                proposal_name = proposal_name.rstrip("/")
+                if not proposal_name:
+                    self._send_json_error("Proposal name required")
+                else:
+                    home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+                    result = _build_proposal_detail(str(_DB_PATH), home, proposal_name)
                     self._send_json(json.dumps(result))
             else:
                 super().do_GET()
