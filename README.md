@@ -1,84 +1,36 @@
-# zsiga ⚡
+# zsiga
 
-**Level 2 · Code Architect** (L3 🔧 IN PROGRESS) — 超电磁开发智能体。读取目标项目中的需求提案，自动补全规格、实现代码、验证质量，完成 git 提交。
+自主工程智能体。读取 OpenSpec proposal，自动完成规格补全、代码实现、质量验证、Git 交付的完整 pipeline。
 
-> 名字源自 **Zsigmondy**（齐格蒙迪，诺贝尔化学奖得主）—— 在混沌的代码中建立秩序。
-> 形象灵感来自 **御坂美琴**（某科学的超电磁炮）—— 用最朴素的硬币，打出最精准的命中。
-
-## 档案卡片
-
-```
-┌─────────────────────────────────────────────┐
-│  ⚡ zsiga · Level 2 Code Architect (L3 WIP)   │
-│  超电磁开发智能体                             │
-│                                             │
-│  🪙 硬币 · 电弧 · 精准打击                    │
-│                                             │
-│  等级：Level 3（LSP 感知 + 自我修改 + 模式挖掘）│
-│  LLM：智谱 AI GLM-5.1                       │
-│  弹药：OpenSpec specs（唯一的真相源）          │
-│                                             │
-│  能力清单：                                   │
-│  ⚡ 超电磁炮 — bash/grep/cat 精准命中         │
-│  🔍 电磁透视 — AST 代码骨架扫描              │
-│  🗜️ 电磁压缩 — Context Compaction           │
-│  🐾 御坂网络 — Sub-Agent 分身并行             │
-│  🔧 LSP 感知 — 跳转定义/引用/诊断             │
-│                                             │
-│  性格：                                      │
-│  · 硬币信徒（spec 是唯一弹药）                │
-│  · 傲娇 — 被表扬会转硬币                     │
-│  · 绝不重犯同一个错误                         │
-│  · 话少活好                                  │
-│                                             │
-│  座右铭：                                     │
-│  "每枚硬币只打一个目标，                      │
-│   每次失误都写进 learnings.jsonl。"            │
-└─────────────────────────────────────────────┘
-```
-
-## 等级体系
-
-| Level | 代号 | 核心能力 | 关键任务 | 状态 |
-|-------|------|----------|----------|------|
-| Level 1 | Shell Artisan | shell 工具 + OpenSpec 流程纪律 | — | ✅ ACHIEVED |
-| **Level 2** | **Code Architect** | **AST 透视 + 消息压缩 + 分身并行** | — | **✅ CURRENT (STABLE)** |
-| Level 3 | 🔧 Self-Evolution | LSP 集成 + 自我修改 + 专业子代理 + 模式挖掘 | 验证通过率≥80%, 经验≥50, 行为测试通过 | 🔧 IN PROGRESS (verify 51.3%, lessons 29/50) |
-| Level 4 | 🌐 Multi-Project Orchestrator | 意图路由 + 跨项目分解 + Todo 编排 + 升级协议 | Intent Router, 跨项目任务分解, Todo 驱动编排, 升级路径, L4 验证 | 🔒 LOCKED |
-| Level 5 | 🚀 Autonomous Engineer | 意图门控 + 并行代理 + Skill 演化 + 自我审查 + 失败恢复 | Phase 0 Intent Gate, 并行后台代理, Skill 演化, 自我审查循环, 失败恢复协议, L5 验证 | 🔒 LOCKED |
-
-## 工作原理
-
-```
-目标项目/openspec/changes/add-xxx/proposal.md   ← 你写这个
-                ↓
-        ┌───────────────────────────────────────────────┐
-        │  zsiga pipeline                               │
-        │                                               │
-        │  1. ENRICH  — proposal → specs + design + tasks│
-        │  2. IMPLEMENT — tasks → 代码 + 测试 + commit   │
-        │  3. VERIFY   — specs vs 代码，三维验证          │
-        │  4. DELIVER  — tag + push + archive             │
-        └───────────────────────────────────────────────┘
-                ↓
-目标项目/openspec/changes/archive/2026-05-07-add-xxx/  ← 完成后归档
-```
-
-zsiga 操作的是**目标项目**（如 d8q），不是自己。所有 OpenSpec artifacts 存放在目标项目里，跟随代码仓库走。
-
-## 安装
+## 快速开始
 
 ```bash
-# Python >= 3.10
+# 1. 安装依赖
 pip install -r requirements.txt
 
-# 或
-pip install zai-sdk pyyaml httpx ruff
+# 2. 配置环境变量
+export ZHIPUAI_API_KEY="your-api-key"
+
+# 3. 投递 proposal
+mkdir -p openspec/changes/my-feature
+cat > openspec/changes/my-feature/proposal.md << 'EOF'
+# my-feature
+## Summary
+一句话描述要做什么。
+## Requirements
+- 具体需求列表
+EOF
+
+# 4. 启动 daemon
+python -m zsiga daemon --port=58175
+
+# 5. 监控状态
+curl http://localhost:58175/api/pipeline-status
 ```
 
 ## 配置
 
-编辑 `zsiga.yaml`：
+### zsiga.yaml
 
 ```yaml
 agent:
@@ -86,9 +38,8 @@ agent:
   llm:
     provider: zhipuai
     model: glm-5.1
-    api_key: ${ZHIPUAI_API_KEY}       # 从环境变量读取
+    api_key: ${ZHIPUAI_API_KEY}
     base_url: https://open.bigmodel.cn/api/coding/paas/v4
-    proxy: http://proxy.example.com:8080  # 可选，公司代理
     max_tokens: 4096
     temperature: 0.3
 
@@ -97,405 +48,432 @@ targets:
     path: /path/to/your/project
     test_cmd: "pytest -x --tb=short"
     lint_cmd: "ruff check ."
+    deploy_branch: main
+    merge_to_branches: []          # DELIVER 后自动 merge 到的额外分支
 
 intake:
-  mode: dir_scan                        # 目前仅支持目录扫描
+  mode: dir_scan
   dir_scan:
     scan_interval_seconds: 60
 
 pipeline:
-  max_changes_per_cycle: 3              # 每轮最多处理几个 change
-  fix_attempts: 10                      # 机械化验证失败后最多修几次
-  eval_fix_attempts: 3                  # AI 验证失败后最多修几次
-  enrich_max_turns: 25                  # enrich 阶段 LLM 最多多少轮工具调用
-  enrich_timeout: 600                   # enrich 超时秒数
+  cycle_interval_hours: 8         # 主循环间隔
+  idle_poll_minutes: 5            # 无 proposal 时的轮询间隔
+  max_changes_per_cycle: 3
+  enrich_max_turns: 25
+  enrich_timeout: 600
   impl_max_turns: 30
   impl_timeout: 900
-  verify_max_turns: 12
-  verify_timeout: 300
-  fix_max_turns: 8                      # 修复循环的每轮上限
+  design_gate_enabled: true       # Judge 评审 spec 质量
+  design_gate_max_retries: 2      # Judge 失败后 ENRICH 重试次数
+
+  proposal_gate:
+    enabled: true
+    score_accept: 6               # Steward 评分 >= 此值通过
+    score_pushback: 3             # < 此值直接拒绝
 
 safety:
-  require_approval: true                # 实现前是否需要人工确认
-  dry_run: true                         # true = 不执行 git push
+  require_approval: false
+  dry_run: false
   protected_paths:
     - "*/migrations/*"
     - "*/settings/prod*"
     - "*/.env"
-  max_files_per_task: 3                 # 每个 task 最多改几个文件
 ```
 
 ### 环境变量
 
-| 变量 | 说明 |
-|------|------|
-| `ZHIPUAI_API_KEY` | 智谱 AI API Key，必填 |
+| 变量 | 说明 | 必填 |
+|------|------|------|
+| `ZHIPUAI_API_KEY` | 智谱 AI API Key | 是 |
+| `LANGFUSE_PUBLIC_KEY` | Langfuse 可观测性公钥 | 否 |
+| `LANGFUSE_SECRET_KEY` | Langfuse 可观测性密钥 | 否 |
+| `LANGFUSE_HOST` | Langfuse 服务地址 | 否 |
+
+### systemd 服务
+
+创建 `/etc/systemd/system/zsiga-daemon.service`：
+
+```ini
+[Unit]
+Description=zsiga autonomous engineer daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lancer
+Group=lancer
+WorkingDirectory=/home/zsiga/repo
+EnvironmentFile=/home/zsiga/repo/.zsiga.env
+ExecStartPre=/usr/bin/git checkout -f main
+ExecStart=/home/zsiga/repo/venv/bin/python -m zsiga daemon --port=58175
+Restart=on-failure
+RestartSec=60
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zsiga
+KillSignal=SIGTERM
+TimeoutStopSec=300
+
+[Install]
+WantedBy=multi-user.target
+```
+
+环境文件 `.zsiga.env`（chmod 600，gitignore）：
 
 ```bash
-export ZHIPUAI_API_KEY="your-api-key-here"
+ZHIPUAI_API_KEY=your-key-here
+LANGFUSE_PUBLIC_KEY=pk-lf-xxx
+LANGFUSE_SECRET_KEY=sk-lf-xxx
+LANGFUSE_HOST=https://jp.cloud.langfuse.com
 ```
 
-## 如何创建需求
+### 启停命令
 
-在目标项目的 `openspec/changes/` 下创建目录，放入 `proposal.md`：
+```bash
+# systemctl 方式
+sudo systemctl enable zsiga-daemon    # 开机自启
+sudo systemctl start zsiga-daemon    # 启动
+sudo systemctl stop zsiga-daemon     # 停止
+sudo systemctl restart zsiga-daemon  # 重启
+sudo systemctl status zsiga-daemon   # 查看状态
+
+# 脚本方式（前台运行，日志输出到 stdout）
+python -m zsiga daemon --port=58175
+
+# 单次运行（处理完所有 proposal 后退出）
+python -m zsiga run
+```
+
+### 运行时信号
+
+| 信号 | 效果 |
+|------|------|
+| `SIGTERM` / `SIGINT` | 完成当前 cycle 后优雅退出 |
+| `SIGUSR1` | 暂停（完成当前 cycle 后等待） |
+| `SIGUSR2` | 恢复运行 |
+
+```bash
+kill -SIGUSR1 $(cat data/lock.pid)   # 暂停
+kill -SIGUSR2 $(cat data/lock.pid)   # 恢复
+```
+
+## 投递 Proposal
+
+### 目录结构
 
 ```
-your-project/
+项目根目录/
   openspec/
     changes/
-      add-health-check/           ← change 名称，随意取
-        proposal.md               ← 你写这个文件，其余由 zsiga 生成
+      add-health-check/           ← proposal 名称
+        proposal.md               ← 你写这个，其余 zsiga 自动生成
 ```
 
-### proposal.md 格式
+### proposal.md 内容要素
 
 ```markdown
-# Proposal: Add Health Check Endpoint
+# proposal-name
 
 ## Summary
-一句话描述要做什么。
+一句话描述要做什么。必须具体，包含目标文件和功能。
 
-## Motivation
-为什么需要这个功能。
+## Problem
+为什么需要这个变更。现有系统的什么缺陷或缺失。
 
-## Expected Behavior
-- 预期的具体行为列表
-- 越具体越好，zsiga 会据此生成 specs
+## Technical Design
+技术方案。包含：
+- 要修改的文件列表和函数名
+- 数据流和接口设计
+- 错误处理策略
+
+## Acceptance Criteria
+验收标准。每条必须是可验证的：
+1. `curl http://localhost:58175/api/health` 返回 HTTP 200
+2. 响应包含 `status` 和 `timestamp` 字段
+3. 现有端点不受影响
+
+## Scope
+- **In scope**: 明确在范围内的变更
+- **Out of scope**: 明确不在范围内的变更
+
+## Risk
+- **Impact**: 高/中/低
+- **Blast radius**: 影响范围
+- **Reversibility**: 回滚方式
 ```
 
-### OpenSpec Change 生命周期
+### Proposal 质量要求
+
+Steward（守门人）从 5 个维度评分（每项 0-2 分，满分 10）：
+
+| 维度 | 2 分 | 1 分 | 0 分 |
+|------|------|------|------|
+| 可行性 | 目标模块/接口存在 | 部分存在需新建 | 核心依赖不存在 |
+| 可执行性 | 有具体文件名、函数名、接口设计 | 有方向但缺细节 | 只有目标没有路径 |
+| 能力匹配 | 近期有成功记录 | 无历史记录 | 近期连续失败 |
+| 历史风险 | 无相关失败 | 有失败但已修复 | 相同失败刚发生过 |
+| 范围合理性 | 范围清晰独立 | 范围较大可分解 | 范围模糊或矛盾 |
+
+评分规则：
+- **>= 8 分**：ACCEPT，直接进入 pipeline
+- **5-7 分**：PUSHBACK，附改进建议
+- **<= 4 分**：REJECT
+
+**注意**：修改 pipeline/agent/orchestrator 自身代码的 proposal，范围合理性上限为 1 分。这类变更应由人工完成。
+
+### 生命周期
 
 ```
-你创建 proposal.md
-        ↓
-zsiga ENRICH 自动生成:
-  ├── specs/                  ← Delta specs（行为变更）
-  │   └── xxx-endpoint.md     ← ADDED/MODIFIED/REMOVED Requirements + Scenarios
-  ├── design.md               ← 技术方案（架构决策、文件列表）
-  └── tasks.md                ← 实现清单（- [ ] 格式）
-        ↓
-zsiga IMPLEMENT 按 tasks 逐个实现
-  每个 task 独立 commit: feat: <task 描述>
-        ↓
-zsiga VERIFY 三维验证
-  Completeness: specs 是否全部覆盖
-  Correctness:  实现是否满足行为描述
-  Coherence:    是否与项目现有模式一致
-        ↓
-zsiga DELIVER
-  git tag + push + archive
-        ↓
-openspec/changes/archive/2026-05-07-add-health-check/
+proposal.md 创建
+      ↓
+Proposal Gate ─── Steward 评分，ACCEPT/PUSHBACK/REJECT
+      ↓
+CLARIFY ─── 需求澄清，生成 clarify.md
+      ↓
+ENRICH ─── 生成 specs/*.md（行为规格 + 测试场景）
+      ↓
+Design Gate ─── Judge 评审 spec 质量，FAIL 则 ENRICH 重试（最多 2 次）
+      ↓
+IMPLEMENT ─── 按 specs 实现代码
+      ↓
+REVIEW ─── Reviewer 审查代码质量
+      ↓
+VERIFY ─── L1 pytest 验证 + LLM 三维验证（Completeness/Correctness/Coherence）
+      ↓
+OPTIMIZE ─── 代码优化
+      ↓
+REFLECT ─── 自我评估
+      ↓
+DELIVER ─── feature branch → deploy branch merge → push → tag
+      ↓
+归档到 archive/，daemon 自动重启加载新代码
 ```
 
-## 运行
+## 监控与状态查看
+
+### HTTP API
+
+daemon 启动后提供以下端点（端口由 `--port` 参数决定）：
+
+| 端点 | 说明 |
+|------|------|
+| `GET /api/pipeline-status` | **实时 pipeline 状态** — 当前 proposal、每 phase 进度/耗时/token |
+| `GET /api/status.json` | Daemon 状态 — PID、cycle 数、当前 proposal、队列 |
+| `GET /api/health` | 健康检查 — daemon 存活 + DB 可读性 |
+| `GET /api/proposal-stats` | 历史统计 — 总量/成功率/平均耗时/最近 5 条 |
+
+#### /api/pipeline-status 详解
+
+最核心的监控端点，返回实时 phase-by-phase 进度：
 
 ```bash
-# 确保在 zsiga 项目目录下，或 zsiga.yaml 在当前目录
-cd /path/to/zsiga
-
-# 单次运行（处理所有目标项目中待处理的 change）
-export ZHIPUAI_API_KEY="your-key"
-python3 -m zsiga
-
-# 或安装后直接用
-zsiga
+curl -s http://localhost:58175/api/pipeline-status | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+print(f\"daemon: {d['daemon']['state']} uptime={d['daemon']['uptime_seconds']:.0f}s\")
+print(f\"active: {d['active_proposal']} @ {d['current_phase']}\")
+for p in d['phase_progress']:
+    s = {'PASS':'done','RUNNING':'>>>  ','PENDING':'wait ','FAIL':'FAIL '}[p['status']]
+    dur = f\" {p.get('duration_s', p.get('elapsed_s', ''))}s\" if p.get('duration_s') or p.get('elapsed_s') else ''
+    print(f\"  [{s}] {p['phase']}{dur}\")
+for q in d['queue']:
+    m = '*' if q['is_active'] else ' '
+    print(f\"  {m} {q['name']}\")
+"
 ```
 
-## Pipeline 四阶段详解
-
-### Phase 1: ENRICH（补全）
-
-读取 proposal.md，结合目标项目代码，自动生成三个 OpenSpec artifact：
-
-| 文件 | 内容 |
-|------|------|
-| `specs/*.md` | Delta specs — 用 `## ADDED Requirements` / `## MODIFIED Requirements` / `## REMOVED Requirements` 组织，每个 Requirement 下有 `#### Scenario`（Given/When/Then） |
-| `design.md` | 技术方案 — 架构决策、数据流、需要新增/修改的文件列表 |
-| `tasks.md` | 实现清单 — `- [ ]` 格式，每个 task 足够小（最多改 3 个文件） |
-
-如果三个文件已存在，跳过此阶段。
-
-### Phase 2: IMPLEMENT（实现）
-
-按 tasks.md 顺序逐个实现：
-1. 找到第一个未勾选的 `- [ ]`
-2. 读取对应 specs 和 design
-3. 读目标项目现有代码，学习模式
-4. 写测试 → 写实现 → 运行 pytest + ruff
-5. 勾选 `- [x]` → git commit
-6. 下一个 task
-
-**机械化验证**：实现完成后自动运行 pytest + ruff。如果失败，进入修复循环（最多 `fix_attempts` 次）。所有修复失败则 `git reset --hard` 回滚。
-
-### Phase 3: VERIFY（验证）
-
-AI 驱动的三维验证：
-
-| 维度 | 检查内容 |
-|------|---------|
-| Completeness | 每个 ADDED Requirement 是否有代码实现，每个 Scenario 是否被覆盖 |
-| Correctness | 实现是否满足 spec 中的行为描述，pytest 是否通过 |
-| Coherence | design.md 中的架构决策是否在代码中体现，命名是否与项目一致 |
-
-输出 `verify.md`，Verdict 为 PASS 或 FAIL。FAIL 时进入 eval-fix 循环。
-
-### Phase 4: DELIVER（交付）
+输出示例：
 
 ```
-git add -A
-git commit -m "feat(<project>): <change-name>"
-git tag -a zsiga-<change-name>
-git push origin main --tags     # dry_run=true 时仅打印
+daemon: running uptime=1847s
+active: add-health-check @ implement
+  [done] PROPOSAL_GATE
+  [done] CLARIFY         92.6s
+  [done] ENRICH          164.2s
+  [done] DESIGN_GATE
+  [>>>>] IMPLEMENT        45.1s
+  [wait ] REVIEW
+  [wait ] VERIFY
+  [wait ] OPTIMIZE
+  [wait ] REFLECT
+  [wait ] DELIVER
+  * add-health-check
+    cleanup-stale-tests
 ```
 
-完成后将 change 目录移动到 `openspec/changes/archive/<date>-<name>/`。
-
-## 记忆系统
-
-zsiga 具有自我学习能力——从每次运行中积累经验，避免重复犯错。
-
-### 工作方式
-
-```
-每次 change 处理完成（成功或失败）
-        ↓
-record_outcome() → memory/learnings.jsonl    ← 追加一条经验
-        ↓
-cycle 结束 → update_active_context()         ← 从 lessons 重新合成 active_context.md
-        ↓
-下次启动 → load_active_context()             ← 注入到 agent 的每个 system prompt
-```
-
-### 经验格式
-
-每条经验记录在 `memory/learnings.jsonl`，包含 `pattern_key`（分类标签）：
-
-```json
-{
-  "type": "lesson",
-  "ts": "2026-05-07T14:30:00",
-  "source": "orchestrator",
-  "title": "FAIL: add-health-check at verify",
-  "context": "project=stockshark, phase=verify",
-  "takeaway": "Failed at verify: verifier wastes turns",
-  "pattern_key": "pipeline.fail.verify"
-}
-```
-
-### 自动注入
-
-`memory/active_context.md` 的内容会在每次 pipeline 运行时自动注入到 agent 的 system prompt 前面。这意味着：
-- 之前的教训会被 agent 看到，避免重复犯错
-- 积累越多经验，agent 越聪明
-- 不需要手动修改 prompt
-
-### 手动添加经验
-
-也可以手动记录经验（不需要跑 pipeline）：
-
-```python
-from zsiga.memory.learn import record_lesson
-
-record_lesson(
-    title="target project uses venv/",
-    context="stockshark has venv/bin/python",
-    takeaway="detect venv/ first, use venv/bin/python -m pytest",
-    pattern_key="tools.venv_detection",
-    source="manual",
-)
-```
-
-## 指标与里程碑
-
-### 查看仪表盘
+#### /api/health
 
 ```bash
-python3 -m zsiga dashboard
-# 生成 site/dashboard.html，浏览器打开即可
+curl http://localhost:58175/api/health
+# {"status": "healthy", "db_records": 138, "timestamp": "2026-05-25T08:24:04Z"}
+# HTTP 200 = healthy, HTTP 503 = unhealthy
 ```
 
-### 指标体系
+#### /api/proposal-stats
 
-| 指标 | 说明 |
+```bash
+curl http://localhost:58175/api/proposal-stats
+# {"total": 138, "by_outcome": {"success": 126, "skipped": 4, "reverted": 7},
+#  "avg_duration_seconds": 469.9, "recent": [...]}
+```
+
+### Dashboard
+
+浏览器打开：
+
+```
+http://<host>:58175/dashboard.html
+```
+
+自动刷新的 HTML 仪表盘，显示 Level 里程碑、成功率、Phase 耗时分布、提案队列。
+
+### 日志
+
+```bash
+# systemd 方式
+journalctl -u zsiga-daemon -f                    # 实时跟踪
+journalctl -u zsiga-daemon --since "10 min ago"  # 最近 10 分钟
+journalctl -u zsiga-daemon | grep "Phase\|Gate\|DONE\|FAIL"  # 关键事件
+
+# 脚本方式
+python -m zsiga daemon --port=58175  # 日志直接输出 stdout
+```
+
+#### 日志关键标记
+
+| 标记 | 含义 |
 |------|------|
-| Total Changes | 处理过的 change 总数 |
-| Success Rate | 完成全部 4 阶段的比例 |
-| First-Pass Test Rate | 实现阶段首次 pytest+ruff 通过率（无需修复循环） |
-| Verify Pass Rate | AI 验证通过率 |
-| Lessons Learned | 记忆系统积累的经验条数 |
-| Phase Performance | 每阶段的平均轮次、耗时、修复次数 |
+| `--- xxx (project) ---` | 开始处理 proposal |
+| `Proposal Gate: ACCEPT/REJECT` | Steward 判定 |
+| `Phase 0/6: CLARIFY` | 进入 CLARIFY |
+| `Phase 1/6: ENRICH` | 进入 ENRICH |
+| `Design Gate PASS/FAIL` | Judge 判定 |
+| `Judge feedback: ...` | Judge 反馈内容 |
+| `Phase 2/6: IMPLEMENT` | 开始写代码 |
+| `Verdict: PASS` | 验证通过 |
+| `DONE: xxx` | 全部完成 |
+| `Cycle complete: N changes processed` | 本轮结束 |
 
-### 里程碑
+### Langfuse 可观测性
 
-**L2: Better Tools（引入 LSP、AST grep、sub-agent）**
+配置 `LANGFUSE_*` 环境变量后，每次 pipeline 运行会上报 trace 到 Langfuse：
 
-| 条件 | 目标 | 当前 |
-|------|------|------|
-| 累计成功 change | ≥ 10 | 需积累 |
-| 总成功率 | ≥ 70% | 需积累 |
-| 覆盖项目数 | ≥ 3 | 需积累 |
-| 经验教训数 | ≥ 20 | 需积累 |
+- Trace 级别：`proposal:<change-name>`
+- Phase 级别：`phase:clarify`、`phase:implement` 等
+- Sub-agent 级别：`sub_agent:judge`、`sub_agent:scout` 等
 
-**L3: Self-Evolution（zsiga 修改自身代码）**
+访问 Langfuse dashboard 查看 LLM 调用链、token 消耗、耗时分析。
 
-| 条件 | 目标 | 当前 |
-|------|------|------|
-| 累计成功 change | ≥ 30 | 需积累 |
-| 总成功率 | ≥ 85% | 需积累 |
-| 验证通过率 | ≥ 80% | 需积累 |
-| 经验教训数 | ≥ 50 | 需积累 |
-| 首次测试通过率 | ≥ 60% | 需积累 |
+## 工作原理
 
-仪表盘会实时显示每项指标的进度条，全部达标时显示 ✅ READY。
+```
+openspec/changes/add-xxx/proposal.md   ← 你写这个
+                ↓
+        ┌─────────────────────────────────────────────────┐
+        │  zsiga pipeline                                 │
+        │                                                 │
+        │  Proposal Gate → Steward 评分                   │
+        │  CLARIFY     → 需求澄清                         │
+        │  ENRICH      → specs + test scenarios           │
+        │  Design Gate → Judge 评审 spec 质量              │
+        │  IMPLEMENT   → 代码 + 测试 + commit             │
+        │  REVIEW      → 代码审查                          │
+        │  VERIFY      → pytest + LLM 三维验证             │
+        │  OPTIMIZE    → 代码优化                          │
+        │  REFLECT     → 自我评估                          │
+        │  DELIVER     → feature branch → deploy → merge   │
+        └─────────────────────────────────────────────────┘
+                ↓
+openspec/changes/archive/2026-05-25-add-xxx/  ← 完成后归档
+```
 
 ## 安全机制
 
 | 机制 | 说明 |
 |------|------|
-| **Approval gate** | `require_approval: true` 时，实现前需人工确认 |
-| **Dry run** | `dry_run: true` 时，git push 只打印不执行 |
-| **Protected paths** | 不修改 migrations、生产配置、.env 等 |
-| **Max files per task** | 每个 task 最多改 3 个文件，防止大规模改动 |
-| **Auto revert** | 验证失败且修复超限时，自动 `git reset --hard` 回滚 |
-| **Scoped tools** | Agent 只能操作目标项目，不能修改 zsiga 自身 |
+| Proposal Gate | Steward 5 维度评分，低分 proposal 自动拒绝 |
+| Design Gate | Judge 评审 spec 质量，FAIL 则 ENRICH 重试 |
+| Feature Branch 隔离 | IMPLEMENT 在独立分支，不碰 deploy branch |
+| Auto Revert | 验证失败且修复超限时 git reset --hard 回滚 |
+| Protected Paths | 不修改 migrations、生产配置、.env |
+| DELIVER 原子性 | tag push / merge / deploy push 各自独立 try，互不阻塞 |
+
+## 记忆系统
+
+zsiga 从每次运行中积累经验到 `memory/learnings.jsonl`，自动注入到后续 agent 的 system prompt，避免重复犯错。
+
+```bash
+# 查看经验数量
+wc -l memory/learnings.jsonl
+
+# 手动添加经验
+python3 -c "
+from zsiga.memory.learn import record_lesson
+record_lesson(
+    title='target project uses venv/',
+    context='stockshark has venv/bin/python',
+    takeaway='detect venv/ first, use venv/bin/python -m pytest',
+    pattern_key='tools.venv_detection',
+    source='manual',
+)
+"
+```
 
 ## 项目结构
 
 ```
 zsiga/
 ├── zsiga.yaml                  # 全局配置
+├── .zsiga.env                  # 环境变量（gitignore）
 ├── requirements.txt
-├── pyproject.toml
-├── L2_PLAN.md                  # L2 架构决策文档
-├── skills/                     # Agent 行为约束
-│   ├── enrich.md               #   补全规则
-│   ├── implement.md            #   实现规则（含 AST 工具引导）
-│   ├── verify.md               #   验证规则
-│   └── safety.md               #   安全红线
-├── memory/                     # Agent 记忆（自我学习）
-│   ├── active_context.md       #   注入到每次 agent 运行的上下文（含炮姐口头禅）
-│   ├── learnings.jsonl         #   经验归档（追加写入）
-│   └── journal.jsonl           #   成长日记
-├── site/
-│   └── dashboard.html          #   ⚡ Level 仪表盘
-├── templates/                  # 模板（预留）
-└── zsiga/                      # 源码
-    ├── __init__.py
-    ├── __main__.py              # 入口：python -m zsiga
-    ├── config.py                # 配置加载（含 CompactionConfig）
-    ├── git_ops.py               # Git 操作
-    ├── agent/
-    │   ├── loop.py              #   LLM Agent Loop + Context Compaction
-    │   ├── tools.py             #   11 个工具（L1 6个 + L2 ast_search/ast_replace + L3 lsp_tools）
-    │   ├── compaction.py        #   ⚡ 电磁压缩（消息摘要 + fallback）
-    │   ├── ast_tools.py         #   🔍 电磁透视（ast-grep-py AST 搜索/替换）
-│   ├── lsp_tools.py         #   🔧 LSP 感知（goto_definition/find_references/diagnostics）
-    │   └── sub_agent.py         #   🐾 御坂网络（L1 分身 + Semaphore(2) 并行）
-    ├── intake/
-    │   └── scanner.py           #   目录扫描，发现 proposal
-    ├── memory/
-    │   ├── learn.py             #   经验记录
-    │   ├── journal.py           #   成长日记读写
-    │   └── context.py           #   上下文加载与合成
-    ├── metrics/
-    │   ├── types.py             #   数据模型 + Level 里程碑定义
-    │   ├── collector.py         #   指标采集与统计
-    │   └── dashboard.py         #   ⚡ HTML 仪表盘（炮姐吉祥物 + Level 体系）
-    └── pipeline/
-        ├── orchestrator.py      #   四阶段编排器（scoped test + 严格 fix prompt）
-        ├── enricher.py          #   Phase 1: 补全
-        ├── implementer.py       #   Phase 2: 实现
-        ├── verifier.py          #   Phase 3: 验证
-        └── utils.py             #   机械化验证（scoped test targets）+ 归档
+├── zsiga/
+│   ├── __main__.py             # 入口
+│   ├── config.py               # 配置加载
+│   ├── daemon.py               # Daemon 模式 + HTTP API
+│   ├── git_ops.py              # Git 操作
+│   ├── agent/
+│   │   ├── loop.py             # LLM Agent Loop
+│   │   ├── tools.py            # 工具注册
+│   │   ├── roles.py            # 角色定义 + system prompt
+│   │   ├── intent_router.py    # 意图路由
+│   │   ├── sub_agent.py        # 子代理调度
+│   │   └── langfuse_shim.py    # Langfuse 可观测性
+│   ├── intake/
+│   │   └── scanner.py          # Proposal 扫描
+│   ├── memory/
+│   │   ├── learn.py            # 经验记录
+│   │   ├── journal.py          # 成长日记
+│   │   └── context.py          # 上下文合成
+│   ├── metrics/
+│   │   ├── collector.py        # 指标采集
+│   │   └── dashboard.py        # HTML 仪表盘
+│   └── pipeline/
+│       ├── orchestrator.py     # Pipeline 编排
+│       ├── enricher.py         # ENRICH 阶段
+│       ├── implementer.py      # IMPLEMENT 阶段
+│       ├── verifier.py         # VERIFY 阶段
+│       ├── proposal_gate.py    # Steward Gate
+│       └── utils.py            # 工具函数 + 归档
+├── openspec/
+│   └── changes/                # Proposal 目录
+│       ├── my-feature/
+│       │   └── proposal.md
+│       └── archive/            # 已完成归档
+├── memory/
+│   ├── active_context.md       # 注入到 agent 的上下文
+│   ├── learnings.jsonl         # 经验库
+│   └── journal.jsonl           # 成长日记
+├── data/
+│   ├── zsiga.db                # Pipeline 记录 DB
+│   └── lock.pid                # PID 锁文件
+└── skills/                     # Agent 行为约束
+    ├── enrich.md
+    ├── implement.md
+    ├── verify.md
+    └── safety.md
 ```
-
-## Agent 工具
-
-zsiga Level 2 注册 8 个工具，全部指向**目标项目**：
-
-### L1 基础工具（超电磁炮）
-| 工具 | 作用 |
-|------|------|
-| `bash` | 在目标项目目录执行 shell 命令 |
-| `read_file` | 读取目标项目文件 |
-| `write_file` | 在目标项目创建/覆盖文件 |
-| `edit_file` | 精确替换文件中的文本片段（old_text 必须唯一匹配） |
-| `search` | 正则搜索目标项目文件内容 |
-| `list_files` | 列出目标项目目录结构 |
-
-### L2 新增工具（电磁透视）
-| 工具 | 作用 |
-|------|------|
-| `ast_search` | AST 模式搜索 — 用 `$VAR`/`$$$` 匹配代码结构，14种语言自动检测 |
-| `ast_replace` | AST 模式替换 — 保证语法正确性的精确代码替换 |
-
-### L3 新增工具（LSP 感知）
-| 工具 | 作用 |
-|------|------|
-| `goto_definition` | 跳转到定义 — 给定文件/行/列，找到符号的定义位置（jedi 本地 / grep 远程） |
-| `find_references` | 查找引用 — 找到符号在项目中的所有引用位置 |
-| `diagnostics` | 诊断文件 — 检查语法错误和 lint 问题（jedi + ruff） |
-
-## 常见问题
-
-### API 超时
-
-检查网络代理。如果公司内网需要代理访问外部 API：
-
-```yaml
-agent:
-  llm:
-    proxy: http://your-proxy:8080
-```
-
-### ruff/pytest 找不到
-
-zsiga 会自动探测目标项目的 `venv/` 或 `.venv/`。确保目标项目有虚拟环境且安装了 pytest 和 ruff：
-
-```bash
-cd your-project
-source venv/bin/activate
-pip install pytest ruff
-```
-
-### 目标项目已有 lint 错误
-
-zsiga 的机械化验证只检查**本轮改动文件**（基于 git diff），不会因为目标项目已有的 lint 问题而失败。
-
-### 中断后重新运行
-
-pipeline 是幂等的：
-- ENRICH：如果 specs/design/tasks 已存在，跳过
-- IMPLEMENT：如果 tasks.md 全部已勾选 `- [x]`，不再实现
-- 可安全地多次运行
-
-### 指定 Python 版本
-
-zsiga 要求 Python >= 3.10。如果系统默认版本较低：
-
-```bash
-python3.11 -m zsiga
-```
-
-## 与目标项目的关系
-
-```
-zsiga（独立智能体）          目标项目（d8q 等）
-┌─────────────────┐        ┌────────────────────────────┐
-│ zsiga.yaml      │        │ openspec/                  │
-│ zsiga/ (源码)    │───────▶│   changes/                 │
-│ skills/         │  读写   │     add-xxx/               │
-│ memory/         │        │       proposal.md ← 人写    │
-└─────────────────┘        │       specs/     ← zsiga 生成│
-                           │       design.md  ← zsiga 生成│
-                           │       tasks.md   ← zsiga 生成│
-                           │ src/             ← zsiga 修改│
-                           │ tests/           ← zsiga 修改│
-                           └────────────────────────────┘
-```
-
-zsiga 不修改自身代码，所有操作都发生在目标项目上。
 
 ## License
 
