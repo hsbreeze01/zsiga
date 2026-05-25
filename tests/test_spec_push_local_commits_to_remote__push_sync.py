@@ -129,19 +129,11 @@ def test_no_divergence_after_sync():
 
 
 def test_no_source_files_modified():
-    """The push operation must not modify any tracked source files.
-
-    NOTE: The push itself is a pure git-ref operation and touches zero
-    working-tree files.  The 'dirty' files visible in the working tree
-    are from *this* change (specs + test file), not from the push.
-    We verify by comparing the tree at HEAD against the tree at the
-    pre-push remote HEAD (1027dbb).  The diff must only show commits
-    that were already committed locally before this change started.
-    """
-    _git("fetch", "origin")
-    status = _git("status", "--porcelain", "--branch")
-    # Branch should be ahead or up-to-date, never behind
-    assert "behind" not in status, f"Branch is behind remote after push: {status}"
+    """The push operation must not modify any tracked source files."""
+    diff_output = _git("diff", "--name-only", "HEAD")
+    assert diff_output == "", (
+        f"Expected no modified source files, but found:\n{diff_output}"
+    )
 
 
 def test_branch_not_behind_after_sync():
