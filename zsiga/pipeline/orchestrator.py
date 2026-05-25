@@ -437,7 +437,7 @@ class ZsigaOrchestrator:
             return await self._run_phases(prop, rec, change_dir, target_path,
                                           project_name, project_config, change_name,
                                           transport, skip_enrich=skip_enrich,
-                                          intent=intent)
+                                          intent=intent, trace_cm=_trace_cm)
         finally:
             record_change(rec)
             export_session(change_name)
@@ -484,7 +484,8 @@ class ZsigaOrchestrator:
                           project_name, project_config, change_name,
                           transport: Transport,
                           skip_enrich: bool = False,
-                          intent: object = None) -> bool:
+                          intent: object = None,
+                          trace_cm: object = None) -> bool:
         cycle_start = time.monotonic()
 
         # Phase WAL for crash recovery
@@ -1259,7 +1260,7 @@ class ZsigaOrchestrator:
         archive_change(target_path, change_name, transport=transport)
         deliver_seconds = time.monotonic() - t0
         if _p6 is not None: _p6_cm.__exit__(None, None, None)
-        if _trace is not None: _trace_cm.__exit__(None, None, None)
+        if trace_cm is not None: trace_cm.__exit__(None, None, None)
         rec.phases.append(PhaseRecord(
             phase=Phase.DELIVER, outcome=Outcome.SUCCESS,
             seconds_used=deliver_seconds,
