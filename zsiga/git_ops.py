@@ -54,18 +54,20 @@ def tag(target_path: str, tag_name: str, transport: Transport = None, force: boo
 
 
 def push(target_path: str, remote: str = "origin", branch: str | None = None,
-         dry_run: bool = False, transport: Transport = None):
+         dry_run: bool = False, transport: Transport = None, tag_name: str | None = None):
     transport = transport or LocalTransport()
     if branch is None:
         branch = current_branch(target_path, transport=transport)
     if dry_run:
-        print(f"  [DRY RUN] git push {remote} {branch} --tags")
+        print(f"  [DRY RUN] git push {remote} {branch}")
         return
     print(f"  git push {remote} {branch} ...")
     r = transport.run_shell(f"git push {remote} {branch}", cwd=target_path)
     _check_result(r, "git push")
-    r2 = transport.run_shell("git push --tags", cwd=target_path)
-    _check_result(r2, "git push --tags")
+    if tag_name:
+        print(f"  git push {remote} refs/tags/{tag_name} ...")
+        r2 = transport.run_shell(f"git push {remote} refs/tags/{tag_name}", cwd=target_path)
+        _check_result(r2, f"git push tag {tag_name}")
     print(f"  ✅ pushed {remote} {branch}")
 
 

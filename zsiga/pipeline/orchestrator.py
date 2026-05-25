@@ -1184,7 +1184,7 @@ class ZsigaOrchestrator:
         # Push feature branch, then merge into deploy branch
         if not self.config.safety.dry_run:
             try:
-                git_ops.push(target_path, branch=feature_branch, transport=transport)
+                git_ops.push(target_path, branch=feature_branch, transport=transport, tag_name=f"zsiga-{change_name}")
                 git_ops.checkout(target_path, deploy_branch, transport=transport)
                 git_ops.pull(target_path, branch=deploy_branch, transport=transport)
                 git_ops.merge_branch(target_path, feature_branch, transport=transport)
