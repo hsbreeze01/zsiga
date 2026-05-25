@@ -20,7 +20,7 @@ import asyncio
 import fcntl
 from pathlib import Path
 from datetime import datetime
-from http.server import HTTPServer, ThreadingHTTPServer, SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
 
 
@@ -341,6 +341,7 @@ def _build_proposal_stats_json(db_path: str) -> dict:
     p = Path(db_path)
     if not p.exists():
         return {"error": f"Database file not found: {db_path}"}
+    conn = None
     try:
         conn = sqlite3.connect(str(p))
         conn.row_factory = sqlite3.Row
@@ -349,7 +350,6 @@ def _build_proposal_stats_json(db_path: str) -> dict:
             "SELECT name FROM sqlite_master WHERE type='table' AND name='changes'"
         ).fetchall()
         if not tables:
-            conn.close()
             return {"error": "changes table does not exist in database"}
 
         # Total count
@@ -368,7 +368,7 @@ def _build_proposal_stats_json(db_path: str) -> dict:
             ) AS avg_dur
             FROM changes
             WHERE finished_at IS NOT NULL AND finished_at != ''
-        """
+            """
         ).fetchone()
         avg_duration_seconds = avg_row["avg_dur"]
         if avg_duration_seconds is not None:
@@ -388,7 +388,6 @@ def _build_proposal_stats_json(db_path: str) -> dict:
             }
             for r in recent_rows
         ]
-        conn.close()
         return {
             "total": total,
             "by_outcome": by_outcome,
@@ -397,6 +396,9 @@ def _build_proposal_stats_json(db_path: str) -> dict:
         }
     except Exception as exc:
         return {"error": str(exc)}
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 def _serve_dashboard(port: int):
@@ -410,21 +412,16 @@ def _serve_dashboard(port: int):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=serve_dir, **kwargs)
 
-        def _send_json(self, payload: str):
+        def _send_json(self, payload: str, status: int = 200):
             body = payload.encode("utf-8")
-            self.send_response(200)
+            self.send_response(status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
 
         def _send_json_error(self, message: str):
-            body = json.dumps({"error": message}).encode("utf-8")
-            self.send_response(500)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._send_json(json.dumps({"error": message}), status=500)
 
         def do_GET(self):
             if self.path == "/api/status.json":
