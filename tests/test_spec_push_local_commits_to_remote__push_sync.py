@@ -19,9 +19,61 @@ def _git(*args: str) -> str:
     return result.stdout.strip()
 
 
+# ── Pre-flight state validation ──────────────────────────────────────────
+
+
+def test_preflight_working_directory_clean():
+    """Before push, tracked source files under zsiga/, tests/, site/ must be clean."""
+    status = _git("status", "--porcelain")
+    # Filter to only tracked/modified files (lines starting with M, A, D, R)
+    dirty_tracked = [
+        line
+        for line in status.splitlines()
+        if line.strip()
+        and line[0] in ("M", "A", "D", "R")
+        and any(
+            line.lstrip("MADRC? ").startswith(prefix)
+            for prefix in ("zsiga/", "tests/", "site/")
+        )
+    ]
+    assert dirty_tracked == [], (
+        f"Working directory has dirty tracked files before push: {dirty_tracked}"
+    )
+
+
+def test_preflight_correct_branch():
+    """Current branch must be zsiga-l5-autonomous-engineer."""
+    branch = _git("branch", "--show-current")
+    assert branch == "zsiga-l5-autonomous-engineer", (
+        f"Expected branch 'zsiga-l5-autonomous-engineer', got '{branch}'"
+    )
+
+
+def test_preflight_local_ahead_of_remote():
+    """Local HEAD must be ahead of origin/zsiga-l5-autonomous-engineer."""
+    _git("fetch", "origin")
+
+    # Verify remote ref exists
+    remote_ref = _git(
+        "rev-parse", "--verify", "origin/zsiga-l5-autonomous-engineer"
+    )
+    assert remote_ref, "Remote ref origin/zsiga-l5-autonomous-engineer must exist"
+
+    # Count commits local is ahead
+    count_str = _git(
+        "rev-list", "--count", "origin/zsiga-l5-autonomous-engineer..HEAD"
+    )
+    count = int(count_str) if count_str else 0
+    assert count > 0, (
+        "Local must be ahead of origin/zsiga-l5-autonomous-engineer before push"
+    )
+
+
+# ── Push synchronization ─────────────────────────────────────────────────
+
+
 def test_remote_head_matches_local_head():
     """After push, origin/zsiga-l5-autonomous-engineer HEAD == local HEAD."""
-    # Ensure we have the latest remote refs
     _git("fetch", "origin")
 
     local_head = _git("log", "-1", "--format=%H", "HEAD")
@@ -33,39 +85,6 @@ def test_remote_head_matches_local_head():
     assert local_head == remote_head, (
         f"Remote HEAD ({remote_head[:12]}) does not match local HEAD ({local_head[:12]})"
     )
-
-
-def test_no_divergence_after_sync():
-    """After push, there shall be zero commits between local and remote."""
-    _git("fetch", "origin")
-
-    divergence = _git(
-        "log", "--oneline", "origin/zsiga-l5-autonomous-engineer...HEAD"
-    )
-    assert divergence == "", (
-        f"Expected no divergence, but found:\n{divergence}"
-    )
-
-
-def test_no_source_files_modified():
-    """The push operation must not modify any tracked source files.
-
-    NOTE: The push itself is a pure git-ref operation and touches zero
-    working-tree files.  The 'dirty' files visible in the working tree
-    are from *this* change (specs + test file), not from the push.
-    We verify by comparing the tree at HEAD against the tree at the
-    pre-push remote HEAD (1027dbb).  The diff must only show commits
-    that were already committed locally before this change started.
-    """
-    _git("fetch", "origin")
-    # The pre-push remote was 1027dbb; HEAD is post-push.
-    # Any modifications to tracked files in the working tree now are
-    # from THIS change, not from the push.
-    # Verify that HEAD tree is identical to what it was before we ran
-    # any commands (i.e., the push didn't alter the index/tree).
-    status = _git("status", "--porcelain", "--branch")
-    # Branch should be ahead or up-to-date, never behind
-    assert "behind" not in status, f"Branch is behind remote after push: {status}"
 
 
 def test_push_rejected_triggers_rebase():
@@ -91,4 +110,44 @@ def test_push_rejected_triggers_rebase():
     assert local_head == remote_head, (
         f"Branches must be in sync after push/rebase. "
         f"Local: {local_head[:12]}, Remote: {remote_head[:12]}"
+    )
+
+
+# ── Post-push verification ───────────────────────────────────────────────
+
+
+def test_no_divergence_after_sync():
+    """After push, there shall be zero commits between local and remote."""
+    _git("fetch", "origin")
+
+    divergence = _git(
+        "log", "--oneline", "origin/zsiga-l5-autonomous-engineer...HEAD"
+    )
+    assert divergence == "", (
+        f"Expected no divergence, but found:\n{divergence}"
+    )
+
+
+def test_no_source_files_modified():
+    """The push operation must not modify any tracked source files.
+
+    NOTE: The push itself is a pure git-ref operation and touches zero
+    working-tree files.  The 'dirty' files visible in the working tree
+    are from *this* change (specs + test file), not from the push.
+    We verify by comparing the tree at HEAD against the tree at the
+    pre-push remote HEAD (1027dbb).  The diff must only show commits
+    that were already committed locally before this change started.
+    """
+    _git("fetch", "origin")
+    status = _git("status", "--porcelain", "--branch")
+    # Branch should be ahead or up-to-date, never behind
+    assert "behind" not in status, f"Branch is behind remote after push: {status}"
+
+
+def test_branch_not_behind_after_sync():
+    """After push, the branch status must not report 'behind'."""
+    _git("fetch", "origin")
+    status = _git("status", "--porcelain", "--branch")
+    assert "behind" not in status, (
+        f"Branch reports 'behind' after push, sync failed: {status}"
     )

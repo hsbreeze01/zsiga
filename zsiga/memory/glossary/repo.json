@@ -1,6 +1,6 @@
 {
   "project": "repo",
-  "extracted_at": "2026-05-24T11:58:55.575616",
+  "extracted_at": "2026-05-25T12:03:47.222085",
   "entries": [
     {
       "name": "ClusterInfo",
@@ -1533,6 +1533,36 @@
       "file": "tests/test_skill_evolver.py"
     },
     {
+      "name": "TestUptimeSecondsPresentWithValidStartedAt",
+      "category": "class",
+      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
+    },
+    {
+      "name": "TestUptimeSecondsNullWhenStartedAtMissing",
+      "category": "class",
+      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
+    },
+    {
+      "name": "TestUptimeSecondsNullWhenStartedAtUnparseable",
+      "category": "class",
+      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
+    },
+    {
+      "name": "TestUptimeSecondsIncreasesBetweenCalls",
+      "category": "class",
+      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
+    },
+    {
+      "name": "TestExistingDaemonFieldsUnchanged",
+      "category": "class",
+      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
+    },
+    {
+      "name": "TestTimezoneAwareStartedAt",
+      "category": "class",
+      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
+    },
+    {
       "name": "TestPostImplementLintAutoFix",
       "category": "class",
       "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__post_implement_lint_autofix.py"
@@ -1681,6 +1711,86 @@
       "name": "test_record_injection_explicit_timestamp",
       "category": "function",
       "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
+    },
+    {
+      "name": "TestProposalGateBlockStructure",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestProposalGateEnabledTrue",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestProposalGateValueTypes",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestDesignGateBlockStructure",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestDesignGateEnabledTrue",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestDesignGateValueTypes",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestConfigParsesProposalGate",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestConfigParsesDesignGate",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestExistingPipelineScalarsUnchanged",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestCompactionSubtreeUnchanged",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestYamlSafeLoadSucceeds",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestYamlRoundtripPreservesGates",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestNoDuplicateYamlKeys",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestProposalGateCanBeDisabled",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "TestDesignGateCanBeDisabled",
+      "category": "class",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
+    },
+    {
+      "name": "YAML_PATH",
+      "category": "config",
+      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
     },
     {
       "name": "TestRemoveDaemonCycleErrorFromJsonl",
@@ -1908,6 +2018,26 @@
       "file": "tests/test_spec_parser.py"
     },
     {
+      "name": "test_remote_head_matches_local_head",
+      "category": "function",
+      "file": "tests/test_spec_push_local_commits_to_remote__push_sync.py"
+    },
+    {
+      "name": "test_no_divergence_after_sync",
+      "category": "function",
+      "file": "tests/test_spec_push_local_commits_to_remote__push_sync.py"
+    },
+    {
+      "name": "test_no_source_files_modified",
+      "category": "function",
+      "file": "tests/test_spec_push_local_commits_to_remote__push_sync.py"
+    },
+    {
+      "name": "test_push_rejected_triggers_rebase",
+      "category": "function",
+      "file": "tests/test_spec_push_local_commits_to_remote__push_sync.py"
+    },
+    {
       "name": "change_layout",
       "category": "function",
       "file": "tests/test_spec_pytest_check.py"
@@ -2021,6 +2151,236 @@
       "name": "BROKEN_TEST_SOURCE",
       "category": "config",
       "file": "tests/test_spec_pytest_check.py"
+    },
+    {
+      "name": "test_execution_report_md_generated",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
+    },
+    {
+      "name": "test_execution_report_md_contains_required_sections",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
+    },
+    {
+      "name": "test_execution_report_md_includes_timestamp",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
+    },
+    {
+      "name": "test_learnings_jsonl_sre_category",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
+    },
+    {
+      "name": "test_learnings_entry_required_fields",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
+    },
+    {
+      "name": "test_learnings_append_additive",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
+    },
+    {
+      "name": "test_no_git_commit_in_command_history",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
+    },
+    {
+      "name": "test_detect_sre_intent_chinese_keywords",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
+    },
+    {
+      "name": "test_detect_sre_intent_english_keywords",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
+    },
+    {
+      "name": "test_sre_takes_precedence_over_code",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
+    },
+    {
+      "name": "test_pure_code_returns_code_intent",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
+    },
+    {
+      "name": "test_unrecognized_defaults_to_code",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
+    },
+    {
+      "name": "test_sre_keywords_constant_exists",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
+    },
+    {
+      "name": "test_dispatch_sre_intent_to_sre_pipeline",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
+    },
+    {
+      "name": "test_dispatch_code_intent_to_code_pipeline",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
+    },
+    {
+      "name": "test_single_dispatch_mutual_exclusivity",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
+    },
+    {
+      "name": "test_code_pipeline_path_preserved",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
+    },
+    {
+      "name": "test_orchestrator_initializes_with_both_pipelines",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
+    },
+    {
+      "name": "test_pipeline_five_phases_in_order",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_pipeline_run_produces_all_phase_records",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_diagnose_uses_read_only_commands",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_plan_generates_whitelisted_commands",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_execute_stops_on_first_failure",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_execute_succeeds_all_pass",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_verify_success",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_verify_failure",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_pipeline_no_git_commit",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_report_produces_execution_report_data",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
+    },
+    {
+      "name": "test_sre_role_registered",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
+    },
+    {
+      "name": "test_sre_role_allowed_tools",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
+    },
+    {
+      "name": "test_sre_system_prompt_idempotency",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
+    },
+    {
+      "name": "test_sre_system_prompt_rollback",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
+    },
+    {
+      "name": "test_sre_system_prompt_whitelist",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
+    },
+    {
+      "name": "test_sre_system_prompt_no_git_commit",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
+    },
+    {
+      "name": "test_whitelisted_systemctl_status",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_whitelisted_sudo_systemctl",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_non_whitelisted_rejected",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_blacklisted_rm_rf",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_blacklisted_iptables",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_blacklisted_reboot",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_blacklisted_sudo_reboot",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_blacklisted_sysctl",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_blacklist_precedence_over_whitelist",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_dangerous_command_flagged_stop",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_safe_command_not_flagged",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+    },
+    {
+      "name": "test_execute_failure_triggers_rollback",
+      "category": "function",
+      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
     },
     {
       "name": "TestClassifyFailure",
@@ -2573,6 +2933,11 @@
       "file": "zsiga/agent/sub_agent.py"
     },
     {
+      "name": "MultiRoleHandle",
+      "category": "class",
+      "file": "zsiga/agent/sub_agent.py"
+    },
+    {
       "name": "create_sub_agent",
       "category": "function",
       "file": "zsiga/agent/sub_agent.py"
@@ -2584,6 +2949,11 @@
     },
     {
       "name": "dispatch_many",
+      "category": "function",
+      "file": "zsiga/agent/sub_agent.py"
+    },
+    {
+      "name": "dispatch_multi_role",
       "category": "function",
       "file": "zsiga/agent/sub_agent.py"
     },
@@ -3541,6 +3911,41 @@
       "name": "MAX_CONTEXT_CHARS",
       "category": "config",
       "file": "zsiga/pipeline/project_context.py"
+    },
+    {
+      "name": "FileFact",
+      "category": "class",
+      "file": "zsiga/pipeline/proposal_fact_extractor.py"
+    },
+    {
+      "name": "SymbolFact",
+      "category": "class",
+      "file": "zsiga/pipeline/proposal_fact_extractor.py"
+    },
+    {
+      "name": "FactReport",
+      "category": "class",
+      "file": "zsiga/pipeline/proposal_fact_extractor.py"
+    },
+    {
+      "name": "extract_facts",
+      "category": "function",
+      "file": "zsiga/pipeline/proposal_fact_extractor.py"
+    },
+    {
+      "name": "GateVerdict",
+      "category": "class",
+      "file": "zsiga/pipeline/proposal_gate.py"
+    },
+    {
+      "name": "ProposalGateResult",
+      "category": "class",
+      "file": "zsiga/pipeline/proposal_gate.py"
+    },
+    {
+      "name": "register_tools_for_steward",
+      "category": "function",
+      "file": "zsiga/pipeline/proposal_gate.py"
     },
     {
       "name": "UnsupportedTargetKind",
