@@ -1208,20 +1208,48 @@ class ZsigaOrchestrator:
         # Push feature branch, then merge into deploy branch
         if not self.config.safety.dry_run:
             try:
-                git_ops.push(target_path, branch=feature_branch, transport=transport, tag_name=f"zsiga-{change_name}")
-                git_ops.checkout(target_path, deploy_branch, transport=transport)
-                git_ops.pull(target_path, branch=deploy_branch, transport=transport)
-                git_ops.merge_branch(target_path, feature_branch, transport=transport)
-                git_ops.push(target_path, branch=deploy_branch, transport=transport)
+                git_ops.push(target_path, branch=feature_branch, transport=transport)
             except RuntimeError as e:
-                print(f"  ❌ DELIVER failed: {e}")
+                print(f"  ❌ DELIVER failed: feature branch push: {e}")
                 rec.outcome = Outcome.FAIL
                 rec.phases.append(PhaseRecord(
                     phase=Phase.DELIVER, outcome=Outcome.FAIL,
                     detail=str(e)[:200],
                 ))
                 return False
-            # Best-effort branch cleanup — don't abort on failure
+
+            git_ops.checkout(target_path, deploy_branch, transport=transport)
+            git_ops.pull(target_path, branch=deploy_branch, transport=transport)
+
+            try:
+                git_ops.merge_branch(target_path, feature_branch, transport=transport)
+            except RuntimeError as e:
+                print(f"  ❌ DELIVER failed: merge into {deploy_branch}: {e}")
+                rec.outcome = Outcome.FAIL
+                rec.phases.append(PhaseRecord(
+                    phase=Phase.DELIVER, outcome=Outcome.FAIL,
+                    detail=str(e)[:200],
+                ))
+                return False
+
+            try:
+                git_ops.push(target_path, branch=deploy_branch, transport=transport)
+            except RuntimeError as e:
+                print(f"  ❌ DELIVER failed: deploy branch push: {e}")
+                rec.outcome = Outcome.FAIL
+                rec.phases.append(PhaseRecord(
+                    phase=Phase.DELIVER, outcome=Outcome.FAIL,
+                    detail=str(e)[:200],
+                ))
+                return False
+
+            # Tag push: best-effort, never blocks the deliver
+            try:
+                git_ops.push(target_path, transport=transport, tag_name=f"zsiga-{change_name}")
+            except RuntimeError:
+                print(f"  ⚠ Tag push failed (non-blocking)")
+
+            # Best-effort branch cleanup
             try:
                 git_ops.delete_branch(target_path, feature_branch, transport=transport)
             except RuntimeError:

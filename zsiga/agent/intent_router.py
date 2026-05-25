@@ -79,7 +79,9 @@ _SRE_KEYWORDS = re.compile(
     r"健康检查|服务状态|重启|部署|监控|告警|磁盘|内存|CPU|"
     r"healthcheck|restart|deploy|monitor|alert|disk|memory|"
     r"infrastructure|运维|operation|service|服务恢复|故障恢复|"
-    r"cmdb|inventory|巡检",
+    r"cmdb|inventory|巡检|git push|push.*remote|push.*origin|"
+    r"远端仓库|同步到|推送到|push到|pull.*rebase|"
+    r"服务启停|进程管理|日志清理|资源回收",
     re.IGNORECASE,
 )
 
@@ -326,7 +328,7 @@ def classify(message: str, config: ZsigaConfig | None = None, source: str = None
 
     sre_matches = _SRE_KEYWORDS.findall(text)
     if sre_matches:
-        sre_score = len(sre_matches) + 1
+        sre_score = len(sre_matches) + 3
         scores.append((sre_score, IntentType.SRE,
                        f"SRE/运维类关键词 ({len(sre_matches)} 个匹配)"))
 
