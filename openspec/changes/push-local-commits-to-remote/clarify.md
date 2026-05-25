@@ -3,62 +3,70 @@
 ## 需求拆解
 
 ### 原始需求
-将本地 `zsiga-l5-autonomous-engineer` 分支上落后的 26 个 commit（含 9-role sub-agent 系统、确定性事实提取、Design Gate 修复等关键基础设施代码）同步推送到远端 `origin/zsiga-l5-autonomous-engineer`。远端当前停留在 commit `1027dbb`，需要与本地对齐。
+
+将本地 `zsiga-l5-autonomous-engineer` 分支的 26 个未推送 commit（含 9-role sub-agent 系统、确定性事实提取、Design Gate 修复等关键基础设施代码）部署到远端 `origin/zsiga-l5-autonomous-engineer`。当前远端停在 commit `1027dbb`，严重落后于本地。若推送失败需先 rebase 再重试。
 
 ### 拆解后的子任务
-- [ ] 1. **前置检查**：确认本地分支状态（是否有未提交的更改、当前分支是否正确、本地与远端的 commit 差异量） (预估复杂度：低, 预估 token：~500 / 无历史参考)
-- [ ] 2. **执行 git push**：将本地 `zsiga-l5-autonomous-engineer` 分支推送到 `origin`；若因远端存在新 commit 导致 push 失败，执行 `git pull --rebase origin zsiga-l5-autonomous-engineer` 解决冲突后重试推送 (预估复杂度：低, 预估 token：~800 / 无历史参考)
-- [ ] 3. **验证推送结果**：确认 `git log origin/zsiga-l5-autonomous-engineer -1` 输出的 commit hash 与本地最新 commit 一致，无报错 (预估复杂度：低, 预估 token：~300 / 无历史参考)
+
+- [ ] 1. 验证本地分支状态与远端差异 (预估复杂度：低, 预估 token：~1500 / 无历史参考)
+  - 确认当前在 `zsiga-l5-autonomous-engineer` 分支
+  - 统计本地领先 origin 的 commit 数量
+  - 确认无未提交的脏文件
+
+- [ ] 2. 执行 git push 并处理冲突 (预估复杂度：中, 预估 token：~2500 / 无历史参考)
+  - 执行 `git push origin zsiga-l5-autonomous-engineer`
+  - 若因远端有新 commit 导致失败，执行 `git pull --rebase origin zsiga-l5-autonomous-engineer` 解决冲突后重新 push
+  - 确保最终 push 成功，无报错
+
+- [ ] 3. 验证远端同步状态 (预估复杂度：低, 预估 token：~1000 / 无历史参考)
+  - `git log origin/zsiga-l5-autonomous-engineer -1` 显示最新本地 commit
+  - 本地与远端 commit 一致，无遗留差异
 
 ## 边界
 
 ### IN scope
-- `git push origin zsiga-l5-autonomous-engineer` 操作
-- push 失败时的 `git pull --rebase` 冲突解决与重试
-- 推送后的 commit hash 对齐验证
+- 将 `zsiga-l5-autonomous-engineer` 分支本地 commit 推送到 `origin`
+- 处理因远端有新 commit 导致的 push 失败（rebase 后重试）
+- 验证远端分支与本地一致
 
 ### OUT of scope
-- 代码逻辑修改（不修改任何 Python 源码、配置文件或测试文件）
-- 其他分支的同步操作
-- CI/CD 流水线配置或触发
-- 远端仓库权限配置或 SSH key 设置
+- 不修改任何源代码文件
+- 不涉及其他分支的推送或合并
+- 不涉及 CI/CD pipeline 配置
+- 不审查 26 个 commit 的内容质量
 
 ### 依赖的外部条件
-- 本地 git 工作区无未提交的脏文件（或有 stash 机制）
-- 对 `origin` 远端有 push 权限
-- 网络可达远端 git 仓库
-- 已有测试文件 `tests/test_spec_push_local_commits_to_remote__push_sync.py` 可作为验证参考
+- 本地 git 工作目录干净（无未提交更改）
+- 网络 connectivity 到 origin 远端仓库
+- 对 origin 有 push 权限
 
 ## 目标
 
 ### 成功标准
 1. `git log origin/zsiga-l5-autonomous-engineer -1` 输出的 commit hash 与本地最新 commit 一致
-2. push 过程无错误退出（退出码 0）
-3. 若发生冲突，rebase 后推送成功且无代码丢失
+2. `git push` 过程无错误
+3. 本地与远端 `zsiga-l5-autonomous-engineer` 分支零差异（`git rev-list HEAD...origin/zsiga-l5-autonomous-engineer --count` 返回 0）
 
 ### 验收方式
-- 在终端执行 `git log origin/zsiga-l5-autonomous-engineer -1`，确认输出为本地最新 commit
-- 执行 `git status` 确认工作区干净
-- 执行 `git log --oneline origin/zsiga-l5-autonomous-engineer | head -30` 确认远端包含全部 26 个新 commit
+- 执行 `git log origin/zsiga-l5-autonomous-engineer -1` 确认 commit hash
+- 执行 `git rev-list --left-right --count origin/zsiga-l5-autonomous-engineer...HEAD` 确认双向零差异
+- 已有测试文件 `tests/test_spec_push_local_commits_to_remote__push_sync.py` 应通过
 
 ## 约束
 
 ### 不能修改的文件
-- 所有 `zsiga/` 目录下的 Python 源码
-- `zsiga.yaml` 配置文件
-- `pyproject.toml`、`requirements.txt`
-- `tests/` 目录下所有测试文件（仅可运行，不可修改）
-- `site/dashboard.html` 前端模板
+- 无（本操作不涉及代码修改，仅为 git 操作）
 
 ### 项目部署分支
-`zsiga-l5-autonomous-engineer`
+- `zsiga-l5-autonomous-engineer`（推送到 `origin/zsiga-l5-autonomous-engineer`）
 
 ### 已知风险
-- **远端存在新 commit**：若 `origin/zsiga-l5-autonomous-engineer` 在 `1027dbb` 之后有了新提交，push 会失败，需要 rebase 解决冲突；rebase 过程中可能出现冲突需手动解决
-- **网络中断**：push 过程中网络不可达会导致操作失败，需重试
-- **冲突复杂度**：26 个 commit 的 rebase 如果遇到冲突，可能需要逐个 commit 解决
+- **远端有新 commit**：若远端分支在 `1027dbb` 之后有其他人推送的 commit，需要 rebase 解决冲突，26 个 commit 的 rebase 可能量大且需逐个处理冲突
+- **push 权限不足**：若当前凭证无 push 权限，操作会直接失败，需人工介入
+- **网络不稳定**：大 commit 集推送可能因网络中断导致部分传输，git 会自动处理但可能需重试
+- **rebase 过程中的合并冲突**：26 个 commit 中的任意一个可能与远端新 commit 产生冲突，需逐个解决
 
 ### 预估 token 消耗
-- prompt: ~200
-- completion: ~100
-- 数据来源: 无历史参考（纯 git 操作，非代码生成任务）
+- prompt: ~3000
+- completion: ~1000
+- 数据来源: 无历史参考（纯 git 操作任务）
