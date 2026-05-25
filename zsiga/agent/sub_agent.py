@@ -95,7 +95,7 @@ async def run_sub_agent(
     elapsed = time.monotonic() - start
 
     success = result.content not in ("TIMEOUT", "MAX_TURNS_REACHED")
-    if _span: _span.__exit__(None, None, None)
+    if _span is not None: span_cm.__exit__(None, None, None)
 
     return SubAgentResult(
         content=result.content,

@@ -515,7 +515,8 @@ class ZsigaOrchestrator:
             self.agent.set_phase("clarify")
             register_tools(self.agent, target_path, transport=transport)
             t0 = time.monotonic()
-            _p0 = phase_span("clarify", change_name=change_name).__enter__()
+            _p0_cm = phase_span("clarify", change_name=change_name)
+            _p0 = _p0_cm.__enter__()
 
             # Optional parallel explore pool for CLARIFY
             supplementary_context = ""
@@ -565,7 +566,7 @@ class ZsigaOrchestrator:
                 llm_calls=clarify_calls[0], tool_calls=clarify_calls[1],
                 prompt_tokens=clarify_tokens[0], completion_tokens=clarify_tokens[1],
             ))
-            if _p0: _p0.__exit__(None, None, None)
+            if _p0 is not None: _p0_cm.__exit__(None, None, None)
             print(f"  Phase 0 done in {time.monotonic() - t0:.1f}s")
 
         # Phase 1: ENRICH (skipped for pipeline_fix — FIX intent)
@@ -576,7 +577,8 @@ class ZsigaOrchestrator:
             self.agent.set_phase("enrich")
             register_tools(self.agent, target_path, transport=transport)
             t0 = time.monotonic()
-            _p1 = phase_span("enrich", change_name=change_name).__enter__()
+            _p1_cm = phase_span("enrich", change_name=change_name)
+            _p1 = _p1_cm.__enter__()
 
             # Optional parallel explore pool (REQ-PP-04) with analyst
             supplementary_context = ""
@@ -630,7 +632,7 @@ class ZsigaOrchestrator:
                 llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
                 prompt_tokens=enrich_tokens[0], completion_tokens=enrich_tokens[1],
             ))
-            if _p1: _p1.__exit__(None, None, None)
+            if _p1 is not None: _p1_cm.__exit__(None, None, None)
             print(f"  Phase 1 done in {time.monotonic() - t0:.1f}s")
 
             # WAL: record ENRICH boundary
@@ -706,7 +708,8 @@ class ZsigaOrchestrator:
         print(f"  Phase 2/6: IMPLEMENT {change_name}")
         print(f"  {'='*50}")
         self.agent.set_phase("impl")
-        _p2 = phase_span("implement", change_name=change_name).__enter__()
+        _p2_cm = phase_span("implement", change_name=change_name)
+        _p2 = _p2_cm.__enter__()
 
         # Feature branch isolation: ensure on zsiga/<change_name>
         deploy_branch = project_config.deploy_branch
@@ -752,7 +755,7 @@ class ZsigaOrchestrator:
         impl_seconds = time.monotonic() - t0
         impl_calls = _extract_calls(impl_result)
         impl_tokens = _extract_tokens(impl_result)
-        if _p2: _p2.__exit__(None, None, None)
+        if _p2 is not None: _p2_cm.__exit__(None, None, None)
         print(f"  Phase 2 done in {impl_seconds:.1f}s")
 
         # Checkpoint after IMPLEMENT: commit working tree so REVIEW/VERIFY can diff
@@ -840,7 +843,8 @@ class ZsigaOrchestrator:
             print(f"  Phase 3/6: REVIEW {change_name}", flush=True)
             print(f"  {'='*50}", flush=True)
             t_review = time.monotonic()
-            _p3 = phase_span("review", change_name=change_name).__enter__()
+            _p3_cm = phase_span("review", change_name=change_name)
+            _p3 = _p3_cm.__enter__()
             # Hard ceiling around the entire review loop so the daemon can never
             # hang forever even if an inner timeout misbehaves.
             review_loop_ceiling = max(
@@ -934,13 +938,14 @@ class ZsigaOrchestrator:
                 )
 
         # Phase 3: VERIFY
-        if _p3: _p3.__exit__(None, None, None)
+        if _p3 is not None: _p3_cm.__exit__(None, None, None)
         print(f"\n  {'='*50}")
         print(f"  Phase 4/6: VERIFY {change_name}")
         print(f"  {'='*50}")
         self.agent.set_phase("verify")
         register_tools(self.agent, target_path, transport=transport)
-        _p4 = phase_span("verify", change_name=change_name).__enter__()
+        _p4_cm = phase_span("verify", change_name=change_name)
+        _p4 = _p4_cm.__enter__()
 
         # Verify pre-check: lightweight import + lint on changed files
         from .diagnoser import verify_precheck as _verify_precheck
@@ -1156,7 +1161,7 @@ class ZsigaOrchestrator:
             ))
 
         # Phase 5/6: REFLECT (self-assessment)
-        if _p4: _p4.__exit__(None, None, None)
+        if _p4 is not None: _p4_cm.__exit__(None, None, None)
         task_type = "refactor"  # default
         if intent is not None:
             task_type = self._INTENT_TO_TASK_TYPE.get(
@@ -1165,7 +1170,8 @@ class ZsigaOrchestrator:
         print(f"\n  {'='*50}")
         print(f"  Phase 5/6: REFLECT {change_name}")
         print(f"  {'='*50}")
-        _p5 = phase_span("reflect", change_name=change_name).__enter__()
+        _p5_cm = phase_span("reflect", change_name=change_name)
+        _p5 = _p5_cm.__enter__()
         reflect_seconds = self.phase_reflect(
             rec, change_name, project_name, task_type,
             change_dir, transport,
@@ -1173,12 +1179,13 @@ class ZsigaOrchestrator:
         print(f"  Self-rating: {self._get_last_rating(rec)} ({reflect_seconds:.1f}s)")
 
         # Phase 4: DELIVER
-        if _p5: _p5.__exit__(None, None, None)
+        if _p5 is not None: _p5_cm.__exit__(None, None, None)
         print(f"\n  {'='*50}")
         print(f"  Phase 6/6: DELIVER {change_name}")
         print(f"  {'='*50}")
         t0 = time.monotonic()
-        _p6 = phase_span("deliver", change_name=change_name).__enter__()
+        _p6_cm = phase_span("deliver", change_name=change_name)
+        _p6 = _p6_cm.__enter__()
 
         # GitHub Issue creation (REQ-GH-001)
         issue_number = None
@@ -1225,8 +1232,8 @@ class ZsigaOrchestrator:
 
         archive_change(target_path, change_name, transport=transport)
         deliver_seconds = time.monotonic() - t0
-        if _p6: _p6.__exit__(None, None, None)
-        if _trace: _trace_cm.__exit__(None, None, None)
+        if _p6 is not None: _p6_cm.__exit__(None, None, None)
+        if _trace is not None: _trace_cm.__exit__(None, None, None)
         rec.phases.append(PhaseRecord(
             phase=Phase.DELIVER, outcome=Outcome.SUCCESS,
             seconds_used=deliver_seconds,
