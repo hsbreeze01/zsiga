@@ -89,6 +89,16 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
     if token_estimation:
         token_section = f"\n## Token 预估参考数据\n{token_estimation}\n"
 
+    # Judge feedback from Design Gate retry
+    judge_feedback = kwargs.pop("judge_feedback", "")
+    judge_section = ""
+    if judge_feedback:
+        judge_section = (
+            "\n## Judge 审查反馈（上一轮 ENRICH 产出的 specs 被拒绝）\n"
+            f"{judge_feedback}\n"
+            "请根据以上反馈改进 specs，解决 Judge 指出的所有问题。\n"
+        )
+
     # Read clarify.md produced by CLARIFY phase
     clarify_content = read_file(f"{change_dir}/clarify.md", transport) or ""
     clarify_section = ""
@@ -100,7 +110,7 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
 
     user_prompt = f"""## Change 目录: {change_dir}
 ## 目标项目: {target_path}
-{ctx_section}{supp_section}{token_section}{clarify_section}
+{ctx_section}{supp_section}{token_section}{clarify_section}{judge_section}
 ## 已有 proposal.md:
 {proposal}
 

@@ -121,20 +121,28 @@ def _observation_span(
     Using ``with`` directly causes ``GeneratorExit`` during ``__exit__``
     which corrupts the ``@contextmanager`` generator (double-yield).
     Manual ``__enter__``/``__exit__`` via ``_safe_exit`` avoids this.
+
+    v2 fix: split __enter__ from yield to avoid double-exit via finally.
+    If __enter__ fails (OTel context error in async env), yield None gracefully.
     """
     cm = None
+    span = None
     try:
         cm = build_cm()
         span = cm.__enter__()
+    except Exception as exc:
+        log.debug("observation_span enter failed: %s", exc)
+        yield None
+        return
+    try:
         yield span
     except GeneratorExit:
         _safe_exit(cm)
         raise
     except Exception:
         _safe_exit(cm)
-        yield None
-        return
-    finally:
+        raise
+    else:
         _safe_exit(cm)
 
 

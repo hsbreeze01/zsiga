@@ -679,17 +679,15 @@ class ZsigaOrchestrator:
                         if design_gate_retries <= max_gate_retries:
                             print(f"  🏛️ Re-running ENRICH with judge feedback...")
                             judge_feedback = judge_result.content[:2000]
-                            retry_prompt_suffix = (
-                                f"\n\n## Judge 审查反馈（上一轮 ENRICH 被拒绝）\n{judge_feedback}\n"
-                                "请根据以上反馈改进 specs。"
-                            )
+                            print(f"  🏛️ Judge feedback: {judge_feedback[:500]}")
                             from .enricher import enrich as _enrich_retry
                             self.agent.set_phase("enrich")
                             register_tools(self.agent, target_path, transport=transport)
                             await _enrich_retry(self.agent, change_dir, target_path,
                                 transport=transport, project_context=project_context,
                                 max_turns=self.config.pipeline.enrich_max_turns,
-                                timeout_seconds=self.config.pipeline.enrich_timeout)
+                                timeout_seconds=self.config.pipeline.enrich_timeout,
+                                judge_feedback=judge_feedback)
                         else:
                             print(f"  🏛️ Design Gate failed {design_gate_retries} times, auto-pausing")
                             rec.outcome = Outcome.SKIPPED
