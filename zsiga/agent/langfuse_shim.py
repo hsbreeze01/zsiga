@@ -126,29 +126,45 @@ def trace_proposal(
     base_metadata = {
         "change_name": change_name,
         "project": project,
-        "is_auto": is_auto,
+        "is_auto": str(is_auto),
     }
     if intent:
         base_metadata["intent"] = intent
     base_metadata.update(metadata)
 
+    span = None
+    cm_obs = None
+    cm_prop = None
     try:
-        with client.start_as_current_observation(
+        cm_obs = client.start_as_current_observation(
             name=f"proposal:{change_name}",
             as_type="span",
             input=base_metadata,
-        ) as span:
-            with propagate_attributes(
-                session_id=change_name,
-                user_id=project,
-                tags=tags,
-                metadata=base_metadata,
-                trace_name=change_name,
-            ):
-                yield span
-    except Exception as exc:  # pragma: no cover - never crash on observability
+        )
+        span = cm_obs.__enter__()
+        cm_prop = propagate_attributes(
+            session_id=change_name,
+            user_id=project,
+            tags=tags,
+            metadata=base_metadata,
+            trace_name=change_name,
+        )
+        cm_prop.__enter__()
+        yield span
+    except Exception as exc:
         log.warning("Langfuse trace_proposal error: %s", exc)
         yield None
+    finally:
+        if cm_prop is not None:
+            try:
+                cm_prop.__exit__(None, None, None)
+            except Exception:
+                pass
+        if cm_obs is not None:
+            try:
+                cm_obs.__exit__(None, None, None)
+            except Exception:
+                pass
 
 
 @contextmanager
@@ -166,16 +182,24 @@ def phase_span(
     if change_name:
         payload["change_name"] = change_name
     payload.update(metadata)
+    span = None
     try:
-        with client.start_as_current_observation(
+        cm = client.start_as_current_observation(
             name=f"phase:{phase_name}",
             as_type="span",
             metadata=payload,
-        ) as span:
-            yield span
-    except Exception as exc:  # pragma: no cover
+        )
+        span = cm.__enter__()
+        yield span
+    except Exception as exc:
         log.warning("Langfuse phase_span error: %s", exc)
         yield None
+    finally:
+        if span is not None:
+            try:
+                cm.__exit__(None, None, None)
+            except Exception:
+                pass
 
 
 @contextmanager
@@ -193,16 +217,24 @@ def sub_agent_span(
     if parent_phase:
         payload["parent_phase"] = parent_phase
     payload.update(metadata)
+    span = None
     try:
-        with client.start_as_current_observation(
+        cm = client.start_as_current_observation(
             name=f"sub_agent:{role}",
             as_type="agent",
             metadata=payload,
-        ) as span:
-            yield span
-    except Exception as exc:  # pragma: no cover
+        )
+        span = cm.__enter__()
+        yield span
+    except Exception as exc:
         log.warning("Langfuse sub_agent_span error: %s", exc)
         yield None
+    finally:
+        if span is not None:
+            try:
+                cm.__exit__(None, None, None)
+            except Exception:
+                pass
 
 
 @contextmanager
@@ -223,17 +255,26 @@ def llm_generation(
         return
     payload = {"provider": provider} if provider else {}
     payload.update(metadata)
+    gen = None
+    cm = None
     try:
-        with client.start_as_current_observation(
+        cm = client.start_as_current_observation(
             name=name,
             as_type="generation",
             model=model,
             metadata=payload,
-        ) as gen:
-            yield gen
-    except Exception as exc:  # pragma: no cover
+        )
+        gen = cm.__enter__()
+        yield gen
+    except Exception as exc:
         log.warning("Langfuse llm_generation error: %s", exc)
         yield None
+    finally:
+        if cm is not None:
+            try:
+                cm.__exit__(None, None, None)
+            except Exception:
+                pass
 
 
 def flush() -> None:
