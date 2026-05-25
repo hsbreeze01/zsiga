@@ -41,6 +41,8 @@ class PhaseRecord:
     layer1_active: bool = False
     layer1_passed: bool = False
     layer1_scenarios: int = 0
+    budget_seconds: int = 0
+    budget_tokens: int = 0
 
     def to_dict(self) -> dict:
         d = {
@@ -61,6 +63,10 @@ class PhaseRecord:
         }
         if self.failure_category is not None:
             d["failure_category"] = self.failure_category
+        if self.budget_seconds > 0:
+            d["budget_seconds"] = self.budget_seconds
+        if self.budget_tokens > 0:
+            d["budget_tokens"] = self.budget_tokens
         return d
 
 

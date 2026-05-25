@@ -28,6 +28,7 @@ from .enricher import enrich, derive_explore_tasks
 from .clarifier import clarify
 from .optimizer import optimize as run_optimize
 from .implementer import implement
+from ..metrics.budget_analyzer import recommend_phase_budget, get_phase_budget_from_config
 from .verifier import verify, read_verdict
 from .diagnoser import Diagnoser
 from .phase_wal import PhaseWAL
@@ -63,6 +64,7 @@ class ZsigaOrchestrator:
             compaction_keep_recent=config.pipeline.compaction.keep_recent,
         )
         self._transports: dict[str, Transport] = {}
+        self._budget_cache: dict[str, dict] = {}
         self._load_context()
 
 
@@ -95,6 +97,30 @@ class ZsigaOrchestrator:
         self.agent.client = orig_client
         self.agent.model = orig_model
         self.agent.provider = orig_provider
+
+    def _adaptive_timeout(self, phase_name: str, config_timeout: int) -> int:
+        if not self._budget_cache:
+            try:
+                from ..metrics.db import _DB_PATH
+                budgets = get_phase_budget_from_config(self.config)
+                rec = recommend_phase_budget(phase_name, str(_DB_PATH), budgets)
+                self._budget_cache[phase_name] = rec
+            except Exception:
+                return config_timeout
+        rec = self._budget_cache.get(phase_name)
+        if not rec:
+            try:
+                from ..metrics.db import _DB_PATH
+                budgets = get_phase_budget_from_config(self.config)
+                rec = recommend_phase_budget(phase_name, str(_DB_PATH), budgets)
+                self._budget_cache[phase_name] = rec
+            except Exception:
+                return config_timeout
+        recommended = rec.get("recommended_timeout", config_timeout)
+        adaptive = max(config_timeout, recommended)
+        if adaptive != config_timeout:
+            print(f"  📊 {phase_name}: adaptive timeout {config_timeout}s → {adaptive}s (p95={rec.get('p95','?')}s, n={rec.get('sample_count',0)})")
+        return adaptive
 
     def _get_transport(self, project_name: str) -> Transport:
         if project_name not in self._transports:
@@ -323,7 +349,7 @@ class ZsigaOrchestrator:
                 )
                 explore_result = await _run_sub(
                     explore_agent, target_path, transport, proposal_text,
-                    max_turns=10, timeout_seconds=120,
+                    max_turns=10, timeout_seconds=self._adaptive_timeout("clarify", 120),
                 )
                 if explore_result.success and explore_result.content.strip():
                     enriched_text = proposal_text + "\n\n## Supplementary Context\n" + explore_result.content
@@ -557,7 +583,7 @@ class ZsigaOrchestrator:
                 transport=transport,
                 project_context=project_context,
                 supplementary_context=supplementary_context,
-                max_turns=3, timeout_seconds=120,
+                max_turns=15, timeout_seconds=self._adaptive_timeout("clarify", 120),
             )
             clarify_calls = _extract_calls(clarify_result)
             clarify_tokens = _extract_tokens(clarify_result)
@@ -566,6 +592,7 @@ class ZsigaOrchestrator:
                 seconds_used=time.monotonic() - t0,
                 llm_calls=clarify_calls[0], tool_calls=clarify_calls[1],
                 prompt_tokens=clarify_tokens[0], completion_tokens=clarify_tokens[1],
+                budget_seconds=self._adaptive_timeout("clarify", 120),
             ))
             if _p0 is not None: _p0_cm.__exit__(None, None, None)
             print(f"  Phase 0 done in {time.monotonic() - t0:.1f}s")
@@ -624,7 +651,7 @@ class ZsigaOrchestrator:
                         project_context=project_context,
                         supplementary_context=supplementary_context,
                         max_turns=self.config.pipeline.enrich_max_turns,
-                         timeout_seconds=self.config.pipeline.enrich_timeout)
+                        timeout_seconds=self._adaptive_timeout("enrich", self.config.pipeline.enrich_timeout))
             enrich_calls = _extract_calls(enrich_result)
             enrich_tokens = _extract_tokens(enrich_result)
             rec.phases.append(PhaseRecord(
@@ -632,6 +659,7 @@ class ZsigaOrchestrator:
                 seconds_used=time.monotonic() - t0,
                 llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
                 prompt_tokens=enrich_tokens[0], completion_tokens=enrich_tokens[1],
+                budget_seconds=self._adaptive_timeout("enrich", self.config.pipeline.enrich_timeout),
             ))
             if _p1 is not None: _p1_cm.__exit__(None, None, None)
             print(f"  Phase 1 done in {time.monotonic() - t0:.1f}s")
@@ -754,7 +782,7 @@ class ZsigaOrchestrator:
                        project_context=project_context,
                        venv_python=venv_python,
                        max_turns=self.config.pipeline.impl_max_turns,
-                        timeout_seconds=self.config.pipeline.impl_timeout)
+                        timeout_seconds=self._adaptive_timeout("implement", self.config.pipeline.impl_timeout))
         impl_seconds = time.monotonic() - t0
         impl_calls = _extract_calls(impl_result)
         impl_tokens = _extract_tokens(impl_result)
@@ -838,6 +866,7 @@ class ZsigaOrchestrator:
             seconds_used=impl_seconds, fix_attempts=fix_attempts,
             llm_calls=impl_calls[0], tool_calls=impl_calls[1],
             prompt_tokens=impl_tokens[0], completion_tokens=impl_tokens[1],
+            budget_seconds=self._adaptive_timeout("implement", self.config.pipeline.impl_timeout),
         ))
 
         # Phase 3/6: REVIEW (self-review loop)
@@ -1042,7 +1071,7 @@ class ZsigaOrchestrator:
                         transport=transport,
                         mech_results=mech_results,
                         max_turns=self.config.pipeline.verify_max_turns,
-                        timeout_seconds=self.config.pipeline.verify_timeout)
+                        timeout_seconds=self._adaptive_timeout("verify", self.config.pipeline.verify_timeout))
             verify_seconds = time.monotonic() - t0
             verify_calls = _extract_calls(verify_result)
             verify_tokens = _extract_tokens(verify_result)
@@ -1057,7 +1086,7 @@ class ZsigaOrchestrator:
                         transport=transport,
                         mech_results=mech_results,
                         max_turns=self.config.pipeline.verify_max_turns,
-                        timeout_seconds=self.config.pipeline.verify_timeout)
+                        timeout_seconds=self._adaptive_timeout("verify", self.config.pipeline.verify_timeout))
             verify_seconds = time.monotonic() - t0
             verify_calls = _extract_calls(verify_result)
             verify_tokens = _extract_tokens(verify_result)
@@ -1147,7 +1176,7 @@ class ZsigaOrchestrator:
             opt_result = await run_optimize(
                 self.agent, change_dir, target_path, pre_sha,
                 transport=transport,
-                max_turns=5, timeout_seconds=180,
+                max_turns=5, timeout_seconds=self._adaptive_timeout("optimize", 180),
             )
             opt_seconds = time.monotonic() - t_opt
             opt_calls = _extract_calls(opt_result)
@@ -1828,7 +1857,7 @@ class ZsigaOrchestrator:
             await verify(self.agent, change_dir, target_path, pre_sha,
                         transport=transport,
                         max_turns=self.config.pipeline.verify_max_turns,
-                        timeout_seconds=self.config.pipeline.verify_timeout)
+                        timeout_seconds=self._adaptive_timeout("verify", self.config.pipeline.verify_timeout))
             new_verdict = read_verdict(change_dir, transport)
             if new_verdict == "PASS":
                 return True, attempt

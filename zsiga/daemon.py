@@ -604,6 +604,19 @@ def _build_proposal_detail(db_path: str, base_path: str, proposal_name: str) -> 
     return result
 
 
+def _build_budget_analysis_json(db_path: str, home: str) -> dict:
+    from .metrics.budget_analyzer import compute_budget_analysis, get_phase_budget_from_config
+    from .config import load_config
+    config_path = os.path.join(home, "zsiga.yaml")
+    config_budgets = None
+    try:
+        cfg = load_config(config_path)
+        config_budgets = get_phase_budget_from_config(cfg)
+    except Exception:
+        pass
+    return compute_budget_analysis(db_path, config_budgets)
+
+
 def _serve_dashboard(port: int):
     """Start HTTP server for dashboard in a daemon thread."""
     from .metrics.dashboard import generate_dashboard
@@ -665,6 +678,11 @@ def _serve_dashboard(port: int):
                     home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
                     result = _build_proposal_detail(str(_DB_PATH), home, proposal_name)
                     self._send_json(json.dumps(result))
+            elif self.path == "/api/budget-analysis":
+                from .metrics.db import _DB_PATH
+                home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+                result = _build_budget_analysis_json(str(_DB_PATH), home)
+                self._send_json(json.dumps(result))
             else:
                 super().do_GET()
 
