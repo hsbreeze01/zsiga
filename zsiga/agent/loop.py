@@ -1,11 +1,92 @@
 import inspect
 import json
 import logging
+import re
 import time
 from zai import ZaiClient
 from zsiga.agent.compaction import compact_messages, estimate_tokens
 from zsiga.agent.token_budget import TokenBudget
 from zsiga.agent.value_signal import ValueTracker, classify_turn
+
+log = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Fallback tool-call extractor for non-JSON LLM outputs
+# ---------------------------------------------------------------------------
+
+def _extract_tool_calls_from_content(content: str) -> list[tuple[str, dict]]:
+    """Parse pseudo tool calls from LLM text when the API returns none.
+
+    Handles three formats that glm-5.1 has been observed to emit:
+
+    1. XML  ``<tool_call name="X"><arg name="Y">val</arg></tool_call_list>``
+    2. XML  ``<invoke name="X"><parameter name="Y">val</parameter></invoke>``
+    3. Inline JSON  ``{"name": "X", "arguments": {"Y": "val"}}``
+
+    Returns a list of ``(tool_name, args_dict)`` tuples.  Only includes tools
+    whose *tool_name* matches a known tool in ``allowed_tools`` (caller must
+    filter).
+    """
+    if not content:
+        return []
+
+    calls: list[tuple[str, dict]] = []
+
+    # --- XML format 1: <tool_call name="..."><arg name="...">val</arg> ---
+    for m in re.finditer(
+        r'<tool_call\s+name=["\'](\w+)["\']\s*>(.*?)</tool_call',
+        content, re.DOTALL | re.IGNORECASE,
+    ):
+        name = m.group(1)
+        args: dict = {}
+        for arg_m in re.finditer(
+            r'<arg\s+name=["\']([^"\']+)["\']\s*>(.*?)</arg>',
+            m.group(2), re.DOTALL,
+        ):
+            val = arg_m.group(2).strip()
+            # Try JSON decode for non-string values
+            try:
+                val = json.loads(val)
+            except (json.JSONDecodeError, ValueError):
+                pass
+            args[arg_m.group(1)] = val
+        calls.append((name, args))
+
+    # --- XML format 2: <invoke name="..."><parameter name="...">val</parameter> ---
+    if not calls:
+        for m in re.finditer(
+            r'<invoke\s+name=["\'](\w+)["\']\s*>(.*?)</invoke',
+            content, re.DOTALL | re.IGNORECASE,
+        ):
+            name = m.group(1)
+            args = {}
+            for param_m in re.finditer(
+                r'<parameter\s+name=["\']([^"\']+)["\']\s*>(.*?)</parameter>',
+                m.group(2), re.DOTALL,
+            ):
+                val = param_m.group(2).strip()
+                try:
+                    val = json.loads(val)
+                except (json.JSONDecodeError, ValueError):
+                    pass
+                args[param_m.group(1)] = val
+            calls.append((name, args))
+
+    # --- Inline JSON: {"name": "...", "arguments": {...}} ---
+    if not calls:
+        for m in re.finditer(
+            r'\{\s*"name"\s*:\s*"(\w+)"\s*,\s*"arguments"\s*:\s*(\{[^}]*\})\s*\}',
+            content,
+        ):
+            name = m.group(1)
+            try:
+                args = json.loads(m.group(2))
+                calls.append((name, args))
+            except json.JSONDecodeError:
+                pass
+
+    return calls
 
 
 def _build_llm_client(provider: str, api_key: str, base_url: str | None,
@@ -221,6 +302,42 @@ class AgentLoop:
             messages.append(msg.model_dump())
 
             if not msg.tool_calls:
+                # Fallback: try to extract tool calls from XML/JSON in content
+                extracted = _extract_tool_calls_from_content(msg.content or "")
+                valid_extracted = [(n, a) for n, a in extracted if n in self.tool_funcs]
+                if valid_extracted:
+                    log.warning(
+                        "⚠️ fallback tool-call parser: %d calls extracted from content "
+                        "(LLM did not return proper tool_calls JSON)",
+                        len(valid_extracted),
+                        extra={"phase": phase, "tools": [n for n, _ in valid_extracted]},
+                    )
+                    tool_calls_total += len(valid_extracted)
+                    turn_tool_names: list[str] = []
+                    turn_tool_results: list[dict] = []
+                    for tc_name, tc_args in valid_extracted:
+                        t_tool = time.monotonic()
+                        try:
+                            result = self.tool_funcs[tc_name](**tc_args)
+                            if inspect.isawaitable(result):
+                                result = await result
+                            result_str = json.dumps(result, ensure_ascii=False, default=str)
+                        except Exception as e:
+                            result_str = json.dumps({"error": str(e)})
+                            result = {"error": str(e)}
+                        tool_ms = (time.monotonic() - t_tool) * 1000
+                        log.debug("    → fallback %.0fms, %d chars", tool_ms, len(result_str),
+                                  extra={"phase": phase, "tool_name": tc_name})
+                        turn_tool_names.append(tc_name)
+                        turn_tool_results.append(result if isinstance(result, dict) else {})
+                        messages.append({
+                            "role": "tool",
+                            "content": result_str,
+                            "name": tc_name,
+                        })
+                    # continue to next turn instead of returning
+                    continue
+
                 elapsed = time.monotonic() - start
                 content_preview = (msg.content or "")[:80].replace("\n", " ")
                 log.info("✅ done in %.1fs | %d LLM calls, %d tool calls | response: %s...",

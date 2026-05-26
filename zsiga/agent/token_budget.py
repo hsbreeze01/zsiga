@@ -126,6 +126,12 @@ class TokenBudget:
         estimated = estimate_fn(messages)
         return estimated >= self.compaction_threshold * self.compaction_ratio
 
+    def reset(self):
+        """Reset usage counters so the next phase starts with a fresh budget."""
+        self._used = 0
+        self._consecutive_stale = 0
+        self._extended = False
+
     def snapshot(self) -> dict:
         """Return current budget state for logging / dashboard."""
         eff = self.effective_budget
