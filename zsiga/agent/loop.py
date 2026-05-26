@@ -187,7 +187,7 @@ class AgentLoop:
                         _gen.update(
                             input=str(messages[-1])[:2000] if messages else None,
                             output=_msg.content[:2000] if _msg and _msg.content else None,
-                            usage={
+                            usage_details={
                                 "input": getattr(resp.usage, "prompt_tokens", 0) or 0,
                                 "output": getattr(resp.usage, "completion_tokens", 0) or 0,
                                 "total": (getattr(resp.usage, "prompt_tokens", 0) or 0)
