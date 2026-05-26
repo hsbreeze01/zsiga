@@ -1,6 +1,6 @@
 {
   "project": "repo",
-  "extracted_at": "2026-05-25T12:03:47.222085",
+  "extracted_at": "2026-05-26T14:24:31.722368",
   "entries": [
     {
       "name": "ClusterInfo",
@@ -1533,393 +1533,143 @@
       "file": "tests/test_skill_evolver.py"
     },
     {
-      "name": "TestUptimeSecondsPresentWithValidStartedAt",
-      "category": "class",
+      "name": "test_health_check_endpoint_placeholder",
+      "category": "function",
+      "file": "tests/test_spec_add_health_check_endpoint__health_check_endpoint.py"
+    },
+    {
+      "name": "test_health_check_placeholder",
+      "category": "function",
+      "file": "tests/test_spec_add_health_check_endpoint__health_check.py"
+    },
+    {
+      "name": "test_proposal_stats_endpoint_placeholder",
+      "category": "function",
+      "file": "tests/test_spec_add_proposal_stats_to_dashboard__proposal_stats_endpoint.py"
+    },
+    {
+      "name": "test_uptime_seconds_field_placeholder",
+      "category": "function",
       "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
     },
     {
-      "name": "TestUptimeSecondsNullWhenStartedAtMissing",
-      "category": "class",
-      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
-    },
-    {
-      "name": "TestUptimeSecondsNullWhenStartedAtUnparseable",
-      "category": "class",
-      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
-    },
-    {
-      "name": "TestUptimeSecondsIncreasesBetweenCalls",
-      "category": "class",
-      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
-    },
-    {
-      "name": "TestExistingDaemonFieldsUnchanged",
-      "category": "class",
-      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
-    },
-    {
-      "name": "TestTimezoneAwareStartedAt",
-      "category": "class",
-      "file": "tests/test_spec_add_uptime_to_status_api__uptime_seconds_field.py"
-    },
-    {
-      "name": "TestPostImplementLintAutoFix",
-      "category": "class",
+      "name": "test_post_implement_lint_autofix_placeholder",
+      "category": "function",
       "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__post_implement_lint_autofix.py"
     },
     {
-      "name": "TestClassifyVerifyFailure",
-      "category": "class",
+      "name": "test_verify_failure_classification_placeholder",
+      "category": "function",
       "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_classification.py"
     },
     {
-      "name": "TestFailureCategoryInPhaseRecord",
-      "category": "class",
-      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_classification.py"
-    },
-    {
-      "name": "TestVerifyFailureBreakdown",
-      "category": "class",
-      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_classification.py"
-    },
-    {
-      "name": "TestPhaseRecordDetail",
-      "category": "class",
+      "name": "test_verify_failure_observability_placeholder",
+      "category": "function",
       "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_observability.py"
     },
     {
-      "name": "TestVerifyDetailCapture",
-      "category": "class",
-      "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_failure_observability.py"
-    },
-    {
-      "name": "TestComputeVerifyRateReport",
-      "category": "class",
+      "name": "test_verify_rate_metric_script_placeholder",
+      "category": "function",
       "file": "tests/test_spec_auto_metric_degradation_verify_pass_rate_20260521__verify_rate_metric_script.py"
     },
     {
-      "name": "test_render_feedback_loop_before_change_history",
+      "name": "test_no_stale_test_spec_files_remain",
       "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
     },
     {
-      "name": "test_render_feedback_loop_uses_css_classes",
+      "name": "test_non_spec_files_preserved",
       "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
     },
     {
-      "name": "test_render_feedback_loop_no_data_yet",
+      "name": "test_conftest_preserved",
       "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
     },
     {
-      "name": "test_render_feedback_loop_partial_data",
+      "name": "test_deleted_files_recoverable_from_git",
       "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
     },
     {
-      "name": "test_render_feedback_loop_in_full_page_ordering",
+      "name": "test_no_changes_outside_tests_dir",
       "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
     },
     {
-      "name": "test_render_feedback_loop_no_crash_with_empty_data",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
-    },
-    {
-      "name": "test_compute_learnings_health_populated",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_learnings_health_missing_file",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_learnings_health_empty_file",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_injection_rate_mixed",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_injection_rate_empty_table",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_injection_rate_no_table",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_auto_proposal_success_varied",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_auto_proposal_success_empty",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_self_assessment_coverage_partial",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_self_assessment_coverage_empty",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_all_feedback_metrics_with_data",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_compute_all_feedback_metrics_missing_sources",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
-    },
-    {
-      "name": "test_ensure_injections_table_idempotent",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
-    },
-    {
-      "name": "test_record_injection_valid",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
-    },
-    {
-      "name": "test_record_injection_multiple_phases",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
-    },
-    {
-      "name": "test_record_injection_zero_count",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
-    },
-    {
-      "name": "test_record_injection_explicit_timestamp",
-      "category": "function",
-      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
-    },
-    {
-      "name": "TestProposalGateBlockStructure",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestProposalGateEnabledTrue",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestProposalGateValueTypes",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestDesignGateBlockStructure",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestDesignGateEnabledTrue",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestDesignGateValueTypes",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestConfigParsesProposalGate",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestConfigParsesDesignGate",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestExistingPipelineScalarsUnchanged",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestCompactionSubtreeUnchanged",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestYamlSafeLoadSucceeds",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestYamlRoundtripPreservesGates",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestNoDuplicateYamlKeys",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestProposalGateCanBeDisabled",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "TestDesignGateCanBeDisabled",
-      "category": "class",
-      "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
-    },
-    {
-      "name": "YAML_PATH",
+      "name": "TESTS_DIR",
       "category": "config",
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
+    },
+    {
+      "name": "REPO_ROOT",
+      "category": "config",
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
+    },
+    {
+      "name": "THIS_FILE",
+      "category": "config",
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
+    },
+    {
+      "name": "NON_STALE_SPEC_FILES",
+      "category": "config",
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
+    },
+    {
+      "name": "STALE_PREFIXES",
+      "category": "config",
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
+    },
+    {
+      "name": "PRESERVED_FILES",
+      "category": "config",
+      "file": "tests/test_spec_cleanup_stale_test_files__stale_test_removal.py"
+    },
+    {
+      "name": "test_dashboard_feedback_loop_section_placeholder",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__dashboard_feedback_loop_section.py"
+    },
+    {
+      "name": "test_feedback_loop_metrics_placeholder",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__feedback_loop_metrics.py"
+    },
+    {
+      "name": "test_learning_injection_tracking_placeholder",
+      "category": "function",
+      "file": "tests/test_spec_dashboard_add_feedback_loop_metrics__learning_injection_tracking.py"
+    },
+    {
+      "name": "test_pipeline_gates_config_placeholder",
+      "category": "function",
       "file": "tests/test_spec_enable_sub_agent_gates__pipeline_gates_config.py"
     },
     {
-      "name": "TestRemoveDaemonCycleErrorFromJsonl",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
-    },
-    {
-      "name": "TestRemoveCodeUnknownFromJsonl",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
-    },
-    {
-      "name": "TestRemoveEmptyTextFromJsonl",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
-    },
-    {
-      "name": "TestRemoveNoisyFromDb",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
-    },
-    {
-      "name": "TestCleanupIdempotent",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
-    },
-    {
-      "name": "memory_dir",
+      "name": "test_cleanup_placeholder",
       "category": "function",
       "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
     },
     {
-      "name": "NOISY_AND_CLEAN",
-      "category": "config",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__cleanup.py"
-    },
-    {
-      "name": "TestEmptyTakeawaySkipped",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
-    },
-    {
-      "name": "TestDaemonCycleErrorSkipped",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
-    },
-    {
-      "name": "TestCodeUnknownSkipped",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
-    },
-    {
-      "name": "TestValidLearningWritten",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
-    },
-    {
-      "name": "memory_dir",
+      "name": "test_filter_and_inject_placeholder",
       "category": "function",
       "file": "tests/test_spec_fix_learnings_noise_and_inject__filter_and_inject.py"
     },
     {
-      "name": "TestEnrichLearningsSectionInjected",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_enrich.py"
-    },
-    {
-      "name": "TestEnrichNoLearningsSectionWhenEmpty",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_enrich.py"
-    },
-    {
-      "name": "TestEnrichMax3Learnings",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_enrich.py"
-    },
-    {
-      "name": "memory_dir",
+      "name": "test_inject_enrich_placeholder",
       "category": "function",
       "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_enrich.py"
     },
     {
-      "name": "TestLearningsSectionInjected",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_implement.py"
-    },
-    {
-      "name": "TestNoLearningsSectionWhenEmpty",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_implement.py"
-    },
-    {
-      "name": "TestMax5Learnings",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_implement.py"
-    },
-    {
-      "name": "memory_dir",
+      "name": "test_inject_implement_placeholder",
       "category": "function",
       "file": "tests/test_spec_fix_learnings_noise_and_inject__inject_implement.py"
     },
     {
-      "name": "TestMatchByChangeNameToken",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
-    },
-    {
-      "name": "TestMatchPipelineFailWildcard",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
-    },
-    {
-      "name": "TestResultsCapped",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
-    },
-    {
-      "name": "TestNoMatchingLearnings",
-      "category": "class",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
-    },
-    {
-      "name": "memory_dir",
+      "name": "test_search_placeholder",
       "category": "function",
-      "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
-    },
-    {
-      "name": "SAMPLE_LEARNINGS",
-      "category": "config",
       "file": "tests/test_spec_fix_learnings_noise_and_inject__search.py"
     },
     {
@@ -2018,22 +1768,7 @@
       "file": "tests/test_spec_parser.py"
     },
     {
-      "name": "test_remote_head_matches_local_head",
-      "category": "function",
-      "file": "tests/test_spec_push_local_commits_to_remote__push_sync.py"
-    },
-    {
-      "name": "test_no_divergence_after_sync",
-      "category": "function",
-      "file": "tests/test_spec_push_local_commits_to_remote__push_sync.py"
-    },
-    {
-      "name": "test_no_source_files_modified",
-      "category": "function",
-      "file": "tests/test_spec_push_local_commits_to_remote__push_sync.py"
-    },
-    {
-      "name": "test_push_rejected_triggers_rebase",
+      "name": "test_push_sync_placeholder",
       "category": "function",
       "file": "tests/test_spec_push_local_commits_to_remote__push_sync.py"
     },
@@ -2153,234 +1888,49 @@
       "file": "tests/test_spec_pytest_check.py"
     },
     {
-      "name": "test_execution_report_md_generated",
+      "name": "test_sre_artifacts_learnings_placeholder",
       "category": "function",
       "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
     },
     {
-      "name": "test_execution_report_md_contains_required_sections",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
-    },
-    {
-      "name": "test_execution_report_md_includes_timestamp",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
-    },
-    {
-      "name": "test_learnings_jsonl_sre_category",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
-    },
-    {
-      "name": "test_learnings_entry_required_fields",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
-    },
-    {
-      "name": "test_learnings_append_additive",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
-    },
-    {
-      "name": "test_no_git_commit_in_command_history",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_artifacts_learnings.py"
-    },
-    {
-      "name": "test_detect_sre_intent_chinese_keywords",
+      "name": "test_sre_intent_routing_placeholder",
       "category": "function",
       "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
     },
     {
-      "name": "test_detect_sre_intent_english_keywords",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
-    },
-    {
-      "name": "test_sre_takes_precedence_over_code",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
-    },
-    {
-      "name": "test_pure_code_returns_code_intent",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
-    },
-    {
-      "name": "test_unrecognized_defaults_to_code",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
-    },
-    {
-      "name": "test_sre_keywords_constant_exists",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_intent_routing.py"
-    },
-    {
-      "name": "test_dispatch_sre_intent_to_sre_pipeline",
+      "name": "test_sre_orchestrator_integration_placeholder",
       "category": "function",
       "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
     },
     {
-      "name": "test_dispatch_code_intent_to_code_pipeline",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
-    },
-    {
-      "name": "test_single_dispatch_mutual_exclusivity",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
-    },
-    {
-      "name": "test_code_pipeline_path_preserved",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
-    },
-    {
-      "name": "test_orchestrator_initializes_with_both_pipelines",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_orchestrator_integration.py"
-    },
-    {
-      "name": "test_pipeline_five_phases_in_order",
+      "name": "test_sre_pipeline_placeholder",
       "category": "function",
       "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
     },
     {
-      "name": "test_pipeline_run_produces_all_phase_records",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_diagnose_uses_read_only_commands",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_plan_generates_whitelisted_commands",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_execute_stops_on_first_failure",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_execute_succeeds_all_pass",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_verify_success",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_verify_failure",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_pipeline_no_git_commit",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_report_produces_execution_report_data",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_pipeline.py"
-    },
-    {
-      "name": "test_sre_role_registered",
+      "name": "test_sre_role_definition_placeholder",
       "category": "function",
       "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
     },
     {
-      "name": "test_sre_role_allowed_tools",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
-    },
-    {
-      "name": "test_sre_system_prompt_idempotency",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
-    },
-    {
-      "name": "test_sre_system_prompt_rollback",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
-    },
-    {
-      "name": "test_sre_system_prompt_whitelist",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
-    },
-    {
-      "name": "test_sre_system_prompt_no_git_commit",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_role_definition.py"
-    },
-    {
-      "name": "test_whitelisted_systemctl_status",
+      "name": "test_sre_security_boundary_placeholder",
       "category": "function",
       "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
     },
     {
-      "name": "test_whitelisted_sudo_systemctl",
+      "name": "test_redirect_compat_placeholder",
       "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+      "file": "tests/test_spec_unify_api_route_style__redirect_compat.py"
     },
     {
-      "name": "test_non_whitelisted_rejected",
+      "name": "test_route_renaming_placeholder",
       "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+      "file": "tests/test_spec_unify_api_route_style__route_renaming.py"
     },
     {
-      "name": "test_blacklisted_rm_rf",
+      "name": "test_test_coverage_placeholder",
       "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
-    },
-    {
-      "name": "test_blacklisted_iptables",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
-    },
-    {
-      "name": "test_blacklisted_reboot",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
-    },
-    {
-      "name": "test_blacklisted_sudo_reboot",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
-    },
-    {
-      "name": "test_blacklisted_sysctl",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
-    },
-    {
-      "name": "test_blacklist_precedence_over_whitelist",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
-    },
-    {
-      "name": "test_dangerous_command_flagged_stop",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
-    },
-    {
-      "name": "test_safe_command_not_flagged",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
-    },
-    {
-      "name": "test_execute_failure_triggers_rollback",
-      "category": "function",
-      "file": "tests/test_spec_sre_subagent_design__sre_security_boundary.py"
+      "file": "tests/test_spec_unify_api_route_style__test_coverage.py"
     },
     {
       "name": "TestClassifyFailure",
@@ -2868,11 +2418,6 @@
       "file": "zsiga/agent/lsp_tools.py"
     },
     {
-      "name": "ZsigaOrchestrator",
-      "category": "class",
-      "file": "zsiga/agent/orchestrator.py"
-    },
-    {
       "name": "RecoveryAction",
       "category": "class",
       "file": "zsiga/agent/recovery.py"
@@ -2995,11 +2540,6 @@
     {
       "name": "TokenBudget",
       "category": "class",
-      "file": "zsiga/agent/token_budget.py"
-    },
-    {
-      "name": "select_budget_profile",
-      "category": "function",
       "file": "zsiga/agent/token_budget.py"
     },
     {
@@ -3548,6 +3088,21 @@
       "file": "zsiga/memory/pattern_miner.py"
     },
     {
+      "name": "get_phase_budget_from_config",
+      "category": "function",
+      "file": "zsiga/metrics/budget_analyzer.py"
+    },
+    {
+      "name": "compute_budget_analysis",
+      "category": "function",
+      "file": "zsiga/metrics/budget_analyzer.py"
+    },
+    {
+      "name": "recommend_phase_budget",
+      "category": "function",
+      "file": "zsiga/metrics/budget_analyzer.py"
+    },
+    {
       "name": "record_change",
       "category": "function",
       "file": "zsiga/metrics/collector.py"
@@ -3829,11 +3384,6 @@
     },
     {
       "name": "derive_explore_tasks",
-      "category": "function",
-      "file": "zsiga/pipeline/enricher.py"
-    },
-    {
-      "name": "estimate_token_budget",
       "category": "function",
       "file": "zsiga/pipeline/enricher.py"
     },
