@@ -1,0 +1,7 @@
+Verdict: ISSUES_FOUND
+
+Issues:
+1. [CRITICAL] Spec `phase-cap-loop.md` not implemented — AgentLoop does not detect `cap_exceeded` or return `CAP_EXCEEDED`. The diff contains zero changes to the AgentLoop code. The spec requires that when `budget.record()` returns `cap_exceeded: True`, the `AgentLoop.run()` method SHALL terminate and return a `RunResult` with `content="CAP_EXCEEDED"`, with `BUDGET_EXCEEDED` taking precedence when both are true. None of this logic exists in the diff.
+2. [CRITICAL] Spec `phase-cap-orchestration.md` not implemented — The orchestrator does not set `self.agent.budget.phase_cap` before each phase, does not map `"impl"` → `"implement"` for cap lookup, and does not handle `CAP_EXCEEDED` gracefully (WARNING log, Outcome.FAIL with detail="CAP_EXCEEDED", no git rollback). The diff contains zero changes to any orchestrator file.
+3. [CRITICAL] Spec `phase-cap-config.md` not implemented — `PipelineConfig` does not have `PHASE_TOKEN_CAPS` defaults, `get_phase_cap()` method, or config-file loading support for `phase_token_caps`. Without this, there is no way to configure per-phase caps, making the entire feature non-functional end-to-end.
+4. [SUGGESTION] Tasks.md only tracks Group 1 (TokenBudget) but 3 additional specs exist with no task entries or implementation. The change is architecturally incomplete: `TokenBudget` has the `phase_cap` plumbing but no consumer sets or reacts to it. Consider completing all spec groups in one coherent change or explicitly scoping the change document.

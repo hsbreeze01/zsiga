@@ -1,6 +1,45 @@
 """Token budget tracker for agent loop sessions."""
 
-from ..agent.intent_router import IntentType
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zsiga.agent.intent_router import IntentType
+
+_FALLBACK_BUDGET = 600000
+
+
+def select_budget_profile(
+    intent: IntentType,
+    target_project: str,
+    *,
+    is_cross_project: bool,
+    profiles: dict[str, int],
+) -> tuple[str, int]:
+    """Select a budget profile name and value.
+
+    Priority rules (first match wins):
+    1. ``is_cross_project`` → ``"cross_project"``
+    2. ``target_project == "zsiga"`` → ``"self_modify"``
+    3. ``intent == FIX`` → ``"fix"``
+    4. fallback → ``"implementation"``
+
+    If the chosen profile key is absent from *profiles*, the fallback
+    value of 600000 is returned.
+    """
+    if is_cross_project:
+        name = "cross_project"
+    elif target_project == "zsiga":
+        name = "self_modify"
+    elif intent.value == "fix":
+        name = "fix"
+    else:
+        name = "implementation"
+
+    budget = profiles.get(name, _FALLBACK_BUDGET)
+    return name, budget
+
 
 
 class TokenBudget:
@@ -63,9 +102,10 @@ class TokenBudget:
         Returns
         -------
         dict
-            Always: ``session_exceeded``, ``turn_exceeded``, ``used``,
-            ``remaining``.  When *value_signal* is given: also
-            ``stale_count``, ``effective_budget``, ``should_stop``.
+            Always: ``session_exceeded``, ``turn_exceeded``,
+            ``cap_exceeded``, ``used``, ``remaining``.  When
+            *value_signal* is given: also ``stale_count``,
+            ``effective_budget``, ``should_stop``.
         """
         self._used += prompt_tokens + completion_tokens
 
