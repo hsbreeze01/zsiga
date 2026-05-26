@@ -580,6 +580,7 @@ class ZsigaOrchestrator:
             print(f"  Phase 0/6: CLARIFY {change_name}")
             print(f"  {'='*50}")
             self.agent.set_phase("clarify")
+            self.agent.budget.reset()
             register_tools(self.agent, target_path, transport=transport)
             t0 = time.monotonic()
             _p0_cm = phase_span("clarify", change_name=change_name)
@@ -643,6 +644,7 @@ class ZsigaOrchestrator:
             print(f"  Phase 1/6: ENRICH {change_name}")
             print(f"  {'='*50}")
             self.agent.set_phase("enrich")
+            self.agent.budget.reset()
             register_tools(self.agent, target_path, transport=transport)
             t0 = time.monotonic()
             _p1_cm = phase_span("enrich", change_name=change_name)
@@ -694,12 +696,16 @@ class ZsigaOrchestrator:
                         timeout_seconds=self._adaptive_timeout("enrich", self.config.pipeline.enrich_timeout))
             enrich_calls = _extract_calls(enrich_result)
             enrich_tokens = _extract_tokens(enrich_result)
+            _enrich_exceeded = enrich_result.content == "BUDGET_EXCEEDED" if enrich_result else False
+            if _enrich_exceeded:
+                print(f"  ⚠️ ENRICH BUDGET_EXCEEDED — specs may be incomplete")
             rec.phases.append(PhaseRecord(
-                phase=Phase.ENRICH, outcome=Outcome.SUCCESS,
+                phase=Phase.ENRICH, outcome=Outcome.FAIL if _enrich_exceeded else Outcome.SUCCESS,
                 seconds_used=time.monotonic() - t0,
                 llm_calls=enrich_calls[0], tool_calls=enrich_calls[1],
                 prompt_tokens=enrich_tokens[0], completion_tokens=enrich_tokens[1],
                 budget_seconds=self._adaptive_timeout("enrich", self.config.pipeline.enrich_timeout),
+                detail="BUDGET_EXCEEDED" if _enrich_exceeded else "",
             ))
             if _p1 is not None: _p1_cm.__exit__(None, None, None)
             print(f"  Phase 1 done in {time.monotonic() - t0:.1f}s")
@@ -781,6 +787,7 @@ class ZsigaOrchestrator:
         print(f"  Phase 2/6: IMPLEMENT {change_name}")
         print(f"  {'='*50}")
         self.agent.set_phase("impl")
+        self.agent.budget.reset()
         _p2_cm = phase_span("implement", change_name=change_name)
         _p2 = _p2_cm.__enter__()
 
@@ -903,12 +910,16 @@ class ZsigaOrchestrator:
                 record_outcome(change_name, project_name, False, "implement", errors)
                 return False
 
+        _impl_exceeded = impl_result.content == "BUDGET_EXCEEDED" if impl_result else False
+        if _impl_exceeded:
+            print(f"  ⚠️ IMPLEMENT BUDGET_EXCEEDED — implementation may be incomplete")
         rec.phases.append(PhaseRecord(
-            phase=Phase.IMPLEMENT, outcome=Outcome.SUCCESS,
+            phase=Phase.IMPLEMENT, outcome=Outcome.FAIL if _impl_exceeded else Outcome.SUCCESS,
             seconds_used=impl_seconds, fix_attempts=fix_attempts,
             llm_calls=impl_calls[0], tool_calls=impl_calls[1],
             prompt_tokens=impl_tokens[0], completion_tokens=impl_tokens[1],
             budget_seconds=self._adaptive_timeout("implement", self.config.pipeline.impl_timeout),
+            detail="BUDGET_EXCEEDED" if _impl_exceeded else "",
         ))
 
         # Phase 3/6: REVIEW (self-review loop)
@@ -1018,6 +1029,7 @@ class ZsigaOrchestrator:
         print(f"  Phase 4/6: VERIFY {change_name}")
         print(f"  {'='*50}")
         self.agent.set_phase("verify")
+        self.agent.budget.reset()
         register_tools(self.agent, target_path, transport=transport)
         _p4_cm = phase_span("verify", change_name=change_name)
         _p4 = _p4_cm.__enter__()
@@ -1221,6 +1233,7 @@ class ZsigaOrchestrator:
             print(f"  Phase 4.5/6: OPTIMIZE {change_name}")
             print(f"  {sep}")
             self.agent.set_phase("optimize")
+            self.agent.budget.reset()
             register_tools(self.agent, target_path, transport=transport)
             t_opt = time.monotonic()
             opt_result = await run_optimize(
