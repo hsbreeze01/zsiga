@@ -366,7 +366,17 @@ class AgentLoop:
 
             for tc in msg.tool_calls:
                 name = tc.function.name
-                args = json.loads(tc.function.arguments)
+                try:
+                    args = json.loads(tc.function.arguments)
+                except json.JSONDecodeError as _je:
+                    log.warning("turn %d: tool_call %s has malformed JSON args (char %d): %.80s",
+                                turn + 1, name, _je.pos, tc.function.arguments[:80])
+                    messages.append({
+                        "role": "tool",
+                        "content": json.dumps({"error": f"malformed tool_call arguments: {_je}"}),
+                        "tool_call_id": tc.id,
+                    })
+                    continue
                 args_preview = json.dumps(args, ensure_ascii=False)[:120]
                 log.debug("turn %d: 🔧 %s(%s)", turn + 1, name, args_preview,
                           extra={"phase": phase, "turn": turn + 1,
