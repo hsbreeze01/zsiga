@@ -108,7 +108,7 @@ def _merge_tool_groups(messages: list) -> list:
     return result
 
 
-def _compress_patterns(messages: list, max_tool_result_chars: int = 2000) -> list:
+def _compress_patterns(messages: list, max_tool_result_chars: int = 1000) -> list:
     """Truncate long tool results, then merge consecutive same-tool call groups."""
     truncated = []
     for m in messages:
@@ -167,8 +167,8 @@ def compact_messages(
     keep_recent: int = 3,
     client: ZaiClient = None,
     model: str = "glm-5.1",
-    *,
-    max_tool_result_chars: int = 2000,
+     *,
+    max_tool_result_chars: int = 1000,
     overhead_per_message: int = 15,
     overhead_per_tool_call: int = 20,
 ) -> tuple[list, int]:
@@ -272,7 +272,7 @@ def _generate_summary(messages: list, client: ZaiClient, model: str) -> str:
         resp = client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=500,
+            max_tokens=300,
             temperature=0.1,
         )
         return resp.choices[0].message.content or _fallback_summary(messages)

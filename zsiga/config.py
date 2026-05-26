@@ -92,7 +92,7 @@ class LLMFastConfig:
 
 
 class CompactionConfig:
-    def __init__(self, enabled: bool = True, threshold_chars: int = 60000,
+    def __init__(self, enabled: bool = True, threshold_chars: int = 30000,
                  keep_recent: int = 3, use_llm_summary: bool = True,
                  total_budget: int = 200000, per_turn_limit: int = 8192,
                  compaction_ratio: float = 0.8):
@@ -373,7 +373,7 @@ def load_config(path: str = None) -> ZsigaConfig:
     compaction_raw = pipeline_raw.get("compaction", {})
     compaction = CompactionConfig(
         enabled=compaction_raw.get("enabled", True),
-        threshold_chars=compaction_raw.get("threshold_chars", 60000),
+        threshold_chars=compaction_raw.get("threshold_chars", 30000),
         keep_recent=compaction_raw.get("keep_recent", 3),
         use_llm_summary=compaction_raw.get("use_llm_summary", True),
         total_budget=compaction_raw.get("total_budget", 200000),

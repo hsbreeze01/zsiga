@@ -690,7 +690,7 @@ class ZsigaOrchestrator:
 
             enrich_result = await enrich(self.agent, change_dir, target_path,
                         transport=transport,
-                        project_context=project_context,
+                        project_context="" if supplementary_context else project_context,
                         supplementary_context=supplementary_context,
                         max_turns=self.config.pipeline.enrich_max_turns,
                         timeout_seconds=self._adaptive_timeout("enrich", self.config.pipeline.enrich_timeout))

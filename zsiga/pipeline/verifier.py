@@ -133,6 +133,15 @@ async def verify(agent: AgentLoop, change_dir: str, target_path: str,
     tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
     diff = git_ops.diff(target_path, pre_impl_sha, transport=transport)
 
+    _MAX_VERIFY_SPECS_CHARS = 8000
+    _MAX_VERIFY_ARTIFACT_CHARS = 2000
+    if len(specs) > _MAX_VERIFY_SPECS_CHARS:
+        specs = specs[:_MAX_VERIFY_SPECS_CHARS] + "\n\n... (specs truncated for token efficiency)"
+    if len(design) > _MAX_VERIFY_ARTIFACT_CHARS:
+        design = design[:_MAX_VERIFY_ARTIFACT_CHARS] + "\n... (truncated)"
+    if len(tasks) > _MAX_VERIFY_ARTIFACT_CHARS:
+        tasks = tasks[:_MAX_VERIFY_ARTIFACT_CHARS] + "\n... (truncated)"
+
     mech_section = ""
     if mech_results:
         test_status = "✅ PASSED" if mech_results["test"]["passed"] else "❌ FAILED"
@@ -165,7 +174,7 @@ async def verify(agent: AgentLoop, change_dir: str, target_path: str,
 {tasks}
 
 ### 实际改动 (git diff):
-{diff[:15000]}
+{diff[:10000]}
 {mech_section}
 基于以上信息判断实现质量（注意：testable=true 的 scenario 已由 Layer 1 判定，你不需要重新对它们下结论；你的核心任务是审查 testable=false 的 scenario + 完整性/一致性）。
 将结果写入 {change_dir}/verify.md。不要运行测试或 lint。"""
