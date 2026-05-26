@@ -141,10 +141,12 @@ class AgentLoop:
                  compaction_ratio: float = 0.8,
                  stale_limit: int = 10,
                  budget_extend_factor: float = 1.5,
-                 provider: str = "zhipuai"):
+                 provider: str = "zhipuai",
+                 max_tokens: int = 4096):
         self.provider = provider
         self.client = _build_llm_client(provider, api_key, base_url, proxy)
         self.model = model
+        self._max_tokens = max_tokens
         self.tools = []
         self.tool_funcs = {}
         self.max_turns = 40
@@ -245,6 +247,7 @@ class AgentLoop:
                             messages=messages,
                             tools=self.tools or None,
                             tool_choice="auto",
+                            max_tokens=self._max_tokens,
                         )
                     ),
                     timeout=_llm_timeout,
@@ -284,8 +287,15 @@ class AgentLoop:
                     getattr(resp.usage, "prompt_tokens", 0) or 0,
                     getattr(resp.usage, "completion_tokens", 0) or 0,
                 )
-                if budget_status["session_exceeded"] or budget_status["turn_exceeded"]:
-                    # Soft budget extension: if last turn was productive, try extending
+                if budget_status["turn_exceeded"]:
+                    log.warning(
+                        "⚠️ turn_exceeded: completion_tokens=%d > per_turn_limit=%d "
+                        "(turn %d, phase=%s) — continuing",
+                        getattr(resp.usage, "completion_tokens", 0) or 0,
+                        self.budget.per_turn_limit,
+                        turn + 1, phase,
+                    )
+                if budget_status["session_exceeded"]:
                     extended = self.budget.try_extend("productive")
                     if not extended:
                         elapsed = time.monotonic() - start
