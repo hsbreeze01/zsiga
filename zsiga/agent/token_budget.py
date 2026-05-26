@@ -31,6 +31,7 @@ class TokenBudget:
         compaction_ratio: float = 0.8,
         stale_limit: int = 10,
         budget_extend_factor: float = 1.5,
+        phase_cap: int = 0,
     ):
         self.total_budget = total_budget
         self.per_turn_limit = per_turn_limit
@@ -38,6 +39,7 @@ class TokenBudget:
         self.compaction_ratio = compaction_ratio
         self.stale_limit = stale_limit
         self.budget_extend_factor = budget_extend_factor
+        self.phase_cap: int = phase_cap
         self._used: int = 0
         self._consecutive_stale: int = 0
         self._extended: bool = False
@@ -79,9 +81,13 @@ class TokenBudget:
         eff = self.effective_budget
         session_exceeded = self._used > eff
 
+        # Phase-cap exceeded check
+        cap_exceeded = self._used > self.phase_cap if self.phase_cap > 0 else False
+
         result: dict = {
             "session_exceeded": session_exceeded,
             "turn_exceeded": turn_exceeded,
+            "cap_exceeded": cap_exceeded,
             "used": self._used,
             "remaining": eff - self._used,
         }
@@ -131,6 +137,15 @@ class TokenBudget:
         self._used = 0
         self._consecutive_stale = 0
         self._extended = False
+
+    def reset_phase(self):
+        """Reset only the per-phase usage counter.
+
+        Unlike ``reset()``, this preserves ``_extended`` and
+        ``_consecutive_stale`` so session-level state survives across
+        phase boundaries.  ``phase_cap`` is also left unchanged.
+        """
+        self._used = 0
 
     def snapshot(self) -> dict:
         """Return current budget state for logging / dashboard."""
