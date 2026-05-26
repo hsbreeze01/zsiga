@@ -4,6 +4,11 @@ from ..agent.loop import AgentLoop
 from ..transport import LocalTransport, Transport
 from .. import git_ops
 from .utils import read_file
+from .verify_layer0 import (
+    Layer0Result,
+    run_layer0_checks,
+    write_layer0_verify_md,
+)
 from .verify_layer1 import (
     Layer1Result,
     has_non_testable_scenarios,
@@ -108,10 +113,20 @@ async def verify(agent: AgentLoop, change_dir: str, target_path: str,
                  mech_results: dict = None,
                  venv_python: str = None,
                  **kwargs):
-    """Two-layer verify: pytest first, LLM judge with L1 context, enforce L1 verdict."""
+    """Three-layer verify: deterministic checks, pytest, then LLM judge."""
     from .implementer import _read_all_specs
 
     transport = transport or LocalTransport()
+
+    # ---- Layer 0: deterministic binary checks ----
+    layer0 = run_layer0_checks(
+        change_dir, target_path, pre_impl_sha, transport,
+    )
+    print(f"  verify {layer0.summary_line()}", flush=True)
+
+    if not layer0.all_passed:
+        write_layer0_verify_md(change_dir, transport, layer0)
+        return None
 
     # ---- Layer 1: mechanical pytest ----
     layer1 = run_layer1_pytest(

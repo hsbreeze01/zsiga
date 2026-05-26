@@ -6,7 +6,8 @@ _MEMORY_DIR = Path(__file__).resolve().parent.parent.parent / "memory"
 
 
 def record_lesson(title: str, context: str, takeaway: str,
-                  pattern_key: str = None, source: str = "pipeline"):
+                  pattern_key: str = None, source: str = "pipeline",
+                  case: dict = None, why: str = None, rule: str = None):
     lesson = {
         "type": "lesson",
         "ts": datetime.now().isoformat(),
@@ -17,6 +18,12 @@ def record_lesson(title: str, context: str, takeaway: str,
     }
     if pattern_key:
         lesson["pattern_key"] = pattern_key
+    if case:
+        lesson["case"] = case
+    if why:
+        lesson["why"] = why
+    if rule:
+        lesson["rule"] = rule
 
     learnings_file = _MEMORY_DIR / "learnings.jsonl"
     learnings_file.parent.mkdir(parents=True, exist_ok=True)
@@ -39,7 +46,8 @@ def record_outcome(change_name: str, project: str, success: bool,
                    phase: str, detail: str = None,
                    error_domain: str = None,
                    root_cause: str = None,
-                   prevention: str = None):
+                   prevention: str = None,
+                   case: dict = None, why: str = None, rule: str = None):
     if success:
         return
 
@@ -74,6 +82,12 @@ def record_outcome(change_name: str, project: str, success: bool,
         "prevention": prevention,
         "what_happened": what_happened,
     }
+    if case:
+        lesson["case"] = case
+    if why:
+        lesson["why"] = why
+    if rule:
+        lesson["rule"] = rule
 
     learnings_file = _MEMORY_DIR / "learnings.jsonl"
     learnings_file.parent.mkdir(parents=True, exist_ok=True)
@@ -267,7 +281,7 @@ def search_learnings(keywords: list[str], pattern_key: str | None = None) -> lis
 
             searchable = " ".join(
                 str(entry.get(field, ""))
-                for field in ("title", "context", "takeaway")
+                for field in ("title", "context", "takeaway", "why", "rule")
             ).lower()
 
             matched = sum(1 for kw in keywords_lower if kw in searchable)

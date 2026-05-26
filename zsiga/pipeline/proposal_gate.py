@@ -45,7 +45,7 @@ class ProposalGateResult:
 
 def _parse_verdict(text: str) -> tuple[GateVerdict, int]:
     verdict = GateVerdict.ACCEPT
-    score = 10
+    score = 12
 
     vm = re.search(r"##\s*Verdict:\s*(ACCEPT|PUSHBACK|REJECT)", text, re.IGNORECASE)
     if vm:
@@ -54,7 +54,7 @@ def _parse_verdict(text: str) -> tuple[GateVerdict, int]:
         except ValueError:
             pass
 
-    sm = re.search(r"总分:\s*(\d+)\s*/\s*10", text)
+    sm = re.search(r"总分:\s*(\d+)\s*/\s*(?:10|12)", text)
     if sm:
         score = int(sm.group(1))
 
@@ -105,8 +105,8 @@ async def run_proposal_gate(
     model: str = "",
     base_url: str = None,
     proxy: str = None,
-    score_accept: int = 6,
-    score_pushback: int = 3,
+    score_accept: int = 10,
+    score_pushback: int = 6,
     steward_max_turns: int = 3,
     steward_timeout: int = 90,
     learning_weight_days: int = 90,

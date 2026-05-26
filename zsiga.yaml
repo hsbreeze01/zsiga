@@ -107,8 +107,8 @@ pipeline:
     max_retries: 1
     steward_max_turns: 3
     steward_timeout: 90
-    score_accept: 6
-    score_pushback: 3
+    score_accept: 10
+    score_pushback: 6
     learning_weight_days: 90
   design_gate:
     enabled: true

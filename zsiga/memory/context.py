@@ -41,9 +41,18 @@ def load_recent_lessons(n: int = 20) -> list[str]:
     for line in recent:
         try:
             obj = json.loads(line)
-            pk = obj.get("pattern_key", "")
-            tw = obj.get("takeaway", "")
-            lessons.append(f"[{pk}] {tw}" if pk else tw)
+            # Prefer structured rule over fuzzy takeaway
+            if obj.get("rule"):
+                rule = obj["rule"]
+                case_what = obj.get("case", {}).get("what", "")
+                if case_what:
+                    lessons.append(f"[RULE] {rule} (case: {case_what[:80]})")
+                else:
+                    lessons.append(f"[RULE] {rule}")
+            else:
+                pk = obj.get("pattern_key", "")
+                tw = obj.get("takeaway", "")
+                lessons.append(f"[{pk}] {tw}" if pk else tw)
         except json.JSONDecodeError:
             continue
     return lessons
