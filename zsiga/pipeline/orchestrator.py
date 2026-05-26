@@ -962,7 +962,8 @@ class ZsigaOrchestrator:
                 phase=Phase.REVIEW, outcome=review_outcome,
                 seconds_used=review_seconds,
                 fix_attempts=review_result.fix_attempts,
-                detail=_summarize_issues(review_result.last_issues),
+                detail="Verdict: " + review_result.final_verdict
+                       + (". " + _summarize_issues(review_result.last_issues) if review_result.last_issues else ""),
                 llm_calls=review_result.llm_calls,
                 tool_calls=review_result.tool_calls,
                 prompt_tokens=review_result.prompt_tokens,

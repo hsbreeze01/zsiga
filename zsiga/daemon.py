@@ -683,6 +683,20 @@ def _serve_dashboard(port: int):
                 home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
                 result = _build_budget_analysis_json(str(_DB_PATH), home)
                 self._send_json(json.dumps(result))
+            elif self.path in ("/", "/dashboard", "/dashboard.html"):
+                dashboard_path = Path("/tmp/zsiga-dashboard/dashboard.html")
+                if dashboard_path.exists():
+                    body = dashboard_path.read_bytes()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "text/html; charset=utf-8")
+                    self.send_header("Content-Length", str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                else:
+                    self._send_json(json.dumps({
+                        "status": "running",
+                        "message": "Dashboard not generated yet. Visit /api/status for JSON.",
+                    }))
             else:
                 super().do_GET()
 
