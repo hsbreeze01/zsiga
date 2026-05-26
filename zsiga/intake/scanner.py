@@ -58,9 +58,13 @@ class DirectoryScanner:
 
                 proposal_filename = _find_file_ci(dir_listing, "proposal.md")
                 if proposal_filename is None:
-                    logger.warning(
-                        f"⚠ Scanner: directory {change_dir} exists but no proposal.md found (case-insensitive search)"
-                    )
+                    non_hidden = [f for f in dir_listing if f and not f.startswith(".")]
+                    if not non_hidden:
+                        transport.run_shell(f"rmdir '{change_dir}'", timeout=5)
+                    else:
+                        logger.warning(
+                            f"⚠ Scanner: directory {change_dir} exists but no proposal.md found"
+                        )
                     continue
 
                 design_filename = _find_file_ci(dir_listing, "design.md")

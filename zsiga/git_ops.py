@@ -20,7 +20,7 @@ def reset_hard(target_path: str, sha: str, transport: Transport = None):
     print(f"  git reset --hard {sha} ...")
     r = transport.run_shell(f"git reset --hard {sha}", cwd=target_path)
     _check_result(r, "git reset")
-    r2 = transport.run_shell("git clean -fd", cwd=target_path)
+    r2 = transport.run_shell("git clean -fd --exclude=openspec/", cwd=target_path)
     _check_result(r2, "git clean")
     print("  ✅ reset hard")
 

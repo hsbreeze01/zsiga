@@ -140,40 +140,65 @@ class ZsigaOrchestrator:
         scanner = DirectoryScanner(self.config.targets)
         proposals = scanner.scan(transports=self._transports)
 
-        # Filter out paused (3+ consecutive fails or .paused file) and completed proposals
+        _MAX_SKIP_RETRIES = 2
+
         from ..metrics.db import load_all_changes as _load_metrics
         _all_metrics = _load_metrics()
         paused_names = []
         completed_names = []
+        abandoned_names = []
         active_proposals = []
         for prop in proposals:
             name = prop["id"]
             prop_dir = Path(prop["change_dir"])
             paused_file = prop_dir / ".paused"
+            mine = [x for x in _all_metrics if x.get("change_name") == name]
+
             consecutive_fails = 0
-            last_outcome = ""
-            for c in reversed([x for x in _all_metrics if x.get("change_name") == name]):
+            for c in reversed(mine):
                 if c.get("outcome") in ("fail", "reverted"):
                     consecutive_fails += 1
                 else:
                     break
-            # Get last outcome
-            mine = [x for x in _all_metrics if x.get("change_name") == name]
-            if mine:
-                last_outcome = mine[-1].get("outcome", "")
+
+            consecutive_skips = 0
+            for c in reversed(mine):
+                if c.get("outcome") == "skipped":
+                    consecutive_skips += 1
+                else:
+                    break
+
+            last_outcome = mine[-1].get("outcome", "") if mine else ""
+
             if paused_file.exists() or consecutive_fails >= 3:
                 paused_names.append(name)
+            elif consecutive_skips >= _MAX_SKIP_RETRIES:
+                abandoned_names.append(name)
+                try:
+                    archive_change(
+                        prop.get("target_path", str(prop_dir.parent.parent)),
+                        name,
+                        transport=self._get_transport(prop["project"]),
+                        sub_dir="skipped",
+                    )
+                except Exception:
+                    pass
             elif last_outcome == "success":
                 completed_names.append(name)
-                # Auto-archive completed proposals
                 try:
-                    archive_change(prop.get("target_path", str(prop_dir.parent.parent)), name, transport=self._get_transport(prop["project"]))
+                    archive_change(
+                        prop.get("target_path", str(prop_dir.parent.parent)),
+                        name,
+                        transport=self._get_transport(prop["project"]),
+                    )
                 except Exception:
                     pass
             else:
                 active_proposals.append(prop)
         if paused_names:
             print(f"  ⏸ Paused ({len(paused_names)}): {', '.join(paused_names)}")
+        if abandoned_names:
+            print(f"  🚫 Abandoned ({len(abandoned_names)}): {', '.join(abandoned_names)}")
         if completed_names:
             print(f"  ✅ Completed & archived ({len(completed_names)}): {', '.join(completed_names)}")
         proposals = active_proposals

@@ -280,10 +280,13 @@ def _get_test_targets(target_path: str, since_sha: str,
 
 
 def archive_change(target_path: str, change_name: str,
-                   transport: Transport = None):
+                   transport: Transport = None, sub_dir: str = ""):
     transport = transport or LocalTransport()
     changes_dir = f"{target_path}/openspec/changes"
-    archive_dir = f"{changes_dir}/archive"
+    if sub_dir:
+        archive_dir = f"{changes_dir}/archive/{sub_dir}"
+    else:
+        archive_dir = f"{changes_dir}/archive"
 
     transport.run_shell(f"mkdir -p '{archive_dir}'")
 
