@@ -1,0 +1,14 @@
+{
+  "passed": false,
+  "vacuous": false,
+  "scenarios_tested": 13,
+  "test_files": [
+    "tests/test_spec_fix_review_verdict_parser__diagnostic_logging.py",
+    "tests/test_spec_fix_review_verdict_parser__issue_pattern_matching.py",
+    "tests/test_spec_fix_review_verdict_parser__xml_preprocessing.py"
+  ],
+  "pytest_exit_code": 1,
+  "pytest_output": "\n==================================== ERRORS ====================================\n_ ERROR collecting tests/test_spec_fix_review_verdict_parser__diagnostic_logging.py _\nImportError while importing test module '/home/zsiga/repo/tests/test_spec_fix_review_verdict_parser__diagnostic_logging.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/usr/lib/python3.12/importlib/__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_spec_fix_review_verdict_parser__diagnostic_logging.py:15: in <module>\n    from zsiga.agent.reviewer import parse_review_verdict\nzsiga/agent/reviewer.py:10: in <module>\n    from ..agent.sub_agent import SubAgentResult, create_with_role, run_sub_agent\nzsiga/agent/sub_agent.py:7: in <module>\n    from .tools import register_tools\nzsiga/agent/tools.py:5: in <module>\n    from ..agent.ast_tools import ast_search, ast_replace\nzsiga/agent/ast_tools.py:2: in <module>\n    from ast_grep_py import SgRoot\nE   ModuleNotFoundError: No module named 'ast_grep_py'\n=========================== short test summary info ============================\nERROR tests/test_spec_fix_review_verdict_parser__diagnostic_logging.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 error in 0.56s\n",
+  "pytest_stderr": "",
+  "warning": ""
+}

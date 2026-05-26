@@ -166,22 +166,19 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
     review_path = os.path.join(change_dir, 'review.md')
     logger = logging.getLogger(__name__)
 
-    # Helper: extract clean verdict + issues from raw text (handles tool_call XML artifacts)
     def _extract_clean_review(raw: str) -> str:
-        m = re.search(r'Verdict:\s*(CLEAN|ISSUES_FOUND)', raw)
+        stripped = _strip_xml_artifacts(raw)
+        m = re.search(r'Verdict:\s*(CLEAN|ISSUES_FOUND)', stripped)
         if not m:
-            return raw
+            return stripped
         verdict = m.group(1)
         clean = 'Verdict: ' + verdict + '\n'
         if verdict == 'ISSUES_FOUND':
-            issues = re.findall(
-                r'(\d+\.\s*\[(CRITICAL|SUGGESTION)\].+?)(?=\n\d+\. |$)',
-                raw, re.DOTALL,
-            )
+            issues = _parse_issues(stripped)
             if issues:
                 clean += '\nIssues:\n'
-                for issue_text, _ in issues:
-                    clean += issue_text + '\n'
+                for i, iss in enumerate(issues, 1):
+                    clean += f'{i}. [{iss["severity"]}] {iss["description"]}\n'
         return clean
 
     if not os.path.isfile(review_path):
@@ -209,6 +206,73 @@ Issues:（仅在 Verdict 为 ISSUES_FOUND 时列出）
     return result
 
 
+def _strip_xml_artifacts(text: str) -> str:
+    """Remove XML tool-call artifacts from review content.
+
+    Handles <tool_call:...>, <tool_calling>, <tool_call_layout>,
+    <invoke>, <parameter>, tool_response, and their closing tags.
+    """
+    text = re.sub(r"<tool_call[^>]*>", "", text)
+    text = re.sub(r"</tool_call[^>]*>", "", text)
+    text = re.sub(r"<tool_calling[^>]*>", "", text)
+    text = re.sub(r"</tool_calling>", "", text)
+    text = re.sub(r"<tool_call_layout[^>]*>", "", text)
+    text = re.sub(r"</tool_call_layout>", "", text)
+    text = re.sub(r"<invoke[^>]*>", "", text)
+    text = re.sub(r"</invoke>", "", text)
+    text = re.sub(r"<parameter[^>]*>", "", text)
+    text = re.sub(r"</parameter>", "", text)
+    text = re.sub(r"tool_name:\s*\w+\s*", "", text)
+    text = re.sub(r"tool_response:\s*", "", text)
+    return text
+
+
+def _parse_issues(text: str) -> list[dict]:
+    """Extract issues from review text using multiple fallback patterns.
+
+    Tries in order:
+      1. Numbered list:  1. [CRITICAL] desc
+      2. Bullet list:    - [CRITICAL] desc
+      3. Bare:           [CRITICAL] desc
+
+    Each pattern captures multi-line descriptions (stops at next issue
+    marker or blank line).
+    """
+    patterns = [
+        # 1. Numbered: "1. [CRITICAL] ..."
+        re.compile(
+            r"\d+\.\s*\[(CRITICAL|SUGGESTION)\]\s*(.+?)(?=\n\s*\d+\.\s*\[|$)",
+            re.DOTALL,
+        ),
+        # 2. Bullet: "- [CRITICAL] ..."
+        re.compile(
+            r"-\s*\[(CRITICAL|SUGGESTION)\]\s*(.+?)(?=\n\s*-\s*\[|$)",
+            re.DOTALL,
+        ),
+        # 3. Bare: "[CRITICAL] ..."
+        re.compile(
+            r"\[(CRITICAL|SUGGESTION)\]\s*(.+?)(?=\n\s*\[CRITICAL\]|\n\s*\[SUGGESTION\]|$)",
+            re.DOTALL,
+        ),
+    ]
+
+    for pattern in patterns:
+        issues = []
+        for match in pattern.finditer(text):
+            severity = match.group(1)
+            # Take first line of description; strip trailing whitespace
+            description = match.group(2).strip().split("\n")[0].strip()
+            if description:
+                issues.append({
+                    "severity": severity,
+                    "description": description,
+                })
+        if issues:
+            return issues
+
+    return []
+
+
 def parse_review_verdict(
     change_dir: str, transport: Transport = None
 ) -> tuple[str, list[dict]]:
@@ -217,12 +281,21 @@ def parse_review_verdict(
     verdict: "CLEAN" or "ISSUES_FOUND" or "UNKNOWN"
     issues: [{"severity": "CRITICAL"|"SUGGESTION", "description": str}, ...]
     """
+    _logger = logging.getLogger(__name__)
     content = read_file(f"{change_dir}/review.md", transport)
     if content is None:
         return "UNKNOWN", []
 
+    # Pre-process: strip XML artifacts that the critic sub-agent may leave
+    content = _strip_xml_artifacts(content)
+
     verdict_match = re.search(r"Verdict:\s*(CLEAN|ISSUES_FOUND)", content)
     if not verdict_match:
+        _logger.warning(
+            "parse_review_verdict: no verdict found in %s/review.md "
+            "(first 300 chars: %.300s)",
+            change_dir, content,
+        )
         return "UNKNOWN", []
 
     verdict = verdict_match.group(1)
@@ -231,19 +304,14 @@ def parse_review_verdict(
         return "CLEAN", []
 
     # Parse issues from ISSUES_FOUND verdict
-    issues = []
-    issue_pattern = re.compile(
-        r"\d+\.\s*\[(CRITICAL|SUGGESTION)\]\s*(.+?)(?=\n\d+\.|$)",
-        re.DOTALL,
-    )
-    for match in issue_pattern.finditer(content):
-        severity = match.group(1)
-        description = match.group(2).strip()
-        if description:
-            issues.append({
-                "severity": severity,
-                "description": description,
-            })
+    issues = _parse_issues(content)
+
+    if not issues and verdict == "ISSUES_FOUND":
+        _logger.warning(
+            "parse_review_verdict: verdict=ISSUES_FOUND but 0 issues parsed "
+            "from %s/review.md (cleaned content first 500 chars: %.500s)",
+            change_dir, content,
+        )
 
     return verdict, issues
 
