@@ -617,6 +617,24 @@ def _build_budget_analysis_json(db_path: str, home: str) -> dict:
     return compute_budget_analysis(db_path, config_budgets)
 
 
+def _build_langfuse_summary() -> dict:
+    try:
+        from .intake.langfuse_reader import get_metrics
+        lm = get_metrics(limit=10, hours=24)
+        return {
+            "available": True,
+            "trace_count": lm.trace_count,
+            "total_tokens_24h": lm.total_tokens,
+            "avg_tokens_per_trace": lm.avg_tokens_per_trace,
+            "costliest_phase": lm.costliest_phase,
+            "costliest_phase_tokens": lm.costliest_phase_tokens,
+            "token_trend": lm.token_trend,
+            "phase_avg_tokens": lm.phase_avg_tokens,
+        }
+    except Exception:
+        return {"available": False}
+
+
 def _build_evolution_status(base_path: str) -> dict:
     from .intake.evolution import EvolutionEngine, EvolutionConfig
     from .config import load_config
@@ -669,6 +687,7 @@ def _build_evolution_status(base_path: str) -> dict:
         "paused": engine.is_paused(),
         "pending_proposals": evo_proposals,
         "archived_proposals": len(evo_archived),
+        "langfuse": _build_langfuse_summary(),
         "timestamp": now.isoformat(),
     }
 

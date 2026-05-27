@@ -28,6 +28,7 @@ from typing import Literal
 
 from ..memory.learn import record_lesson, search_learnings
 from ..memory.pattern_miner import mine_patterns
+from .langfuse_reader import get_metrics as get_langfuse_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +126,7 @@ class EvolutionEngine:
 
     def _phase1_intake(self) -> dict:
         recent_evo_rejections = self._collect_recent_evo_rejections()
+        langfuse_metrics = get_langfuse_metrics(limit=10, hours=24)
 
         facts: dict = {
             "recent_outcomes": self._collect_recent_outcomes(),
@@ -134,6 +136,7 @@ class EvolutionEngine:
             "recent_failures": search_learnings(["fail", "revert", "error", "critical"], pattern_key=None)[:10],
             "recent_successes": search_learnings(["success", "pass", "deliver"], pattern_key=None)[:5],
             "recent_evo_rejections": recent_evo_rejections,
+            "langfuse_metrics": langfuse_metrics,
             "actionable": False,
         }
 
@@ -185,6 +188,16 @@ class EvolutionEngine:
         # Proactive: look at what succeeded and find similar patterns to apply
         if facts["recent_successes"]:
             findings.append("reinforce_success:analyze_and_extend")
+
+        # Langfuse-driven findings: token cost anomalies and trends
+        lm = langfuse_metrics
+        if lm.trace_count >= 3:
+            if lm.costliest_phase and lm.costliest_phase_tokens > 0:
+                findings.append(f"high_cost_phase:{lm.costliest_phase}:{lm.costliest_phase_tokens}")
+            if lm.token_trend > 0.5:
+                findings.append(f"token_cost_rising:{lm.token_trend:.1%}")
+            if lm.avg_tokens_per_trace > 50000:
+                findings.append(f"avg_trace_expensive:{int(lm.avg_tokens_per_trace)}")
 
         facts["findings"] = findings
         facts["actionable"] = len(findings) > 0
@@ -276,6 +289,26 @@ class EvolutionEngine:
                     insights["confidence"] = "low"
                     break
 
+        # Langfuse-driven optimization: reduce token cost of expensive phases
+        if not insights["priority_finding"]:
+            lm = facts.get("langfuse_metrics")
+            if lm and lm.costliest_phase:
+                for finding in findings:
+                    if finding.startswith("high_cost_phase:"):
+                        parts = finding.split(":")
+                        phase = parts[1] if len(parts) > 1 else ""
+                        tokens = int(parts[2]) if len(parts) > 2 else 0
+                        insights["priority_finding"] = {
+                            "type": "optimize_cost",
+                            "phase": phase,
+                            "tokens": tokens,
+                            "avg_per_trace": lm.avg_tokens_per_trace,
+                            "trend": lm.token_trend,
+                        }
+                        insights["proposal_type"] = "improvement"
+                        insights["confidence"] = "medium"
+                        break
+
         return insights
 
     # ------------------------------------------------------------------
@@ -307,6 +340,14 @@ class EvolutionEngine:
                 pattern_key="evolution.test_gap",
                 source="evolution",
             )
+        elif ftype == "optimize_cost":
+            record_lesson(
+                title=f"Evolution: {finding.get('phase', '')} phase costs {finding.get('tokens', 0)} tokens",
+                context=f"avg_per_trace={finding.get('avg_per_trace', 0)}, trend={finding.get('trend', 0):.1%}",
+                takeaway=f"Optimize {finding.get('phase', '')} to reduce token usage",
+                pattern_key=f"evolution.cost.{finding.get('phase', 'unknown')}",
+                source="evolution",
+            )
         return True
 
     # ------------------------------------------------------------------
@@ -330,6 +371,8 @@ class EvolutionEngine:
             content = self._render_explore_proposal(finding, facts)
         elif ftype == "reinforce_success":
             content = self._render_reinforce_proposal(finding, facts)
+        elif ftype == "optimize_cost":
+            content = self._render_cost_proposal(finding, facts)
         else:
             return None
 
@@ -560,6 +603,62 @@ class EvolutionEngine:
 
 ## Constraints
 - 此 proposal 由 zsiga 自演进引擎生成
+- project=zsiga
+"""
+
+    def _render_cost_proposal(self, finding: dict, facts: dict) -> str:
+        phase = finding.get("phase", "unknown")
+        tokens = finding.get("tokens", 0)
+        avg = finding.get("avg_per_trace", 0)
+        trend = finding.get("trend", 0)
+        trend_desc = "上升" if trend > 0 else "下降"
+        lm = facts.get("langfuse_metrics")
+
+        phase_breakdown = ""
+        if lm and lm.phase_avg_tokens:
+            phase_lines = [f"  - {p}: {t:.0f} tokens/trace" for p, t in lm.phase_avg_tokens.items()]
+            phase_breakdown = "\n".join(phase_lines)
+
+        return f"""# optimize-{phase}-token-cost
+
+## Summary
+优化 `{phase}` phase 的 token 消耗（当前 {tokens} tokens / 24h），降低 pipeline 运行成本。
+
+## Problem
+Langfuse 数据显示 `{phase}` 是 token 消耗最高的阶段：
+- 24h 累计: {tokens} tokens
+- 平均每 trace: {avg:.0f} tokens
+- 趋势: {trend_desc} ({abs(trend):.1%})
+
+各 phase token 分布：
+{phase_breakdown if phase_breakdown else "- 暂无详细数据"}
+
+## Technical Design
+1. 分析 `{phase}` phase 的 agent prompt，识别冗余上下文
+2. 检查 compaction 策略是否生效（减少历史对话的 token 浪费）
+3. 评估 sub-agent 调用是否可以合并（减少重复上下文注入）
+4. 对 prompt 进行精简，保留核心指令，移除重复约束
+
+### Target Files
+- `zsiga/agent/roles.py` (prompt 定义)
+- `zsiga/agent/loop.py` (context 管理)
+- `zsiga/pipeline/orchestrator.py` (phase 编排)
+
+## Acceptance Criteria
+- [BAC-01] 分析 `{phase}` phase 的 token 使用分布
+- [BAC-02] 实施至少 1 项 token 优化（prompt 精简/compaction 改进）
+- [BAC-03] 优化后同类 proposal 的 `{phase}` phase token 消耗降低 >= 15%
+
+## Scope
+- In scope: 分析并优化 `{phase}` phase 的 token 消耗
+- Out of scope: 不修改其他 phase 的逻辑
+
+## Risk
+- Impact: Low — prompt 和上下文管理优化
+- Reversibility: git revert
+
+## Constraints
+- 此 proposal 由 zsiga 自演进引擎生成（基于 Langfuse 可观测数据）
 - project=zsiga
 """
 
