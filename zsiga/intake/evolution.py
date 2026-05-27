@@ -147,6 +147,9 @@ class EvolutionEngine:
                         if p.severity == "high"
                         and p.key not in excluded_patterns
                         and not p.key.startswith("evolution.")]
+
+        findings = []
+
         if high_patterns:
             findings.append(f"recurring_failure:{high_patterns[0].key}")
 
@@ -598,7 +601,7 @@ class EvolutionEngine:
             return []
 
     def _collect_recent_evo_rejections(self) -> list[dict]:
-        """Scan archived evo- proposals for REJECT verdicts."""
+        """Scan evo- proposals for REJECT verdicts from Steward."""
         rejections: list[dict] = []
         changes_dir = self.base / "openspec" / "changes"
 
@@ -608,31 +611,39 @@ class EvolutionEngine:
                 if entry.is_dir() and entry.name.startswith("evo-"):
                     evo_dirs.append(entry)
         archive_dir = changes_dir / "archive"
-        for sub in ("skipped", "completed"):
-            sub_dir = archive_dir / sub
-            if sub_dir.exists():
-                for entry in sub_dir.iterdir():
-                    if entry.is_dir() and entry.name.startswith("evo-"):
-                        evo_dirs.append(entry)
+        if archive_dir.exists():
+            for sub_dir in archive_dir.iterdir():
+                if sub_dir.is_dir():
+                    for entry in sub_dir.iterdir():
+                        if entry.is_dir() and "evo-" in entry.name:
+                            evo_dirs.append(entry)
 
-        for evo_dir in evo_dirs[-10:]:
-            for review_file in sorted(evo_dir.glob("steward-review*.md"))[-1:]:
+        for evo_dir in evo_dirs[-15:]:
+            has_reject = False
+            for review_file in evo_dir.glob("steward-review*.md"):
                 try:
                     content = review_file.read_text(encoding="utf-8")
                     if "REJECT" in content:
-                        pattern_key = ""
-                        for line in content.splitlines():
-                            m = re.match(r".*模式\s*`(\S+)`.*", line)
-                            if m:
-                                pattern_key = m.group(1)
-                                break
-                        rejections.append({
-                            "dir": evo_dir.name,
-                            "pattern_key": pattern_key,
-                            "review": content[:200],
-                        })
+                        has_reject = True
+                        break
                 except OSError:
                     pass
+
+            if has_reject:
+                proposal_path = evo_dir / "proposal.md"
+                pattern_key = ""
+                try:
+                    proposal_text = proposal_path.read_text(encoding="utf-8")
+                    m = re.search(r"失败模式\s*`(\S+)`", proposal_text)
+                    if m:
+                        pattern_key = m.group(1)
+                except OSError:
+                    pass
+
+                rejections.append({
+                    "dir": evo_dir.name,
+                    "pattern_key": pattern_key,
+                })
 
         return rejections
 
