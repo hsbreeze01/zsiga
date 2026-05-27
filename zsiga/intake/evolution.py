@@ -124,6 +124,8 @@ class EvolutionEngine:
     # ------------------------------------------------------------------
 
     def _phase1_intake(self) -> dict:
+        recent_evo_rejections = self._collect_recent_evo_rejections()
+
         facts: dict = {
             "recent_outcomes": self._collect_recent_outcomes(),
             "patterns": mine_patterns(min_occurrences=2, learnings_path=self.base / "memory" / "learnings.jsonl"),
@@ -131,13 +133,20 @@ class EvolutionEngine:
             "learnings_count": self._count_learnings(),
             "recent_failures": search_learnings(["fail", "revert", "error", "critical"], pattern_key=None)[:10],
             "recent_successes": search_learnings(["success", "pass", "deliver"], pattern_key=None)[:5],
+            "recent_evo_rejections": recent_evo_rejections,
             "actionable": False,
         }
 
+        excluded_patterns = set()
+        for rej in recent_evo_rejections:
+            pattern = rej.get("pattern_key", "")
+            if pattern:
+                excluded_patterns.add(pattern)
+
         findings = []
 
-        # Check for recurring failure patterns
-        high_patterns = [p for p in facts["patterns"] if p.severity == "high"]
+        high_patterns = [p for p in facts["patterns"]
+                        if p.severity == "high" and p.key not in excluded_patterns]
         if high_patterns:
             findings.append(f"recurring_failure:{high_patterns[0].key}")
 
@@ -587,6 +596,45 @@ class EvolutionEngine:
             ]
         except Exception:
             return []
+
+    def _collect_recent_evo_rejections(self) -> list[dict]:
+        """Scan archived evo- proposals for REJECT verdicts."""
+        rejections: list[dict] = []
+        changes_dir = self.base / "openspec" / "changes"
+
+        evo_dirs: list[Path] = []
+        if changes_dir.exists():
+            for entry in changes_dir.iterdir():
+                if entry.is_dir() and entry.name.startswith("evo-"):
+                    evo_dirs.append(entry)
+        archive_dir = changes_dir / "archive"
+        for sub in ("skipped", "completed"):
+            sub_dir = archive_dir / sub
+            if sub_dir.exists():
+                for entry in sub_dir.iterdir():
+                    if entry.is_dir() and entry.name.startswith("evo-"):
+                        evo_dirs.append(entry)
+
+        for evo_dir in evo_dirs[-10:]:
+            for review_file in sorted(evo_dir.glob("steward-review*.md"))[-1:]:
+                try:
+                    content = review_file.read_text(encoding="utf-8")
+                    if "REJECT" in content:
+                        pattern_key = ""
+                        for line in content.splitlines():
+                            m = re.match(r".*模式\s*`(\S+)`.*", line)
+                            if m:
+                                pattern_key = m.group(1)
+                                break
+                        rejections.append({
+                            "dir": evo_dir.name,
+                            "pattern_key": pattern_key,
+                            "review": content[:200],
+                        })
+                except OSError:
+                    pass
+
+        return rejections
 
     def _scan_code_structure(self) -> dict:
         zsiga_dir = self.base / "zsiga"
