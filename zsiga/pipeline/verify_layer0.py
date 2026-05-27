@@ -6,6 +6,13 @@ a binary yes/no result — no LLM calls, no probabilistic judgement.
 If ANY check fails, verify returns FAIL immediately without calling the
 LLM, saving tokens and preventing false-positive PASS on incomplete work.
 
+Design principles:
+    1. Logical consistency — same git state MUST yield consistent verdicts
+       across all checks.  No check may observe a different "truth" than
+       another.
+    2. Operational consistency — the change snapshot is captured ONCE and
+       shared by every check.  No check fetches git data independently.
+
 Check inventory:
     L0-01  spec_file_coverage      — every spec has ≥1 corresponding code change
     L0-02  tasks_completion        — all tasks.md items are checked off
@@ -28,8 +35,6 @@ from .. import git_ops
 from ..transport import LocalTransport, Transport
 from .spec_parser import parse_spec
 from .utils import (
-    _get_changed_files,
-    get_all_changed_files,
     list_files_recursive,
     read_file,
 )
@@ -90,6 +95,101 @@ class Layer0Result:
             "elapsed_seconds": self.elapsed_seconds,
             "all_passed": self.all_passed,
         }
+
+
+# ---------------------------------------------------------------------------
+# ChangeSnapshot — single source of truth for all checks
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class ChangeSnapshot:
+    """Immutable snapshot of all git changes, captured once per verify run.
+
+    Every L0 check receives this object instead of querying git independently.
+    This guarantees logical and operational consistency.
+    """
+
+    diff_content: str
+    changed_files: list[str]
+    changed_py_files: list[str]
+
+    @property
+    def diff_lower(self) -> str:
+        return self.diff_content.lower()
+
+    @property
+    def has_changes(self) -> bool:
+        return bool(self.changed_files)
+
+
+def _build_snapshot(
+    target_path: str,
+    pre_impl_sha: str,
+    transport: Transport,
+) -> ChangeSnapshot:
+    """Build a unified change snapshot from git.
+
+    Collects committed diff, staged diff, unstaged diff, and untracked files.
+    If committed diff is empty, falls back to staged + unstaged + untracked
+    file contents so that checks never see contradictory data.
+    """
+    _EXCLUDE = ("/site-packages/", "__pycache__")
+
+    def _filter_files(stdout: str) -> list[str]:
+        files: list[str] = []
+        for line in stdout.strip().split("\n"):
+            f = line.strip()
+            if f and not any(ex in f for ex in _EXCLUDE):
+                files.append(f)
+        return files
+
+    # 1. Committed diff (since pre_impl_sha)
+    committed_diff = git_ops.diff(target_path, pre_impl_sha, transport=transport)
+
+    # 2. Staged + unstaged diffs
+    r_staged = transport.run_shell("git diff --cached", cwd=target_path)
+    staged_diff = r_staged.get("stdout", "")
+
+    r_unstaged = transport.run_shell("git diff", cwd=target_path)
+    unstaged_diff = r_unstaged.get("stdout", "")
+
+    # 3. File lists (committed + staged + untracked) — same query as utils.py
+    r_files = transport.run_shell(
+        f"git diff --name-only {pre_impl_sha} HEAD;"
+        "git diff --name-only --cached;"
+        "git ls-files --others --exclude-standard",
+        cwd=target_path,
+    )
+    all_files = _filter_files(r_files.get("stdout", ""))
+    py_files = [f for f in all_files if f.endswith(".py")]
+
+    # 4. Compose diff: committed first; if empty, fall back to staged + unstaged
+    diff = committed_diff.strip()
+    if not diff:
+        parts: list[str] = []
+        if staged_diff.strip():
+            parts.append(staged_diff.strip())
+        if unstaged_diff.strip():
+            parts.append(unstaged_diff.strip())
+        # If still empty but untracked files exist, synthesize diff-like content
+        if not parts:
+            r_untracked = transport.run_shell(
+                "git ls-files --others --exclude-standard",
+                cwd=target_path,
+            )
+            for fname in _filter_files(r_untracked.get("stdout", "")):
+                full = os.path.join(target_path, fname)
+                source = read_file(full, transport)
+                if source:
+                    parts.append(f"--- /dev/null\n+++ b/{fname}\n{source}")
+        diff = "\n".join(parts)
+
+    return ChangeSnapshot(
+        diff_content=diff,
+        changed_files=all_files,
+        changed_py_files=py_files,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -158,8 +258,7 @@ def _diff_has_keyword(
 
 def check_spec_file_coverage(
     change_dir: str,
-    target_path: str,
-    pre_impl_sha: str,
+    snapshot: ChangeSnapshot,
     transport: Transport,
 ) -> Layer0Check:
     """L0-01: every spec file must have ≥1 corresponding code change."""
@@ -174,9 +273,8 @@ def check_spec_file_coverage(
             "无 spec 文件，跳过",
         )
 
-    diff_files = get_all_changed_files(target_path, pre_impl_sha, transport)
-    diff_content = git_ops.diff(target_path, pre_impl_sha, transport=transport)
-    diff_lower = diff_content.lower()
+    diff_files = snapshot.changed_files
+    diff_lower = snapshot.diff_lower
 
     uncovered: list[str] = []
     for spec_path in spec_files:
@@ -184,7 +282,6 @@ def check_spec_file_coverage(
         keywords = _extract_spec_keywords(spec_path, transport)
 
         if not keywords:
-            # Last resort: use the full spec name stem
             keywords = [os.path.basename(spec_path).removesuffix(".md").lower()]
 
         covered = any(
@@ -195,10 +292,11 @@ def check_spec_file_coverage(
             uncovered.append(spec_filename)
 
     passed = len(uncovered) == 0
-    if passed:
-        evidence = f"全部 {len(spec_files)} 个 spec 文件均有对应代码变更"
-    else:
-        evidence = f"未覆盖的 spec: {', '.join(uncovered)}"
+    evidence = (
+        f"全部 {len(spec_files)} 个 spec 文件均有对应代码变更"
+        if passed
+        else f"未覆盖的 spec: {', '.join(uncovered)}"
+    )
 
     return Layer0Check(
         "spec_file_coverage",
@@ -319,10 +417,12 @@ def _py_compile_source(source_text: str) -> tuple[bool, str]:
 
 
 def check_no_syntax_error(
-    target_path: str, pre_impl_sha: str, transport: Transport,
+    target_path: str,
+    snapshot: ChangeSnapshot,
+    transport: Transport,
 ) -> Layer0Check:
     """L0-04: all changed Python files must pass py_compile."""
-    changed = _get_changed_files(target_path, pre_impl_sha, transport)
+    changed = snapshot.changed_py_files
     if not changed:
         return Layer0Check(
             "no_syntax_error",
@@ -378,8 +478,7 @@ _MUST_RE = re.compile(
 
 def check_spec_scenario_coverage(
     change_dir: str,
-    target_path: str,
-    pre_impl_sha: str,
+    snapshot: ChangeSnapshot,
     transport: Transport,
 ) -> Layer0Check:
     """L0-05: key SHALL/MUST terms from each spec appear in the diff."""
@@ -394,16 +493,16 @@ def check_spec_scenario_coverage(
             "无 spec 文件，跳过",
         )
 
-    diff_content = git_ops.diff(target_path, pre_impl_sha, transport=transport)
+    diff_content = snapshot.diff_content
     if not diff_content.strip():
         return Layer0Check(
             "spec_scenario_coverage",
             "spec 中的关键要求在 diff 中有实现痕迹",
             False,
-            "git diff 为空",
+            "git diff 为空（committed/staged/unstaged/untracked 均无变更）",
         )
 
-    diff_lower = diff_content.lower()
+    diff_lower = snapshot.diff_lower
 
     uncovered_specs: list[str] = []
     for spec_path in spec_files:
@@ -413,7 +512,6 @@ def check_spec_scenario_coverage(
         for pat in (_SHALL_RE, _MUST_RE):
             for m in pat.finditer(spec_text):
                 term = m.group("term").strip()
-                # Take the last 1-2 words (most specific) as keyword
                 words = term.split()
                 if len(words) > 2:
                     term = " ".join(words[-2:])
@@ -422,7 +520,6 @@ def check_spec_scenario_coverage(
         if not terms:
             continue
 
-        # A spec is "covered" if at least half of its key terms appear
         matched = sum(
             1 for t in terms
             if t.lower() in diff_lower
@@ -457,26 +554,37 @@ def check_spec_scenario_coverage(
 
 _BAC_RE = re.compile(r"\[BAC-(\d+)\]\s*(.+?)(?:\n|$)")
 
-# Pattern: `file` 中存在 `symbol`
 _BAC_EXISTS_RE = re.compile(r"`([^`]+)`\s*中存在\s*`([^`]+)`")
-# Pattern: `file` 中引用了 `term`
 _BAC_REF_RE = re.compile(r"`([^`]+)`\s*中引用了\s*`([^`]+)`")
-# Pattern: 所有 spec 文件...都有对应代码变更
 _BAC_ALL_SPEC_RE = re.compile(r"所有\s*spec.*对应.*代码.*变更")
-# Pattern: 至少存在 N 个 testable=true
 _BAC_TESTABLE_RE = re.compile(r"至少存在\s*(\d+)\s*个\s*testable\s*=\s*true")
+_BAC_FILE_EXISTS_RE = re.compile(r"(\S+)\s+文件存在")
+_BAC_FILE_HAS_RE = re.compile(r"(\S+)\s+中存在\s+(\S+)")
+
+
+def _check_file_exists(
+    file_name: str, target_path: str, transport: Transport,
+) -> tuple[bool, str]:
+    """Check that *file_name* exists on disk."""
+    candidates = [
+        os.path.join(target_path, file_name),
+        os.path.join(target_path, "zsiga", file_name),
+    ]
+    for candidate in candidates:
+        r = transport.run_shell(f"test -f '{candidate}' && echo YES", timeout=5)
+        if r.get("stdout", "").strip() == "YES":
+            return True, f"文件 {file_name} 存在"
+    return False, f"文件 {file_name} 未找到"
 
 
 def _check_symbol_in_file(
     file_name: str, symbol: str, target_path: str, transport: Transport,
 ) -> tuple[bool, str]:
     """Check that *symbol* appears in *file_name* source."""
-    # Try multiple resolution strategies for file_name
     candidates = [
         os.path.join(target_path, file_name),
         os.path.join(target_path, "zsiga", file_name),
     ]
-    # Also try finding by basename
     for candidate in candidates:
         source = read_file(candidate, transport)
         if source is not None:
@@ -484,7 +592,6 @@ def _check_symbol_in_file(
                 return True, f"`{symbol}` 存在于 {file_name}"
             return False, f"`{symbol}` 未在 {file_name} 中找到"
 
-    # Fallback: try grep in target_path
     r = transport.run_shell(
         f"grep -r '{symbol}' '{target_path}/{file_name}' 2>/dev/null | head -1",
         timeout=10,
@@ -498,7 +605,6 @@ def _check_term_in_file(
     file_name: str, term: str, target_path: str, transport: Transport,
 ) -> tuple[bool, str]:
     """Check that *term* is referenced in *file_name* source."""
-    # Try term alternatives (e.g. cap_exceeded OR CAP_EXCEEDED)
     terms = [term]
     if "_" in term:
         terms.append(term.upper())
@@ -538,7 +644,7 @@ def _check_testable_count(
 def check_bac_acceptance(
     change_dir: str,
     target_path: str,
-    pre_impl_sha: str,
+    snapshot: ChangeSnapshot,
     transport: Transport,
 ) -> list[Layer0Check]:
     """Parse BAC items from proposal.md and evaluate each one."""
@@ -554,7 +660,6 @@ def check_bac_acceptance(
     for bac_num, bac_text in bac_items:
         bac_text = bac_text.strip()
 
-        # Pattern: `file` 中存在 `symbol`
         m = _BAC_EXISTS_RE.search(bac_text)
         if m:
             passed, evidence = _check_symbol_in_file(
@@ -568,7 +673,6 @@ def check_bac_acceptance(
             ))
             continue
 
-        # Pattern: `file` 中引用了 `term`
         m = _BAC_REF_RE.search(bac_text)
         if m:
             passed, evidence = _check_term_in_file(
@@ -582,9 +686,7 @@ def check_bac_acceptance(
             ))
             continue
 
-        # Pattern: 所有 spec 文件...都有对应代码变更
         if _BAC_ALL_SPEC_RE.search(bac_text):
-            # Delegate to L0-01 (will be checked separately)
             checks.append(Layer0Check(
                 f"bac_{bac_num}",
                 f"[BAC-{bac_num}] {bac_text}",
@@ -593,12 +695,38 @@ def check_bac_acceptance(
             ))
             continue
 
-        # Pattern: 至少存在 N 个 testable=true
         m = _BAC_TESTABLE_RE.search(bac_text)
         if m:
             min_count = int(m.group(1))
             passed, evidence = _check_testable_count(
                 change_dir, min_count, transport,
+            )
+            checks.append(Layer0Check(
+                f"bac_{bac_num}",
+                f"[BAC-{bac_num}] {bac_text}",
+                passed,
+                evidence,
+            ))
+            continue
+
+        # Pattern: xxx.py 文件存在 / xxx.py 中存在 yyy
+        m = _BAC_FILE_EXISTS_RE.search(bac_text)
+        if m:
+            passed, evidence = _check_file_exists(
+                m.group(1), target_path, transport,
+            )
+            checks.append(Layer0Check(
+                f"bac_{bac_num}",
+                f"[BAC-{bac_num}] {bac_text}",
+                passed,
+                evidence,
+            ))
+            continue
+
+        m = _BAC_FILE_HAS_RE.search(bac_text)
+        if m:
+            passed, evidence = _check_symbol_in_file(
+                m.group(1), m.group(2), target_path, transport,
             )
             checks.append(Layer0Check(
                 f"bac_{bac_num}",
@@ -634,24 +762,24 @@ def run_layer0_checks(
     transport = transport or LocalTransport()
     t_start = time.monotonic()
 
+    snapshot = _build_snapshot(target_path, pre_impl_sha, transport)
+
     checks: list[Layer0Check] = [
-        check_spec_file_coverage(change_dir, target_path, pre_impl_sha, transport),
+        check_spec_file_coverage(change_dir, snapshot, transport),
         check_tasks_completion(change_dir, transport),
         check_testable_not_all_false(change_dir, transport),
-        check_no_syntax_error(target_path, pre_impl_sha, transport),
-        check_spec_scenario_coverage(change_dir, target_path, pre_impl_sha, transport),
+        check_no_syntax_error(target_path, snapshot, transport),
+        check_spec_scenario_coverage(change_dir, snapshot, transport),
     ]
 
-    # Conditional: BAC checks (only if proposal.md contains BAC items)
     bac_checks = check_bac_acceptance(
-        change_dir, target_path, pre_impl_sha, transport,
+        change_dir, target_path, snapshot, transport,
     )
     checks.extend(bac_checks)
 
     elapsed = time.monotonic() - t_start
     result = Layer0Result(checks=checks, elapsed_seconds=elapsed)
 
-    # Persist verify_layer0.json
     _persist_result(change_dir, transport, result)
 
     return result

@@ -1,0 +1,150 @@
+{
+  "checks": [
+    {
+      "id": "spec_file_coverage",
+      "description": "每个 spec 文件至少有一个对应的代码变更",
+      "passed": true,
+      "evidence": "全部 4 个 spec 文件均有对应代码变更"
+    },
+    {
+      "id": "tasks_completion",
+      "description": "tasks.md 中所有 task 已勾选",
+      "passed": true,
+      "evidence": "无 tasks.md 或为空，跳过"
+    },
+    {
+      "id": "testable_not_all_false",
+      "description": "至少存在 testable=true 的 scenario",
+      "passed": true,
+      "evidence": "27 个 scenario 中 27 个 testable=true"
+    },
+    {
+      "id": "no_syntax_error",
+      "description": "变更的 Python 文件无语法错误",
+      "passed": true,
+      "evidence": "无 Python 文件变更，跳过"
+    },
+    {
+      "id": "spec_scenario_coverage",
+      "description": "spec 中的关键要求在 diff 中有实现痕迹",
+      "passed": false,
+      "evidence": "git diff 为空"
+    },
+    {
+      "id": "bac_01",
+      "description": "[BAC-01] config.py 中存在 PHASE_TOKEN_CAPS",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_01",
+      "description": "[BAC-01] loop.py 中存在 handle_cap_exceeded",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_02",
+      "description": "[BAC-02] orchestrator.py 中引用了 cap_exceeded",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_10",
+      "description": "[BAC-10] 至少存在 1 个 testable=true",
+      "passed": true,
+      "evidence": "testable=true 的 scenario: 27 (要求 ≥ 1)"
+    },
+    {
+      "id": "bac_01",
+      "description": "[BAC-01] tests/test_verify_layer0.py 文件存在",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_02",
+      "description": "[BAC-02] tests/test_verifier_layer0_integration.py 文件存在",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_03",
+      "description": "[BAC-03] tests/test_learning_format.py 文件存在",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_04",
+      "description": "[BAC-04] tests/test_steward_scoring.py 文件存在",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_05",
+      "description": "[BAC-05] tests/test_verify_layer0.py 中存在 test_spec_file_coverage_pass",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_06",
+      "description": "[BAC-06] tests/test_verify_layer0.py 中存在 test_spec_file_coverage_fail",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_07",
+      "description": "[BAC-07] tests/test_verify_layer0.py 中存在 test_bac_exists_pass",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_08",
+      "description": "[BAC-08] tests/test_verify_layer0.py 中存在 test_run_layer0_checks_all_pass",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_09",
+      "description": "[BAC-09] tests/test_verify_layer0.py 中存在 test_run_layer0_checks_partial_fail",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_10",
+      "description": "[BAC-10] tests/test_verifier_layer0_integration.py 中存在 test_verify_returns_none_on_layer0_fail",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_11",
+      "description": "[BAC-11] tests/test_learning_format.py 中存在 test_record_lesson_with_case_why_rule",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_12",
+      "description": "[BAC-12] tests/test_learning_format.py 中存在 test_load_recent_lessons_prefers_rule",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_13",
+      "description": "[BAC-13] tests/test_steward_scoring.py 中存在 test_steward_prompt_has_6_dimensions",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_14",
+      "description": "[BAC-14] 所有 spec 文件 (4个) 都有对应的代码变更",
+      "passed": true,
+      "evidence": "由 spec_file_coverage 检查覆盖"
+    },
+    {
+      "id": "bac_15",
+      "description": "[BAC-15] 至少存在 1 个 testable=true 的 scenario",
+      "passed": true,
+      "evidence": "testable=true 的 scenario: 27 (要求 ≥ 1)"
+    }
+  ],
+  "elapsed_seconds": 0.06512938160449266,
+  "all_passed": false
+}
