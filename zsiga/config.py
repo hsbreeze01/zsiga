@@ -147,6 +147,12 @@ class PipelineConfig:
         design_gate_max_retries: int = 2,
         design_gate_max_turns: int = 4,
         design_gate_timeout: int = 120,
+        # Evolution Engine
+        evolution_enabled: bool = True,
+        evolution_window_start_hour: int = 22,
+        evolution_window_end_hour: int = 10,
+        evolution_max_proposals: int = 12,
+        evolution_min_gap_minutes: int = 15,
         # Role-specific timeouts
         analyst_max_turns: int = 8,
         analyst_timeout: int = 180,
@@ -196,6 +202,12 @@ class PipelineConfig:
         self.design_gate_max_retries = design_gate_max_retries
         self.design_gate_max_turns = design_gate_max_turns
         self.design_gate_timeout = design_gate_timeout
+        # Evolution
+        self.evolution_enabled = evolution_enabled
+        self.evolution_window_start_hour = evolution_window_start_hour
+        self.evolution_window_end_hour = evolution_window_end_hour
+        self.evolution_max_proposals = evolution_max_proposals
+        self.evolution_min_gap_minutes = evolution_min_gap_minutes
         # Role-specific
         self.analyst_max_turns = analyst_max_turns
         self.analyst_timeout = analyst_timeout
@@ -419,6 +431,12 @@ def load_config(path: str = None) -> ZsigaConfig:
         design_gate_max_retries=pipeline_raw.get("design_gate", {}).get("max_retries", 2),
         design_gate_max_turns=pipeline_raw.get("design_gate", {}).get("max_turns", 4),
         design_gate_timeout=pipeline_raw.get("design_gate", {}).get("timeout", 120),
+        # Evolution
+        evolution_enabled=pipeline_raw.get("evolution", {}).get("enabled", True),
+        evolution_window_start_hour=pipeline_raw.get("evolution", {}).get("window_start_hour", 22),
+        evolution_window_end_hour=pipeline_raw.get("evolution", {}).get("window_end_hour", 10),
+        evolution_max_proposals=pipeline_raw.get("evolution", {}).get("max_proposals_per_window", 12),
+        evolution_min_gap_minutes=pipeline_raw.get("evolution", {}).get("min_cycle_gap_minutes", 15),
         # Role-specific
         analyst_max_turns=pipeline_raw.get("analyst_max_turns", 8),
         analyst_timeout=pipeline_raw.get("analyst_timeout", 180),

@@ -116,6 +116,13 @@ pipeline:
     max_turns: 4
     timeout: 120
 
+  evolution:
+    enabled: true
+    window_start_hour: 22          # 22:00 ~ 10:00 next day (12h window)
+    window_end_hour: 10
+    max_proposals_per_window: 12
+    min_cycle_gap_minutes: 15
+
 safety:
   require_approval: false
   dry_run: false

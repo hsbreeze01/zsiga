@@ -821,6 +821,29 @@ def daemon_loop(config, dashboard_port=None):
                 idle_cycles = 0
                 last_change_at = datetime.now().isoformat()
 
+                # Self-heal: verify zsiga package integrity before restart
+                home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+                try:
+                    import subprocess as _sp
+                    verify_cmd = f"cd {home} && . venv/bin/activate && python3 -c 'import zsiga; print(\"OK\")'"
+                    vr = _sp.run(verify_cmd, shell=True, capture_output=True, text=True, timeout=30)
+                    if vr.returncode != 0 or "OK" not in (vr.stdout or ""):
+                        print(f"  ⚠️ Self-heal: zsiga import failed, reverting last commit")
+                        _sp.run(f"cd {home} && git reset --hard HEAD~1", shell=True, check=False)
+                        from .memory.learn import record_lesson
+                        record_lesson(
+                            title="Self-heal: reverted breaking change",
+                            context=f"import check failed after delivery: {vr.stderr[:200]}",
+                            takeaway="Evolution proposal introduced breaking change; auto-reverted",
+                            pattern_key="evolution.self_heal.revert",
+                            source="daemon",
+                            case={"stderr": vr.stderr[:300] if vr.stderr else ""},
+                            why="LLM-generated code can introduce import errors or circular deps",
+                            rule="Always verify import integrity after self-modification before restart",
+                        )
+                except Exception as heal_err:
+                    print(f"  ⚠️ Self-heal check error: {heal_err}")
+
                 # Auto-restart: reload new code after successful delivery
                 print("  🔄 Auto-restarting daemon to reload delivered code...")
                 _write_daemon_state(
@@ -839,9 +862,33 @@ def daemon_loop(config, dashboard_port=None):
                 idle_cycles += 1
                 continuous_busy_cycles = 0
 
-            # Self-reflection: generate proposals from internal signals
+            # Self-evolution engine: runs during designated evolution windows
+            evo_ran = False
+            if processed_count == 0:
+                try:
+                    from .intake.evolution import EvolutionEngine, EvolutionConfig
+                    home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+                    pcfg = config.pipeline
+                    evo_config = EvolutionConfig(
+                        enabled=pcfg.evolution_enabled,
+                        window_start_hour=pcfg.evolution_window_start_hour,
+                        window_end_hour=pcfg.evolution_window_end_hour,
+                        max_proposals_per_window=pcfg.evolution_max_proposals,
+                        min_cycle_gap_minutes=pcfg.evolution_min_gap_minutes,
+                    )
+                    engine = EvolutionEngine(home, evo_config)
+                    if engine.should_evolve():
+                        evo_path = engine.run_evolution_cycle()
+                        if evo_path:
+                            print(f"  🧬 Evolution generated proposal: {evo_path}")
+                            evo_ran = True
+                            continue
+                except Exception as e:
+                    print(f"  ⚠️ EvolutionEngine error: {e}")
+
+            # Legacy Reflector: generate proposals from internal signals
             # when daemon has been idle for sustained periods
-            if idle_cycles >= 3 and processed_count == 0:
+            if idle_cycles >= 3 and processed_count == 0 and not evo_ran:
                 try:
                     from .intake.reflector import Reflector
                     reflector = Reflector()
