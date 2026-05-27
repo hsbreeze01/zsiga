@@ -744,7 +744,7 @@ def _serve_dashboard(port: int):
                 from .metrics.db import _DB_PATH
                 home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
                 result = _build_pipeline_status(str(_DB_PATH), home)
-                 self._send_json(json.dumps(result))
+                self._send_json(json.dumps(result))
             elif self.path == "/api/daemon-state":
                 ds = _read_daemon_state()
                 self._send_json(json.dumps(ds))
