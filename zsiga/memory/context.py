@@ -72,6 +72,27 @@ def _build_base_context() -> str:
         "- Follow existing project patterns",
     ]
 
+    # Inject target manifest for external projects
+    try:
+        from ..config import load_config
+        cfg = load_config()
+        for _tname, target in cfg.targets.items():
+            if target.domain == "external":
+                parts.append(f"\n## Target: {_tname}")
+                if target.description:
+                    parts.append(f"**Description**: {target.description}")
+                if target.tech_stack:
+                    parts.append(f"**Tech Stack**: {', '.join(target.tech_stack)}")
+                if target.key_dirs:
+                    parts.append(f"**Key Dirs**: {', '.join(target.key_dirs)}")
+                if target.conventions:
+                    parts.append(f"**Conventions**: {target.conventions}")
+                parts.append(f"**Path**: {target.path}")
+                parts.append(f"**Branch**: {target.deploy_branch}")
+                break
+    except Exception:
+        pass
+
     learnings_file = _MEMORY_DIR / "learnings.jsonl"
     if learnings_file.exists():
         lines = learnings_file.read_text(encoding="utf-8").strip().split("\n")

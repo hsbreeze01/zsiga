@@ -58,7 +58,12 @@ class TargetConfig:
                  lint_cmd: str = "ruff check .", transport: str = "local",
                  ssh: SSHConfig = None, venv_path: str = None,
                  deploy_branch: str = "main",
-                 merge_to_branches: list = None):
+                 merge_to_branches: list = None,
+                 domain: str = "",
+                 description: str = "",
+                 tech_stack: list = None,
+                 key_dirs: list = None,
+                 conventions: str = ""):
         self.name = name
         self.path = path
         self.test_cmd = test_cmd
@@ -68,6 +73,11 @@ class TargetConfig:
         self.venv_path = venv_path
         self.deploy_branch = deploy_branch
         self.merge_to_branches = merge_to_branches or []
+        self.domain = domain
+        self.description = description
+        self.tech_stack = tech_stack or []
+        self.key_dirs = key_dirs or []
+        self.conventions = conventions
 
 
 class LLMConfig:
@@ -315,6 +325,10 @@ def validate_config(config: ZsigaConfig) -> ValidationResult:
                     errors.append(
                         f"target '{name}': SSH transport requires ssh config with a non-empty host"
                     )
+            if target.domain not in ("", "self", "external"):
+                warnings.append(
+                    f"target '{name}': domain should be 'self' or 'external', got '{target.domain}'"
+                )
 
     # Pipeline validation
     if not (1 <= config.pipeline.max_changes_per_cycle <= 10):
@@ -379,6 +393,11 @@ def load_config(path: str = None) -> ZsigaConfig:
             venv_path=tc.get("venv_path"),
             deploy_branch=tc.get("deploy_branch", "main"),
             merge_to_branches=tc.get("merge_to_branches", []),
+            domain=tc.get("domain", ""),
+            description=tc.get("description", ""),
+            tech_stack=tc.get("tech_stack", []),
+            key_dirs=tc.get("key_dirs", []),
+            conventions=tc.get("conventions", ""),
         )
 
     pipeline_raw = raw.get("pipeline", {})

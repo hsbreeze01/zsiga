@@ -69,6 +69,7 @@ targets:
       key_path: /home/lancer/.ssh/id_ed25519
 
   zsiga:
+    domain: self
     path: /home/zsiga/repo
     test_cmd: "venv/bin/python -m pytest -x --tb=short"
     lint_cmd: "venv/bin/python -m ruff check ."
@@ -76,6 +77,9 @@ targets:
     merge_to_branches:
       - main
     transport: local
+    description: "zsiga 自主工程智能体自身演进"
+    tech_stack: [python, pyyaml, zhipuai]
+    key_dirs: [zsiga/pipeline, zsiga/agent, zsiga/intake]
 
 intake:
   mode: dir_scan
