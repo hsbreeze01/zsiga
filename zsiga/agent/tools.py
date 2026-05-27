@@ -4,9 +4,34 @@ from pathlib import Path
 from ..transport import Transport, LocalTransport
 from ..agent.ast_tools import ast_search, ast_replace
 from ..agent.lsp_tools import lsp_goto_definition, lsp_find_references, lsp_diagnostics
+from ..agent.permissions import load_permissions
+from ..agent.policy import (
+    check_bash_command,
+    check_write_allowed,
+    normalize_relative_path,
+)
 
 
-def _bash(transport: Transport, target_path, command, timeout=120):
+def _load_protected_paths() -> list[str]:
+    try:
+        from ..config import load_config
+        return list(load_config().safety.protected_paths)
+    except Exception:
+        return []
+
+
+def _bash(transport: Transport, target_path, command, timeout=120, protected_paths=None):
+    decision = check_bash_command(
+        command,
+        protected_paths=protected_paths,
+        permissions=load_permissions(),
+    )
+    if not decision.allowed:
+        return {
+            "exit_code": 126,
+            "stdout": "",
+            "stderr": decision.to_tool_error()["error"],
+        }
     r = transport.run_shell(command, cwd=target_path, timeout=timeout)
     return {
         "exit_code": r["exit_code"],
@@ -32,10 +57,14 @@ def _read_file(transport: Transport, target_path, path):
     return {"path": path, "content": content, "lines": content.count("\n") + 1}
 
 
-def _write_file(transport: Transport, target_path, path, content):
+def _write_file(transport: Transport, target_path, path, content, protected_paths=None):
     # Handle LLM passing absolute paths — strip target_path prefix if present
     if path.startswith(target_path):
         path = path[len(target_path):].lstrip("/")
+    path = normalize_relative_path(target_path, path)
+    decision = check_write_allowed(path, protected_paths)
+    if not decision.allowed:
+        return decision.to_tool_error()
     full = f"{target_path}/{path}"
     if isinstance(transport, LocalTransport):
         full_path = Path(full)
@@ -49,9 +78,13 @@ def _write_file(transport: Transport, target_path, path, content):
     return {"ok": True, "path": path, "bytes": len(content)}
 
 
-def _edit_file(transport: Transport, target_path, path, old_text, new_text):
+def _edit_file(transport: Transport, target_path, path, old_text, new_text, protected_paths=None):
     if path.startswith(target_path):
         path = path[len(target_path):].lstrip("/")
+    path = normalize_relative_path(target_path, path)
+    decision = check_write_allowed(path, protected_paths)
+    if not decision.allowed:
+        return decision.to_tool_error()
     full = f"{target_path}/{path}"
     if isinstance(transport, LocalTransport):
         full_path = Path(full)
@@ -141,6 +174,7 @@ def _list_files(transport: Transport, target_path, path=""):
 
 def register_tools(agent, target_path: str, transport: Transport = None):
     transport = transport or LocalTransport()
+    protected_paths = _load_protected_paths()
     agent.tools = []
     agent.tool_funcs = {}
 
@@ -155,7 +189,9 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             },
             "required": ["command"],
         },
-        func=lambda command, timeout=120: _bash(transport, target_path, command, timeout),
+        func=lambda command, timeout=120: _bash(
+            transport, target_path, command, timeout, protected_paths,
+        ),
     )
 
     agent.register_tool(
@@ -182,7 +218,9 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             },
             "required": ["path", "content"],
         },
-        func=lambda path, content: _write_file(transport, target_path, path, content),
+        func=lambda path, content: _write_file(
+            transport, target_path, path, content, protected_paths,
+        ),
     )
 
     agent.register_tool(
@@ -197,7 +235,9 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             },
             "required": ["path", "old_text", "new_text"],
         },
-        func=lambda path, old_text, new_text: _edit_file(transport, target_path, path, old_text, new_text),
+        func=lambda path, old_text, new_text: _edit_file(
+            transport, target_path, path, old_text, new_text, protected_paths,
+        ),
     )
 
     agent.register_tool(
@@ -255,7 +295,10 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             },
             "required": ["pattern", "replacement", "path"],
         },
-        func=lambda pattern, replacement, path, lang=None: ast_replace(transport, target_path, pattern, replacement, path, lang),
+        func=lambda pattern, replacement, path, lang=None: ast_replace(
+            transport, target_path, pattern, replacement, path, lang,
+            protected_paths=protected_paths,
+        ),
     )
 
     agent.register_tool(

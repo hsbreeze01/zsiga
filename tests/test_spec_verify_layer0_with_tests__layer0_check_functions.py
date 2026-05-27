@@ -14,6 +14,7 @@ from zsiga.pipeline.verify_layer0 import (
     Transport,
     check_bac_acceptance,
     check_no_syntax_error,
+    check_secret_scan,
     check_spec_file_coverage,
     check_spec_scenario_coverage,
     check_tasks_completion,
@@ -315,6 +316,30 @@ def test_run_layer0_checks_all_pass():
 
     result = run_layer0_checks("/tmp/change", "/tmp/target", "abc123", transport=t)
     assert result.all_passed is True
+
+
+def test_secret_scan_blocks_added_api_key():
+    t = FakeTransport()
+    t.set_diff(
+        "diff --git a/app.py b/app.py\n"
+        "+++ b/app.py\n"
+        "+api_key = 'live_abcdefghijklmnopqrstuvwxyz123456'\n",
+        changed_files=["app.py"],
+    )
+    result = run_layer0_checks("/tmp/change", "/tmp/target", "abc123", transport=t)
+    failed_ids = [c.id for c in result.failed_checks]
+    assert "secret_scan" in failed_ids
+
+
+def test_secret_scan_ignores_env_placeholder():
+    check = check_secret_scan(
+        snapshot=type(
+            "Snapshot",
+            (),
+            {"diff_content": "+++ b/zsiga.yaml\n+api_key: ${ZHIPUAI_API_KEY}\n"},
+        )(),
+    )
+    assert check.passed is True
 
 
 def test_run_layer0_checks_partial_fail():

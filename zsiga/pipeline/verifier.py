@@ -125,6 +125,15 @@ async def verify(agent: AgentLoop, change_dir: str, target_path: str,
     print(f"  verify {layer0.summary_line()}", flush=True)
 
     if not layer0.all_passed:
+        if _layer0_failures_are_l1_supersedable(layer0):
+            layer1 = run_layer1_pytest(
+                change_dir, target_path, transport=transport,
+                venv_python=venv_python,
+            )
+            print(f"  verify {layer1.summary_line()}", flush=True)
+            if not layer1.vacuous and not has_non_testable_scenarios(change_dir, transport):
+                _write_pure_layer1_verify_md(change_dir, transport, layer1)
+                return None
         write_layer0_verify_md(change_dir, transport, layer0)
         return None
 
@@ -200,6 +209,19 @@ async def verify(agent: AgentLoop, change_dir: str, target_path: str,
     _enforce_l1_verdict(change_dir, transport, layer1)
 
     return result
+
+
+def _layer0_failures_are_l1_supersedable(layer0: Layer0Result) -> bool:
+    """Allow pure-L1 mechanical verdict to supersede heuristic spec-coverage L0.
+
+    Secret, syntax, task, lint, and BAC failures remain hard blockers.  Only the
+    two heuristic coverage checks can be superseded when every scenario has a
+    concrete pytest companion and Layer 1 produces an authoritative verdict.
+    """
+    supersedable = {"spec_file_coverage", "spec_scenario_coverage"}
+    return bool(layer0.failed_checks) and all(
+        check.id in supersedable for check in layer0.failed_checks
+    )
 
 
 def _write_pure_layer1_verify_md(

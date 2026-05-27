@@ -12,6 +12,7 @@ from .metrics.dashboard import generate_dashboard  # noqa: E402
 from .metrics.collector import load_all_changes  # noqa: E402
 from .transport import create_transport  # noqa: E402
 from .daemon import daemon_loop  # noqa: E402
+from .agent.permissions import ensure_permissions  # noqa: E402
 
 
 def _slugify(text: str) -> str:
@@ -132,6 +133,7 @@ async def _run_single(config, project_name, change_name, change_dir, target_path
 
 def cmd_run():
     config = load_config()
+    ensure_permissions(reauth="--reauth" in sys.argv[2:])
     orchestrator = ZsigaOrchestrator(config)
     try:
         asyncio.run(orchestrator.run_cycle())
@@ -272,13 +274,17 @@ def cmd_dashboard(args: list[str]):
 
 def cmd_daemon(args: list[str]):
     dashboard_port = 58175
+    reauth = False
     for a in args:
         if a.startswith("--port="):
             dashboard_port = int(a.split("=")[1])
         elif a == "--no-dashboard":
             dashboard_port = None
+        elif a == "--reauth":
+            reauth = True
 
     config = load_config()
+    ensure_permissions(reauth=reauth)
     daemon_loop(config, dashboard_port=dashboard_port)
 
 

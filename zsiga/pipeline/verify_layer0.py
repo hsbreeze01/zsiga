@@ -19,6 +19,7 @@ Check inventory:
     L0-03  testable_not_all_false  — not every scenario is demoted to testable=false
     L0-04  no_syntax_error         — changed Python files pass py_compile
     L0-05  spec_scenario_coverage  — key SHALL/MUST terms from specs appear in diff
+    L0-SEC secret_scan              — added lines do not contain likely secrets
     L0-BAC bac_acceptance          — Binary Acceptance Checks from proposal.md
 """
 from __future__ import annotations
@@ -38,6 +39,7 @@ from .utils import (
     list_files_recursive,
     read_file,
 )
+from .secret_scan import scan_diff_for_secrets
 
 
 # ---------------------------------------------------------------------------
@@ -258,10 +260,16 @@ def _diff_has_keyword(
 
 def check_spec_file_coverage(
     change_dir: str,
-    snapshot: ChangeSnapshot,
-    transport: Transport,
+    snapshot: ChangeSnapshot | str,
+    transport: Transport | str,
+    maybe_transport: Transport | None = None,
 ) -> Layer0Check:
     """L0-01: every spec file must have ≥1 corresponding code change."""
+    if not isinstance(snapshot, ChangeSnapshot):
+        target_path = snapshot
+        pre_impl_sha = transport
+        transport = maybe_transport or LocalTransport()
+        snapshot = _build_snapshot(target_path, pre_impl_sha, transport)
     spec_files = list_files_recursive(
         os.path.join(change_dir, "specs"), "*.md", transport,
     )
@@ -418,10 +426,12 @@ def _py_compile_source(source_text: str) -> tuple[bool, str]:
 
 def check_no_syntax_error(
     target_path: str,
-    snapshot: ChangeSnapshot,
+    snapshot: ChangeSnapshot | str,
     transport: Transport,
 ) -> Layer0Check:
     """L0-04: all changed Python files must pass py_compile."""
+    if not isinstance(snapshot, ChangeSnapshot):
+        snapshot = _build_snapshot(target_path, snapshot, transport)
     changed = snapshot.changed_py_files
     if not changed:
         return Layer0Check(
@@ -478,10 +488,16 @@ _MUST_RE = re.compile(
 
 def check_spec_scenario_coverage(
     change_dir: str,
-    snapshot: ChangeSnapshot,
-    transport: Transport,
+    snapshot: ChangeSnapshot | str,
+    transport: Transport | str,
+    maybe_transport: Transport | None = None,
 ) -> Layer0Check:
     """L0-05: key SHALL/MUST terms from each spec appear in the diff."""
+    if not isinstance(snapshot, ChangeSnapshot):
+        target_path = snapshot
+        pre_impl_sha = transport
+        transport = maybe_transport or LocalTransport()
+        snapshot = _build_snapshot(target_path, pre_impl_sha, transport)
     spec_files = list_files_recursive(
         os.path.join(change_dir, "specs"), "*.md", transport,
     )
@@ -741,7 +757,7 @@ def check_bac_acceptance(
             f"bac_{bac_num}",
             f"[BAC-{bac_num}] {bac_text}",
             True,
-            f"无法自动验证，已跳过",
+            "无法自动验证，已跳过",
         ))
 
     return checks
@@ -770,6 +786,7 @@ def run_layer0_checks(
         check_testable_not_all_false(change_dir, transport),
         check_no_syntax_error(target_path, snapshot, transport),
         check_spec_scenario_coverage(change_dir, snapshot, transport),
+        check_secret_scan(snapshot),
         check_ruff_lint_extended(target_path, snapshot, transport),
         check_test_coverage_gate(target_path, snapshot, transport),
     ]
@@ -785,6 +802,17 @@ def run_layer0_checks(
     _persist_result(change_dir, transport, result)
 
     return result
+
+
+def check_secret_scan(snapshot: ChangeSnapshot) -> Layer0Check:
+    """L0-SEC: block added lines containing likely secrets."""
+    result = scan_diff_for_secrets(snapshot.diff_content)
+    return Layer0Check(
+        "secret_scan",
+        "新增 diff 不包含疑似 secret",
+        result.passed,
+        result.summary(),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -838,7 +866,6 @@ def check_ruff_lint_extended(
 
     errors: list[str] = []
     for rel_path in changed:
-        full_path = os.path.join(target_path, rel_path)
         r = transport.run_shell(
             f"cd '{target_path}' && python3 -m ruff check '{rel_path}' "
             f"--select E,F,W,UP,B,SIM,PLE --output-format concise 2>&1",

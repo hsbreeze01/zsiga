@@ -1,10 +1,14 @@
-import asyncio
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from zsiga.agent.sub_agent import create_sub_agent, run_sub_agent, run_parallel, SubAgentResult
+from zsiga.agent.sub_agent import (
+    _filter_tools_by_role,
+    create_sub_agent,
+    run_parallel,
+    SubAgentResult,
+)
 from zsiga.agent.tools import register_tools
 from zsiga.transport import LocalTransport
 
@@ -33,6 +37,16 @@ async def test_run_sub_agent_registers_tools():
         assert "bash" in tool_names
         assert "read_file" in tool_names
         assert "write_file" in tool_names
+
+
+def test_filter_tools_by_role_uses_function_name():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        agent = create_sub_agent("fake-key", "glm-5.1")
+        register_tools(agent, tmpdir, transport=LocalTransport())
+        _filter_tools_by_role(agent, ["read_file"])
+        tool_names = [t["function"]["name"] for t in agent.tools]
+        assert tool_names == ["read_file"]
+        assert set(agent.tool_funcs) == {"read_file"}
 
 
 @pytest.mark.asyncio

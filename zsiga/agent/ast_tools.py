@@ -1,6 +1,7 @@
 import os
 from ast_grep_py import SgRoot
 from ..transport import Transport, LocalTransport
+from .policy import check_write_allowed, normalize_relative_path
 
 LANG_MAP = {
     ".py": "python",
@@ -47,15 +48,26 @@ def _read_source(transport: Transport, target_path: str, path: str) -> str | Non
         return None
 
 
-def _write_source(transport: Transport, target_path: str, path: str, content: str):
+def _write_source(
+    transport: Transport,
+    target_path: str,
+    path: str,
+    content: str,
+    protected_paths: list[str] | None = None,
+):
     if path.startswith(target_path):
         path = path[len(target_path):].lstrip("/")
+    path = normalize_relative_path(target_path, path)
+    decision = check_write_allowed(path, protected_paths)
+    if not decision.allowed:
+        return decision.to_tool_error()
     full = f"{target_path}/{path}"
     if isinstance(transport, LocalTransport):
         from pathlib import Path
         Path(full).write_text(content)
     else:
         transport.run_shell(f"cat > '{full}'", stdin_data=content)
+    return {"ok": True}
 
 
 def ast_search(transport: Transport, target_path: str,
@@ -91,7 +103,12 @@ def ast_search(transport: Transport, target_path: str,
 
 def ast_replace(transport: Transport, target_path: str,
                 pattern: str, replacement: str, path: str,
-                lang: str = None) -> dict:
+                lang: str = None,
+                protected_paths: list[str] | None = None) -> dict:
+    normalized_path = normalize_relative_path(target_path, path)
+    decision = check_write_allowed(normalized_path, protected_paths)
+    if not decision.allowed:
+        return decision.to_tool_error()
     lang = lang or _detect_lang(path)
     if not lang:
         return {"error": f"Cannot detect language for {path}. Specify lang parameter."}
@@ -116,7 +133,12 @@ def ast_replace(transport: Transport, target_path: str,
         edits.append(edit)
 
     new_source = node.commit_edits(edits)
-    _write_source(transport, target_path, path, new_source)
+    write_result = _write_source(
+        transport, target_path, path, new_source,
+        protected_paths=protected_paths,
+    )
+    if write_result and write_result.get("error"):
+        return write_result
 
     return {
         "ok": True,

@@ -3,7 +3,7 @@ agent:
   llm:
     provider: zhipuai
     model: glm-5.1
-    api_key: 6f0cf15381114026987ba060209f608c.yGMlkw9kWcELd2si
+    api_key: ${ZHIPUAI_API_KEY}
     base_url: https://open.bigmodel.cn/api/coding/paas/v4
     max_tokens: 4096
     temperature: 0.3
@@ -130,6 +130,17 @@ safety:
     - "*/migrations/*"
     - "*/settings/prod*"
     - "*/.env"
+    - "**/*secret*"
+    - "**/*token*"
+    - "**/*password*"
+    - "**/*.key"
+    - "**/*.pem"
+    - "zsiga.yaml"
+    - "zsiga/config.py"
+    - "zsiga/git_ops.py"
+    - "zsiga/agent/tools.py"
+    - "zsiga/agent/policy.py"
+    - "zsiga/pipeline/orchestrator.py"
   max_files_per_task: 3
 
 github:

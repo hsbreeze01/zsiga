@@ -95,7 +95,8 @@ async def run_sub_agent(
     elapsed = time.monotonic() - start
 
     success = result.content not in ("TIMEOUT", "MAX_TURNS_REACHED")
-    if _span is not None: span_cm.__exit__(None, None, None)
+    if _span is not None:
+        span_cm.__exit__(None, None, None)
 
     return SubAgentResult(
         content=result.content,
@@ -109,7 +110,10 @@ async def run_sub_agent(
 
 
 def _filter_tools_by_role(agent: AgentLoop, allowed: list[str]):
-    agent.tools = [t for t in agent.tools if t.get("name") in allowed]
+    agent.tools = [
+        t for t in agent.tools
+        if t.get("function", {}).get("name") in allowed
+    ]
     agent.tool_funcs = {k: v for k, v in agent.tool_funcs.items() if k in allowed}
 
 
