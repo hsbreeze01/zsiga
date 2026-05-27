@@ -770,6 +770,8 @@ def run_layer0_checks(
         check_testable_not_all_false(change_dir, transport),
         check_no_syntax_error(target_path, snapshot, transport),
         check_spec_scenario_coverage(change_dir, snapshot, transport),
+        check_ruff_lint_extended(target_path, snapshot, transport),
+        check_test_coverage_gate(target_path, snapshot, transport),
     ]
 
     bac_checks = check_bac_acceptance(
@@ -805,6 +807,170 @@ def _persist_result(
         )
     except Exception as exc:
         print(f"  ⚠ failed to persist verify_layer0.json: {exc}", flush=True)
+
+
+# ---------------------------------------------------------------------------
+# Check L0-06: ruff_lint_extended — ruff check with extended rule set
+# ---------------------------------------------------------------------------
+
+
+def check_ruff_lint_extended(
+    target_path: str,
+    snapshot: ChangeSnapshot,
+    transport: Transport,
+) -> Layer0Check:
+    """L0-06: changed Python files pass ruff check with extended rules.
+
+    Extends the existing L0-04 syntax check by catching unreachable code,
+    unused imports, shadowed variables, and other issues in CHANGED lines only.
+    Pre-existing issues in unchanged lines are ignored.
+    """
+    changed = snapshot.changed_py_files
+    if not changed:
+        return Layer0Check(
+            "ruff_lint_extended",
+            "变更的 Python 文件通过 ruff 扩展检查",
+            True,
+            "无 Python 文件变更，跳过",
+        )
+
+    changed_line_ranges = _extract_changed_line_ranges(snapshot.diff_content)
+
+    errors: list[str] = []
+    for rel_path in changed:
+        full_path = os.path.join(target_path, rel_path)
+        r = transport.run_shell(
+            f"cd '{target_path}' && python3 -m ruff check '{rel_path}' "
+            f"--select E,F,W,UP,B,SIM,PLE --output-format concise 2>&1",
+            timeout=15,
+        )
+        stdout = r.get("stdout", "").strip()
+        if not stdout or stdout.startswith("All checks"):
+            continue
+
+        file_ranges = changed_line_ranges.get(rel_path, [])
+        for line in stdout.split("\n"):
+            line = line.strip()
+            if not line or line.startswith("Found") or line.startswith("All"):
+                continue
+            line_num = _extract_line_number(line)
+            if line_num is not None and file_ranges:
+                if not any(lo <= line_num <= hi for lo, hi in file_ranges):
+                    continue
+            errors.append(line[:120])
+            if len(errors) >= 5:
+                break
+        if len(errors) >= 5:
+            break
+
+    passed = len(errors) == 0
+    evidence = (
+        "; ".join(errors[:5])
+        if errors
+        else f"{len(changed)} 个 Python 文件 ruff 扩展检查通过"
+    )
+
+    return Layer0Check(
+        "ruff_lint_extended",
+        "变更的 Python 文件通过 ruff 扩展检查",
+        passed,
+        evidence,
+    )
+
+
+def _extract_changed_line_ranges(diff_content: str) -> dict[str, list[tuple[int, int]]]:
+    """Parse unified diff to extract changed line ranges per file.
+
+    Returns {file_path: [(start_line, end_line), ...]} for the new file version.
+    """
+    ranges: dict[str, list[tuple[int, int]]] = {}
+    current_file = ""
+    for line in diff_content.split("\n"):
+        if line.startswith("+++ b/"):
+            current_file = line[6:]
+        elif line.startswith("@@") and current_file:
+            m = re.match(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", line)
+            if m:
+                start = int(m.group(1))
+                count = int(m.group(2)) if m.group(2) else 1
+                ranges.setdefault(current_file, []).append((start, start + count - 1))
+    return ranges
+
+
+def _extract_line_number(ruff_line: str) -> int | None:
+    """Extract line number from ruff output like 'file.py:42: ...'."""
+    m = re.match(r"\S+:(\d+):", ruff_line)
+    if m:
+        return int(m.group(1))
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Check L0-07: test_coverage_gate — new code has corresponding test changes
+# ---------------------------------------------------------------------------
+
+
+def check_test_coverage_gate(
+    target_path: str,
+    snapshot: ChangeSnapshot,
+    transport: Transport,
+) -> Layer0Check:
+    """L0-07: if production code changed, at least one test file must change.
+
+    This is a heuristic gate — it doesn't require full coverage, just ensures
+    that the IMPLEMENT phase didn't forget to add/update tests entirely.
+    """
+    changed = snapshot.changed_py_files
+    if not changed:
+        return Layer0Check(
+            "test_coverage_gate",
+            "生产代码变更时有对应的测试变更",
+            True,
+            "无 Python 文件变更，跳过",
+        )
+
+    prod_files = [
+        f for f in changed
+        if not f.startswith("tests/") and not f.startswith("test_")
+        and not os.path.basename(f).startswith("test_")
+        and not os.path.basename(f).startswith("conftest")
+    ]
+
+    if not prod_files:
+        return Layer0Check(
+            "test_coverage_gate",
+            "生产代码变更时有对应的测试变更",
+            True,
+            "只有测试文件变更，跳过",
+        )
+
+    test_files = [
+        f for f in changed
+        if f.startswith("tests/") or os.path.basename(f).startswith("test_")
+    ]
+
+    diff_content = snapshot.diff_content
+    new_test_files_in_diff = [
+        line for line in diff_content.split("\n")
+        if line.startswith("+++ b/tests/") or line.startswith("+++ b/test_")
+    ]
+
+    has_test_changes = bool(test_files) or bool(new_test_files_in_diff)
+
+    passed = has_test_changes
+    evidence = (
+        f"生产代码 {len(prod_files)} 文件变更，"
+        f"测试变更 {len(test_files)} 文件 + {len(new_test_files_in_diff)} 新建"
+        if has_test_changes
+        else f"生产代码 {len(prod_files)} 文件变更但无测试变更"
+    )
+
+    return Layer0Check(
+        "test_coverage_gate",
+        "生产代码变更时有对应的测试变更",
+        passed,
+        evidence,
+    )
 
 
 # ---------------------------------------------------------------------------

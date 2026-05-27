@@ -242,12 +242,13 @@ def classify_verify_failure(
     mech_results: dict = None,
     layer1_result: dict = None,
     precheck_error_type: str = "",
+    layer0_result: dict = None,
 ) -> str:
     """Classify a verify failure into a root-cause category.
 
     Detection order follows the priority chain:
-    lint → test → layer1_pytest → must_modify_gate → precheck_import →
-    precheck_syntax → llm_judge → unknown
+    lint → test → layer1_pytest → layer0_check → must_modify_gate →
+    precheck_import → precheck_syntax → llm_judge → unknown
     """
     content = verify_md or ""
 
@@ -302,6 +303,27 @@ def classify_verify_failure(
             "vacuous", False
         ):
             return "layer1_pytest"
+
+    # Layer 0 check failure — precise when layer0_result is provided
+    if layer0_result is not None:
+        failed_checks = layer0_result.get("failed_checks", [])
+        if failed_checks:
+            first_fail = failed_checks[0]
+            return f"layer0_check:{first_fail}"
+
+    # Layer 0 check failure — heuristic from verify.md
+    if content:
+        l0_match = re.search(
+            r"L0 FAIL.*?\((\w+(?:_\w+)*)\)", content, re.IGNORECASE
+        )
+        if l0_match:
+            return f"layer0_check:{l0_match.group(1)}"
+        # Also match "verify L0 FAIL: N/M checks passed (check_name)"
+        l0_match2 = re.search(
+            r"checks passed \((\w+(?:_\w+)*)\)", content, re.IGNORECASE
+        )
+        if l0_match2:
+            return f"layer0_check:{l0_match2.group(1)}"
 
     # Must-modify gate failure
     if content and "must-modify" in content.lower() and "coverage" in content.lower():

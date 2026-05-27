@@ -671,6 +671,14 @@ def _build_evolution_status(base_path: str) -> dict:
                 if d.startswith("evo-"):
                     evo_archived.append(d)
 
+    langfuse_summary = _build_langfuse_summary()
+    langfuse_metrics = None
+    if langfuse_summary.get("available"):
+        from .intake.langfuse_reader import AggregatedMetrics
+        langfuse_metrics = AggregatedMetrics(
+            total_tokens=langfuse_summary.get("total_tokens_24h", 0),
+        )
+
     return {
         "enabled": evo_config.enabled,
         "window": {
@@ -687,7 +695,8 @@ def _build_evolution_status(base_path: str) -> dict:
         "paused": engine.is_paused(),
         "pending_proposals": evo_proposals,
         "archived_proposals": len(evo_archived),
-        "langfuse": _build_langfuse_summary(),
+        "langfuse": langfuse_summary,
+        "token_budget_cap": engine._compute_token_budget_cap(langfuse_metrics),
         "timestamp": now.isoformat(),
     }
 

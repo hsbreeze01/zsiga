@@ -34,6 +34,12 @@ logger = logging.getLogger(__name__)
 
 _EVO_PREFIX = "evo-"
 _BACKDOOR_FILE = ".evolution-pause"
+# Adaptive token budget: computed from historical per-phase usage
+# rather than a static hard cap. See _compute_token_budget_cap().
+# During testing/verification phase, use elevated limits to avoid
+# blocking capability development.
+_TOKEN_BUDGET_BASE_CAP = 80_000_000  # 80M floor (testing phase)
+_TOKEN_BUDGET_SAFETY_MARGIN = 1.5  # allow 50% above baseline before triggering
 
 
 @dataclass
@@ -60,6 +66,45 @@ class EvolutionEngine:
         self.base = Path(base_path)
         self.config = config or EvolutionConfig()
         self._state_path = self.base / "data" / "evolution_state.json"
+
+    def _compute_token_budget_cap(self, langfuse_metrics) -> int:
+        """Compute adaptive 24h token budget cap from historical usage.
+
+        Derives cap from budget_analyzer's per-phase data (same source as
+        orchestrator's _adaptive_timeout), then applies a safety margin.
+        Falls back to _TOKEN_BUDGET_BASE_CAP if budget_analyzer is unavailable.
+        """
+        try:
+            from ..metrics.budget_analyzer import compute_budget_analysis, get_phase_budget_from_config
+            from ..config import load_config
+            db_path = str(self.base / "data" / "zsiga.db")
+            cfg = load_config(self.base / "zsiga.yaml")
+            config_budgets = get_phase_budget_from_config(cfg)
+            analysis = compute_budget_analysis(db_path, config_budgets)
+            if analysis.get("error"):
+                return _TOKEN_BUDGET_BASE_CAP
+
+            per_phase_avg_tokens = 0
+            phase_count = 0
+            for phase_name, phase_info in analysis.get("phases", {}).items():
+                tokens = phase_info.get("tokens", {}).get("avg_total", 0)
+                sample = phase_info.get("sample_count", 0)
+                if sample > 0 and tokens > 0:
+                    per_phase_avg_tokens += tokens
+                    phase_count += 1
+
+            if phase_count == 0:
+                return _TOKEN_BUDGET_BASE_CAP
+
+            # Estimate: avg tokens per complete pipeline run × estimated daily runs
+            # daily_runs ≈ 24h / avg_cycle_duration (rough estimate from sample count)
+            total_records = analysis.get("total_records", 0)
+            daily_runs = max(total_records / 7, 3) if total_records > 0 else 3
+            baseline = int(per_phase_avg_tokens * phase_count * daily_runs)
+            cap = max(int(baseline * _TOKEN_BUDGET_SAFETY_MARGIN), _TOKEN_BUDGET_BASE_CAP)
+            return cap
+        except Exception:
+            return _TOKEN_BUDGET_BASE_CAP
 
     # ------------------------------------------------------------------
     # Window control
@@ -199,6 +244,13 @@ class EvolutionEngine:
             if lm.avg_tokens_per_trace > 50000:
                 findings.append(f"avg_trace_expensive:{int(lm.avg_tokens_per_trace)}")
 
+        # Token budget hard cap: if 24h usage exceeds cap, force cost optimization
+        budget_cap = self._compute_token_budget_cap(lm)
+        if lm.total_tokens >= budget_cap:
+            findings.append(
+                f"token_budget_exceeded:{lm.total_tokens}:{budget_cap}"
+            )
+
         facts["findings"] = findings
         facts["actionable"] = len(findings) > 0
         return facts
@@ -222,6 +274,37 @@ class EvolutionEngine:
             if "evo-fix-" in r.get("dir", "")
         )
         skip_fix_types = recent_fix_rejections >= 3
+
+        # Token budget hard cap override: only allow cost optimization
+        budget_exceeded = any(
+            f.startswith("token_budget_exceeded:") for f in findings
+        )
+        if budget_exceeded:
+            for finding in findings:
+                if finding.startswith("token_budget_exceeded:"):
+                    parts = finding.split(":")
+                    used = int(parts[1]) if len(parts) > 1 else 0
+                    cap = int(parts[2]) if len(parts) > 2 else 0
+                    insights["priority_finding"] = {
+                        "type": "enforce_budget_cap",
+                        "used": used,
+                        "cap": cap,
+                    }
+                    insights["proposal_type"] = "improvement"
+                    insights["confidence"] = "high"
+                    insights["scope"] = "cost_only"
+                    break
+
+            for finding in findings:
+                if finding.startswith("high_cost_phase:"):
+                    parts = finding.split(":")
+                    pf = insights["priority_finding"]
+                    if pf:
+                        pf["costliest_phase"] = parts[1] if len(parts) > 1 else ""
+                        pf["phase_tokens"] = int(parts[2]) if len(parts) > 2 else 0
+                    break
+
+            return insights
 
         if not skip_fix_types:
             for finding in findings:
@@ -348,6 +431,14 @@ class EvolutionEngine:
                 pattern_key=f"evolution.cost.{finding.get('phase', 'unknown')}",
                 source="evolution",
             )
+        elif ftype == "enforce_budget_cap":
+            record_lesson(
+                title=f"Token budget hard cap exceeded: {finding.get('used', 0):,} / {finding.get('cap', 0):,}",
+                context=f"24h token usage hit hard cap, restricting to cost-only proposals",
+                takeaway="Reduce token consumption before generating new feature proposals",
+                pattern_key="evolution.budget_cap_hit",
+                source="evolution",
+            )
         return True
 
     # ------------------------------------------------------------------
@@ -373,6 +464,8 @@ class EvolutionEngine:
             content = self._render_reinforce_proposal(finding, facts)
         elif ftype == "optimize_cost":
             content = self._render_cost_proposal(finding, facts)
+        elif ftype == "enforce_budget_cap":
+            content = self._render_budget_cap_proposal(finding, facts)
         else:
             return None
 
@@ -659,6 +752,60 @@ Langfuse 数据显示 `{phase}` 是 token 消耗最高的阶段：
 
 ## Constraints
 - 此 proposal 由 zsiga 自演进引擎生成（基于 Langfuse 可观测数据）
+- project=zsiga
+"""
+
+    def _render_budget_cap_proposal(self, finding: dict, facts: dict) -> str:
+        used = finding.get("used", 0)
+        cap = finding.get("cap", 0)
+        pct = used / cap * 100 if cap else 0
+        costliest = finding.get("costliest_phase", "")
+        phase_tokens = finding.get("phase_tokens", 0)
+        phase_section = ""
+        if costliest:
+            phase_section = f"\n消耗最高阶段: `{costliest}` ({phase_tokens:,} tokens)"
+
+        return f"""# token-budget-cap-enforcement
+
+## Summary
+24h token 消耗已达自适应 cap ({used:,} / {cap:,} = {pct:.1f}%)，必须降低 token 消耗才能继续。
+
+## Problem
+Langfuse 24h token 使用量超过自适应 budget cap：
+{phase_section}
+- 当前用量: {used:,} tokens ({pct:.1f}% of cap)
+- 自适应 cap 基于 budget_analyzer 历史数据 × {_TOKEN_BUDGET_SAFETY_MARGIN}x 安全系数计算
+- 除非显著降低 token 消耗，否则新 proposal 会继续推高成本
+
+## Technical Design
+1. 审查 agent prompt，移除冗余上下文（重复的约束、过长的 system prompt）
+2. 精简 IMPLEMENT/ENRICH 阶段的 context 注入，只保留必要信息
+3. 减少 sub-agent 调用次数（合并相似探索任务）
+4. 优化 compaction 策略（更积极的对话历史压缩）
+5. 协同 budget_analyzer 的 phase-level 自适应：在整体超 cap 时，主动收紧各 phase budget
+
+### Target Files
+- `zsiga/agent/roles.py`
+- `zsiga/agent/loop.py`
+- `zsiga/pipeline/enricher.py`
+- `zsiga/pipeline/implementer.py`
+
+## Acceptance Criteria
+- [BAC-01] 审计并精简至少 2 个 agent 的 system prompt
+- [BAC-02] 优化后 24h token 消耗降低 >= 20%
+- [BAC-03] 不影响 pipeline 成功率（不低于当前 67%）
+
+## Scope
+- In scope: 降低 token 消耗（prompt 精简、context 压缩、phase budget 收紧）
+- Out of scope: 不修改 pipeline 逻辑和 L0 checks
+
+## Risk
+- Impact: Medium — prompt 修改可能影响生成质量
+- Reversibility: git revert
+
+## Constraints
+- 此 proposal 由 zsiga 自演进引擎生成（adaptive token budget cap 触发）
+- 自适应 cap 基于 budget_analyzer 历史数据，与 phase-level timeout/turns 自适应联动
 - project=zsiga
 """
 

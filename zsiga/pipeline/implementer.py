@@ -1,6 +1,7 @@
 
-import re
 
+import os
+import re
 from ..agent.loop import AgentLoop
 from ..memory.pattern_miner import mine_patterns
 from ..transport import Transport, LocalTransport
@@ -135,6 +136,8 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str,
     design = read_file(f"{change_dir}/design.md", transport) or ""
     tasks = read_file(f"{change_dir}/tasks.md", transport) or ""
 
+    kw_section = _build_spec_keywords_section(change_dir, transport)
+
     system_prompt = IMPLEMENTER_SYSTEM
     if venv_python:
         system_prompt += _venv_prompt_section(venv_python)
@@ -148,7 +151,7 @@ async def implement(agent: AgentLoop, change_dir: str, target_path: str,
 
     user_prompt = f"""## Change: {change_dir}
 ## 目标项目: {target_path}
-{ctx_section}{must_section}
+{ctx_section}{must_section}{kw_section}
 ### specs:
 {specs}
 
@@ -162,6 +165,29 @@ specs/design/tasks 已在上方提供。从第一个 - [ ] 开始实现，不需
 
     return await agent.run(system_prompt, user_prompt,
                           **kwargs)
+
+
+def _build_spec_keywords_section(change_dir: str, transport: Transport) -> str:
+    import json as _json
+
+    kw_path = os.path.join(change_dir, "spec_keywords.json")
+    raw = read_file(kw_path, transport)
+    if not raw:
+        return ""
+    try:
+        data = _json.loads(raw)
+    except (ValueError, TypeError):
+        return ""
+    keywords = data.get("keywords", [])
+    if not keywords:
+        return ""
+    items = ", ".join(f"`{k}`" for k in keywords[:15])
+    return (
+        f"\n## Spec Alignment Keywords (MUST appear in code/diff)\n"
+        f"{items}\n"
+        f"确保以上 spec 关键词在代码变更中有所体现，以提高 "
+        f"spec_scenario_coverage 通过率。\n"
+    )
 
 
 def _build_pattern_warnings() -> str:

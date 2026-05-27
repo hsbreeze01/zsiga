@@ -2160,10 +2160,14 @@ class ZsigaOrchestrator:
             transport.close()
         self._transports.clear()
 
-    def _verify_failure_detail(self, change_dir, mech_results, transport) -> str:
+    def _verify_failure_detail(self, change_dir, mech_results, transport,
+                                   layer0_result=None) -> str:
         from .verifier import classify_verify_failure
         verify_md = read_file(f"{change_dir}/verify.md", transport) or ""
-        category = classify_verify_failure(verify_md, mech_results)
+        category = classify_verify_failure(
+            verify_md, mech_results,
+            layer0_result=layer0_result,
+        )
         parts = [f"category={category}"]
         test_info = (mech_results or {}).get("test", {})
         if not test_info.get("passed", True):
@@ -2171,6 +2175,9 @@ class ZsigaOrchestrator:
         lint_info = (mech_results or {}).get("lint", {})
         if not lint_info.get("passed", True):
             parts.append("lint_fail")
+        if layer0_result and layer0_result.get("failed_checks"):
+            for fc in layer0_result["failed_checks"][:3]:
+                parts.append(f"l0_fail:{fc}")
         if verify_md:
             for line in verify_md.split("\n"):
                 if "FAIL" in line and len(line) < 120:
@@ -2183,6 +2190,51 @@ def _extract_calls(result) -> tuple[int, int]:
     if isinstance(result, RunResult):
         return (result.llm_calls, result.tool_calls)
     return (0, 0)
+
+
+def _build_verify_detail(verdict: str, content: str, extra_detail: str = "") -> str:
+    parts = []
+    if verdict:
+        parts.append(f"Verdict: {verdict}")
+    if content:
+        parts.append(content[:150])
+    if extra_detail:
+        parts.append(extra_detail)
+    return "; ".join(parts) if parts else ""
+
+
+def _classify_and_build_verify_record(
+    outcome,
+    seconds: float,
+    fix_attempts: int,
+    verify_md_content: str = "",
+    mech_results: dict | None = None,
+    extra_detail: str = "",
+) -> "PhaseRecord":
+    from ..metrics.types import Outcome as _Outcome, Phase as _Phase, PhaseRecord as _PR
+    from .verifier import classify_verify_failure
+
+    detail = _build_verify_detail(
+        "FAIL" if outcome == _Outcome.FAIL else "PASS",
+        verify_md_content or "",
+        extra_detail,
+    )
+
+    failure_category = ""
+    if outcome == _Outcome.FAIL:
+        failure_category = classify_verify_failure(
+            verify_md_content or "",
+            mech_results or {},
+        )
+
+    return _PR(
+        phase=_Phase.VERIFY,
+        outcome=outcome,
+        seconds_used=seconds,
+        detail=detail[:200],
+        failure_category=failure_category,
+        fix_attempts=fix_attempts,
+    )
 
 
 def _extract_tokens(result) -> tuple[int, int]:

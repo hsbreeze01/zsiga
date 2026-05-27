@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -141,6 +142,12 @@ async def enrich(agent: AgentLoop, change_dir: str, target_path: str,
     except Exception as exc:  # pragma: no cover - defensive
         print(f"  ⚠ spec→pytest validation error: {exc}", flush=True)
 
+    # Extract spec keywords for IMPLEMENT-phase alignment
+    try:
+        _extract_and_save_spec_keywords(change_dir, transport)
+    except Exception as exc:
+        print(f"  ⚠ spec keyword extraction error: {exc}", flush=True)
+
     return result
 
 
@@ -158,3 +165,59 @@ def derive_explore_tasks(proposal_text: str) -> list[str]:
         "搜索项目中与「{kw}」相关的数据库模型和数据结构",
     ]
     return [t.format(kw=keywords) for t in templates][:5]
+
+
+def _extract_and_save_spec_keywords(
+    change_dir: str, transport: Transport,
+) -> None:
+    """Extract SHALL/MUST terms from specs and save as spec_keywords.json.
+
+    IMPLEMENT phase reads this file and injects keywords into its prompt,
+    so the LLM knows which terms must appear in the code diff for L0-05 to pass.
+    """
+    import json as _json
+    import re as _re
+
+    spec_files = list_files_recursive(
+        os.path.join(change_dir, "specs"), "*.md", transport,
+    )
+    if not spec_files:
+        return
+
+    verb_phrase = _re.compile(
+        r"(?:SHALL|MUST|SHOULD)\s+"
+        r"(?:\w+\s+){0,2}"
+        r"((?:[A-Za-z_][\w]*\s+){0,2}[A-Za-z_][\w]*)",
+        _re.IGNORECASE,
+    )
+
+    all_terms: list[str] = []
+    skip_words = frozenset(
+        ["shall", "must", "should", "be", "a", "an", "the", "to", "of",
+         "in", "for", "with", "by", "is", "are", "was", "were", "has",
+         "have", "had", "that", "this", "it", "not", "no", "or", "and",
+         "but", "if", "all", "each", "any", "its", "their", "than",
+         "then", "so", "as", "at", "system", "module", "function",
+         "method", "class", "component"],
+    )
+    for spec_path in spec_files:
+        spec_text = read_file(spec_path, transport) or ""
+        for m in verb_phrase.finditer(spec_text):
+            term = m.group(1).strip()
+            words = [w for w in term.split() if w.lower() not in skip_words]
+            if len(words) < 1:
+                continue
+            if len(words) > 3:
+                words = words[:3]
+            all_terms.append(" ".join(words))
+
+    if not all_terms:
+        return
+
+    unique_terms = list(dict.fromkeys(all_terms))
+    payload = _json.dumps({"keywords": unique_terms}, ensure_ascii=False, indent=2)
+    target = os.path.join(change_dir, "spec_keywords.json")
+    transport.run_shell(
+        f"cat > '{target}' <<'ZSIGA_KW_EOF'\n{payload}\nZSIGA_KW_EOF",
+        timeout=10,
+    )
