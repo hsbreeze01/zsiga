@@ -7,6 +7,8 @@ agent to evaluate the proposal.  Outputs ACCEPT / PUSHBACK / REJECT.
 
 import re
 import logging
+import os
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
@@ -247,6 +249,14 @@ Scout 的分析可能包含推断或幻觉——如果 Scout 的结论与确定�
     print(
         f"  🛡️ Proposal Gate: verdict={final_verdict.value} score={score}/10 "
         f"({elapsed:.1f}s)"
+    )
+
+    from ..agent.langfuse_shim import score_proposal
+    change_name = os.path.basename(change_dir)
+    score_proposal(
+        change_name=change_name,
+        score=score,
+        verdict=final_verdict.value,
     )
 
     review_path = f"{change_dir}/steward-review.md"

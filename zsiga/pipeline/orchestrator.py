@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import time
 import traceback
 from datetime import datetime
@@ -1371,6 +1372,7 @@ class ZsigaOrchestrator:
             print(f"  [DRY RUN] Would merge {feature_branch} into {deploy_branch}")
 
         archive_change(target_path, change_name, transport=transport)
+        _extract_success_template(change_dir, change_name, transport)
         deliver_seconds = time.monotonic() - t0
         if _p6 is not None: _p6_cm.__exit__(None, None, None)
         if trace_cm is not None: trace_cm.__exit__(None, None, None)
@@ -2250,3 +2252,86 @@ def _summarize_issues(issues: list[dict]) -> str:
     parts = [f"[{i.get('severity', '?')}] {i.get('description', '')[:60]}" for i in issues]
     text = "; ".join(parts)
     return text[:200]
+
+
+def _extract_success_template(
+    change_dir: str,
+    change_name: str,
+    transport: Transport,
+) -> None:
+    """After DELIVER success, extract proposal structure as a reusable template."""
+    import json as _json
+
+    proposal = read_file(f"{change_dir}/proposal.md", transport) or ""
+    if not proposal:
+        return
+
+    title = proposal.splitlines()[0].lstrip("# ").strip() if proposal else ""
+
+    first_line = proposal.splitlines()[0].strip() if proposal else ""
+    if not first_line.startswith("#"):
+        return
+
+    summary = ""
+    in_summary = False
+    for line in proposal.splitlines():
+        low = line.lower().strip()
+        if low.startswith("## summary"):
+            in_summary = True
+            continue
+        if low.startswith("## ") and in_summary:
+            break
+        if in_summary and line.strip():
+            summary = line.strip()
+            break
+
+    acceptance: list[str] = []
+    in_ac = False
+    for line in proposal.splitlines():
+        low = line.lower().strip()
+        if low.startswith("## acceptance") or low.startswith("## bac"):
+            in_ac = True
+            continue
+        if low.startswith("## ") and in_ac:
+            break
+        if in_ac and line.strip().startswith(("-", "*", "[")):
+            acceptance.append(line.strip().lstrip("-*[] ").strip())
+
+    scope = ""
+    in_scope = False
+    for line in proposal.splitlines():
+        low = line.lower().strip()
+        if low.startswith("## scope"):
+            in_scope = True
+            continue
+        if low.startswith("## ") and in_scope:
+            break
+        if in_scope and "in scope" in line.lower():
+            scope = line.strip()
+            break
+
+    if not title:
+        return
+
+    template = {
+        "source": change_name,
+        "title": title[:80],
+        "summary": summary[:200],
+        "acceptance_count": len(acceptance),
+        "scope": scope[:200],
+        "extracted_at": datetime.now().isoformat(),
+    }
+
+    try:
+        templates_dir = os.path.join(os.path.dirname(change_dir), "..", "memory", "templates")
+        templates_dir = os.path.normpath(templates_dir)
+        transport.run_shell(f"mkdir -p '{templates_dir}'", timeout=5)
+        slug = change_name.replace("/", "-")[:60]
+        path = os.path.join(templates_dir, f"{slug}.json")
+        payload = _json.dumps(template, ensure_ascii=False, indent=2)
+        transport.run_shell(
+            f"cat > '{path}' <<'ZSIGA_TPL_EOF'\n{payload}\nZSIGA_TPL_EOF",
+            timeout=10,
+        )
+    except Exception:
+        pass

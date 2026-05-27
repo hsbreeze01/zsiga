@@ -273,3 +273,30 @@ def update_current_observation(**kwargs: Any) -> None:
         client.update_current_observation(**kwargs)
     except Exception as exc:
         log.warning("Langfuse update_current_observation error: %s", exc)
+
+
+def score_proposal(
+    trace_id: str | None = None,
+    change_name: str = "",
+    score: int = 0,
+    verdict: str = "",
+    dimensions: dict[str, int] | None = None,
+) -> None:
+    """Write Steward evaluation score back to Langfuse.
+
+    Creates a score event on the proposal trace so Evolution can later
+    correlate proposal characteristics with Steward scores.
+    """
+    client = _client()
+    if client is None:
+        return
+    try:
+        score_name = f"steward:{change_name}" if change_name else "steward"
+        client.score(
+            trace_id=trace_id,
+            name=score_name,
+            value=score,
+            comment=f"verdict={verdict}; dims={dimensions or {}}",
+        )
+    except Exception as exc:
+        log.debug("Langfuse score_proposal error: %s", exc)
