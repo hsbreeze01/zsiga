@@ -617,6 +617,62 @@ def _build_budget_analysis_json(db_path: str, home: str) -> dict:
     return compute_budget_analysis(db_path, config_budgets)
 
 
+def _build_evolution_status(base_path: str) -> dict:
+    from .intake.evolution import EvolutionEngine, EvolutionConfig
+    from .config import load_config
+    config_path = os.path.join(base_path, "zsiga.yaml")
+    try:
+        cfg = load_config(config_path)
+        pc = cfg.pipeline
+        evo_config = EvolutionConfig(
+            enabled=pc.evolution_enabled,
+            window_start_hour=pc.evolution_window_start_hour,
+            window_end_hour=pc.evolution_window_end_hour,
+            max_proposals_per_window=pc.evolution_max_proposals,
+            min_cycle_gap_minutes=pc.evolution_min_gap_minutes,
+        )
+    except Exception:
+        evo_config = EvolutionConfig()
+
+    engine = EvolutionEngine(base_path, evo_config)
+    state = engine._load_state()
+    now = datetime.now()
+
+    evo_proposals = []
+    changes_dir = os.path.join(base_path, "openspec", "changes")
+    if os.path.isdir(changes_dir):
+        for entry in os.listdir(changes_dir):
+            if entry.startswith("evo-") and os.path.isdir(os.path.join(changes_dir, entry)):
+                evo_proposals.append(entry)
+
+    evo_archived = []
+    archive_dir = os.path.join(changes_dir, "archive")
+    if os.path.isdir(archive_dir):
+        for root, _dirs, files in os.walk(archive_dir):
+            for d in _dirs:
+                if d.startswith("evo-"):
+                    evo_archived.append(d)
+
+    return {
+        "enabled": evo_config.enabled,
+        "window": {
+            "start_hour": evo_config.window_start_hour,
+            "end_hour": evo_config.window_end_hour,
+            "currently_in_window": engine.is_in_window(),
+        },
+        "state": {
+            "proposals_generated": state.proposals_generated,
+            "max_proposals_per_window": evo_config.max_proposals_per_window,
+            "last_proposal_at": state.last_proposal_at,
+            "total_cycles": state.total_cycles,
+        },
+        "paused": engine.is_paused(),
+        "pending_proposals": evo_proposals,
+        "archived_proposals": len(evo_archived),
+        "timestamp": now.isoformat(),
+    }
+
+
 def _serve_dashboard(port: int):
     """Start HTTP server for dashboard in a daemon thread."""
     from .metrics.dashboard import generate_dashboard
@@ -682,6 +738,10 @@ def _serve_dashboard(port: int):
                 from .metrics.db import _DB_PATH
                 home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
                 result = _build_budget_analysis_json(str(_DB_PATH), home)
+                self._send_json(json.dumps(result))
+            elif self.path == "/api/evolution-status":
+                home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
+                result = _build_evolution_status(home)
                 self._send_json(json.dumps(result))
             elif self.path in ("/", "/dashboard", "/dashboard.html"):
                 dashboard_path = Path("/tmp/zsiga-dashboard/dashboard.html")
