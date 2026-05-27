@@ -1,3 +1,4 @@
+import os
 import subprocess
 from pathlib import Path
 
@@ -20,11 +21,25 @@ def _load_protected_paths() -> list[str]:
         return []
 
 
-def _bash(transport: Transport, target_path, command, timeout=120, protected_paths=None):
+def _get_allowed_prefix(target_path: str) -> str | None:
+    try:
+        from ..config import load_config
+        cfg = load_config()
+        for _name, target in cfg.targets.items():
+            if target.path == target_path and target.domain == "external":
+                return target_path
+    except Exception:
+        pass
+    return None
+
+
+def _bash(transport: Transport, target_path, command, timeout=120,
+          protected_paths=None, allowed_prefix=None):
     decision = check_bash_command(
         command,
         protected_paths=protected_paths,
         permissions=load_permissions(),
+        allowed_prefix=allowed_prefix,
     )
     if not decision.allowed:
         return {
@@ -57,8 +72,10 @@ def _read_file(transport: Transport, target_path, path):
     return {"path": path, "content": content, "lines": content.count("\n") + 1}
 
 
-def _write_file(transport: Transport, target_path, path, content, protected_paths=None):
-    # Handle LLM passing absolute paths — strip target_path prefix if present
+def _write_file(transport: Transport, target_path, path, content,
+                protected_paths=None, allowed_prefix=None):
+    if allowed_prefix and os.path.isabs(path) and not path.startswith(allowed_prefix):
+        return {"error": f"POLICY_DENIED: write outside allowed target '{allowed_prefix}': '{path}'"}
     if path.startswith(target_path):
         path = path[len(target_path):].lstrip("/")
     path = normalize_relative_path(target_path, path)
@@ -78,7 +95,10 @@ def _write_file(transport: Transport, target_path, path, content, protected_path
     return {"ok": True, "path": path, "bytes": len(content)}
 
 
-def _edit_file(transport: Transport, target_path, path, old_text, new_text, protected_paths=None):
+def _edit_file(transport: Transport, target_path, path, old_text, new_text,
+                protected_paths=None, allowed_prefix=None):
+    if allowed_prefix and os.path.isabs(path) and not path.startswith(allowed_prefix):
+        return {"error": f"POLICY_DENIED: write outside allowed target '{allowed_prefix}': '{path}'"}
     if path.startswith(target_path):
         path = path[len(target_path):].lstrip("/")
     path = normalize_relative_path(target_path, path)
@@ -175,6 +195,7 @@ def _list_files(transport: Transport, target_path, path=""):
 def register_tools(agent, target_path: str, transport: Transport = None):
     transport = transport or LocalTransport()
     protected_paths = _load_protected_paths()
+    allowed_prefix = _get_allowed_prefix(target_path)
     agent.tools = []
     agent.tool_funcs = {}
 
@@ -190,7 +211,7 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             "required": ["command"],
         },
         func=lambda command, timeout=120: _bash(
-            transport, target_path, command, timeout, protected_paths,
+            transport, target_path, command, timeout, protected_paths, allowed_prefix,
         ),
     )
 
@@ -219,7 +240,7 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             "required": ["path", "content"],
         },
         func=lambda path, content: _write_file(
-            transport, target_path, path, content, protected_paths,
+            transport, target_path, path, content, protected_paths, allowed_prefix,
         ),
     )
 
@@ -236,7 +257,7 @@ def register_tools(agent, target_path: str, transport: Transport = None):
             "required": ["path", "old_text", "new_text"],
         },
         func=lambda path, old_text, new_text: _edit_file(
-            transport, target_path, path, old_text, new_text, protected_paths,
+            transport, target_path, path, old_text, new_text, protected_paths, allowed_prefix,
         ),
     )
 
@@ -298,6 +319,7 @@ def register_tools(agent, target_path: str, transport: Transport = None):
         func=lambda pattern, replacement, path, lang=None: ast_replace(
             transport, target_path, pattern, replacement, path, lang,
             protected_paths=protected_paths,
+            allowed_prefix=allowed_prefix,
         ),
     )
 

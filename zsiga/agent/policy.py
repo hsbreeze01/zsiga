@@ -96,12 +96,18 @@ def _matches(path: str, pattern: str) -> bool:
     return fnmatch.fnmatch(path, pattern) or fnmatch.fnmatch("/" + path, pattern)
 
 
-def check_write_allowed(path: str, protected_paths: list[str] | None = None) -> PolicyDecision:
+def check_write_allowed(path: str, protected_paths: list[str] | None = None,
+                        allowed_prefix: str | None = None) -> PolicyDecision:
     protected = list(DEFAULT_PROTECTED_PATHS)
     protected.extend(protected_paths or [])
     for pattern in protected:
         if _matches(path, pattern):
             return PolicyDecision(False, f"write to protected path '{path}' matched '{pattern}'")
+    if allowed_prefix:
+        abs_path = os.path.isabs(path) and path or f"{allowed_prefix}/{path}"
+        if not abs_path.startswith(allowed_prefix.rstrip("/") + "/") and abs_path != allowed_prefix.rstrip("/"):
+            return PolicyDecision(False,
+                f"write outside allowed target '{allowed_prefix}': '{path}'")
     return PolicyDecision(True)
 
 
@@ -109,6 +115,7 @@ def check_bash_command(
     command: str,
     protected_paths: list[str] | None = None,
     permissions: PermissionConfig | None = None,
+    allowed_prefix: str | None = None,
 ) -> PolicyDecision:
     permissions = permissions or load_permissions()
     stripped = command.strip()
@@ -127,7 +134,7 @@ def check_bash_command(
                 return PolicyDecision(False, f"command requires advanced permission: '{pattern}'")
 
     for path in extract_write_paths(stripped):
-        decision = check_write_allowed(path, protected_paths)
+        decision = check_write_allowed(path, protected_paths, allowed_prefix)
         if not decision.allowed:
             return decision
 

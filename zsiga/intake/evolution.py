@@ -132,6 +132,15 @@ class EvolutionEngine:
         if self.is_paused():
             logger.info("Evolution paused (backdoor file present)")
             return False
+        try:
+            from ..config import load_config
+            cfg = load_config()
+            for _name, target in cfg.targets.items():
+                if target.domain == "external":
+                    logger.info("Evolution paused: external target active (%s)", _name)
+                    return False
+        except Exception:
+            pass
         state = self._load_state()
         if state.proposals_generated >= self.config.max_proposals_per_window:
             return False

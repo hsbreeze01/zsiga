@@ -160,3 +160,95 @@ class TestManifestContextInjection:
 
         ctx = _build_base_context()
         assert "## Target:" not in ctx
+
+
+class TestPathIsolation:
+    def test_write_blocked_outside_allowed_prefix(self):
+        from zsiga.agent.policy import check_write_allowed
+        decision = check_write_allowed(
+            "/home/zsiga/repo/zsiga/config.py",
+            allowed_prefix="/home/user/d8q-project",
+        )
+        assert decision.allowed is False
+        assert "outside allowed target" in decision.reason
+
+    def test_write_allowed_inside_target(self):
+        from zsiga.agent.policy import check_write_allowed
+        decision = check_write_allowed(
+            "/home/user/d8q-project/src/app.py",
+            allowed_prefix="/home/user/d8q-project",
+        )
+        assert decision.allowed is True
+
+    def test_write_file_tool_blocks_external_write_to_zsiga(self, tmp_path):
+        from zsiga.agent.tools import _write_file
+        from zsiga.transport import LocalTransport
+        target_dir = tmp_path / "external-project"
+        target_dir.mkdir()
+        zsiga_dir = tmp_path / "zsiga-repo"
+        zsiga_dir.mkdir()
+        result = _write_file(
+            LocalTransport(),
+            str(target_dir),
+            str(zsiga_dir / "evil.py"),
+            "print('pwned')",
+            allowed_prefix=str(target_dir),
+        )
+        assert result.get("error", "").startswith("POLICY_DENIED")
+        assert not (zsiga_dir / "evil.py").exists()
+
+    def test_self_target_no_allowed_prefix(self, tmp_path):
+        from zsiga.agent.tools import _write_file
+        from zsiga.transport import LocalTransport
+        target_dir = tmp_path / "zsiga-repo"
+        target_dir.mkdir()
+        result = _write_file(
+            LocalTransport(),
+            str(target_dir),
+            "src/app.py",
+            "print('ok')",
+            allowed_prefix=None,
+        )
+        assert result.get("ok") is True
+
+
+class TestEvolutionPausedForExternal:
+    def test_should_evolve_false_when_external_active(self, tmp_path, monkeypatch):
+        config_data = _minimal_config(**{
+            "d8q-factory": {
+                "domain": "external",
+                "path": "/home/user/factory",
+                "transport": "local",
+            }
+        })
+        path = _write_yaml(tmp_path, config_data)
+
+        import zsiga.config as cfg_mod
+        original_load = cfg_mod.load_config
+
+        def patched_load(p=None):
+            return original_load(path=path)
+
+        monkeypatch.setattr(cfg_mod, "load_config", patched_load)
+
+        from zsiga.intake.evolution import EvolutionEngine, EvolutionConfig
+        evo_config = EvolutionConfig(enabled=True, window_start_hour=0, window_end_hour=24)
+        engine = EvolutionEngine(tmp_path, evo_config)
+        assert engine.should_evolve() is False
+
+    def test_should_evolve_true_self_only(self, tmp_path, monkeypatch):
+        config_data = _minimal_config()
+        path = _write_yaml(tmp_path, config_data)
+
+        import zsiga.config as cfg_mod
+        original_load = cfg_mod.load_config
+
+        def patched_load(p=None):
+            return original_load(path=path)
+
+        monkeypatch.setattr(cfg_mod, "load_config", patched_load)
+
+        from zsiga.intake.evolution import EvolutionEngine, EvolutionConfig
+        evo_config = EvolutionConfig(enabled=True, window_start_hour=0, window_end_hour=24)
+        engine = EvolutionEngine(tmp_path, evo_config)
+        assert engine.should_evolve() is True

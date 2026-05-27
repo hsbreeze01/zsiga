@@ -54,11 +54,12 @@ def _write_source(
     path: str,
     content: str,
     protected_paths: list[str] | None = None,
+    allowed_prefix: str | None = None,
 ):
     if path.startswith(target_path):
         path = path[len(target_path):].lstrip("/")
     path = normalize_relative_path(target_path, path)
-    decision = check_write_allowed(path, protected_paths)
+    decision = check_write_allowed(path, protected_paths, allowed_prefix)
     if not decision.allowed:
         return decision.to_tool_error()
     full = f"{target_path}/{path}"
@@ -104,9 +105,10 @@ def ast_search(transport: Transport, target_path: str,
 def ast_replace(transport: Transport, target_path: str,
                 pattern: str, replacement: str, path: str,
                 lang: str = None,
-                protected_paths: list[str] | None = None) -> dict:
+                protected_paths: list[str] | None = None,
+                allowed_prefix: str | None = None) -> dict:
     normalized_path = normalize_relative_path(target_path, path)
-    decision = check_write_allowed(normalized_path, protected_paths)
+    decision = check_write_allowed(normalized_path, protected_paths, allowed_prefix)
     if not decision.allowed:
         return decision.to_tool_error()
     lang = lang or _detect_lang(path)
@@ -136,6 +138,7 @@ def ast_replace(transport: Transport, target_path: str,
     write_result = _write_source(
         transport, target_path, path, new_source,
         protected_paths=protected_paths,
+        allowed_prefix=allowed_prefix,
     )
     if write_result and write_result.get("error"):
         return write_result
