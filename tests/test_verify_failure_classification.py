@@ -409,3 +409,89 @@ class TestClassifyAndBuildVerifyRecord:
         )
         assert "import" in rec.detail
         assert "zsiga/foo.py" in rec.detail
+
+
+# ---------------------------------------------------------------------------
+# Layer 0 check failure classification
+# ---------------------------------------------------------------------------
+
+class TestLayer0CheckClassification:
+    """Tests for layer0_check failure category in classify_verify_failure."""
+
+    def test_classify_layer0_check_from_verify_md(self):
+        """Scenario: Classify layer0_check from verify.md pattern."""
+        verify_md = "Verdict: FAIL\nverify L0 FAIL: 7/8 checks passed (spec_scenario_coverage)"
+        result = classify_verify_failure(
+            verify_md=verify_md,
+            mech_results={"lint": {"passed": True, "output": ""},
+                          "test": {"passed": True, "output": ""}},
+        )
+        assert result == "layer0_check:spec_scenario_coverage"
+
+    def test_classify_layer0_check_from_l0_fail_pattern(self):
+        """Scenario: Classify layer0_check from L0 FAIL pattern."""
+        verify_md = "Verdict: FAIL\nL0 FAIL: missing spec coverage (spec_file_coverage)"
+        result = classify_verify_failure(
+            verify_md=verify_md,
+            mech_results={"lint": {"passed": True, "output": ""},
+                          "test": {"passed": True, "output": ""}},
+        )
+        assert result == "layer0_check:spec_file_coverage"
+
+    def test_classify_layer0_check_with_result_param(self):
+        """Scenario: Precise classification using layer0_result parameter."""
+        layer0_result = {
+            "passed": False,
+            "failed_checks": ["tasks_completion", "spec_file_coverage"],
+        }
+        result = classify_verify_failure(
+            verify_md="Verdict: FAIL",
+            mech_results={"lint": {"passed": True, "output": ""},
+                          "test": {"passed": True, "output": ""}},
+            layer0_result=layer0_result,
+        )
+        assert result == "layer0_check:tasks_completion"
+
+    def test_classify_layer0_check_with_single_failed_check(self):
+        """Scenario: Single failed L0 check in result param."""
+        layer0_result = {
+            "passed": False,
+            "failed_checks": ["spec_scenario_coverage"],
+        }
+        result = classify_verify_failure(
+            verify_md="Verdict: FAIL",
+            mech_results={"lint": {"passed": True, "output": ""},
+                          "test": {"passed": True, "output": ""}},
+            layer0_result=layer0_result,
+        )
+        assert result == "layer0_check:spec_scenario_coverage"
+
+    def test_layer0_result_takes_priority_over_heuristic(self):
+        """Scenario: layer0_result param takes priority over verify.md heuristic."""
+        layer0_result = {
+            "passed": False,
+            "failed_checks": ["bac_acceptance"],
+        }
+        verify_md = "Verdict: FAIL\nchecks passed (spec_scenario_coverage)"
+        result = classify_verify_failure(
+            verify_md=verify_md,
+            mech_results={"lint": {"passed": True, "output": ""},
+                          "test": {"passed": True, "output": ""}},
+            layer0_result=layer0_result,
+        )
+        assert result == "layer0_check:bac_acceptance"
+
+    def test_layer0_not_triggered_when_passed(self):
+        """Scenario: No layer0_check when result shows passed."""
+        layer0_result = {
+            "passed": True,
+            "failed_checks": [],
+        }
+        verify_md = "Verdict: FAIL\nSome other reason"
+        result = classify_verify_failure(
+            verify_md=verify_md,
+            mech_results={"lint": {"passed": True, "output": ""},
+                          "test": {"passed": True, "output": ""}},
+            layer0_result=layer0_result,
+        )
+        assert result == "llm_judge"

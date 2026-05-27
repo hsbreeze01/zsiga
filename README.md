@@ -69,8 +69,8 @@ pipeline:
 
   proposal_gate:
     enabled: true
-    score_accept: 6               # Steward 评分 >= 此值通过
-    score_pushback: 3             # < 此值直接拒绝
+    score_accept: 10              # Steward 评分 >= 此值通过
+    score_pushback: 6             # < 此值直接拒绝
 
 safety:
   require_approval: false
@@ -206,7 +206,7 @@ kill -SIGUSR2 $(cat data/lock.pid)   # 恢复
 
 ### Proposal 质量要求
 
-Steward（守门人）从 5 个维度评分（每项 0-2 分，满分 10）：
+Steward（守门人）从 6 个维度评分（每项 0-2 分，满分 12）：
 
 | 维度 | 2 分 | 1 分 | 0 分 |
 |------|------|------|------|
@@ -215,11 +215,13 @@ Steward（守门人）从 5 个维度评分（每项 0-2 分，满分 10）：
 | 能力匹配 | 近期有成功记录 | 无历史记录 | 近期连续失败 |
 | 历史风险 | 无相关失败 | 有失败但已修复 | 相同失败刚发生过 |
 | 范围合理性 | 范围清晰独立 | 范围较大可分解 | 范围模糊或矛盾 |
+| 验收可测性 | 有结构化 BAC ≥3 条，覆盖所有 spec | 有 AC 但不够结构化 | 无 AC 或 AC 全是主观描述 |
 
 评分规则：
-- **>= 8 分**：ACCEPT，直接进入 pipeline
-- **5-7 分**：PUSHBACK，附改进建议
-- **<= 4 分**：REJECT
+- **>= 10 分**：ACCEPT，直接进入 pipeline
+- **6-9 分**：PUSHBACK，附改进建议
+- **<= 5 分**：REJECT
+- 验收可测性 = 0 时，总分上限锁定为 6（强制 PUSHBACK）
 
 **注意**：修改 pipeline/agent/orchestrator 自身代码的 proposal，范围合理性上限为 1 分。这类变更应由人工完成。
 

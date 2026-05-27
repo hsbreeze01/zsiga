@@ -17,10 +17,12 @@ Phase 3 (学习更新): update — record new lessons, adjust strategy
 Phase 4 (沉淀固化): solidify — generate next proposal from accumulated knowledge
 """
 
+import ast
 import json
 import logging
 import os
 import re
+import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -273,7 +275,7 @@ class EvolutionEngine:
             1 for r in recent_rejections
             if "evo-fix-" in r.get("dir", "")
         )
-        skip_fix_types = recent_fix_rejections >= 3
+        skip_fix_types = recent_fix_rejections >= 3 or len(recent_rejections) >= 5
 
         # Token budget hard cap override: only allow cost optimization
         budget_exceeded = any(
@@ -575,34 +577,62 @@ class EvolutionEngine:
     def _render_test_proposal(self, finding: dict, facts: dict) -> str:
         modules = finding.get("modules", [])
         count = finding.get("count", 0)
+
+        target_module = modules[0] if modules else "unknown"
+        target_basename = os.path.basename(target_module).replace(".py", "")
+
+        module_scans = facts.get("code_structure", {}).get("module_scans", {})
+        scan = module_scans.get(target_basename, self._pre_scan_module(target_module))
+
+        symbols = scan.get("symbols", [])
+        func_list = [s for s in symbols if s.get("kind") == "function"]
+        total_lines = scan.get("total_lines", 0)
+        lint_issues = scan.get("lint_issues", [])
+        complexity = scan.get("complexity", [])
+
+        avg_cc = sum(c.get("cc", 0) for c in complexity) / len(complexity) if complexity else 0
+
+        func_lines = "\n".join(
+            f"- `{s['name']}({', '.join(s.get('args', []))})` L{s['line']}-L{s['end_line']} (~{s['lines']}L)"
+            for s in func_list[:10]
+        ) if func_list else "- (无法提取函数列表)"
+
+        target_funcs = [f["name"] for f in func_list[:3]] if func_list else []
+        bac_test_names = ", ".join(f"`test_{n}`" for n in target_funcs)
+        min_tests = min(len(func_list), 3) if func_list else 1
+
         module_lines = "\n".join(f"- `{m}`" for m in modules)
 
-        # Pick first module as the concrete target
-        target_module = modules[0] if modules else "unknown"
-
-        return f"""# add-tests-for-untested-modules
+        return f"""# add-tests-for-{target_basename}
 
 ## Summary
-为 {count} 个缺少测试的模块编写单元测试，优先覆盖 `{target_module}`。
+为 {count} 个缺少测试的模块编写单元测试，优先覆盖 `{target_module}` ({total_lines} 行, {len(func_list)} 函数, 平均 CC {avg_cc:.1f})。
 
 ## Problem
 以下模块缺少测试覆盖，是潜在的风险点：
 
 {module_lines}
 
+### `{target_basename}` 静态分析
+- 总行数: {total_lines}, 函数数: {len(func_list)}, lint 问题: {len(lint_issues)}
+- 函数列表:
+{func_lines}
+
 ## Technical Design
-1. 分析目标模块的公开 API 和关键函数
-2. 为每个公开函数编写正向和反向测试用例
-3. 使用 mock/fixture 隔离外部依赖
-4. 确保测试可在 CI 环境中独立运行
+1. 为 `{target_module}` 的公开函数编写单元测试
+2. 优先覆盖: {', '.join(f'`{f["name"]}`' for f in func_list[:3]) if func_list else '(待分析)'}
+3. 使用 mock 隔离外部依赖（LLM 调用、文件 I/O、subprocess）
+4. 确保每个测试可独立运行
 
 ### Target Files
-- `tests/test_{os.path.basename(target_module).replace('.py', '')}.py` (新建)
+- `tests/test_{target_basename}.py` (新建)
+- `{target_module}` (仅读取分析，不修改)
 
 ## Acceptance Criteria
-- [BAC-01] tests/ 目录中存在对应的测试文件
-- [BAC-02] 测试文件中存在至少 3 个 test_ 函数
-- [BAC-03] pytest 执行全部通过
+- [BAC-01] 文件 `tests/test_{target_basename}.py` 存在
+- [BAC-02] `tests/test_{target_basename}.py` 中存在 {bac_test_names}
+- [BAC-03] `tests/test_{target_basename}.py` 中存在至少 {min_tests} 个 `def test_` 函数
+- [BAC-04] `python -m pytest tests/test_{target_basename}.py` 退出码 0
 
 ## Scope
 - In scope: 为 1 个模块编写测试
@@ -613,7 +643,7 @@ class EvolutionEngine:
 - Reversibility: 删除测试文件
 
 ## Constraints
-- 此 proposal 由 zsiga 自演进引擎生成
+- 此 proposal 由 zsiga 自演进引擎生成（含静态分析数据）
 - project=zsiga
 """
 
@@ -621,39 +651,97 @@ class EvolutionEngine:
         module = finding.get("module", "unknown")
         module_name = os.path.basename(module).replace(".py", "")
 
-        return f"""# explore-and-improve-{module_name}
+        module_scans = facts.get("code_structure", {}).get("module_scans", {})
+        scan = module_scans.get(module_name, self._pre_scan_module(module))
+
+        symbols = scan.get("symbols", [])
+        lint_issues = scan.get("lint_issues", [])
+        complexity = scan.get("complexity", [])
+        total_lines = scan.get("total_lines", 0)
+
+        func_list = [s for s in symbols if s.get("kind") == "function"]
+        class_list = [s for s in symbols if s.get("kind") == "class"]
+        high_cc = [c for c in complexity if c.get("cc", 0) > 10]
+
+        func_lines = "\n".join(
+            f"- `{s['name']}({', '.join(s.get('args', []))})` L{s['line']}-L{s['end_line']} (~{s['lines']}L)"
+            for s in func_list[:10]
+        ) if func_list else "- (无法提取函数列表)"
+
+        class_lines = "\n".join(
+            f"- `{s['name']}` L{s['line']}-L{s['end_line']} methods={s.get('methods', [])}"
+            for s in class_list[:5]
+        ) if class_list else ""
+
+        lint_lines = "\n".join(
+            f"- L{iss['line']} [{iss['code']}]: {iss['message']}"
+            for iss in lint_issues[:5]
+        ) if lint_issues else "- 无 lint 问题"
+
+        cc_lines = "\n".join(
+            f"- `{c['name']}` L{c['line']} CC={c['cc']} ({c['length']}L)"
+            for c in high_cc
+        ) if high_cc else "- 无高复杂度函数 (CC>10)"
+
+        avg_cc = sum(c.get("cc", 0) for c in complexity) / len(complexity) if complexity else 0
+
+        target_funcs_for_bac = [f["name"] for f in func_list[:3]] if func_list else ["(待分析)"]
+        bac_test_names = ", ".join(f"`test_{n}`" for n in target_funcs_for_bac)
+
+        class_section = f"""
+### 类结构
+{class_lines}
+""" if class_lines else ""
+
+        return f"""# add-tests-{module_name}
 
 ## Summary
-探索模块 `{module}` 的代码质量，识别可优化项并实施改进。
+为无测试模块 `{module}` ({total_lines} 行, {len(func_list)} 函数{f', {len(class_list)} 类' if class_list else ''}) 添加单元测试覆盖。
 
 ## Problem
-模块 `{module}` 缺少测试覆盖且可能有改进空间。通过主动探索发现潜在问题。
+模块 `{module}` 缺少测试文件 `tests/test_{module_name}.py`，是潜在风险点。
+
+### 当前状态（静态分析数据）
+- 总行数: {total_lines}
+- 函数数: {len(func_list)}，类数: {len(class_list)}
+- ruff lint 问题: {len(lint_issues)}
+- 圈复杂度: 平均 {avg_cc:.1f}，高 CC(>10) 函数 {len(high_cc)} 个
+
+### 函数列表
+{func_lines}
+{class_section}
+### Lint 问题
+{lint_lines}
+
+### 高复杂度函数 (CC > 10)
+{cc_lines}
 
 ## Technical Design
-1. 阅读 `{module}` 源码，理解其职责和 API
-2. 识别代码异味：过长函数、重复代码、缺失错误处理
-3. 对发现的问题实施针对性改进
-4. 添加基本测试覆盖
+1. 为 `{module}` 中的公开函数编写单元测试
+2. 优先覆盖高复杂度函数: {', '.join(f'`{c["name"]}`' for c in high_cc[:3]) if high_cc else '(无高 CC 函数)'}
+3. 使用 mock 隔离外部依赖（LLM 调用、文件 I/O、subprocess）
+4. 确保每个测试可独立运行，不依赖运行时环境
 
 ### Target Files
-- `{module}` (分析)
-- `tests/test_{module_name}.py` (新建，如不存在)
+- `tests/test_{module_name}.py` (新建)
+- `{module}` (仅读取分析，不修改)
 
 ## Acceptance Criteria
-- [BAC-01] 完成对 `{module}` 的代码分析
-- [BAC-02] 实施至少 1 项实质性改进（非格式化）
-- [BAC-03] 所有变更通过 pytest 和 ruff
+- [BAC-01] 文件 `tests/test_{module_name}.py` 存在
+- [BAC-02] `tests/test_{module_name}.py` 中存在 {bac_test_names}
+- [BAC-03] `tests/test_{module_name}.py` 中存在至少 {min(len(func_list), 3)} 个 `def test_` 函数
+- [BAC-04] `python -m pytest tests/test_{module_name}.py` 退出码 0
 
 ## Scope
-- In scope: 分析 1 个模块，实施小范围改进
-- Out of scope: 不做大范围重构
+- In scope: 为 `{module}` 编写测试，覆盖公开函数
+- Out of scope: 不修改 `{module}` 源码
 
 ## Risk
-- Impact: Low — 小范围改进
-- Reversibility: git revert
+- Impact: None — 只添加测试
+- Reversibility: 删除测试文件
 
 ## Constraints
-- 此 proposal 由 zsiga 自演进引擎生成
+- 此 proposal 由 zsiga 自演进引擎生成（含静态分析数据）
 - project=zsiga
 """
 
@@ -854,24 +942,35 @@ Langfuse 24h token 使用量超过自适应 budget cap：
             return []
 
     def _collect_recent_evo_rejections(self) -> list[dict]:
-        """Scan evo- proposals for REJECT verdicts from Steward."""
-        rejections: list[dict] = []
+        """Scan evo- proposals for REJECT verdicts from Steward.
+
+        Priority order: pending changes first, then archive, newest first.
+        """
         changes_dir = self.base / "openspec" / "changes"
 
-        evo_dirs: list[Path] = []
+        pending_dirs: list[Path] = []
         if changes_dir.exists():
-            for entry in changes_dir.iterdir():
+            for entry in sorted(changes_dir.iterdir(), key=lambda p: p.name, reverse=True):
                 if entry.is_dir() and entry.name.startswith("evo-"):
-                    evo_dirs.append(entry)
+                    pending_dirs.append(entry)
+
+        archive_dirs: list[Path] = []
         archive_dir = changes_dir / "archive"
         if archive_dir.exists():
             for sub_dir in archive_dir.iterdir():
                 if sub_dir.is_dir():
                     for entry in sub_dir.iterdir():
-                        if entry.is_dir() and "evo-" in entry.name:
-                            evo_dirs.append(entry)
+                        if entry.is_dir() and entry.name.startswith("evo-"):
+                            archive_dirs.append(entry)
+            archive_dirs.sort(key=lambda p: p.name, reverse=True)
 
-        for evo_dir in evo_dirs[-15:]:
+        rejections: list[dict] = []
+        scanned = 0
+        for evo_dir in pending_dirs + archive_dirs:
+            if scanned >= 20:
+                break
+            scanned += 1
+
             has_reject = False
             for review_file in evo_dir.glob("steward-review*.md"):
                 try:
@@ -922,15 +1021,20 @@ Langfuse 24h token 使用量超过自适应 budget cap：
 
         modules_without_tests: list[str] = []
         large_files: list[str] = []
+        module_scans: dict[str, dict] = {}
+
         for pf in py_files:
             basename = os.path.basename(pf).replace(".py", "")
             if basename not in test_files and basename != "__init__":
                 modules_without_tests.append(pf)
+                scan = self._pre_scan_module(pf)
+                if scan["symbols"] or scan["lint_issues"] or scan["complexity"]:
+                    module_scans[basename] = scan
 
             full_path = self.base / pf
             try:
                 size = os.path.getsize(full_path)
-                if size > 10000:  # > 10KB
+                if size > 10000:
                     large_files.append(f"{pf} ({size // 1024}KB)")
             except OSError:
                 pass
@@ -940,6 +1044,109 @@ Langfuse 24h token 使用量超过自适应 budget cap：
             "test_files_count": len(test_files),
             "modules_without_tests": modules_without_tests,
             "large_files": large_files,
+            "module_scans": module_scans,
+        }
+
+    # ------------------------------------------------------------------
+    # Module static analysis: ast + ruff + lizard
+    # ------------------------------------------------------------------
+
+    def _pre_scan_module(self, rel_path: str) -> dict:
+        """Run deterministic static analysis on a single module.
+
+        Uses stdlib ast for symbol extraction, ruff for lint issues,
+        and lizard (if available) for cyclomatic complexity.
+
+        Returns a dict with:
+          - symbols: list of {name, kind, line, end_line, lines, args}
+          - lint_issues: list of {code, message, line}
+          - complexity: list of {name, line, cc}  (empty if lizard unavailable)
+          - total_lines: int
+        """
+        full_path = self.base / rel_path
+        if not full_path.exists():
+            return {"symbols": [], "lint_issues": [], "complexity": [], "total_lines": 0}
+
+        try:
+            source = full_path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            return {"symbols": [], "lint_issues": [], "complexity": [], "total_lines": 0}
+
+        total_lines = source.count("\n") + 1
+
+        # --- ast: symbol extraction ---
+        symbols: list[dict] = []
+        try:
+            tree = ast.parse(source)
+            for node in ast.iter_child_nodes(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    end = node.end_lineno or node.lineno
+                    args = [a.arg for a in node.args.args if a.arg != "self"]
+                    symbols.append({
+                        "name": node.name,
+                        "kind": "function",
+                        "line": node.lineno,
+                        "end_line": end,
+                        "lines": end - node.lineno + 1,
+                        "args": args,
+                    })
+                elif isinstance(node, ast.ClassDef):
+                    methods = [
+                        n.name for n in node.body
+                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                    ]
+                    symbols.append({
+                        "name": node.name,
+                        "kind": "class",
+                        "line": node.lineno,
+                        "end_line": node.end_lineno or node.lineno,
+                        "lines": (node.end_lineno or node.lineno) - node.lineno + 1,
+                        "methods": methods,
+                    })
+        except SyntaxError:
+            pass
+
+        # --- ruff: lint issues ---
+        lint_issues: list[dict] = []
+        try:
+            r = subprocess.run(
+                ["python3", "-m", "ruff", "check", str(full_path),
+                 "--output-format=json"],
+                capture_output=True, text=True, timeout=10,
+            )
+            if r.stdout and r.stdout.strip().startswith("["):
+                items = json.loads(r.stdout)
+                for item in items[:10]:
+                    lint_issues.append({
+                        "code": item.get("code", ""),
+                        "message": item.get("message", "")[:120],
+                        "line": item.get("location", {}).get("row", 0),
+                    })
+        except Exception:
+            pass
+
+        # --- lizard: cyclomatic complexity (optional) ---
+        complexity: list[dict] = []
+        try:
+            import lizard as _lizard
+            result = _lizard.analyze_file(str(full_path))
+            for fn in result.function_list:
+                complexity.append({
+                    "name": fn.name,
+                    "line": fn.start_line,
+                    "cc": fn.cyclomatic_complexity,
+                    "length": fn.length,
+                })
+        except ImportError:
+            pass
+        except Exception:
+            pass
+
+        return {
+            "symbols": symbols,
+            "lint_issues": lint_issues,
+            "complexity": complexity,
+            "total_lines": total_lines,
         }
 
     def _count_learnings(self) -> int:
