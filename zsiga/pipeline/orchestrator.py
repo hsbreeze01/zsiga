@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import time
 import traceback
+import copy
 from datetime import datetime
 
 from ..agent.loop import AgentLoop, RunResult, _build_llm_client
@@ -33,7 +34,7 @@ from ..metrics.budget_analyzer import recommend_phase_budget, get_phase_budget_f
 from .verifier import verify, read_verdict
 from .diagnoser import Diagnoser
 from .phase_wal import PhaseWAL
-from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python, get_all_changed_files, must_modify_coverage
+from .utils import verify_mechanical, archive_change, _get_changed_files, read_file, resolve_venv_python, get_all_changed_files, must_modify_coverage, warn_change_conflicts, suggest_merge_order
 from .implementer import _extract_must_modify_files, _read_all_specs
 from .github_issue import create_issue, extract_github_repo
 from .project_context import build_project_context, prefetch_mechanical
@@ -208,6 +209,48 @@ class ZsigaOrchestrator:
         print(f"zsiga cycle: found {len(proposals)} active changes")
         print(f"{'='*60}")
 
+        # P0-1: warn on file-level conflicts across pending proposals
+        _conflict_warned = False
+        for _pname in self.config.targets:
+            _tpath = self.config.targets[_pname].path
+            try:
+                _warning = warn_change_conflicts(_tpath)
+                if _warning:
+                    _conflict_warned = True
+                    print(f"  ⚠️ Conflict detected ({_pname}):\n{_warning}")
+                    record_lesson(
+                        title=f"Change conflicts: {_pname}",
+                        context=f"project={_pname}, active_changes={len(proposals)}",
+                        takeaway=f"File overlaps detected:\n{_warning[:500]}",
+                        pattern_key="pipeline.conflict_warning",
+                        source="orchestrator",
+                    )
+            except Exception as _cw_err:
+                print(f"  ⚠️ Conflict detection error ({_pname}): {_cw_err}")
+
+        # P0-2: topological ordering — sort by dependency graph, fallback to scanner order
+        if len(proposals) > 1:
+            try:
+                _order_cache: dict[str, list[str]] = {}
+                for _pname in self.config.targets:
+                    _tpath = self.config.targets[_pname].path
+                    _order = suggest_merge_order(_tpath)
+                    if _order:
+                        _order_cache[_pname] = _order
+
+                if _order_cache:
+                    def _sort_key(p):
+                        proj = p["project"]
+                        order_list = _order_cache.get(proj, [])
+                        if p["id"] in order_list:
+                            return order_list.index(p["id"])
+                        return len(order_list) + hash(p["id"])
+
+                    proposals.sort(key=_sort_key)
+                    print(f"  📊 Execution order: {[p['id'] for p in proposals]}")
+            except Exception as _so_err:
+                print(f"  ⚠️ Topological ordering error, using scanner order: {_so_err}")
+
         processed = 0
         for prop in proposals:
             if processed >= self.config.pipeline.max_changes_per_cycle:
@@ -268,7 +311,7 @@ class ZsigaOrchestrator:
                                     "detail": "project not configured",
                                 }
                                 continue
-                            sub_prop = dict(prop)
+                            sub_prop = copy.deepcopy(prop)
                             sub_prop["project"] = subtask.project
                             sub_prop["target_path"] = target_cfg.path
                             self._get_transport(subtask.project)
@@ -523,6 +566,11 @@ class ZsigaOrchestrator:
             # stale phase artifacts into the next proposal.
             try:
                 deploy_branch = project_config.deploy_branch
+                _pre_deploy_sha = git_ops.rev_parse(
+                    target_path,
+                    ref=f"origin/{deploy_branch}",
+                    transport=transport,
+                )
                 if git_ops.has_uncommitted_changes(target_path, transport=transport):
                     print(
                         "  Post-proposal cleanup: reset_hard to discard runtime dirt",
@@ -543,6 +591,16 @@ class ZsigaOrchestrator:
                         target_path,
                         git_ops.rev_parse(target_path, transport=transport),
                         transport=transport,
+                    )
+                # P2: verify deploy_branch HEAD integrity against remote
+                _post_deploy_sha = git_ops.rev_parse(target_path, transport=transport)
+                if _pre_deploy_sha and _post_deploy_sha != _pre_deploy_sha:
+                    record_lesson(
+                        title=f"Deploy branch drift: {change_name}",
+                        context=f"project={project_name}, pre={_pre_deploy_sha[:8]}, post={_post_deploy_sha[:8]}",
+                        takeaway="Deploy branch HEAD changed during proposal processing — possible external modification or incomplete DELIVER",
+                        pattern_key="pipeline.deploy_branch_drift",
+                        source="orchestrator",
                     )
             except Exception as cleanup_err:
                 print(f"  ⚠ Cleanup warning: {cleanup_err}", flush=True)

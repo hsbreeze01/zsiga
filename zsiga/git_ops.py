@@ -9,9 +9,9 @@ def _check_result(result: dict, operation_label: str):
         raise RuntimeError(stderr)
 
 
-def rev_parse(target_path: str, transport: Transport = None) -> str:
+def rev_parse(target_path: str, transport: Transport = None, ref: str = "HEAD") -> str:
     transport = transport or LocalTransport()
-    r = transport.run_shell("git rev-parse HEAD", cwd=target_path)
+    r = transport.run_shell(f"git rev-parse {ref}", cwd=target_path)
     return r["stdout"].strip()
 
 

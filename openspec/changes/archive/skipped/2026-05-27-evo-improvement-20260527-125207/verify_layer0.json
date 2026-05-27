@@ -1,0 +1,54 @@
+{
+  "checks": [
+    {
+      "id": "spec_file_coverage",
+      "description": "每个 spec 文件至少有一个对应的代码变更",
+      "passed": true,
+      "evidence": "全部 2 个 spec 文件均有对应代码变更"
+    },
+    {
+      "id": "tasks_completion",
+      "description": "tasks.md 中所有 task 已勾选",
+      "passed": true,
+      "evidence": "无 tasks.md 或为空，跳过"
+    },
+    {
+      "id": "testable_not_all_false",
+      "description": "至少存在 testable=true 的 scenario",
+      "passed": true,
+      "evidence": "13 个 scenario 中 13 个 testable=true"
+    },
+    {
+      "id": "no_syntax_error",
+      "description": "变更的 Python 文件无语法错误",
+      "passed": true,
+      "evidence": "2 个 Python 文件语法检查通过"
+    },
+    {
+      "id": "spec_scenario_coverage",
+      "description": "spec 中的关键要求在 diff 中有实现痕迹",
+      "passed": false,
+      "evidence": "config-load-robustness.md: of the, chained via not in diff (0/2); config-unit-coverage.md: resolved recursively not in diff (0/1)"
+    },
+    {
+      "id": "bac_01",
+      "description": "[BAC-01] 完成对 `zsiga/config.py` 的代码分析",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_02",
+      "description": "[BAC-02] 实施至少 1 项实质性改进（非格式化）",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    },
+    {
+      "id": "bac_03",
+      "description": "[BAC-03] 所有变更通过 pytest 和 ruff",
+      "passed": true,
+      "evidence": "无法自动验证，已跳过"
+    }
+  ],
+  "elapsed_seconds": 0.052349151112139225,
+  "all_passed": false
+}
