@@ -143,10 +143,10 @@ class EvolutionEngine:
             if pattern:
                 excluded_patterns.add(pattern)
 
-        findings = []
-
         high_patterns = [p for p in facts["patterns"]
-                        if p.severity == "high" and p.key not in excluded_patterns]
+                        if p.severity == "high"
+                        and p.key not in excluded_patterns
+                        and not p.key.startswith("evolution.")]
         if high_patterns:
             findings.append(f"recurring_failure:{high_patterns[0].key}")
 
