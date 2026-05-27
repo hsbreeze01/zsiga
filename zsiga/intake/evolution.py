@@ -196,6 +196,7 @@ class EvolutionEngine:
 
     def _phase2_reflect(self, facts: dict) -> dict:
         findings = facts.get("findings", [])
+        recent_rejections = facts.get("recent_evo_rejections", [])
         insights: dict = {
             "priority_finding": None,
             "proposal_type": "improvement",
@@ -203,22 +204,28 @@ class EvolutionEngine:
             "confidence": "low",
         }
 
-        # Priority: fix failures > fill gaps > proactive improvement
-        for finding in findings:
-            if finding.startswith("recurring_failure:"):
-                key = finding.split(":", 1)[1]
-                patterns = [p for p in facts["patterns"] if p.key == key]
-                insights["priority_finding"] = {
-                    "type": "fix_failure",
-                    "key": key,
-                    "count": patterns[0].count if patterns else 0,
-                    "takeaways": patterns[0].recent_takeaways if patterns else [],
-                }
-                insights["proposal_type"] = "fix"
-                insights["confidence"] = "high"
-                break
+        recent_fix_rejections = sum(
+            1 for r in recent_rejections
+            if "evo-fix-" in r.get("dir", "")
+        )
+        skip_fix_types = recent_fix_rejections >= 3
 
-        if not insights["priority_finding"]:
+        if not skip_fix_types:
+            for finding in findings:
+                if finding.startswith("recurring_failure:"):
+                    key = finding.split(":", 1)[1]
+                    patterns = [p for p in facts["patterns"] if p.key == key]
+                    insights["priority_finding"] = {
+                        "type": "fix_failure",
+                        "key": key,
+                        "count": patterns[0].count if patterns else 0,
+                        "takeaways": patterns[0].recent_takeaways if patterns else [],
+                    }
+                    insights["proposal_type"] = "fix"
+                    insights["confidence"] = "high"
+                    break
+
+        if not insights["priority_finding"] and not skip_fix_types:
             for finding in findings:
                 if finding.startswith("unresolved_failures:"):
                     count = finding.split(":")[1]
@@ -228,6 +235,18 @@ class EvolutionEngine:
                         "failures": facts["recent_failures"][:3],
                     }
                     insights["proposal_type"] = "fix"
+                    insights["confidence"] = "medium"
+                    break
+
+        if not insights["priority_finding"]:
+            for finding in findings:
+                if finding.startswith("explore_untested:"):
+                    module = finding.split(":", 1)[1]
+                    insights["priority_finding"] = {
+                        "type": "explore_module",
+                        "module": module,
+                    }
+                    insights["proposal_type"] = "improvement"
                     insights["confidence"] = "medium"
                     break
 
@@ -243,18 +262,6 @@ class EvolutionEngine:
                     }
                     insights["proposal_type"] = "improvement"
                     insights["confidence"] = "medium"
-                    break
-
-        if not insights["priority_finding"]:
-            for finding in findings:
-                if finding.startswith("explore_untested:"):
-                    module = finding.split(":", 1)[1]
-                    insights["priority_finding"] = {
-                        "type": "explore_module",
-                        "module": module,
-                    }
-                    insights["proposal_type"] = "improvement"
-                    insights["confidence"] = "low"
                     break
 
         if not insights["priority_finding"]:
