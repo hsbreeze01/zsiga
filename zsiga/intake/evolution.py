@@ -135,10 +135,9 @@ class EvolutionEngine:
         try:
             from ..config import load_config
             cfg = load_config()
-            for _name, target in cfg.targets.items():
-                if target.domain == "external":
-                    logger.info("Evolution paused: external target active (%s)", _name)
-                    return False
+            if cfg.active_target != "zsiga":
+                logger.info("Evolution paused: non-zsiga target active (%s)", cfg.active_target)
+                return False
         except Exception:
             pass
         state = self._load_state()

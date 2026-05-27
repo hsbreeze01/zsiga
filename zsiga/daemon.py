@@ -744,7 +744,10 @@ def _serve_dashboard(port: int):
                 from .metrics.db import _DB_PATH
                 home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
                 result = _build_pipeline_status(str(_DB_PATH), home)
-                self._send_json(json.dumps(result))
+                 self._send_json(json.dumps(result))
+            elif self.path == "/api/daemon-state":
+                ds = _read_daemon_state()
+                self._send_json(json.dumps(ds))
             elif self.path == "/api/proposal-stats":
                 from .metrics.db import _DB_PATH
                 result = _build_proposal_stats_json(str(_DB_PATH))
@@ -874,6 +877,32 @@ def daemon_loop(config, dashboard_port=None):
                 continuous_busy_cycles=continuous_busy_cycles,
                 last_change_at=last_change_at,
             )
+
+            # Evolution schedule: auto-switch back to zsiga if in window
+            try:
+                from datetime import datetime as _dt
+                cfg_at = getattr(config, 'active_target', 'zsiga')
+                if cfg_at != 'zsiga':
+                    from .intake.evolution import EvolutionConfig
+                    evo_cfg = EvolutionConfig(
+                        enabled=config.pipeline.evolution_enabled,
+                        window_start_hour=config.pipeline.evolution_window_start_hour,
+                        window_end_hour=config.pipeline.evolution_window_end_hour,
+                    )
+                    h = _dt.now().hour
+                    s = evo_cfg.window_start_hour
+                    e = evo_cfg.window_end_hour
+                    in_window = (h >= s or h < e) if s > e else (s <= h < e)
+                    if in_window:
+                        print(f"  🕐 Evolution window active ({s}:00-{e}:00), switching back to zsiga")
+                        import yaml as _yaml
+                        from pathlib import Path as _P
+                        _cfg_path = _P(os.environ.get('ZSIGA_HOME', str(Path(__file__).resolve().parent.parent))) / 'zsiga.yaml'
+                        _raw = _yaml.safe_load(_cfg_path.read_text())
+                        _raw['active_target'] = 'zsiga'
+                        _cfg_path.write_text(_yaml.dump(_raw, default_flow_style=False, allow_unicode=True, sort_keys=False))
+            except Exception as _e:
+                print(f"  ⚠️ Schedule check error: {_e}")
 
             orchestrator = None
             processed_count = 0

@@ -270,7 +270,8 @@ class ZsigaConfig:
                  pipeline: PipelineConfig, intake: IntakeConfig,
                  safety: SafetyConfig, logging_config: 'LoggingConfig' = None,
                  llm_fast: 'LLMFastConfig' = None,
-                 github: GithubConfig = None):
+                 github: GithubConfig = None,
+                 active_target: str = "zsiga"):
         self.llm = llm
         self.targets = targets
         self.pipeline = pipeline
@@ -279,6 +280,7 @@ class ZsigaConfig:
         self.logging_config = logging_config
         self.llm_fast = llm_fast
         self.github = github
+        self.active_target = active_target
 
 
 class LoggingConfig:
@@ -501,9 +503,11 @@ def load_config(path: str = None) -> ZsigaConfig:
         issue_integration=github_raw.get("issue_integration", False),
     )
 
+    active_target = raw.get("active_target", "zsiga")
+
     config = ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline, intake=intake, safety=safety,
                          logging_config=logging_config, llm_fast=llm_fast,
-                         github=github)
+                         github=github, active_target=active_target)
 
     result = validate_config(config)
     for w in result.warnings:
