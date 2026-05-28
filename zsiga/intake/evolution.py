@@ -648,7 +648,10 @@ class EvolutionEngine:
             for s in func_list[:10]
         ) if func_list else "- (无法提取函数列表)"
 
-        target_funcs = [f["name"] for f in func_list[:3]] if func_list else []
+        target_funcs = [f["name"] for f in func_list[:3]] if func_list else [
+            "module_import",
+            "module_smoke",
+        ]
         bac_test_names = ", ".join(f"`test_{n}`" for n in target_funcs)
         min_tests = min(len(func_list), 3) if func_list else 1
 
@@ -671,7 +674,7 @@ class EvolutionEngine:
 
 ## Technical Design
 1. 为 `{target_module}` 的公开函数编写单元测试
-2. 优先覆盖: {', '.join(f'`{f["name"]}`' for f in func_list[:3]) if func_list else '(待分析)'}
+2. 优先覆盖: {', '.join(f'`{f["name"]}`' for f in func_list[:3]) if func_list else '`module_import`, `module_smoke`'}
 3. 使用 mock 隔离外部依赖（LLM 调用、文件 I/O、subprocess）
 4. 确保每个测试可独立运行
 
@@ -736,8 +739,12 @@ class EvolutionEngine:
 
         avg_cc = sum(c.get("cc", 0) for c in complexity) / len(complexity) if complexity else 0
 
-        target_funcs_for_bac = [f["name"] for f in func_list[:3]] if func_list else ["(待分析)"]
+        target_funcs_for_bac = [f["name"] for f in func_list[:3]] if func_list else [
+            "module_import",
+            "module_smoke",
+        ]
         bac_test_names = ", ".join(f"`test_{n}`" for n in target_funcs_for_bac)
+        min_tests = min(len(func_list), 3) if func_list else 1
 
         class_section = f"""
 ### 类结构
@@ -780,7 +787,7 @@ class EvolutionEngine:
 ## Acceptance Criteria
 - [BAC-01] 文件 `tests/test_{module_name}.py` 存在
 - [BAC-02] `tests/test_{module_name}.py` 中存在 {bac_test_names}
-- [BAC-03] `tests/test_{module_name}.py` 中存在至少 {min(len(func_list), 3)} 个 `def test_` 函数
+- [BAC-03] `tests/test_{module_name}.py` 中存在至少 {min_tests} 个 `def test_` 函数
 - [BAC-04] `python -m pytest tests/test_{module_name}.py` 退出码 0
 
 ## Scope
@@ -1035,6 +1042,7 @@ Langfuse 24h token 使用量超过自适应 budget cap：
                             archive_dirs.append(entry)
             archive_dirs.sort(key=lambda p: p.name, reverse=True)
 
+        cutoff_ts = self._current_window_start().timestamp()
         rejections: list[dict] = []
         scanned = 0
         for evo_dir in pending_dirs + archive_dirs:
@@ -1045,6 +1053,8 @@ Langfuse 24h token 使用量超过自适应 budget cap：
             has_reject = False
             for review_file in evo_dir.glob("steward-review*.md"):
                 try:
+                    if review_file.stat().st_mtime < cutoff_ts:
+                        continue
                     content = review_file.read_text(encoding="utf-8")
                     verdict_text = content.upper()
                     if "REJECT" in verdict_text or "PUSHBACK" in verdict_text:

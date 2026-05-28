@@ -460,6 +460,57 @@ class TestEvolutionControlGates:
 
         assert engine._proposal_preflight_error(good) is None
 
+    def test_render_test_proposal_without_functions_has_concrete_bac(self, tmp_path):
+        from zsiga.intake.evolution import EvolutionEngine
+
+        engine = EvolutionEngine(str(tmp_path))
+        proposal = engine._render_test_proposal(
+            {"modules": ["zsiga/no_functions.py"], "count": 1},
+            {"code_structure": {"module_scans": {"no_functions": {"symbols": []}}}},
+        )
+
+        assert "待分析" not in proposal
+        assert "至少 0 个" not in proposal
+        assert "test_module_import" in proposal
+        assert engine._proposal_preflight_error(proposal) is None
+
+    def test_render_explore_proposal_without_functions_has_concrete_bac(self, tmp_path):
+        from zsiga.intake.evolution import EvolutionEngine
+
+        engine = EvolutionEngine(str(tmp_path))
+        proposal = engine._render_explore_proposal(
+            {"module": "zsiga/no_functions.py"},
+            {"code_structure": {"module_scans": {"no_functions": {"symbols": []}}}},
+        )
+
+        assert "待分析" not in proposal
+        assert "至少 0 个" not in proposal
+        assert "test_module_import" in proposal
+        assert engine._proposal_preflight_error(proposal) is None
+
+    def test_rejection_breaker_ignores_previous_window_reviews(self, tmp_path):
+        import os
+        import time
+        from zsiga.intake.evolution import EvolutionConfig, EvolutionEngine
+
+        changes = tmp_path / "openspec" / "changes"
+        changes.mkdir(parents=True)
+        old_ts = time.time() - 48 * 3600
+        for i in range(5):
+            evo_dir = changes / f"evo-improvement-old-{i}"
+            evo_dir.mkdir()
+            (evo_dir / "proposal.md").write_text("# proposal\n")
+            review = evo_dir / "steward-review.md"
+            review.write_text("## Verdict: REJECT\n")
+            os.utime(review, (old_ts, old_ts))
+
+        engine = EvolutionEngine(
+            str(tmp_path),
+            EvolutionConfig(window_start_hour=0, window_end_hour=23),
+        )
+
+        assert engine._collect_recent_evo_rejections() == []
+
     def test_pushback_counts_as_evo_rejection(self, tmp_path):
         from zsiga.intake.evolution import EvolutionEngine
 
