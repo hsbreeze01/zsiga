@@ -137,9 +137,16 @@ class ZsigaOrchestrator:
             print(f"  📝 Loaded memory context ({len(ctx)} chars)")
 
     async def run_cycle(self):
-        for name in self.config.targets:
+        # Only process the active target (from runtime_state.yaml)
+        active = self.config.active_target
+        if active and active in self.config.targets:
+            active_targets = {active: self.config.targets[active]}
+        else:
+            active_targets = self.config.targets
+        print(f"  🎯 Active target: {active} (of {len(self.config.targets)} configured)")
+        for name in active_targets:
             self._get_transport(name)
-        scanner = DirectoryScanner(self.config.targets)
+        scanner = DirectoryScanner(active_targets)
         proposals = scanner.scan(transports=self._transports)
 
         _MAX_SKIP_RETRIES = 2
@@ -211,7 +218,7 @@ class ZsigaOrchestrator:
 
         # P0-1: warn on file-level conflicts across pending proposals
         _conflict_warned = False
-        for _pname in self.config.targets:
+        for _pname in active_targets:
             _tpath = self.config.targets[_pname].path
             try:
                 _warning = warn_change_conflicts(_tpath)
@@ -232,7 +239,7 @@ class ZsigaOrchestrator:
         if len(proposals) > 1:
             try:
                 _order_cache: dict[str, list[str]] = {}
-                for _pname in self.config.targets:
+                for _pname in active_targets:
                     _tpath = self.config.targets[_pname].path
                     _order = suggest_merge_order(_tpath)
                     if _order:
@@ -260,7 +267,7 @@ class ZsigaOrchestrator:
 
             try:
                 # Cross-project decomposition (REQ-TD-01)
-                available_projects = list(self.config.targets.keys())
+                available_projects = list(active_targets.keys())
                 proposal_text = read_file(
                     f"{prop['change_dir']}/{prop.get('proposal_filename', 'proposal.md')}",
                     self._get_transport(prop['project']),

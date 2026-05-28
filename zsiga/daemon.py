@@ -892,6 +892,7 @@ def daemon_loop(config, dashboard_port=None):
                     if in_window:
                         print(f"  🕐 Evolution window active ({evo_start}:00-{evo_end}:00), switching back to zsiga")
                         rs["active_target"] = "zsiga"
+                        rs.pop("pending_switch", None)
                         save_runtime_state(rs)
             except Exception as _e:
                 print(f"  ⚠️ Schedule check error: {_e}")
@@ -922,6 +923,29 @@ def daemon_loop(config, dashboard_port=None):
             finally:
                 if orchestrator is not None:
                     orchestrator.close()
+
+            # Execute pending target switch (queued from web while daemon was running)
+            try:
+                from .config import load_runtime_state as _lrs, save_runtime_state as _srs
+                _rs = _lrs()
+                _pending = _rs.get("pending_switch")
+                if _pending:
+                    evo_start = _rs.get("evolution_window_start_hour", config.pipeline.evolution_window_start_hour)
+                    evo_end = _rs.get("evolution_window_end_hour", config.pipeline.evolution_window_end_hour)
+                    _h = datetime.now().hour
+                    _in_window = (_h >= evo_start or _h < evo_end) if evo_start > evo_end else (evo_start <= _h < evo_end)
+                    if _in_window and _pending != "zsiga":
+                        print(f"  ⏭️ Pending switch to {_pending} overridden — evolution window active, clearing")
+                        _rs.pop("pending_switch", None)
+                        _srs(_rs)
+                    else:
+                        print(f"  ⏭️ Executing pending switch: {_rs.get('active_target')} → {_pending}")
+                        _rs["active_target"] = _pending
+                        _rs.pop("pending_switch", None)
+                        _srs(_rs)
+                        config.active_target = _pending
+            except Exception as _pse:
+                print(f"  ⚠️ Pending switch error: {_pse}")
 
             # Update scheduling statistics
             total_changes_processed += processed_count
