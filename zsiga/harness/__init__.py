@@ -10,6 +10,12 @@ from zsiga.harness.conftest import (
     mock_transport,
     temp_git_repo,
 )
+from zsiga.harness.phase_contract import (
+    ContractViolation,
+    PhaseContractError,
+    PhaseContractHarness,
+    PhaseContractResult,
+)
 from zsiga.harness.runner import (
     HarnessResult,
     HarnessRunner,
@@ -94,6 +100,10 @@ def run_qualification(
 
 
 __all__ = [
+    "PhaseContractResult",
+    "PhaseContractHarness",
+    "PhaseContractError",
+    "ContractViolation",
     "HarnessResult",
     "HarnessRunner",
     "MockLLMClient",

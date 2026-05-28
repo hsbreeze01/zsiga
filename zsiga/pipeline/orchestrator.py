@@ -21,6 +21,7 @@ from ..memory.context import load_active_context, update_active_context, load_re
 from ..memory.learn import record_outcome, record_lesson
 from ..agent.langfuse_shim import trace_proposal, phase_span, flush as langfuse_flush
 from ..metrics.types import ChangeRecord, PhaseRecord, Phase, Outcome
+from ..harness.phase_contract import PhaseContractHarness
 from ..metrics.db import record_self_assessment, query_recent_ratings
 from ..metrics.collector import record_change
 from ..metrics.intent_tracker import record_intent_decision, update_intent_outcome, update_intent_reclassification
@@ -67,6 +68,7 @@ class ZsigaOrchestrator:
         )
         self._transports: dict[str, Transport] = {}
         self._budget_cache: dict[str, dict] = {}
+        self._phase_contract = PhaseContractHarness()
         self._load_context()
 
 
@@ -123,6 +125,65 @@ class ZsigaOrchestrator:
         if adaptive != config_timeout:
             print(f"  📊 {phase_name}: adaptive timeout {config_timeout}s → {adaptive}s (p95={rec.get('p95','?')}s, n={rec.get('sample_count',0)})")
         return adaptive
+
+    def _enforce_phase_contract(
+        self,
+        phase_name: str,
+        rec: ChangeRecord,
+        change_name: str,
+        change_dir: str,
+        target_path: str,
+        project_name: str,
+        transport: Transport,
+        *,
+        context: dict | None = None,
+        revert_sha: str | None = None,
+    ) -> bool:
+        active_target = getattr(self.config, "active_target", "")
+        if active_target not in getattr(self.config, "targets", {}):
+            active_target = project_name
+        result = self._phase_contract.validate(
+            phase_name,
+            change_dir=change_dir,
+            target_path=target_path,
+            project=project_name,
+            active_target=active_target,
+            transport=transport,
+            context=context,
+        )
+        if result.passed:
+            return True
+
+        detail = f"phase_contract:{phase_name}: {result.message}"[:500]
+        print(f"  ❌ Phase contract failed: {detail}", flush=True)
+        if revert_sha:
+            git_ops.reset_hard(target_path, revert_sha, transport=transport)
+            rec.outcome = Outcome.REVERTED
+        else:
+            rec.outcome = Outcome.SKIPPED
+            rec.skip_reason = detail
+
+        phase_map = {
+            "clarify": Phase.CLARIFY,
+            "enrich": Phase.ENRICH,
+            "implement": Phase.IMPLEMENT,
+            "verify": Phase.VERIFY,
+            "reflect": Phase.REFLECT,
+        }
+        rec.phases.append(PhaseRecord(
+            phase=phase_map.get(phase_name, Phase.VERIFY),
+            outcome=Outcome.FAIL,
+            detail=detail,
+        ))
+        record_lesson(
+            title=f"PHASE CONTRACT FAILED: {change_name}",
+            context=f"phase={phase_name}, project={project_name}",
+            takeaway=result.message[:1000],
+            pattern_key=f"pipeline.phase_contract.{phase_name}",
+            source="phase_contract",
+        )
+        record_outcome(change_name, project_name, False, f"{phase_name}_contract", result.message)
+        return False
 
     def _get_transport(self, project_name: str) -> Transport:
         if project_name not in self._transports:
@@ -710,6 +771,11 @@ class ZsigaOrchestrator:
             ))
             if _p0 is not None: _p0_cm.__exit__(None, None, None)
             print(f"  Phase 0 done in {time.monotonic() - t0:.1f}s")
+            if not self._enforce_phase_contract(
+                "clarify", rec, change_name, change_dir, target_path,
+                project_name, transport,
+            ):
+                return False
 
         # Phase 1: ENRICH (skipped for pipeline_fix — FIX intent)
         if not skip_enrich and not (prop["has_specs"] and prop["has_design"] and prop["has_tasks"]):
@@ -782,6 +848,11 @@ class ZsigaOrchestrator:
             ))
             if _p1 is not None: _p1_cm.__exit__(None, None, None)
             print(f"  Phase 1 done in {time.monotonic() - t0:.1f}s")
+            if not self._enforce_phase_contract(
+                "enrich", rec, change_name, change_dir, target_path,
+                project_name, transport,
+            ):
+                return False
 
             # WAL: record ENRICH boundary
             wal.write(phase="enrich", target_path=target_path, project=project_name)
@@ -994,6 +1065,12 @@ class ZsigaOrchestrator:
             budget_seconds=self._adaptive_timeout("implement", self.config.pipeline.impl_timeout),
             detail="BUDGET_EXCEEDED" if _impl_exceeded else "",
         ))
+        if not self._enforce_phase_contract(
+            "implement", rec, change_name, change_dir, target_path,
+            project_name, transport, context={"pre_sha": pre_sha},
+            revert_sha=pre_sha,
+        ):
+            return False
 
         # Phase 3/6: REVIEW (self-review loop)
         if self.config.pipeline.review_max_rounds > 0:
@@ -1298,6 +1375,11 @@ class ZsigaOrchestrator:
             layer1_scenarios=_l1_scen,
             detail=verify_detail,
         ))
+        if not self._enforce_phase_contract(
+            "verify", rec, change_name, change_dir, target_path,
+            project_name, transport, revert_sha=pre_sha,
+        ):
+            return False
 
         # Phase 4.5/6: OPTIMIZE (optional norm alignment)
         if getattr(self.config.pipeline, "optimize_enabled", True):
