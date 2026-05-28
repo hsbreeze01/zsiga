@@ -881,26 +881,18 @@ def daemon_loop(config, dashboard_port=None):
             # Evolution schedule: auto-switch back to zsiga if in window
             try:
                 from datetime import datetime as _dt
-                cfg_at = getattr(config, 'active_target', 'zsiga')
-                if cfg_at != 'zsiga':
-                    from .intake.evolution import EvolutionConfig
-                    evo_cfg = EvolutionConfig(
-                        enabled=config.pipeline.evolution_enabled,
-                        window_start_hour=config.pipeline.evolution_window_start_hour,
-                        window_end_hour=config.pipeline.evolution_window_end_hour,
-                    )
+                from .config import load_runtime_state, save_runtime_state
+                rs = load_runtime_state()
+                cfg_at = rs.get("active_target", "zsiga")
+                if cfg_at != "zsiga":
+                    evo_start = rs.get("evolution_window_start_hour", config.pipeline.evolution_window_start_hour)
+                    evo_end = rs.get("evolution_window_end_hour", config.pipeline.evolution_window_end_hour)
                     h = _dt.now().hour
-                    s = evo_cfg.window_start_hour
-                    e = evo_cfg.window_end_hour
-                    in_window = (h >= s or h < e) if s > e else (s <= h < e)
+                    in_window = (h >= evo_start or h < evo_end) if evo_start > evo_end else (evo_start <= h < evo_end)
                     if in_window:
-                        print(f"  🕐 Evolution window active ({s}:00-{e}:00), switching back to zsiga")
-                        import yaml as _yaml
-                        from pathlib import Path as _P
-                        _cfg_path = _P(os.environ.get('ZSIGA_HOME', str(Path(__file__).resolve().parent.parent))) / 'zsiga.yaml'
-                        _raw = _yaml.safe_load(_cfg_path.read_text())
-                        _raw['active_target'] = 'zsiga'
-                        _cfg_path.write_text(_yaml.dump(_raw, default_flow_style=False, allow_unicode=True, sort_keys=False))
+                        print(f"  🕐 Evolution window active ({evo_start}:00-{evo_end}:00), switching back to zsiga")
+                        rs["active_target"] = "zsiga"
+                        save_runtime_state(rs)
             except Exception as _e:
                 print(f"  ⚠️ Schedule check error: {_e}")
 

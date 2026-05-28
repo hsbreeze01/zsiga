@@ -133,10 +133,10 @@ class EvolutionEngine:
             logger.info("Evolution paused (backdoor file present)")
             return False
         try:
-            from ..config import load_config
-            cfg = load_config()
-            if cfg.active_target != "zsiga":
-                logger.info("Evolution paused: non-zsiga target active (%s)", cfg.active_target)
+            from ..config import load_runtime_state
+            rs = load_runtime_state()
+            if rs.get("active_target", "zsiga") != "zsiga":
+                logger.info("Evolution paused: non-zsiga target active (%s)", rs.get("active_target"))
                 return False
         except Exception:
             pass

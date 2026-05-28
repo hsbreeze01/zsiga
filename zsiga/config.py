@@ -503,7 +503,7 @@ def load_config(path: str = None) -> ZsigaConfig:
         issue_integration=github_raw.get("issue_integration", False),
     )
 
-    active_target = raw.get("active_target", "zsiga")
+    active_target = load_runtime_state().get("active_target", "zsiga")
 
     config = ZsigaConfig(llm=llm, targets=targets, pipeline=pipeline, intake=intake, safety=safety,
                          logging_config=logging_config, llm_fast=llm_fast,
@@ -516,3 +516,32 @@ def load_config(path: str = None) -> ZsigaConfig:
         raise ConfigValidationError(result)
 
     return config
+
+
+_RUNTIME_STATE_FILE = "data/runtime_state.yaml"
+
+
+def _runtime_state_path() -> Path:
+    home = os.environ.get("ZSIGA_HOME", "")
+    if home:
+        return Path(home) / _RUNTIME_STATE_FILE
+    cfg_path = _find_config()
+    return cfg_path.parent / _RUNTIME_STATE_FILE
+
+
+def load_runtime_state() -> dict:
+    p = _runtime_state_path()
+    if p.exists():
+        try:
+            import yaml as _yaml
+            return _yaml.safe_load(p.read_text()) or {}
+        except Exception:
+            pass
+    return {}
+
+
+def save_runtime_state(state: dict):
+    import yaml as _yaml
+    p = _runtime_state_path()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(_yaml.dump(state, default_flow_style=False, allow_unicode=True, sort_keys=False))
