@@ -139,6 +139,13 @@ class EvolutionEngine:
                 return False
         except Exception:
             pass
+        recent_rejections = self._collect_recent_evo_rejections()
+        if len(recent_rejections) >= 5:
+            logger.warning(
+                "Evolution paused: %d recent evo proposals were rejected/pushed back",
+                len(recent_rejections),
+            )
+            return False
         state = self._load_state()
         window_start = self._current_window_start().isoformat()
         if state.window_start_at != window_start:

@@ -889,6 +889,23 @@ class ZsigaOrchestrator:
                         timeout_seconds=self.config.pipeline.design_gate_timeout,
                     )
                     judge_content = judge_result.content.upper()
+                    if not judge_result.success or judge_content in {"MAX_TURNS_REACHED", "TIMEOUT", "STALE_LIMIT"}:
+                        print(
+                            "  🏛️ Design Gate unavailable "
+                            f"({judge_result.content}); proceeding with downstream gates"
+                        )
+                        Path(change_dir, "judge-feedback.md").write_text(
+                            "# Design Gate Judge Feedback (infra failure)\n\n"
+                            f"{judge_result.content}\n"
+                        )
+                        record_lesson(
+                            title=f"DESIGN GATE UNAVAILABLE: {change_name}",
+                            context=f"project={project_name}, attempt={design_gate_retries + 1}",
+                            takeaway=judge_result.content[:1000],
+                            pattern_key="pipeline.design_gate.infra_failure",
+                            source="judge",
+                        )
+                        break
                     if "VERDICT: PASS" in judge_content or "GATE PASS" in judge_content:
                         print(f"  🏛️ Design Gate PASS (attempt {design_gate_retries + 1})")
                         break

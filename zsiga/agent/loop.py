@@ -89,6 +89,24 @@ def _extract_tool_calls_from_content(content: str) -> list[tuple[str, dict]]:
     return calls
 
 
+def _fallback_args_for_malformed_tool(tool_name: str, tools: list[dict]) -> dict | None:
+    """Return safe fallback args for malformed tool-call JSON when possible.
+
+    Only tools with no required arguments are eligible. This turns common model
+    truncations like `{\"` for `list_files` into `{}` instead of burning every
+    turn without executing any useful tool.
+    """
+    for tool in tools:
+        fn = tool.get("function", {})
+        if fn.get("name") != tool_name:
+            continue
+        params = fn.get("parameters", {}) or {}
+        if params.get("required"):
+            return None
+        return {}
+    return None
+
+
 def _build_llm_client(provider: str, api_key: str, base_url: str | None,
                      proxy: str | None):
     """Return an OpenAI-compatible client for the requested *provider*.
@@ -366,17 +384,25 @@ class AgentLoop:
 
             for tc in msg.tool_calls:
                 name = tc.function.name
+                raw_args = tc.function.arguments or ""
                 try:
-                    args = json.loads(tc.function.arguments)
+                    args = json.loads(raw_args)
                 except json.JSONDecodeError as _je:
-                    log.warning("turn %d: tool_call %s has malformed JSON args (char %d): %.80s",
-                                turn + 1, name, _je.pos, tc.function.arguments[:80])
-                    messages.append({
-                        "role": "tool",
-                        "content": json.dumps({"error": f"malformed tool_call arguments: {_je}"}),
-                        "tool_call_id": tc.id,
-                    })
-                    continue
+                    fallback_args = _fallback_args_for_malformed_tool(name, self.tools)
+                    if fallback_args is None:
+                        log.warning("turn %d: tool_call %s has malformed JSON args (char %d): %.80s",
+                                    turn + 1, name, _je.pos, raw_args[:80])
+                        messages.append({
+                            "role": "tool",
+                            "content": json.dumps({"error": f"malformed tool_call arguments: {_je}; retry with valid JSON object arguments"}),
+                            "tool_call_id": tc.id,
+                        })
+                        continue
+                    args = fallback_args
+                    log.warning(
+                        "turn %d: repaired malformed JSON args for optional-arg tool %s: %.80s",
+                        turn + 1, name, raw_args[:80],
+                    )
                 args_preview = json.dumps(args, ensure_ascii=False)[:120]
                 log.debug("turn %d: 🔧 %s(%s)", turn + 1, name, args_preview,
                           extra={"phase": phase, "turn": turn + 1,
