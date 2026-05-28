@@ -221,15 +221,15 @@ class TestEvolutionPausedForExternal:
                 "transport": "local",
             }
         })
-        path = _write_yaml(tmp_path, config_data)
+        _write_yaml(tmp_path, config_data)
 
-        import zsiga.config as cfg_mod
-        original_load = cfg_mod.load_config
-
-        def patched_load(p=None):
-            return original_load(path=path)
-
-        monkeypatch.setattr(cfg_mod, "load_config", patched_load)
+        # Write runtime_state with external target active
+        (tmp_path / "data").mkdir(exist_ok=True)
+        import yaml as _yaml
+        (tmp_path / "data" / "runtime_state.yaml").write_text(
+            _yaml.dump({"active_target": "d8q-factory"})
+        )
+        monkeypatch.setenv("ZSIGA_HOME", str(tmp_path))
 
         from zsiga.intake.evolution import EvolutionEngine, EvolutionConfig
         evo_config = EvolutionConfig(enabled=True, window_start_hour=0, window_end_hour=24)
