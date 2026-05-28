@@ -998,6 +998,7 @@ def daemon_loop(config, dashboard_port=None):
 
             # Self-evolution engine: runs during designated evolution windows
             evo_ran = False
+            evolution_rejection_breaker = False
             if processed_count == 0:
                 try:
                     from .intake.evolution import EvolutionEngine, EvolutionConfig
@@ -1017,12 +1018,19 @@ def daemon_loop(config, dashboard_port=None):
                             print(f"  🧬 Evolution generated proposal: {evo_path}")
                             evo_ran = True
                             continue
+                    elif len(engine._collect_recent_evo_rejections()) >= 5:
+                        evolution_rejection_breaker = True
                 except Exception as e:
                     print(f"  ⚠️ EvolutionEngine error: {e}")
 
             # Legacy Reflector: generate proposals from internal signals
             # when daemon has been idle for sustained periods
-            if idle_cycles >= 3 and processed_count == 0 and not evo_ran:
+            if (
+                idle_cycles >= 3
+                and processed_count == 0
+                and not evo_ran
+                and not evolution_rejection_breaker
+            ):
                 try:
                     from .intake.reflector import Reflector
                     reflector = Reflector()
