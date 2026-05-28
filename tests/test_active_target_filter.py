@@ -123,8 +123,8 @@ class TestOrchestratorActiveTargetFilter:
         assert "factory" in scanned_targets
         assert "zsiga" not in scanned_targets
 
-    def test_active_target_unknown_falls_back_to_all(self, tmp_path, monkeypatch):
-        """When active_target not in targets, fall back to all targets."""
+    def test_active_target_unknown_falls_back_to_zsiga(self, tmp_path, monkeypatch):
+        """When active_target not in targets, fall back to zsiga (not all targets)."""
         from zsiga.pipeline.orchestrator import ZsigaOrchestrator
         from zsiga.intake.scanner import DirectoryScanner
 
@@ -146,7 +146,40 @@ class TestOrchestratorActiveTargetFilter:
         asyncio.run(orch.run_cycle())
 
         assert "zsiga" in scanned_targets
-        assert "factory" in scanned_targets
+        assert "factory" not in scanned_targets
+
+    def test_no_zsiga_target_skips_cycle(self, tmp_path, monkeypatch):
+        """When active_target invalid and no zsiga target, skip cycle entirely."""
+        from zsiga.pipeline.orchestrator import ZsigaOrchestrator
+        from zsiga.intake.scanner import DirectoryScanner
+        from zsiga.config import ZsigaConfig, LLMConfig, PipelineConfig, IntakeConfig, SafetyConfig, TargetConfig
+
+        config = ZsigaConfig(
+            llm=LLMConfig(provider="test", model="test-model", api_key="test-key"),
+            targets={
+                "factory": TargetConfig(name="factory", path="/tmp/factory", domain="external"),
+            },
+            pipeline=PipelineConfig(),
+            intake=IntakeConfig(),
+            safety=SafetyConfig(),
+            active_target="nonexistent",
+        )
+
+        scan_called = False
+
+        def capture_scan(self_scanner, transports=None):
+            nonlocal scan_called
+            scan_called = True
+            return []
+
+        monkeypatch.setattr(DirectoryScanner, "scan", capture_scan)
+        monkeypatch.setattr(ZsigaOrchestrator, "_load_context", lambda self: None)
+
+        import asyncio
+        orch = ZsigaOrchestrator(config)
+        asyncio.run(orch.run_cycle())
+
+        assert scan_called is False
 
     def test_config_loads_active_target_from_runtime_state(self, tmp_path, monkeypatch):
         """active_target should be read from runtime_state.yaml."""

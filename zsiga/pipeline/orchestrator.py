@@ -141,13 +141,20 @@ class ZsigaOrchestrator:
         active = self.config.active_target
         if active and active in self.config.targets:
             active_targets = {active: self.config.targets[active]}
+        elif "zsiga" in self.config.targets:
+            print(f"  ⚠️ Active target '{active}' not found in config, falling back to zsiga")
+            active_targets = {"zsiga": self.config.targets["zsiga"]}
         else:
-            active_targets = self.config.targets
-        print(f"  🎯 Active target: {active} (of {len(self.config.targets)} configured)")
-        for name in active_targets:
-            self._get_transport(name)
-        scanner = DirectoryScanner(active_targets)
-        proposals = scanner.scan(transports=self._transports)
+            print(f"  ⚠️ Active target '{active}' not found and no zsiga target available, skipping cycle")
+            active_targets = {}
+        if active_targets:
+            print(f"  🎯 Active target: {next(iter(active_targets))} (of {len(self.config.targets)} configured)")
+            for name in active_targets:
+                self._get_transport(name)
+            scanner = DirectoryScanner(active_targets)
+            proposals = scanner.scan(transports=self._transports)
+        else:
+            proposals = []
 
         _MAX_SKIP_RETRIES = 2
 
