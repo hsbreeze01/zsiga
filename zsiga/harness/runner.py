@@ -250,7 +250,20 @@ class HarnessRunner:
 
         import pytest
 
-        pytest.main(args, plugins=[plugin])
+        exit_code = pytest.main(args, plugins=[plugin])
+        try:
+            exit_value = int(exit_code)
+        except (TypeError, ValueError):
+            exit_value = 1
+
+        if not plugin.reports:
+            plugin.add_harness_error(
+                "pytest collected no executable test results",
+            )
+        elif exit_value != 0 and all(r.status == "passed" for r in plugin.reports):
+            plugin.add_harness_error(
+                f"pytest exited with non-zero status {exit_value}",
+            )
 
         return plugin.reports
 
@@ -268,9 +281,30 @@ class _HarnessCollectorPlugin:
         self.reports: list[TestReport] = []
         self._start_times: dict[str, float] = {}
 
+    def add_harness_error(self, message: str) -> None:
+        report = TestReport(
+            name="__harness__::pytest",
+            status="error",
+            duration_s=0.0,
+            message=message,
+        )
+        self.reports.append(report)
+        self._append_jsonl(report)
+
     def pytest_collection_modifyitems(self, session: Any, items: Any) -> None:
         # Record no-op; collection is handled by pytest
         pass
+
+    def pytest_collectreport(self, report: Any) -> None:
+        if getattr(report, "failed", False):
+            test_report = TestReport(
+                name=getattr(report, "nodeid", "__collection__"),
+                status="error",
+                duration_s=0.0,
+                message=str(report.longrepr) if getattr(report, "longrepr", None) else "collection failed",
+            )
+            self.reports.append(test_report)
+            self._append_jsonl(test_report)
 
     def pytest_runtest_logstart(self, nodeid: str, location: Any) -> None:
         self._start_times[nodeid] = time.time()
@@ -312,5 +346,6 @@ class _HarnessCollectorPlugin:
                 "timestamp": datetime.now(tz=timezone.utc).isoformat(),
             },
         )
+        Path(self.output_path).parent.mkdir(parents=True, exist_ok=True)
         with open(self.output_path, "a") as fh:
             fh.write(line + "\n")

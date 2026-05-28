@@ -8,11 +8,7 @@ Verifies:
 5. Proposals pass Steward scoring criteria (actionability, eval)
 """
 
-import os
 import textwrap
-import tempfile
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -420,7 +416,6 @@ class TestFixLoopDetection:
         (zsiga_dir / "untested.py").write_text("def fn(): pass\n")
         (tmp_path / "tests").mkdir()
 
-        from zsiga.intake.evolution import EvolutionEngine
 
         changes = tmp_path / "openspec" / "changes"
         changes.mkdir(parents=True)
@@ -436,3 +431,69 @@ class TestFixLoopDetection:
         if insights.get("priority_finding"):
             assert insights["priority_finding"]["type"] != "fix_failure", \
                 "Should skip fix_failure when evo-fix rejections >= 3"
+
+
+class TestEvolutionControlGates:
+    def test_proposal_preflight_blocks_placeholders(self, tmp_path):
+        from zsiga.intake.evolution import EvolutionEngine
+
+        engine = EvolutionEngine(str(tmp_path))
+        bad = """# add-tests
+
+## Acceptance Criteria
+- [BAC-01] `test_(待分析)` exists
+- [BAC-02] 至少 0 个 def test_ 函数
+"""
+
+        assert engine._proposal_preflight_error(bad) is not None
+
+    def test_proposal_preflight_accepts_concrete_bac(self, tmp_path):
+        from zsiga.intake.evolution import EvolutionEngine
+
+        engine = EvolutionEngine(str(tmp_path))
+        good = """# add-tests
+
+## Acceptance Criteria
+- [BAC-01] `test_run_pytest_returns_reports` passes
+- [BAC-02] 至少 1 个 def test_ 函数覆盖目标行为
+"""
+
+        assert engine._proposal_preflight_error(good) is None
+
+    def test_pushback_counts_as_evo_rejection(self, tmp_path):
+        from zsiga.intake.evolution import EvolutionEngine
+
+        evo_dir = tmp_path / "openspec" / "changes" / "evo-improvement-1"
+        evo_dir.mkdir(parents=True)
+        (evo_dir / "proposal.md").write_text("# proposal\n")
+        (evo_dir / "steward-review.md").write_text("## Verdict: PUSHBACK\n")
+
+        rejections = EvolutionEngine(str(tmp_path))._collect_recent_evo_rejections()
+
+        assert rejections and rejections[0]["dir"] == "evo-improvement-1"
+
+    def test_should_evolve_resets_counter_for_new_window(self, tmp_path, monkeypatch):
+        import json
+        from datetime import datetime, timedelta
+        from zsiga.intake.evolution import EvolutionConfig, EvolutionEngine
+
+        monkeypatch.setattr("zsiga.config.load_runtime_state", lambda: {"active_target": "zsiga"})
+        engine = EvolutionEngine(
+            str(tmp_path),
+            EvolutionConfig(
+                window_start_hour=datetime.now().hour,
+                window_end_hour=(datetime.now().hour + 1) % 24,
+                max_proposals_per_window=1,
+            ),
+        )
+        old_state = {
+            "proposals_generated": 1,
+            "last_proposal_at": "",
+            "window_start_at": (datetime.now() - timedelta(days=2)).isoformat(),
+            "total_cycles": 0,
+        }
+        state_path = tmp_path / "data" / "evolution_state.json"
+        state_path.parent.mkdir()
+        state_path.write_text(json.dumps(old_state))
+
+        assert engine.should_evolve() is True

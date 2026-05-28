@@ -78,9 +78,14 @@ def run_qualification(
         A :class:`QualificationReport` with capability_results,
         regression_results, and an overall ``passed`` flag.
     """
+    output_file = Path(output_path)
+    if output_file.exists():
+        output_file.unlink()
+
     cap_reports = run_capability_tests(output_path=output_path)
     reg_reports = run_regression(output_path=output_path)
-    all_passed = all(r.status == "passed" for r in cap_reports + reg_reports)
+    all_reports = cap_reports + reg_reports
+    all_passed = bool(all_reports) and all(r.status == "passed" for r in all_reports)
     return QualificationReport(
         capability_results=cap_reports,
         regression_results=reg_reports,

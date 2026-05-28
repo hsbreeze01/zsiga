@@ -894,6 +894,7 @@ def daemon_loop(config, dashboard_port=None):
                         rs["active_target"] = "zsiga"
                         rs.pop("pending_switch", None)
                         save_runtime_state(rs)
+                        config.active_target = "zsiga"
             except Exception as _e:
                 print(f"  ⚠️ Schedule check error: {_e}")
 

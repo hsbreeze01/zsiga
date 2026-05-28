@@ -8,10 +8,12 @@ from pathlib import Path
 from zsiga.harness.runner import (
     HarnessResult,
     HarnessRunner,
+    QualificationReport,
     TestError,
     TestEvent,
     TestFailed,
     TestPassed,
+    TestReport,
     TestStarted,
 )
 
@@ -224,3 +226,51 @@ class TestHarnessRunnerRun:
 
         for event in result.events:
             assert event.timestamp > 0
+
+
+# ---------------------------------------------------------------------------
+# HarnessRunner.run_pytest fail-closed tests
+# ---------------------------------------------------------------------------
+
+
+class TestHarnessRunnerPytestFailClosed:
+    def test_run_pytest_empty_file_returns_harness_error(self, tmp_path: Path) -> None:
+        test_file = tmp_path / "test_empty.py"
+        test_file.write_text("# no tests here\n")
+        output_path = tmp_path / "results.jsonl"
+
+        reports = HarnessRunner().run_pytest([str(test_file)], str(output_path))
+
+        assert reports
+        assert reports[-1].status == "error"
+        assert "no executable test results" in reports[-1].message
+        assert output_path.exists()
+
+    def test_run_pytest_collection_error_returns_error(self, tmp_path: Path) -> None:
+        test_file = tmp_path / "test_bad_syntax.py"
+        test_file.write_text("def test_bad(:\n")
+
+        reports = HarnessRunner().run_pytest([str(test_file)], str(tmp_path / "out.jsonl"))
+
+        assert any(r.status == "error" for r in reports)
+        assert any("SyntaxError" in r.message or "ERROR" in r.message for r in reports)
+
+    def test_qualification_report_empty_results_can_be_failed(self) -> None:
+        report = QualificationReport(
+            capability_results=[],
+            regression_results=[],
+            passed=False,
+        )
+
+        assert report.passed is False
+
+    def test_test_report_dataclass_fields(self) -> None:
+        report = TestReport(
+            name="tests/test_sample.py::test_ok",
+            status="passed",
+            duration_s=0.1,
+            message="",
+        )
+
+        assert report.name.endswith("test_ok")
+        assert report.status == "passed"

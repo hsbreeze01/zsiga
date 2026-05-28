@@ -23,10 +23,9 @@ import logging
 import os
 import re
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Literal
 
 from ..memory.learn import record_lesson, search_learnings
 from ..memory.pattern_miner import mine_patterns
@@ -141,6 +140,11 @@ class EvolutionEngine:
         except Exception:
             pass
         state = self._load_state()
+        window_start = self._current_window_start().isoformat()
+        if state.window_start_at != window_start:
+            state.proposals_generated = 0
+            state.window_start_at = window_start
+            self._save_state(state)
         if state.proposals_generated >= self.config.max_proposals_per_window:
             return False
         if state.last_proposal_at:
@@ -162,7 +166,7 @@ class EvolutionEngine:
             return None
 
         insights = self._phase2_reflect(facts)
-        updated = self._phase3_learn(facts, insights)
+        self._phase3_learn(facts, insights)
         proposal_path = self._phase4_solidify(facts, insights)
 
         if proposal_path:
@@ -444,7 +448,7 @@ class EvolutionEngine:
         elif ftype == "enforce_budget_cap":
             record_lesson(
                 title=f"Token budget hard cap exceeded: {finding.get('used', 0):,} / {finding.get('cap', 0):,}",
-                context=f"24h token usage hit hard cap, restricting to cost-only proposals",
+                context="24h token usage hit hard cap, restricting to cost-only proposals",
                 takeaway="Reduce token consumption before generating new feature proposals",
                 pattern_key="evolution.budget_cap_hit",
                 source="evolution",
@@ -909,7 +913,19 @@ Langfuse 24h token 使用量超过自适应 budget cap：
     # Proposal writing
     # ------------------------------------------------------------------
 
-    def _write_proposal(self, content: str, proposal_type: str) -> str:
+    def _write_proposal(self, content: str, proposal_type: str) -> str | None:
+        preflight_error = self._proposal_preflight_error(content)
+        if preflight_error:
+            logger.warning("Evolution proposal blocked by preflight: %s", preflight_error)
+            record_lesson(
+                title="Evolution proposal blocked by preflight",
+                context=preflight_error,
+                takeaway="Generated proposals must have concrete BACs and no placeholders before entering OpenSpec",
+                pattern_key="evolution.proposal_preflight",
+                source="evolution",
+            )
+            return None
+
         changes_dir = self.base / "openspec" / "changes"
         changes_dir.mkdir(parents=True, exist_ok=True)
 
@@ -983,7 +999,8 @@ Langfuse 24h token 使用量超过自适应 budget cap：
             for review_file in evo_dir.glob("steward-review*.md"):
                 try:
                     content = review_file.read_text(encoding="utf-8")
-                    if "REJECT" in content:
+                    verdict_text = content.upper()
+                    if "REJECT" in verdict_text or "PUSHBACK" in verdict_text:
                         has_reject = True
                         break
                 except OSError:
@@ -1204,10 +1221,39 @@ Langfuse 24h token 使用量超过自适应 budget cap：
         }
         self._state_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    def _current_window_start(self) -> datetime:
+        now = datetime.now()
+        start = self.config.window_start_hour
+        end = self.config.window_end_hour
+        if start > end and now.hour < end:
+            base = now - timedelta(days=1)
+        else:
+            base = now
+        return datetime(base.year, base.month, base.day, start)
+
     def reset_window(self) -> None:
         """Reset proposal counter for a new evolution window."""
         state = self._load_state()
         state.proposals_generated = 0
-        state.window_start_at = datetime.now().isoformat()
+        state.window_start_at = self._current_window_start().isoformat()
         self._save_state(state)
         logger.info("🧬 Evolution window reset")
+
+    @staticmethod
+    def _proposal_preflight_error(content: str) -> str | None:
+        placeholder_markers = ["待分析", "TODO", "TBD", "至少 0 个", "test_("]
+        for marker in placeholder_markers:
+            if marker in content:
+                return f"proposal contains placeholder marker: {marker}"
+        bac_lines = [line for line in content.splitlines() if "[BAC-" in line]
+        if not bac_lines:
+            return "proposal has no binary acceptance criteria"
+        if "def test_" in content:
+            test_count_pattern = r"至少\s*[1-9]\d*\s*个.*def test_"
+            named_test_pattern = r"test_[a-zA-Z0-9_]+"
+            if not (
+                re.search(test_count_pattern, content)
+                or re.search(named_test_pattern, content)
+            ):
+                return "proposal test BACs do not name concrete tests or a positive test count"
+        return None

@@ -1,11 +1,9 @@
 """Tests for TargetConfig manifest fields and context injection."""
-import os
-import tempfile
 
 import yaml
 
 from zsiga.config import TargetConfig, load_config, validate_config
-from zsiga.memory.context import _build_base_context, update_active_context
+from zsiga.memory.context import _build_base_context
 
 
 def _write_yaml(tmp_path, data: dict) -> str:
@@ -139,12 +137,51 @@ class TestManifestContextInjection:
             return original_load(path=path)
 
         monkeypatch.setattr(cfg_mod, "load_config", patched_load)
+        monkeypatch.setattr(
+            cfg_mod, "load_runtime_state", lambda: {"active_target": "d8q-factory"}
+        )
 
         ctx = _build_base_context()
         assert "d8q-factory" in ctx
         assert "数据工厂服务" in ctx
         assert "python, fastapi" in ctx
         assert "api/routes" in ctx
+
+
+    def test_only_active_external_manifest_in_context(self, tmp_path, monkeypatch):
+        config_data = _minimal_config(**{
+            "factory": {
+                "domain": "external",
+                "path": "/home/user/factory",
+                "transport": "local",
+                "description": "factory service",
+                "tech_stack": ["python"],
+            },
+            "compass": {
+                "domain": "external",
+                "path": "/home/user/compass",
+                "transport": "local",
+                "description": "compass service",
+                "tech_stack": ["go"],
+            },
+        })
+        path = _write_yaml(tmp_path, config_data)
+
+        import zsiga.config as cfg_mod
+        original_load = cfg_mod.load_config
+
+        def patched_load(p=None):
+            return original_load(path=path)
+
+        monkeypatch.setattr(cfg_mod, "load_config", patched_load)
+        monkeypatch.setattr(
+            cfg_mod, "load_runtime_state", lambda: {"active_target": "compass"}
+        )
+
+        ctx = _build_base_context()
+
+        assert "compass service" in ctx
+        assert "factory service" not in ctx
 
     def test_self_target_no_manifest_in_context(self, tmp_path, monkeypatch):
         config_data = _minimal_config()
@@ -247,6 +284,9 @@ class TestEvolutionPausedForExternal:
             return original_load(path=path)
 
         monkeypatch.setattr(cfg_mod, "load_config", patched_load)
+        monkeypatch.setattr(
+            cfg_mod, "load_runtime_state", lambda: {"active_target": "zsiga"}
+        )
 
         from zsiga.intake.evolution import EvolutionEngine, EvolutionConfig
         evo_config = EvolutionConfig(enabled=True, window_start_hour=0, window_end_hour=24)

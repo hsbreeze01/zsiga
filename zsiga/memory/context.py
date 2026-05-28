@@ -13,14 +13,10 @@ def load_active_context() -> str:
 
 def update_active_context(new_lessons: list[str] = None):
     ctx_file = _MEMORY_DIR / "active_context.md"
-    existing = ""
-    if ctx_file.exists():
-        existing = ctx_file.read_text(encoding="utf-8")
-
     lessons_text = ""
     if new_lessons:
         lessons_text = "\n\n## Recent Lessons\n" + "\n".join(
-            f"- {l}" for l in new_lessons
+            f"- {lesson}" for lesson in new_lessons
         )
 
     base = _build_base_context()
@@ -33,7 +29,7 @@ def load_recent_lessons(n: int = 20) -> list[str]:
     if not learnings_file.exists():
         return []
     lines = learnings_file.read_text(encoding="utf-8").strip().split("\n")
-    lines = [l for l in lines if l.strip()]
+    lines = [line for line in lines if line.strip()]
     if not lines:
         return []
     recent = lines[-n:]
@@ -72,31 +68,34 @@ def _build_base_context() -> str:
         "- Follow existing project patterns",
     ]
 
-    # Inject target manifest for external projects
+    # Inject manifest only for the active external target.
     try:
-        from ..config import load_config
+        from ..config import load_config, load_runtime_state
         cfg = load_config()
-        for _tname, target in cfg.targets.items():
-            if target.domain == "external":
-                parts.append(f"\n## Target: {_tname}")
-                if target.description:
-                    parts.append(f"**Description**: {target.description}")
-                if target.tech_stack:
-                    parts.append(f"**Tech Stack**: {', '.join(target.tech_stack)}")
-                if target.key_dirs:
-                    parts.append(f"**Key Dirs**: {', '.join(target.key_dirs)}")
-                if target.conventions:
-                    parts.append(f"**Conventions**: {target.conventions}")
-                parts.append(f"**Path**: {target.path}")
-                parts.append(f"**Branch**: {target.deploy_branch}")
-                break
+        active = load_runtime_state().get(
+            "active_target", getattr(cfg, "active_target", "zsiga")
+        )
+        target = cfg.targets.get(active)
+        if target and target.domain == "external":
+            parts.append(f"\n## Target: {active}")
+            if target.description:
+                parts.append(f"**Description**: {target.description}")
+            if target.tech_stack:
+                parts.append(f"**Tech Stack**: {', '.join(target.tech_stack)}")
+            if target.key_dirs:
+                parts.append(f"**Key Dirs**: {', '.join(target.key_dirs)}")
+            if target.conventions:
+                parts.append(f"**Conventions**: {target.conventions}")
+            parts.append(f"**Path**: {target.path}")
+            parts.append(f"**Branch**: {target.deploy_branch}")
     except Exception:
         pass
+
 
     learnings_file = _MEMORY_DIR / "learnings.jsonl"
     if learnings_file.exists():
         lines = learnings_file.read_text(encoding="utf-8").strip().split("\n")
-        lines = [l for l in lines if l.strip()]
+        lines = [line for line in lines if line.strip()]
         parts.append(f"\n## Session History: {len(lines)} lessons recorded")
 
     from .pattern_miner import mine_patterns, generate_warnings
