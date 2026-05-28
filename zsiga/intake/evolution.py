@@ -224,6 +224,9 @@ class EvolutionEngine:
 
     def _phase1_intake(self) -> dict:
         recent_evo_rejections = self._collect_recent_evo_rejections()
+        historical_evo_rejections = self._collect_recent_evo_rejections(
+            include_previous_windows=True
+        )
         langfuse_metrics = get_langfuse_metrics(limit=10, hours=24)
 
         reflector_signals = self._collect_reflector_signals()
@@ -236,6 +239,7 @@ class EvolutionEngine:
             "recent_failures": search_learnings(["fail", "revert", "error", "critical"], pattern_key=None)[:10],
             "recent_successes": search_learnings(["success", "pass", "deliver"], pattern_key=None)[:5],
             "recent_evo_rejections": recent_evo_rejections,
+            "historical_evo_rejections": historical_evo_rejections,
             "langfuse_metrics": langfuse_metrics,
             "reflector_signals": reflector_signals,
             "actionable": False,
@@ -315,6 +319,7 @@ class EvolutionEngine:
     def _phase2_reflect(self, facts: dict) -> dict:
         findings = facts.get("findings", [])
         recent_rejections = facts.get("recent_evo_rejections", [])
+        historical_rejections = facts.get("historical_evo_rejections", recent_rejections)
         insights: dict = {
             "priority_finding": None,
             "proposal_type": "improvement",
@@ -326,7 +331,15 @@ class EvolutionEngine:
             1 for r in recent_rejections
             if "evo-fix-" in r.get("dir", "")
         )
-        skip_fix_types = recent_fix_rejections >= 3 or len(recent_rejections) >= 5
+        historical_fix_rejections = sum(
+            1 for r in historical_rejections
+            if "evo-fix-" in r.get("dir", "")
+        )
+        skip_fix_types = (
+            recent_fix_rejections >= 3
+            or historical_fix_rejections >= 3
+            or len(recent_rejections) >= 5
+        )
 
         # Token budget hard cap override: only allow cost optimization
         budget_exceeded = any(
@@ -1019,7 +1032,7 @@ Langfuse 24h token 使用量超过自适应 budget cap：
         except Exception:
             return []
 
-    def _collect_recent_evo_rejections(self) -> list[dict]:
+    def _collect_recent_evo_rejections(self, *, include_previous_windows: bool = False) -> list[dict]:
         """Scan evo- proposals for REJECT verdicts from Steward.
 
         Priority order: pending changes first, then archive, newest first.
@@ -1053,7 +1066,10 @@ Langfuse 24h token 使用量超过自适应 budget cap：
             has_reject = False
             for review_file in evo_dir.glob("steward-review*.md"):
                 try:
-                    if review_file.stat().st_mtime < cutoff_ts:
+                    if (
+                        not include_previous_windows
+                        and review_file.stat().st_mtime < cutoff_ts
+                    ):
                         continue
                     content = review_file.read_text(encoding="utf-8")
                     verdict_text = content.upper()
@@ -1068,7 +1084,7 @@ Langfuse 24h token 使用量超过自适应 budget cap：
                 pattern_key = ""
                 try:
                     proposal_text = proposal_path.read_text(encoding="utf-8")
-                    m = re.search(r"失败模式\s*`(\S+)`", proposal_text)
+                    m = re.search(r"(?:失败模式|模式)\s*`(\S+)`", proposal_text)
                     if m:
                         pattern_key = m.group(1)
                 except OSError:

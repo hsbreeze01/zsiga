@@ -432,6 +432,21 @@ class TestFixLoopDetection:
             assert insights["priority_finding"]["type"] != "fix_failure", \
                 "Should skip fix_failure when evo-fix rejections >= 3"
 
+    def test_phase2_reflect_skips_fix_when_historical_loop_detected(self, evo_engine):
+        facts = {
+            "findings": ["recurring_failure:pipeline.fail.verify.diagnosed"],
+            "recent_evo_rejections": [],
+            "historical_evo_rejections": [
+                {"dir": f"evo-fix-old-{i}", "pattern_key": "pipeline.fail.verify.diagnosed"}
+                for i in range(3)
+            ],
+            "patterns": [],
+        }
+
+        insights = evo_engine._phase2_reflect(facts)
+
+        assert insights["priority_finding"] is None
+
 
 class TestEvolutionControlGates:
     def test_proposal_preflight_blocks_placeholders(self, tmp_path):
@@ -510,6 +525,7 @@ class TestEvolutionControlGates:
         )
 
         assert engine._collect_recent_evo_rejections() == []
+        assert len(engine._collect_recent_evo_rejections(include_previous_windows=True)) == 5
 
     def test_pushback_counts_as_evo_rejection(self, tmp_path):
         from zsiga.intake.evolution import EvolutionEngine
