@@ -527,6 +527,43 @@ class TestEvolutionControlGates:
         assert engine._collect_recent_evo_rejections() == []
         assert len(engine._collect_recent_evo_rejections(include_previous_windows=True)) == 5
 
+    def test_historical_rejections_scan_archives_by_mtime_not_name(self, tmp_path):
+        import os
+        import time
+        from zsiga.intake.evolution import EvolutionEngine
+
+        archive = tmp_path / "openspec" / "changes" / "archive"
+        stale_ts = time.time() - 48 * 3600
+        for i in range(30):
+            evo_dir = archive / "older-batch" / f"evo-improvement-z-{i:02d}"
+            evo_dir.mkdir(parents=True)
+            (evo_dir / "proposal.md").write_text("# proposal\n")
+            review = evo_dir / "steward-review.md"
+            review.write_text("## Verdict: REJECT\n")
+            os.utime(review, (stale_ts + i, stale_ts + i))
+
+        for i in range(3):
+            evo_dir = archive / "final-cleanup" / f"evo-fix-20260529-075{i}"
+            evo_dir.mkdir(parents=True)
+            (evo_dir / "proposal.md").write_text(
+                "# fix-pipeline.fail.verify.diagnosed\n\n"
+                "## Problem\n"
+                "模式 `pipeline.fail.verify.diagnosed` repeatedly failed.\n"
+            )
+            review = evo_dir / "steward-review.md"
+            review.write_text("## Verdict: REJECT\n")
+            os.utime(review, (stale_ts + 100 + i, stale_ts + 100 + i))
+
+        rejections = EvolutionEngine(str(tmp_path))._collect_recent_evo_rejections(
+            include_previous_windows=True
+        )
+
+        fix_rejections = [r for r in rejections if r["dir"].startswith("evo-fix-")]
+        assert len(fix_rejections) == 3
+        assert {r["pattern_key"] for r in fix_rejections} == {
+            "pipeline.fail.verify.diagnosed"
+        }
+
     def test_pushback_counts_as_evo_rejection(self, tmp_path):
         from zsiga.intake.evolution import EvolutionEngine
 

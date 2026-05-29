@@ -1045,21 +1045,29 @@ Langfuse 24h token 使用量超过自适应 budget cap：
                 if entry.is_dir() and entry.name.startswith("evo-"):
                     pending_dirs.append(entry)
 
+        def latest_review_mtime(evo_dir: Path) -> float:
+            mtimes = [evo_dir.stat().st_mtime]
+            for review_file in evo_dir.glob("steward-review*.md"):
+                try:
+                    mtimes.append(review_file.stat().st_mtime)
+                except OSError:
+                    pass
+            return max(mtimes)
+
         archive_dirs: list[Path] = []
         archive_dir = changes_dir / "archive"
         if archive_dir.exists():
-            for sub_dir in archive_dir.iterdir():
-                if sub_dir.is_dir():
-                    for entry in sub_dir.iterdir():
-                        if entry.is_dir() and entry.name.startswith("evo-"):
-                            archive_dirs.append(entry)
-            archive_dirs.sort(key=lambda p: p.name, reverse=True)
+            for entry in archive_dir.rglob("*"):
+                if entry.is_dir() and entry.name.startswith("evo-"):
+                    archive_dirs.append(entry)
+            archive_dirs.sort(key=latest_review_mtime, reverse=True)
 
         cutoff_ts = self._current_window_start().timestamp()
         rejections: list[dict] = []
+        max_scan = 100 if include_previous_windows else 20
         scanned = 0
         for evo_dir in pending_dirs + archive_dirs:
-            if scanned >= 20:
+            if scanned >= max_scan:
                 break
             scanned += 1
 
