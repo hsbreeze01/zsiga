@@ -998,7 +998,6 @@ def daemon_loop(config, dashboard_port=None):
 
             # Self-evolution engine: runs during designated evolution windows
             evo_ran = False
-            evolution_rejection_breaker = False
             if processed_count == 0:
                 try:
                     from .intake.evolution import EvolutionEngine, EvolutionConfig
@@ -1008,6 +1007,13 @@ def daemon_loop(config, dashboard_port=None):
                         enabled=pcfg.evolution_enabled,
                         window_start_hour=pcfg.evolution_window_start_hour,
                         window_end_hour=pcfg.evolution_window_end_hour,
+                        max_per_day=pcfg.evolution_max_proposals,
+                        cooldown_hours=pcfg.evolution_cooldown_hours,
+                        rejection_breaker=pcfg.evolution_rejection_breaker,
+                        min_outcomes=pcfg.evolution_min_outcomes,
+                        min_non_skip=pcfg.evolution_min_non_skip,
+                        min_success=pcfg.evolution_min_success,
+                        max_age_hours=pcfg.evolution_max_age_hours,
                         max_proposals_per_window=pcfg.evolution_max_proposals,
                         min_cycle_gap_minutes=pcfg.evolution_min_gap_minutes,
                     )
@@ -1018,29 +1024,8 @@ def daemon_loop(config, dashboard_port=None):
                             print(f"  🧬 Evolution generated proposal: {evo_path}")
                             evo_ran = True
                             continue
-                    elif len(engine._collect_recent_evo_rejections()) >= 5:
-                        evolution_rejection_breaker = True
                 except Exception as e:
                     print(f"  ⚠️ EvolutionEngine error: {e}")
-
-            # Legacy Reflector: generate proposals from internal signals
-            # when daemon has been idle for sustained periods
-            if (
-                idle_cycles >= 3
-                and processed_count == 0
-                and not evo_ran
-                and not evolution_rejection_breaker
-            ):
-                try:
-                    from .intake.reflector import Reflector
-                    reflector = Reflector()
-                    home = os.environ.get("ZSIGA_HOME", str(Path(__file__).resolve().parent.parent))
-                    proposals = reflector.run(home)
-                    if proposals:
-                        print(f"  🔄 Reflector generated {len(proposals)} proposal(s)")
-                        continue
-                except Exception as e:
-                    print(f"  ⚠️ Reflector error: {e}")
 
             try:
                 from .metrics.dashboard import generate_dashboard

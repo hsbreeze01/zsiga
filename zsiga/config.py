@@ -160,9 +160,15 @@ class PipelineConfig:
         # Evolution Engine
         evolution_enabled: bool = True,
         evolution_window_start_hour: int = 22,
-        evolution_window_end_hour: int = 10,
-        evolution_max_proposals: int = 12,
-        evolution_min_gap_minutes: int = 15,
+        evolution_window_end_hour: int = 6,
+        evolution_max_proposals: int = 3,
+        evolution_min_gap_minutes: int = 240,
+        evolution_cooldown_hours: int = 4,
+        evolution_rejection_breaker: int = 3,
+        evolution_min_outcomes: int = 5,
+        evolution_min_non_skip: int = 2,
+        evolution_min_success: int = 1,
+        evolution_max_age_hours: int = 48,
         # Role-specific timeouts
         analyst_max_turns: int = 8,
         analyst_timeout: int = 180,
@@ -218,6 +224,12 @@ class PipelineConfig:
         self.evolution_window_end_hour = evolution_window_end_hour
         self.evolution_max_proposals = evolution_max_proposals
         self.evolution_min_gap_minutes = evolution_min_gap_minutes
+        self.evolution_cooldown_hours = evolution_cooldown_hours
+        self.evolution_rejection_breaker = evolution_rejection_breaker
+        self.evolution_min_outcomes = evolution_min_outcomes
+        self.evolution_min_non_skip = evolution_min_non_skip
+        self.evolution_min_success = evolution_min_success
+        self.evolution_max_age_hours = evolution_max_age_hours
         # Role-specific
         self.analyst_max_turns = analyst_max_turns
         self.analyst_timeout = analyst_timeout
@@ -455,9 +467,16 @@ def load_config(path: str = None) -> ZsigaConfig:
         # Evolution
         evolution_enabled=pipeline_raw.get("evolution", {}).get("enabled", True),
         evolution_window_start_hour=pipeline_raw.get("evolution", {}).get("window_start_hour", 22),
-        evolution_window_end_hour=pipeline_raw.get("evolution", {}).get("window_end_hour", 10),
-        evolution_max_proposals=pipeline_raw.get("evolution", {}).get("max_proposals_per_window", 12),
-        evolution_min_gap_minutes=pipeline_raw.get("evolution", {}).get("min_cycle_gap_minutes", 15),
+        evolution_window_end_hour=pipeline_raw.get("evolution", {}).get("window_end_hour", 6),
+        evolution_max_proposals=pipeline_raw.get("evolution", {}).get("max_per_day",
+                                    pipeline_raw.get("evolution", {}).get("max_proposals_per_window", 3)),
+        evolution_min_gap_minutes=pipeline_raw.get("evolution", {}).get("cooldown_hours", 4) * 60,
+        evolution_cooldown_hours=pipeline_raw.get("evolution", {}).get("cooldown_hours", 4),
+        evolution_rejection_breaker=pipeline_raw.get("evolution", {}).get("rejection_breaker", 3),
+        evolution_min_outcomes=pipeline_raw.get("evolution", {}).get("signal_threshold", {}).get("min_outcomes", 5),
+        evolution_min_non_skip=pipeline_raw.get("evolution", {}).get("signal_threshold", {}).get("min_non_skip", 2),
+        evolution_min_success=pipeline_raw.get("evolution", {}).get("signal_threshold", {}).get("min_success", 1),
+        evolution_max_age_hours=pipeline_raw.get("evolution", {}).get("signal_threshold", {}).get("max_age_hours", 48),
         # Role-specific
         analyst_max_turns=pipeline_raw.get("analyst_max_turns", 8),
         analyst_timeout=pipeline_raw.get("analyst_timeout", 180),

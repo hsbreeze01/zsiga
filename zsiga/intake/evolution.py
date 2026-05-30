@@ -46,11 +46,19 @@ _TOKEN_BUDGET_SAFETY_MARGIN = 1.5  # allow 50% above baseline before triggering
 @dataclass
 class EvolutionConfig:
     enabled: bool = True
-    window_start_hour: int = 22       # 22:00 local time
-    window_end_hour: int = 10         # 10:00 next day
-    max_proposals_per_window: int = 12
-    min_cycle_gap_minutes: int = 15   # gap between evo proposals
-    backdoor_file: str = ".evolution-pause"  # touch this file to pause evolution
+    window_start_hour: int = 22
+    window_end_hour: int = 6
+    max_per_day: int = 3
+    cooldown_hours: int = 4
+    rejection_breaker: int = 3
+    min_outcomes: int = 5
+    min_non_skip: int = 2
+    min_success: int = 1
+    max_age_hours: int = 48
+    backdoor_file: str = ".evolution-pause"
+    # Deprecated — kept for migration
+    max_proposals_per_window: int = 0
+    min_cycle_gap_minutes: int = 0
 
 
 @dataclass
@@ -140,26 +148,46 @@ class EvolutionEngine:
         except Exception:
             pass
         recent_rejections = self._collect_recent_evo_rejections()
-        if len(recent_rejections) >= 5:
+        if len(recent_rejections) >= self.config.rejection_breaker:
             logger.warning(
                 "Evolution paused: %d recent evo proposals were rejected/pushed back",
                 len(recent_rejections),
             )
             return False
-        state = self._load_state()
-        window_start = self._current_window_start().isoformat()
-        if state.window_start_at != window_start:
-            state.proposals_generated = 0
-            state.window_start_at = window_start
-            self._save_state(state)
-        if state.proposals_generated >= self.config.max_proposals_per_window:
+        if not self._signal_threshold_met():
+            logger.info("Evolution skipped: signal threshold not met")
             return False
-        if state.last_proposal_at:
-            last = datetime.fromisoformat(state.last_proposal_at)
-            gap = datetime.now() - last
-            if gap < timedelta(minutes=self.config.min_cycle_gap_minutes):
-                return False
+        if not self._cooldown_elapsed():
+            logger.info("Evolution skipped: cooldown not elapsed")
+            return False
+        if self._daily_limit_reached():
+            logger.info("Evolution skipped: daily limit reached")
+            return False
         return True
+
+    def _signal_threshold_met(self) -> bool:
+        outcomes = self._collect_recent_outcomes()
+        recent = [o for o in outcomes if self._is_recent(o.get("ts", ""), hours=self.config.max_age_hours)]
+        non_skip = [o for o in recent if o.get("outcome") not in ("skipped",)]
+        successes = [o for o in recent if o.get("outcome") == "success"]
+        return (
+            len(recent) >= self.config.min_outcomes
+            and len(non_skip) >= self.config.min_non_skip
+            and len(successes) >= self.config.min_success
+        )
+
+    def _cooldown_elapsed(self) -> bool:
+        state = self._load_state()
+        if not state.last_proposal_at:
+            return True
+        elapsed = datetime.now() - datetime.fromisoformat(state.last_proposal_at)
+        return elapsed >= timedelta(hours=self.config.cooldown_hours)
+
+    def _daily_limit_reached(self) -> bool:
+        state = self._load_state()
+        today = datetime.now().date().isoformat()
+        return (state.window_start_at == today
+                and state.proposals_generated >= self.config.max_per_day)
 
     # ------------------------------------------------------------------
     # Main evolution loop: 事实摄入 → 反思校验 → 学习更新 → 沉淀固化
@@ -178,6 +206,10 @@ class EvolutionEngine:
 
         if proposal_path:
             state = self._load_state()
+            today = datetime.now().date().isoformat()
+            if state.window_start_at != today:
+                state.proposals_generated = 0
+                state.window_start_at = today
             state.proposals_generated += 1
             state.last_proposal_at = datetime.now().isoformat()
             state.total_cycles += 1
@@ -194,6 +226,8 @@ class EvolutionEngine:
         recent_evo_rejections = self._collect_recent_evo_rejections()
         langfuse_metrics = get_langfuse_metrics(limit=10, hours=24)
 
+        reflector_signals = self._collect_reflector_signals()
+
         facts: dict = {
             "recent_outcomes": self._collect_recent_outcomes(),
             "patterns": mine_patterns(min_occurrences=2, learnings_path=self.base / "memory" / "learnings.jsonl"),
@@ -203,6 +237,7 @@ class EvolutionEngine:
             "recent_successes": search_learnings(["success", "pass", "deliver"], pattern_key=None)[:5],
             "recent_evo_rejections": recent_evo_rejections,
             "langfuse_metrics": langfuse_metrics,
+            "reflector_signals": reflector_signals,
             "actionable": False,
         }
 
@@ -222,40 +257,38 @@ class EvolutionEngine:
         if high_patterns:
             findings.append(f"recurring_failure:{high_patterns[0].key}")
 
-        # Check for recent failures with no fix attempt
+        for sig in reflector_signals:
+            if sig.type == "recurring_failure" and sig.pattern_key not in excluded_patterns:
+                findings.append(f"reflector_failure:{sig.pattern_key}")
+            elif sig.type == "metric_degradation" and sig.priority == "high":
+                findings.append(f"reflector_metric:{sig.pattern_key}:{sig.data.get('value', '')}")
+
         recent_fails = [f for f in facts["recent_failures"]
                        if self._is_recent(f.get("ts", ""), hours=24)]
         if len(recent_fails) >= 2:
             findings.append(f"unresolved_failures:{len(recent_fails)}")
 
-        # Check for code structure gaps
-        structure = facts["code_structure"]
-        if structure.get("modules_without_tests"):
-            findings.append(f"missing_tests:{len(structure['modules_without_tests'])}")
+        if facts["code_structure"].get("modules_without_tests"):
+            findings.append(f"missing_tests:{len(facts['code_structure']['modules_without_tests'])}")
 
-        # Check for stale code / tech debt signals
-        if structure.get("large_files"):
-            findings.append(f"large_files:{len(structure['large_files'])}")
+        if facts["code_structure"].get("large_files"):
+            findings.append(f"large_files:{len(facts['code_structure']['large_files'])}")
 
-        # Check for learning gaps — things we keep failing at but haven't extracted rules
         no_rule_lessons = [f for f in facts["recent_failures"]
                           if not f.get("rule") and not f.get("why")]
         if len(no_rule_lessons) >= 3:
             findings.append("learning_gaps:need_better_failure_analysis")
 
-        # Proactive exploration: pick a random untested module
-        if structure.get("modules_without_tests"):
+        if facts["code_structure"].get("modules_without_tests"):
             import random
-            untested = structure["modules_without_tests"]
+            untested = facts["code_structure"]["modules_without_tests"]
             if untested:
                 target = random.choice(untested[:5])
                 findings.append(f"explore_untested:{target}")
 
-        # Proactive: look at what succeeded and find similar patterns to apply
         if facts["recent_successes"]:
             findings.append("reinforce_success:analyze_and_extend")
 
-        # Langfuse-driven findings: token cost anomalies and trends
         lm = langfuse_metrics
         if lm.trace_count >= 3:
             if lm.costliest_phase and lm.costliest_phase_tokens > 0:
@@ -265,7 +298,6 @@ class EvolutionEngine:
             if lm.avg_tokens_per_trace > 50000:
                 findings.append(f"avg_trace_expensive:{int(lm.avg_tokens_per_trace)}")
 
-        # Token budget hard cap: if 24h usage exceeds cap, force cost optimization
         budget_cap = self._compute_token_budget_cap(lm)
         if lm.total_tokens >= budget_cap:
             findings.append(
@@ -956,6 +988,14 @@ Langfuse 24h token 使用量超过自适应 budget cap：
     # Fact collectors
     # ------------------------------------------------------------------
 
+    def _collect_reflector_signals(self) -> list:
+        try:
+            from .reflector import Reflector
+            reflector = Reflector()
+            return reflector.scan_signals(self.base)
+        except Exception:
+            return []
+
     def _collect_recent_outcomes(self) -> list[dict]:
         try:
             from ..metrics.db import load_all_changes
@@ -1239,10 +1279,10 @@ Langfuse 24h token 使用量超过自适应 budget cap：
         return datetime(base.year, base.month, base.day, start)
 
     def reset_window(self) -> None:
-        """Reset proposal counter for a new evolution window."""
+        """Reset proposal counter for the current day."""
         state = self._load_state()
         state.proposals_generated = 0
-        state.window_start_at = self._current_window_start().isoformat()
+        state.window_start_at = datetime.now().date().isoformat()
         self._save_state(state)
         logger.info("🧬 Evolution window reset")
 

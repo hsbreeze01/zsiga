@@ -127,10 +127,16 @@ pipeline:
 
   evolution:
     enabled: true
-    window_start_hour: 0           # testing: always in window
-    window_end_hour: 24
-    max_proposals_per_window: 12
-    min_cycle_gap_minutes: 15
+    window_start_hour: 22
+    window_end_hour: 6
+    max_per_day: 3
+    cooldown_hours: 4
+    rejection_breaker: 3
+    signal_threshold:
+      min_outcomes: 5
+      min_non_skip: 2
+      min_success: 1
+      max_age_hours: 48
 
 safety:
   require_approval: false
